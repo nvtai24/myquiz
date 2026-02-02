@@ -14,7 +14,10 @@ builder.Services.AddInfrastructure();
 
 var app = builder.Build();
 
-// Global Exception Handler - Must be first in pipeline
+// Request Logging - First in pipeline to log final status code
+app.UseRequestLogging();
+
+// Global Exception Handler - Catches exceptions and sets proper status code
 app.UseGlobalExceptionHandler();
 
 // Configure the HTTP request pipeline.
@@ -28,10 +31,8 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
-// Request Logging - After auth to have user info
-app.UseRequestLogging();
-
 app.MapControllers();
 
 app.Run();
+
 

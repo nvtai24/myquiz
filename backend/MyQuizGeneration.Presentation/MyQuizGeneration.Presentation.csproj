@@ -13,6 +13,7 @@
   <ItemGroup>
     <ProjectReference Include="..\MyQuizGeneration.Domain\MyQuizGeneration.Domain.csproj" />
     <ProjectReference Include="..\MyQuizGenerator.Application\MyQuizGenerator.Application.csproj" />
+    <ProjectReference Include="..\MyQuizGenerator.Infrastructure\MyQuizGenerator.Infrastructure.csproj" />
   </ItemGroup>
 
 </Project>

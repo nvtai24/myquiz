@@ -1,16 +1,17 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using System.Net.NetworkInformation;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MyQuizGeneration.Presentation.Controllers
+namespace MyQuizGeneration.Presentation.Controllers;
+
+[Route("api/[controller]")]
+public class PingController : BaseApiController
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    public class PingController : ControllerBase
+    /// <summary>
+    /// Health check endpoint
+    /// </summary>
+    [HttpGet]
+    public IActionResult Ping()
     {
-        [HttpGet]
-        public IActionResult Ping()
-        {
-            return Ok("Pong");
-        }
+        return ApiOk(new { Reply = "Pong", ServerTime = DateTime.UtcNow }, "Server is running");
     }
 }

@@ -1,5 +1,5 @@
-﻿using System.Net.NetworkInformation;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using MyQuizGenerator.Application.Common.Exceptions;
 
 namespace MyQuizGenerator.Presentation.Controllers;
 
@@ -14,4 +14,33 @@ public class PingController : BaseApiController
     {
         return ApiOk(new { Reply = "Pong", ServerTime = DateTime.UtcNow }, "Server is running");
     }
+
+    /// <summary>
+    /// Test endpoint to demonstrate exception handling - throws NotFoundException
+    /// </summary>
+    [HttpGet("test-not-found")]
+    public IActionResult TestNotFound()
+    {
+        throw new NotFoundException("Quiz", 123);
+    }
+
+    /// <summary>
+    /// Test endpoint to demonstrate exception handling - throws ValidationException
+    /// </summary>
+    [HttpGet("test-validation")]
+    public IActionResult TestValidation()
+    {
+        var errors = new List<string> { "Field 'name' is required", "Field 'email' must be a valid email" };
+        throw new ValidationException(errors);
+    }
+
+    /// <summary>
+    /// Test endpoint to demonstrate exception handling - throws generic exception
+    /// </summary>
+    [HttpGet("test-error")]
+    public IActionResult TestError()
+    {
+        throw new Exception("This is a test exception to demonstrate error handling");
+    }
 }
+

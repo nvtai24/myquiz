@@ -1,12 +1,11 @@
 using MyQuizGenerator.Application;
 using MyQuizGenerator.Infrastructure;
+using MyQuizGenerator.Presentation.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -14,6 +13,9 @@ builder.Services.AddApplication();
 builder.Services.AddInfrastructure();
 
 var app = builder.Build();
+
+// Global Exception Handler - Must be first in pipeline
+app.UseGlobalExceptionHandler();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -29,3 +31,4 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+

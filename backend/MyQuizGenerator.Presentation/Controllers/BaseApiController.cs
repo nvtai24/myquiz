@@ -1,8 +1,8 @@
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
-using MyQuizGeneration.Presentation.Common.Responses;
+using MyQuizGenerator.Presentation.Common.Responses;
 
-namespace MyQuizGeneration.Presentation.Controllers;
+namespace MyQuizGenerator.Presentation.Controllers;
 
 /// <summary>
 /// Base Controller with helper methods for ApiResponse

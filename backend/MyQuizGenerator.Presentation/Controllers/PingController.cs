@@ -1,7 +1,7 @@
 ﻿using System.Net.NetworkInformation;
 using Microsoft.AspNetCore.Mvc;
 
-namespace MyQuizGeneration.Presentation.Controllers;
+namespace MyQuizGenerator.Presentation.Controllers;
 
 [Route("api/[controller]")]
 public class PingController : BaseApiController

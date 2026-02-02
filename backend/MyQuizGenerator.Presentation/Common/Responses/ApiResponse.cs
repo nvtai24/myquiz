@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace MyQuizGeneration.Presentation.Common.Responses;
+namespace MyQuizGenerator.Presentation.Common.Responses;
 
 /// <summary>
 /// Base API Response wrapper to standardize response format for Frontend

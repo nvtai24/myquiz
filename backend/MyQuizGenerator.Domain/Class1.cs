@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace MyQuizGenerator.Infrastructure
+namespace MyQuizGenerator.Domain
 {
     public class Class1
     {

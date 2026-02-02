@@ -7,9 +7,9 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyQuizGenerator.Infrastruct
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyQuizGenerator.Application", "MyQuizGenerator.Application\MyQuizGenerator.Application.csproj", "{77F15444-3D7D-4452-99E5-5CF46DDB0016}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyQuizGeneration.Domain", "MyQuizGeneration.Domain\MyQuizGeneration.Domain.csproj", "{364360EF-D45D-424F-942F-7CA75576D546}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyQuizGenerator.Domain", "MyQuizGenerator.Domain\MyQuizGenerator.Domain.csproj", "{364360EF-D45D-424F-942F-7CA75576D546}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyQuizGeneration.Presentation", "MyQuizGeneration.Presentation\MyQuizGeneration.Presentation.csproj", "{7D65212A-3AE5-44D5-B8B5-D99C9A90288B}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyQuizGenerator.Presentation", "MyQuizGenerator.Presentation\MyQuizGenerator.Presentation.csproj", "{7D65212A-3AE5-44D5-B8B5-D99C9A90288B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

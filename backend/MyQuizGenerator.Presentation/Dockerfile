@@ -4,17 +4,17 @@ WORKDIR /src
 
 # Copy solution and project files
 COPY ["MyQuizGenerator.sln", "."]
-COPY ["MyQuizGeneration.Presentation/MyQuizGeneration.Presentation.csproj", "MyQuizGeneration.Presentation/"]
+COPY ["MyQuizGenerator.Presentation/MyQuizGenerator.Presentation.csproj", "MyQuizGenerator.Presentation/"]
 COPY ["MyQuizGenerator.Application/MyQuizGenerator.Application.csproj", "MyQuizGenerator.Application/"]
-COPY ["MyQuizGeneration.Domain/MyQuizGeneration.Domain.csproj", "MyQuizGeneration.Domain/"]
+COPY ["MyQuizGenerator.Domain/MyQuizGenerator.Domain.csproj", "MyQuizGenerator.Domain/"]
 COPY ["MyQuizGenerator.Infrastructure/MyQuizGenerator.Infrastructure.csproj", "MyQuizGenerator.Infrastructure/"]
 
 # Restore dependencies
-RUN dotnet restore "MyQuizGeneration.Presentation/MyQuizGeneration.Presentation.csproj"
+RUN dotnet restore "MyQuizGenerator.Presentation/MyQuizGenerator.Presentation.csproj"
 
 # Copy everything else and build
 COPY . .
-WORKDIR "/src/MyQuizGeneration.Presentation"
+WORKDIR "/src/MyQuizGenerator.Presentation"
 RUN dotnet build -c Release -o /app/build
 
 # Publish stage
@@ -32,4 +32,4 @@ RUN adduser --disabled-password --gecos "" appuser && chown -R appuser /app
 USER appuser
 
 COPY --from=publish /app/publish .
-ENTRYPOINT ["dotnet", "MyQuizGeneration.Presentation.dll"]
+ENTRYPOINT ["dotnet", "MyQuizGenerator.Presentation.dll"]

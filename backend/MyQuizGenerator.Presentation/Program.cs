@@ -28,6 +28,9 @@ app.UseHttpsRedirection();
 
 app.UseAuthorization();
 
+// Request Logging - After auth to have user info
+app.UseRequestLogging();
+
 app.MapControllers();
 
 app.Run();

@@ -40,7 +40,7 @@ public class ExceptionHandlingMiddleware
         response.ContentType = "application/json";
 
         ApiResponse errorResponse;
-        
+
         switch (exception)
         {
             case AppException appException:
@@ -51,7 +51,7 @@ public class ExceptionHandlingMiddleware
                     appException.StatusCode,
                     appException.Errors
                 );
-                
+
                 // Log as warning for client errors (4xx)
                 if (appException.StatusCode < 500)
                 {
@@ -95,7 +95,7 @@ public class ExceptionHandlingMiddleware
                 // Handle unexpected exceptions
                 response.StatusCode = (int)HttpStatusCode.InternalServerError;
                 errorResponse = ApiResponse.Fail("An unexpected error occurred", 500);
-                
+
                 // Log full exception details for unexpected errors
                 _logger.LogError(
                     exception,

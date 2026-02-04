@@ -1,5 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MyQuizGenerator.Application.Common.Exceptions;
+using MyQuizGenerator.Application.Features.Ping.Queries.GetPing;
 
 namespace MyQuizGenerator.Presentation.Controllers;
 
@@ -13,6 +14,16 @@ public class PingController : BaseApiController
     public IActionResult Ping()
     {
         return ApiOk(new { Reply = "Pong", ServerTime = DateTime.UtcNow }, "Server is running");
+    }
+
+    /// <summary>
+    /// Health check endpoint using MediatR
+    /// </summary>
+    [HttpGet("mediator")]
+    public async Task<IActionResult> PingMediator()
+    {
+        var result = await Mediator.Send(new GetPingQuery());
+        return ApiOk(result, "MediatR is working!");
     }
 
     /// <summary>
@@ -43,4 +54,3 @@ public class PingController : BaseApiController
         throw new Exception("This is a test exception to demonstrate error handling");
     }
 }
-

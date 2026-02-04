@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using MyQuizGenerator.Presentation.Common.Responses;
 
@@ -10,6 +11,8 @@ namespace MyQuizGenerator.Presentation.Controllers;
 [ApiController]
 public abstract class BaseApiController : ControllerBase
 {
+    private ISender? _mediator;
+    protected ISender Mediator => _mediator ??= HttpContext.RequestServices.GetRequiredService<ISender>();
     /// <summary>
     /// Returns OK (200) with data
     /// </summary>

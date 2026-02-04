@@ -11,6 +11,7 @@ using MyQuizGenerator.Infrastructure.Settings;
 using MyQuizGenerator.Infrastructure.Persistence;
 using MyQuizGenerator.Infrastructure.Repositories;
 using MyQuizGenerator.Infrastructure.Identity;
+using Microsoft.AspNetCore.Http;
 
 namespace MyQuizGenerator.Infrastructure;
 
@@ -90,6 +91,20 @@ public static class DependencyInjection
                         context.Response.Headers["Token-Expired"] = "true";
                     }
                     return Task.CompletedTask;
+                },
+                OnForbidden = async context =>
+                {
+                    context.Response.StatusCode = 403;
+                    context.Response.ContentType = "application/json";
+
+                    var response = new
+                    {
+                        success = false,
+                        message = "Access denied. You don't have permission to access this resource.",
+                        statusCode = 403
+                    };
+
+                    await context.Response.WriteAsJsonAsync(response);
                 }
             };
         });

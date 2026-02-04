@@ -11,6 +11,7 @@ public static class DependencyInjection
         IConfiguration configuration)
     {
         services
+            .AddConfig(configuration)
             .AddDatabase(configuration)
             .AddIdentityServices(configuration)
             .AddApplicationServices();

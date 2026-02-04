@@ -5,9 +5,9 @@ using MyQuizGenerator.Application.Features.Auth.DTOs;
 
 namespace MyQuizGenerator.Application.Auth.Queries.GetCurrentUser;
 
-public record GetCurrentUserQuery(string UserId) : IRequest<UserInfo>;
+public record GetCurrentUserQuery(string UserId) : IRequest<UserResponse>;
 
-public class GetCurrentUserQueryHandler : IRequestHandler<GetCurrentUserQuery, UserInfo>
+public class GetCurrentUserQueryHandler : IRequestHandler<GetCurrentUserQuery, UserResponse>
 {
     private readonly IAuthService _authService;
 
@@ -16,7 +16,7 @@ public class GetCurrentUserQueryHandler : IRequestHandler<GetCurrentUserQuery, U
         _authService = authService;
     }
 
-    public async Task<UserInfo> Handle(GetCurrentUserQuery request, CancellationToken cancellationToken)
+    public async Task<UserResponse> Handle(GetCurrentUserQuery request, CancellationToken cancellationToken)
     {
         var userInfo = await _authService.GetUserByIdAsync(request.UserId);
 

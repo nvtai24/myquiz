@@ -26,7 +26,7 @@ public interface IAuthService
     /// <summary>
     /// Gets user information by ID.
     /// </summary>
-    Task<UserInfo?> GetUserByIdAsync(string userId);
+    Task<UserResponse?> GetUserByIdAsync(string userId);
 
     /// <summary>
     /// Gets roles assigned to a user.

@@ -84,7 +84,7 @@ public class AuthService : IAuthService
         return (result.Succeeded, result.Succeeded ? user.Id : null, false);
     }
 
-    public async Task<UserInfo?> GetUserByIdAsync(string userId)
+    public async Task<UserResponse?> GetUserByIdAsync(string userId)
     {
         var user = await _userManager.FindByIdAsync(userId);
 
@@ -95,7 +95,7 @@ public class AuthService : IAuthService
 
         var roles = await _userManager.GetRolesAsync(user);
 
-        return new UserInfo
+        return new UserResponse
         {
             Id = user.Id,
             Email = user.Email!,

@@ -14,9 +14,9 @@ namespace MyQuizGenerator.Application.Auth.Commands.Login;
 
 public record LoginCommand(
     LoginRequest loginRequest
-) : IRequest<AuthResponse>;
+) : IRequest<LoginResponse>;
 
-public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponse>
+public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
 {
     private readonly IAuthService _authService;
     private readonly ITokenService _tokenService;
@@ -32,7 +32,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponse>
         _logger = logger;
     }
 
-    public async Task<AuthResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
+    public async Task<LoginResponse> Handle(LoginCommand request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Login attempt for email: {Email}", request.loginRequest.Email);
 
@@ -63,12 +63,14 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, AuthResponse>
         var roles = await _authService.GetUserRolesAsync(userId);
         var tokenUser = new TokenUserInfo(userId, userInfo.Email, userInfo.FirstName, userInfo.LastName);
         var accessToken = _tokenService.GenerateAccessToken(tokenUser, roles);
+        var refreshToken = _tokenService.GenerateRefreshToken();
 
-        var response = new AuthResponse
+        var response = new LoginResponse
         {
             AccessToken = accessToken,
+            RefreshToken = refreshToken,
             ExpiresAt = _tokenService.GetAccessTokenExpiration(),
-            User = new UserInfo
+            User = new UserResponse
             {
                 Id = userId,
                 Email = userInfo.Email,

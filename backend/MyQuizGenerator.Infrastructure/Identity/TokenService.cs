@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using MyQuizGenerator.Application.Common.Interfaces;
 using MyQuizGenerator.Application.Common.Models;
+using MyQuizGenerator.Infrastructure.Settings;
 
 namespace MyQuizGenerator.Infrastructure.Identity;
 

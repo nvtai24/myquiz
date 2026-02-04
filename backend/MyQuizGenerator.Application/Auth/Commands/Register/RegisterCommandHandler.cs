@@ -10,10 +10,10 @@ namespace MyQuizGenerator.Application.Auth.Commands.Register;
 
 public record RegisterCommand(
     RegisterRequest registerRequest
-) : IRequest<AuthResponse>;
+) : IRequest<RegisterResponse>;
 
 
-public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthResponse>
+public class RegisterCommandHandler : IRequestHandler<RegisterCommand, RegisterResponse>
 {
     private readonly IAuthService _authService;
     private readonly ITokenService _tokenService;
@@ -29,7 +29,7 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthRespo
         _logger = logger;
     }
 
-    public async Task<AuthResponse> Handle(RegisterCommand request, CancellationToken cancellationToken)
+    public async Task<RegisterResponse> Handle(RegisterCommand request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Registration attempt for email: {Email}", request.registerRequest.Email);
 
@@ -49,14 +49,10 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, AuthRespo
 
         // Get user info and generate token
         var roles = await _authService.GetUserRolesAsync(userId);
-        var tokenUser = new TokenUserInfo(userId, email, request.registerRequest.FirstName, request.registerRequest.LastName);
-        var accessToken = _tokenService.GenerateAccessToken(tokenUser, roles);
 
-        var response = new AuthResponse
+        var response = new RegisterResponse
         {
-            AccessToken = accessToken,
-            ExpiresAt = _tokenService.GetAccessTokenExpiration(),
-            User = new UserInfo
+            User = new UserResponse
             {
                 Id = userId,
                 Email = email,

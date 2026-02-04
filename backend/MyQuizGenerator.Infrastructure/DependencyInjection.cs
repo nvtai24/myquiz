@@ -7,9 +7,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
 using MyQuizGenerator.Application.Common.Interfaces;
 using MyQuizGenerator.Domain.Constants;
-using MyQuizGenerator.Infrastructure.Identity;
+using MyQuizGenerator.Infrastructure.Settings;
 using MyQuizGenerator.Infrastructure.Persistence;
 using MyQuizGenerator.Infrastructure.Repositories;
+using MyQuizGenerator.Infrastructure.Identity;
 
 namespace MyQuizGenerator.Infrastructure;
 

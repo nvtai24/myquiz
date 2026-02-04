@@ -1,4 +1,4 @@
-namespace MyQuizGenerator.Infrastructure.Identity;
+namespace MyQuizGenerator.Infrastructure.Settings;
 
 /// <summary>
 /// JWT configuration settings loaded from appsettings.json.

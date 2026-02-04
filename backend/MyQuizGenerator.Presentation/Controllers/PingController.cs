@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using MyQuizGenerator.Application.Common.Exceptions;
-using MyQuizGenerator.Application.Features.Ping.Queries.GetPing;
+using MyQuizGenerator.Application.Ping.Queries.GetPing;
 
 namespace MyQuizGenerator.Presentation.Controllers;
 

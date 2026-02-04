@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyQuizGenerator.Application.Auth.Commands.Login;
+using MyQuizGenerator.Application.Auth.Commands.Logout;
 using MyQuizGenerator.Application.Auth.Commands.RefreshToken;
 using MyQuizGenerator.Application.Auth.Commands.Register;
 using MyQuizGenerator.Application.Auth.Queries.GetCurrentUser;
@@ -42,8 +43,16 @@ public class AuthController : BaseApiController
         return ApiOk(response, "Token refreshed successfully");
     }
 
-    [HttpGet("me")]
+    [HttpPost("logout")]
+    public async Task<IActionResult> Logout([FromBody] LogoutRequest request)
+    {
+        var command = new LogoutCommand(request);
+        await Mediator.Send(command);
+        return ApiNoContent("Logout successful");
+    }
+
     [Authorize]
+    [HttpGet("me")]
     public async Task<IActionResult> GetCurrentUser()
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value

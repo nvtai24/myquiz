@@ -18,10 +18,6 @@ namespace MyQuizGenerator.Presentation.Controllers;
 public class AuthController : BaseApiController
 {
     [HttpPost("register")]
-    [AllowAnonymous]
-    [ProducesResponseType(StatusCodes.Status201Created)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
         var command = new RegisterCommand(request);
@@ -31,9 +27,6 @@ public class AuthController : BaseApiController
     }
 
     [HttpPost("login")]
-    [AllowAnonymous]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Login([FromBody] LoginRequest request)
     {
         var command = new LoginCommand(request);
@@ -42,10 +35,6 @@ public class AuthController : BaseApiController
     }
 
     [HttpPost("refresh-token")]
-    [AllowAnonymous]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
     {
         var command = new RefreshTokenCommand(request);
@@ -55,8 +44,6 @@ public class AuthController : BaseApiController
 
     [HttpGet("me")]
     [Authorize]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetCurrentUser()
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
@@ -72,33 +59,5 @@ public class AuthController : BaseApiController
         return ApiOk(userInfo, "User retrieved successfully");
     }
 
-    [HttpGet("admin-only")]
-    [Authorize(Roles = Roles.Admin)]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    [ProducesResponseType(StatusCodes.Status403Forbidden)]
-    public IActionResult AdminOnly()
-    {
-        return ApiOk(new
-        {
-            Message = "Welcome, Admin! You have access to this protected resource.",
-            AccessedAt = DateTime.UtcNow
-        });
-    }
 
-    [HttpGet("user-area")]
-    [Authorize(Policy = Policies.RequireUserRole)]
-    [ProducesResponseType(StatusCodes.Status200OK)]
-    public IActionResult UserArea()
-    {
-        var firstName = User.FindFirst("firstName")?.Value ?? "User";
-        var email = User.FindFirst(ClaimTypes.Email)?.Value;
-
-        return ApiOk(new
-        {
-            Message = $"Hello {firstName}! Welcome to the user area.",
-            Email = email,
-            AccessedAt = DateTime.UtcNow
-        });
-    }
 }

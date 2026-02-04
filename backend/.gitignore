@@ -63,3 +63,6 @@ appsettings.Development.json
 # IDEs and editors
 .vs/
 .vscode/
+
+# Claude AI
+.claude/

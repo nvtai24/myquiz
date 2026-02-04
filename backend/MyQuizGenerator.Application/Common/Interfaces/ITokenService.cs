@@ -21,4 +21,7 @@ public interface ITokenService
     /// Returns access token expiration time.
     /// </summary>
     DateTime GetAccessTokenExpiration();
+
+    DateTime GetRefreshTokenExpiration();
+
 }

@@ -42,8 +42,8 @@ public class TokenService : ITokenService
             new Claim(JwtRegisteredClaimNames.Iat,
                 DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(),
                 ClaimValueTypes.Integer64),
-            new Claim("firstName", user.FirstName ?? string.Empty),
-            new Claim("lastName", user.LastName ?? string.Empty),
+            new Claim(ClaimTypes.GivenName, user.FirstName ?? string.Empty),
+            new Claim(ClaimTypes.Surname, user.LastName ?? string.Empty),
         };
 
         foreach (var role in roles)
@@ -80,5 +80,10 @@ public class TokenService : ITokenService
     public DateTime GetAccessTokenExpiration()
     {
         return DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes);
+    }
+
+    public DateTime GetRefreshTokenExpiration()
+    {
+        return DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpirationDays);
     }
 }

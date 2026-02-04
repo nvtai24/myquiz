@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using MyQuizGenerator.Domain.Entities;
 using MyQuizGenerator.Infrastructure.Identity;
 
 namespace MyQuizGenerator.Infrastructure.Persistence;
@@ -14,6 +15,8 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, IdentityRole, str
     {
     }
 
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
@@ -23,6 +26,17 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, IdentityRole, str
             entity.Property(u => u.FirstName).HasMaxLength(100);
             entity.Property(u => u.LastName).HasMaxLength(100);
             entity.Ignore(u => u.FullName);
+        });
+
+        modelBuilder.Entity<RefreshToken>(entity =>
+        {
+            entity.Property(r => r.Token).IsRequired();
+            entity.Property(r => r.JwtId).IsRequired();
+            entity.Property(r => r.CreationAt).IsRequired();
+            entity.Property(r => r.ExpiryAt).IsRequired();
+            entity.Property(r => r.Used).IsRequired();
+            entity.Property(r => r.Invalidated).IsRequired();
+            entity.Property(r => r.UserId).IsRequired();
         });
     }
 }

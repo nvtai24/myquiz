@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyQuizGenerator.Application.Auth.Commands.Login;
+using MyQuizGenerator.Application.Auth.Commands.RefreshToken;
 using MyQuizGenerator.Application.Auth.Commands.Register;
 using MyQuizGenerator.Application.Auth.Queries.GetCurrentUser;
 using MyQuizGenerator.Application.Common.Exceptions;
@@ -38,6 +39,18 @@ public class AuthController : BaseApiController
         var command = new LoginCommand(request);
         var response = await Mediator.Send(command);
         return ApiOk(response, "Login successful");
+    }
+
+    [HttpPost("refresh-token")]
+    [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+    {
+        var command = new RefreshTokenCommand(request);
+        var response = await Mediator.Send(command);
+        return ApiOk(response, "Token refreshed successfully");
     }
 
     [HttpGet("me")]

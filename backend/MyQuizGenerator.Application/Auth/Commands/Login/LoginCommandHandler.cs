@@ -20,15 +20,21 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
 {
     private readonly IAuthService _authService;
     private readonly ITokenService _tokenService;
+    private readonly IUnitOfWork _unitOfWork;
+    private readonly IRepository<Guid, Domain.Entities.RefreshToken> _refreshTokenRepository;
     private readonly ILogger<LoginCommandHandler> _logger;
 
     public LoginCommandHandler(
         IAuthService authService,
         ITokenService tokenService,
+        IUnitOfWork unitOfWork,
+        IRepository<Guid, Domain.Entities.RefreshToken> refreshTokenRepository,
         ILogger<LoginCommandHandler> logger)
     {
         _authService = authService;
         _tokenService = tokenService;
+        _unitOfWork = unitOfWork;
+        _refreshTokenRepository = refreshTokenRepository;
         _logger = logger;
     }
 
@@ -64,6 +70,23 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
         var tokenUser = new TokenUserInfo(userId, userInfo.Email, userInfo.FirstName, userInfo.LastName);
         var accessToken = _tokenService.GenerateAccessToken(tokenUser, roles);
         var refreshToken = _tokenService.GenerateRefreshToken();
+        var refreshTokenExpiryDate = DateTime.UtcNow.AddDays(7); // Assuming 7 days from settings, ideally inject settings
+
+        // Save refresh token
+        var refreshTokenEntity = new Domain.Entities.RefreshToken
+        {
+            Id = Guid.NewGuid(),
+            Token = refreshToken,
+            JwtId = Guid.NewGuid().ToString(), // Should ideally extract from access token or generate
+            CreationAt = DateTime.UtcNow,
+            ExpiryAt = refreshTokenExpiryDate,
+            Used = false,
+            Invalidated = false,
+            UserId = userId
+        };
+
+        await _refreshTokenRepository.AddAsync(refreshTokenEntity, cancellationToken);
+        await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         var response = new LoginResponse
         {

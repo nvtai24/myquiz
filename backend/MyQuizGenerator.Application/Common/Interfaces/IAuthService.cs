@@ -72,4 +72,11 @@ public interface IAuthService
     /// Changes the user's password. Throws ValidationException on failure.
     /// </summary>
     Task ChangePasswordAsync(string userId, string currentPassword, string newPassword);
+
+    /// <summary>
+    /// Authenticates or registers a user via Google OAuth using ID Token.
+    /// Returns user info if successful.
+    /// </summary>
+    Task<(string UserId, string Email, string? FirstName, string? LastName, bool IsNewUser)>
+        GoogleLoginAsync(string idToken);
 }

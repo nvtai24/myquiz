@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using MyQuizGenerator.Application.Auth.Commands.ChangePassword;
 using MyQuizGenerator.Application.Auth.Commands.ConfirmEmail;
 using MyQuizGenerator.Application.Auth.Commands.ForgotPassword;
+using MyQuizGenerator.Application.Auth.Commands.GoogleLogin;
 using MyQuizGenerator.Application.Auth.Commands.Login;
 using MyQuizGenerator.Application.Auth.Commands.Logout;
 using MyQuizGenerator.Application.Auth.Commands.RefreshToken;
@@ -35,6 +36,17 @@ public class AuthController : BaseApiController
         var command = new LoginCommand(request);
         var response = await Mediator.Send(command);
         return ApiOk(response, "Login successful");
+    }
+
+    /// <summary>
+    /// Authenticates user via Google OAuth.
+    /// </summary>
+    [HttpPost("google-login")]
+    public async Task<IActionResult> GoogleLogin([FromBody] GoogleLoginRequest request)
+    {
+        var command = new GoogleLoginCommand(request);
+        var response = await Mediator.Send(command);
+        return ApiOk(response, "Google login successful");
     }
 
     [HttpPost("refresh-token")]

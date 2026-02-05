@@ -1,8 +1,12 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 using MyQuizGenerator.Application.Common.Interfaces;
 using MyQuizGenerator.Application.Features.Auth.DTOs;
 using MyQuizGenerator.Domain.Constants;
+using Google.Apis.Auth;
+using MyQuizGenerator.Infrastructure.Settings;
+using Microsoft.Extensions.Options;
 
 namespace MyQuizGenerator.Infrastructure.Identity;
 
@@ -14,16 +18,18 @@ public class AuthService : IAuthService
     private readonly UserManager<AppUser> _userManager;
     private readonly SignInManager<AppUser> _signInManager;
     private readonly ILogger<AuthService> _logger;
-
+    private readonly GoogleSettings _googleSettings;
 
     public AuthService(
         UserManager<AppUser> userManager,
         SignInManager<AppUser> signInManager,
-        ILogger<AuthService> logger)
+        ILogger<AuthService> logger,
+        IOptions<GoogleSettings> googleSettings)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _logger = logger;
+        _googleSettings = googleSettings.Value;
     }
 
     public async Task<(string UserId, string Email)> RegisterUserAsync(
@@ -241,5 +247,69 @@ public class AuthService : IAuthService
         }
 
         _logger.LogInformation("Password changed successfully for user: {UserId}", userId);
+    }
+
+    public async Task<(string UserId, string Email, string? FirstName, string? LastName, bool IsNewUser)>
+        GoogleLoginAsync(string idToken)
+    {
+        GoogleJsonWebSignature.Payload payload;
+        try
+        {
+            var settings = new GoogleJsonWebSignature.ValidationSettings
+            {
+                Audience = new[] { _googleSettings.ClientId }
+            };
+
+            payload = await GoogleJsonWebSignature.ValidateAsync(idToken, settings);
+        }
+        catch (InvalidJwtException ex)
+        {
+            _logger.LogWarning("Invalid Google token: {Message}", ex.Message);
+            throw new Application.Common.Exceptions.UnauthorizedException("Invalid Google token");
+        }
+
+        if (!payload.EmailVerified)
+        {
+            _logger.LogWarning("Google email not verified: {Email}", payload.Email);
+            throw new Application.Common.Exceptions.UnauthorizedException("Google email is not verified");
+        }
+
+        var email = payload.Email;
+        var firstName = payload.GivenName;
+        var lastName = payload.FamilyName;
+
+        var user = await _userManager.FindByEmailAsync(email);
+
+        if (user == null)
+        {
+            // Create new user without password (Google OAuth user)
+            user = new AppUser
+            {
+                UserName = email,
+                Email = email,
+                FirstName = firstName,
+                LastName = lastName,
+                EmailConfirmed = true, // Google has already verified the email
+                CreatedAt = DateTime.UtcNow
+            };
+
+            var result = await _userManager.CreateAsync(user);
+
+            if (!result.Succeeded)
+            {
+                var errors = result.Errors.Select(e => e.Description).ToList();
+                _logger.LogWarning("Failed to create Google user {Email}: {Errors}",
+                    email, string.Join(", ", errors));
+                throw new Application.Common.Exceptions.ValidationException(errors);
+            }
+
+            await _userManager.AddToRoleAsync(user, Roles.User);
+
+            _logger.LogInformation("New user created via Google login: {Email}", email);
+            return (user.Id, user.Email!, user.FirstName, user.LastName, true);
+        }
+
+        _logger.LogInformation("Existing user logged in via Google: {Email}", email);
+        return (user.Id, user.Email!, user.FirstName, user.LastName, false);
     }
 }

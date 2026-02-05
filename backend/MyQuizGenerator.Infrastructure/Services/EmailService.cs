@@ -117,4 +117,65 @@ public class EmailService : IEmailService
 </body>
 </html>";
     }
+
+    public async Task SendPasswordResetEmailAsync(string email, string? firstName, string resetToken, CancellationToken cancellationToken = default)
+    {
+        var encodedToken = HttpUtility.UrlEncode(resetToken);
+        var encodedEmail = HttpUtility.UrlEncode(email);
+        var resetLink = $"{_emailSettings.ClientBaseUrl}/reset-password?email={encodedEmail}&token={encodedToken}";
+
+        var emailBody = GeneratePasswordResetEmailBody(firstName ?? "User", resetLink);
+
+        await SendEmailAsync(
+            email,
+            "Reset Your Password - MyQuiz Generator",
+            emailBody,
+            cancellationToken);
+
+        _logger.LogInformation("Password reset email sent to: {Email}", email);
+    }
+
+    private static string GeneratePasswordResetEmailBody(string userName, string resetLink)
+    {
+        return $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset='UTF-8'>
+    <meta name='viewport' content='width=device-width, initial-scale=1.0'>
+    <title>Password Reset</title>
+</head>
+<body style='font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;'>
+    <div style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; text-align: center; border-radius: 10px 10px 0 0;'>
+        <h1 style='color: #ffffff; margin: 0;'>MyQuiz Generator</h1>
+    </div>
+    <div style='background-color: #f9f9f9; padding: 30px; border-radius: 0 0 10px 10px;'>
+        <h2 style='color: #333;'>Password Reset Request</h2>
+        <p>Hi {userName},</p>
+        <p>We received a request to reset your password. Click the button below to create a new password:</p>
+        <div style='text-align: center; margin: 30px 0;'>
+            <a href='{resetLink}' 
+               style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                      color: #ffffff; 
+                      padding: 15px 30px; 
+                      text-decoration: none; 
+                      border-radius: 5px; 
+                      font-weight: bold;
+                      display: inline-block;'>
+                Reset Password
+            </a>
+        </div>
+        <p style='color: #e74c3c; font-size: 14px; text-align: center; font-weight: bold;'>
+            ⏰ This link will expire in 24 hours.
+        </p>
+        <p style='color: #666; font-size: 14px;'>If the button doesn't work, copy and paste this link into your browser:</p>
+        <p style='word-break: break-all; color: #667eea; font-size: 12px;'>{resetLink}</p>
+        <hr style='border: none; border-top: 1px solid #eee; margin: 30px 0;'>
+        <p style='color: #999; font-size: 12px; text-align: center;'>
+            If you didn't request a password reset, you can safely ignore this email. Your password will remain unchanged.
+        </p>
+    </div>
+</body>
+</html>";
+    }
 }

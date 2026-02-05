@@ -52,4 +52,19 @@ public interface IAuthService
     /// Checks if the user's email is confirmed.
     /// </summary>
     Task<bool> IsEmailConfirmedAsync(string userId);
+
+    /// <summary>
+    /// Generates a password reset token for the user.
+    /// </summary>
+    Task<string?> GeneratePasswordResetTokenAsync(string email);
+
+    /// <summary>
+    /// Resets the user's password with the provided token.
+    /// </summary>
+    Task<bool> ResetPasswordAsync(string email, string token, string newPassword);
+
+    /// <summary>
+    /// Gets user by email.
+    /// </summary>
+    Task<UserResponse?> GetUserByEmailAsync(string email);
 }

@@ -8,4 +8,9 @@ public interface IEmailService
     /// Sends a confirmation email to the user.
     /// </summary>
     Task SendConfirmationEmailAsync(string userId, string email, string? firstName, string confirmationToken, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Sends a password reset email to the user.
+    /// </summary>
+    Task SendPasswordResetEmailAsync(string email, string? firstName, string resetToken, CancellationToken cancellationToken = default);
 }

@@ -2,10 +2,12 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyQuizGenerator.Application.Auth.Commands.ConfirmEmail;
+using MyQuizGenerator.Application.Auth.Commands.ForgotPassword;
 using MyQuizGenerator.Application.Auth.Commands.Login;
 using MyQuizGenerator.Application.Auth.Commands.Logout;
 using MyQuizGenerator.Application.Auth.Commands.RefreshToken;
 using MyQuizGenerator.Application.Auth.Commands.Register;
+using MyQuizGenerator.Application.Auth.Commands.ResetPassword;
 using MyQuizGenerator.Application.Auth.Queries.GetCurrentUser;
 using MyQuizGenerator.Application.Common.Exceptions;
 using MyQuizGenerator.Application.Features.Auth.DTOs;
@@ -76,6 +78,28 @@ public class AuthController : BaseApiController
     public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest request)
     {
         var command = new ConfirmEmailCommand(request);
+        var response = await Mediator.Send(command);
+        return ApiOk(response, response.Message);
+    }
+
+    /// <summary>
+    /// Sends a password reset email to the user.
+    /// </summary>
+    [HttpPost("forgot-password")]
+    public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
+    {
+        var command = new ForgotPasswordCommand(request);
+        var response = await Mediator.Send(command);
+        return ApiOk(response, response.Message);
+    }
+
+    /// <summary>
+    /// Resets the user's password with a valid token.
+    /// </summary>
+    [HttpPost("reset-password")]
+    public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
+    {
+        var command = new ResetPasswordCommand(request);
         var response = await Mediator.Send(command);
         return ApiOk(response, response.Message);
     }

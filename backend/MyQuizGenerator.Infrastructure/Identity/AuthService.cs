@@ -167,4 +167,58 @@ public class AuthService : IAuthService
 
         return await _userManager.IsEmailConfirmedAsync(user);
     }
+
+    public async Task<string?> GeneratePasswordResetTokenAsync(string email)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            _logger.LogWarning("Password reset requested for non-existent email: {Email}", email);
+            return null;
+        }
+
+        return await _userManager.GeneratePasswordResetTokenAsync(user);
+    }
+
+    public async Task<bool> ResetPasswordAsync(string email, string token, string newPassword)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            _logger.LogWarning("Password reset failed - user not found: {Email}", email);
+            return false;
+        }
+
+        var result = await _userManager.ResetPasswordAsync(user, token, newPassword);
+
+        if (result.Succeeded)
+        {
+            _logger.LogInformation("Password reset successfully for user: {Email}", email);
+            return true;
+        }
+
+        var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+        _logger.LogWarning("Password reset failed for {Email}: {Errors}", email, errors);
+        return false;
+    }
+
+    public async Task<UserResponse?> GetUserByEmailAsync(string email)
+    {
+        var user = await _userManager.FindByEmailAsync(email);
+        if (user == null)
+        {
+            return null;
+        }
+
+        var roles = await _userManager.GetRolesAsync(user);
+
+        return new UserResponse
+        {
+            Id = user.Id,
+            Email = user.Email!,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            Roles = roles.ToList()
+        };
+    }
 }

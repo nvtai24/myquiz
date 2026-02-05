@@ -2,7 +2,6 @@ using MediatR;
 using Microsoft.Extensions.Logging;
 using MyQuizGenerator.Application.Common.Exceptions;
 using MyQuizGenerator.Application.Common.Interfaces;
-using MyQuizGenerator.Application.Common.Models;
 using MyQuizGenerator.Application.Features.Auth.DTOs;
 
 namespace MyQuizGenerator.Application.Auth.Commands.Register;
@@ -16,16 +15,16 @@ public record RegisterCommand(
 public class RegisterCommandHandler : IRequestHandler<RegisterCommand, RegisterResponse>
 {
     private readonly IAuthService _authService;
-    private readonly ITokenService _tokenService;
+    private readonly IEmailService _emailService;
     private readonly ILogger<RegisterCommandHandler> _logger;
 
     public RegisterCommandHandler(
         IAuthService authService,
-        ITokenService tokenService,
+        IEmailService emailService,
         ILogger<RegisterCommandHandler> logger)
     {
         _authService = authService;
-        _tokenService = tokenService;
+        _emailService = emailService;
         _logger = logger;
     }
 
@@ -47,7 +46,26 @@ public class RegisterCommandHandler : IRequestHandler<RegisterCommand, RegisterR
             request.registerRequest.FirstName,
             request.registerRequest.LastName);
 
-        // Get user info and generate token
+        // Generate email confirmation token and send confirmation email
+        try
+        {
+            var token = await _authService.GenerateEmailConfirmationTokenAsync(userId);
+            await _emailService.SendConfirmationEmailAsync(
+                userId,
+                email,
+                request.registerRequest.FirstName,
+                token,
+                cancellationToken);
+
+            _logger.LogInformation("Confirmation email sent to: {Email}", email);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send confirmation email to: {Email}", email);
+            // Continue registration even if email fails - user can request resend later
+        }
+
+        // Get user info
         var roles = await _authService.GetUserRolesAsync(userId);
 
         var response = new RegisterResponse

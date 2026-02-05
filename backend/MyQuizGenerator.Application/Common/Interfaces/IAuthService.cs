@@ -37,4 +37,19 @@ public interface IAuthService
     /// Checks if a user with the specified email exists.
     /// </summary>
     Task<bool> UserExistsAsync(string email);
+
+    /// <summary>
+    /// Generates an email confirmation token for the user.
+    /// </summary>
+    Task<string> GenerateEmailConfirmationTokenAsync(string userId);
+
+    /// <summary>
+    /// Confirms the user's email with the provided token.
+    /// </summary>
+    Task<bool> ConfirmEmailAsync(string userId, string token);
+
+    /// <summary>
+    /// Checks if the user's email is confirmed.
+    /// </summary>
+    Task<bool> IsEmailConfirmedAsync(string userId);
 }

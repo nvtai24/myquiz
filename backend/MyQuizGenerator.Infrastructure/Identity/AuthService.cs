@@ -15,6 +15,7 @@ public class AuthService : IAuthService
     private readonly SignInManager<AppUser> _signInManager;
     private readonly ILogger<AuthService> _logger;
 
+
     public AuthService(
         UserManager<AppUser> userManager,
         SignInManager<AppUser> signInManager,
@@ -121,5 +122,49 @@ public class AuthService : IAuthService
     {
         var user = await _userManager.FindByEmailAsync(email);
         return user != null;
+    }
+
+    public async Task<string> GenerateEmailConfirmationTokenAsync(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            throw new Application.Common.Exceptions.NotFoundException("User", userId);
+        }
+
+        return await _userManager.GenerateEmailConfirmationTokenAsync(user);
+    }
+
+    public async Task<bool> ConfirmEmailAsync(string userId, string token)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            _logger.LogWarning("Email confirmation failed - user not found: {UserId}", userId);
+            return false;
+        }
+
+        var result = await _userManager.ConfirmEmailAsync(user, token);
+
+        if (result.Succeeded)
+        {
+            _logger.LogInformation("Email confirmed successfully for user: {UserId}", userId);
+            return true;
+        }
+
+        var errors = string.Join(", ", result.Errors.Select(e => e.Description));
+        _logger.LogWarning("Email confirmation failed for user {UserId}: {Errors}", userId, errors);
+        return false;
+    }
+
+    public async Task<bool> IsEmailConfirmedAsync(string userId)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return false;
+        }
+
+        return await _userManager.IsEmailConfirmedAsync(user);
     }
 }

@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MyQuizGenerator.Application.Auth.Commands.ConfirmEmail;
 using MyQuizGenerator.Application.Auth.Commands.Login;
 using MyQuizGenerator.Application.Auth.Commands.Logout;
 using MyQuizGenerator.Application.Auth.Commands.RefreshToken;
@@ -24,7 +25,7 @@ public class AuthController : BaseApiController
         var command = new RegisterCommand(request);
 
         var response = await Mediator.Send(command);
-        return ApiCreated(response, "Registration successful");
+        return ApiCreated(response, "Registration successful. Please check your email to confirm your account.");
     }
 
     [HttpPost("login")]
@@ -68,5 +69,16 @@ public class AuthController : BaseApiController
         return ApiOk(userInfo, "User retrieved successfully");
     }
 
-
+    /// <summary>
+    /// Confirms user's email address.
+    /// </summary>
+    /// <param name="userId">The user's ID</param>
+    /// <param name="token">The email confirmation token</param>
+    [HttpGet("confirm-email")]
+    public async Task<IActionResult> ConfirmEmail([FromQuery] ConfirmEmailRequest request)
+    {
+        var command = new ConfirmEmailCommand(request);
+        var response = await Mediator.Send(command);
+        return ApiOk(response, response.Message);
+    }
 }

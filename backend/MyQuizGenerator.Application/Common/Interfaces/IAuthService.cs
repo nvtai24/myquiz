@@ -67,4 +67,9 @@ public interface IAuthService
     /// Gets user by email.
     /// </summary>
     Task<UserResponse?> GetUserByEmailAsync(string email);
+
+    /// <summary>
+    /// Changes the user's password. Throws ValidationException on failure.
+    /// </summary>
+    Task ChangePasswordAsync(string userId, string currentPassword, string newPassword);
 }

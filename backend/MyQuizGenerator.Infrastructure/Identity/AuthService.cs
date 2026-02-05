@@ -221,4 +221,25 @@ public class AuthService : IAuthService
             Roles = roles.ToList()
         };
     }
+
+    public async Task ChangePasswordAsync(string userId, string currentPassword, string newPassword)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            _logger.LogWarning("Change password failed - user not found: {UserId}", userId);
+            throw new Application.Common.Exceptions.NotFoundException("User", userId);
+        }
+
+        var result = await _userManager.ChangePasswordAsync(user, currentPassword, newPassword);
+
+        if (!result.Succeeded)
+        {
+            var errors = result.Errors.Select(e => e.Description).ToList();
+            _logger.LogWarning("Change password failed for {UserId}: {Errors}", userId, string.Join(", ", errors));
+            throw new Application.Common.Exceptions.ValidationException(errors);
+        }
+
+        _logger.LogInformation("Password changed successfully for user: {UserId}", userId);
+    }
 }

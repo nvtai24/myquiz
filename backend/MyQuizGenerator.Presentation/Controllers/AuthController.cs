@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using MyQuizGenerator.Application.Auth.Commands.ChangePassword;
 using MyQuizGenerator.Application.Auth.Commands.ConfirmEmail;
 using MyQuizGenerator.Application.Auth.Commands.ForgotPassword;
 using MyQuizGenerator.Application.Auth.Commands.Login;
@@ -102,5 +103,25 @@ public class AuthController : BaseApiController
         var command = new ResetPasswordCommand(request);
         var response = await Mediator.Send(command);
         return ApiOk(response, response.Message);
+    }
+
+    /// <summary>
+    /// Changes the user's password (requires authentication).
+    /// </summary>
+    [Authorize]
+    [HttpPost("change-password")]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+    {
+        var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                  ?? User.FindFirst("sub")?.Value;
+
+        if (string.IsNullOrEmpty(userId))
+        {
+            throw new UnauthorizedException("Invalid token");
+        }
+
+        var command = new ChangePasswordCommand(userId, request);
+        await Mediator.Send(command);
+        return ApiNotFound("Password changed successfully");
     }
 }

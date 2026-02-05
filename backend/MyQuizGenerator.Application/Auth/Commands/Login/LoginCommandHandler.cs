@@ -20,6 +20,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
 {
     private readonly IAuthService _authService;
     private readonly ITokenService _tokenService;
+    private readonly IEmailService _emailService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IRepository<Guid, Domain.Entities.RefreshToken> _refreshTokenRepository;
     private readonly ILogger<LoginCommandHandler> _logger;
@@ -27,12 +28,14 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
     public LoginCommandHandler(
         IAuthService authService,
         ITokenService tokenService,
+        IEmailService emailService,
         IUnitOfWork unitOfWork,
         IRepository<Guid, Domain.Entities.RefreshToken> refreshTokenRepository,
         ILogger<LoginCommandHandler> logger)
     {
         _authService = authService;
         _tokenService = tokenService;
+        _emailService = emailService;
         _unitOfWork = unitOfWork;
         _refreshTokenRepository = refreshTokenRepository;
         _logger = logger;
@@ -57,6 +60,35 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
         {
             _logger.LogWarning("Login failed - invalid credentials: {Email}", request.loginRequest.Email);
             throw new UnauthorizedException("Invalid email or password");
+        }
+
+        // Check if email is confirmed
+        if (!await _authService.IsEmailConfirmedAsync(userId))
+        {
+            _logger.LogWarning("Login failed - email not confirmed: {Email}", request.loginRequest.Email);
+
+            // Auto-resend confirmation email
+            try
+            {
+                var token = await _authService.GenerateEmailConfirmationTokenAsync(userId);
+                var user = await _authService.GetUserByIdAsync(userId);
+                if (user != null)
+                {
+                    await _emailService.SendConfirmationEmailAsync(
+                        userId,
+                        user.Email,
+                        user.FirstName,
+                        token,
+                        cancellationToken);
+                    _logger.LogInformation("Confirmation email resent to: {Email}", request.loginRequest.Email);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to resend confirmation email to: {Email}", request.loginRequest.Email);
+            }
+
+            throw new UnauthorizedException("Please confirm your email before logging in. A new confirmation email has been sent to your inbox.");
         }
 
         // Get user info and generate token

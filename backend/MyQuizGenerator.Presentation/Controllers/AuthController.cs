@@ -72,10 +72,8 @@ public class AuthController : BaseApiController
     /// <summary>
     /// Confirms user's email address.
     /// </summary>
-    /// <param name="userId">The user's ID</param>
-    /// <param name="token">The email confirmation token</param>
-    [HttpGet("confirm-email")]
-    public async Task<IActionResult> ConfirmEmail([FromQuery] ConfirmEmailRequest request)
+    [HttpPost("confirm-email")]
+    public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest request)
     {
         var command = new ConfirmEmailCommand(request);
         var response = await Mediator.Send(command);

@@ -41,7 +41,7 @@ public abstract class BaseApiController : ControllerBase
     /// <summary>
     /// Returns No Content (204)
     /// </summary>
-    protected IActionResult ApiNoContent(string message = "Deleted successfully")
+    protected IActionResult ApiNoContent(string message = "Operation handled successfully")
     {
         return Ok(ApiResponse.NoContent(message));
     }

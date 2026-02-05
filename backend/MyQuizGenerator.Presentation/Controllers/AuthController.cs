@@ -12,7 +12,6 @@ using MyQuizGenerator.Application.Auth.Commands.ResetPassword;
 using MyQuizGenerator.Application.Auth.Queries.GetCurrentUser;
 using MyQuizGenerator.Application.Common.Exceptions;
 using MyQuizGenerator.Application.Features.Auth.DTOs;
-using MyQuizGenerator.Domain.Constants;
 
 namespace MyQuizGenerator.Presentation.Controllers;
 
@@ -26,7 +25,6 @@ public class AuthController : BaseApiController
     public async Task<IActionResult> Register([FromBody] RegisterRequest request)
     {
         var command = new RegisterCommand(request);
-
         var response = await Mediator.Send(command);
         return ApiCreated(response, "Registration successful. Please check your email to confirm your account.");
     }
@@ -52,7 +50,7 @@ public class AuthController : BaseApiController
     {
         var command = new LogoutCommand(request);
         await Mediator.Send(command);
-        return ApiNoContent("Logout successful");
+        return ApiOk("Logout successful");
     }
 
     [Authorize]
@@ -79,8 +77,8 @@ public class AuthController : BaseApiController
     public async Task<IActionResult> ConfirmEmail([FromBody] ConfirmEmailRequest request)
     {
         var command = new ConfirmEmailCommand(request);
-        var response = await Mediator.Send(command);
-        return ApiOk(response, response.Message);
+        await Mediator.Send(command);
+        return ApiOk("Email confirmed successfully. You can now login.");
     }
 
     /// <summary>
@@ -90,8 +88,8 @@ public class AuthController : BaseApiController
     public async Task<IActionResult> ForgotPassword([FromBody] ForgotPasswordRequest request)
     {
         var command = new ForgotPasswordCommand(request);
-        var response = await Mediator.Send(command);
-        return ApiOk(response, response.Message);
+        await Mediator.Send(command);
+        return ApiOk("If the email exists in our system, you will receive a password reset link shortly.");
     }
 
     /// <summary>
@@ -101,8 +99,8 @@ public class AuthController : BaseApiController
     public async Task<IActionResult> ResetPassword([FromBody] ResetPasswordRequest request)
     {
         var command = new ResetPasswordCommand(request);
-        var response = await Mediator.Send(command);
-        return ApiOk(response, response.Message);
+        await Mediator.Send(command);
+        return ApiOk("Password has been reset successfully. You can now login with your new password.");
     }
 
     /// <summary>
@@ -117,11 +115,11 @@ public class AuthController : BaseApiController
 
         if (string.IsNullOrEmpty(userId))
         {
-            throw new UnauthorizedException("Invalid token");
+            return ApiUnauthorized("Invalid token");
         }
 
         var command = new ChangePasswordCommand(userId, request);
         await Mediator.Send(command);
-        return ApiNotFound("Password changed successfully");
+        return ApiOk("Password changed successfully");
     }
 }

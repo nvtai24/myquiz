@@ -1,12 +1,13 @@
 using MediatR;
 using Microsoft.Extensions.Logging;
+using MyQuizGenerator.Application.Common.Exceptions;
 using MyQuizGenerator.Application.Common.Interfaces;
 
 namespace MyQuizGenerator.Application.Auth.Commands.ForgotPassword;
 
-public record ForgotPasswordCommand(ForgotPasswordRequest Request) : IRequest<ForgotPasswordResponse>;
+public record ForgotPasswordCommand(ForgotPasswordRequest Request) : IRequest;
 
-public class ForgotPasswordCommandHandler : IRequestHandler<ForgotPasswordCommand, ForgotPasswordResponse>
+public class ForgotPasswordCommandHandler : IRequestHandler<ForgotPasswordCommand>
 {
     private readonly IAuthService _authService;
     private readonly IEmailService _emailService;
@@ -22,7 +23,7 @@ public class ForgotPasswordCommandHandler : IRequestHandler<ForgotPasswordComman
         _logger = logger;
     }
 
-    public async Task<ForgotPasswordResponse> Handle(ForgotPasswordCommand request, CancellationToken cancellationToken)
+    public async Task Handle(ForgotPasswordCommand request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Password reset requested for email: {Email}", request.Request.Email);
 
@@ -31,13 +32,9 @@ public class ForgotPasswordCommandHandler : IRequestHandler<ForgotPasswordComman
 
         if (token == null)
         {
-            // Don't reveal that the user doesn't exist for security
+            // Don't reveal that the user doesn't exist for security - return silently
             _logger.LogWarning("Password reset requested for non-existent email: {Email}", request.Request.Email);
-            return new ForgotPasswordResponse
-            {
-                Success = true,
-                Message = "If the email exists in our system, you will receive a password reset link shortly."
-            };
+            return;
         }
 
         // Get user info for personalization
@@ -57,17 +54,7 @@ public class ForgotPasswordCommandHandler : IRequestHandler<ForgotPasswordComman
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to send password reset email to: {Email}", request.Request.Email);
-            return new ForgotPasswordResponse
-            {
-                Success = false,
-                Message = "Failed to send password reset email. Please try again later."
-            };
+            throw new BadRequestException("Failed to send password reset email. Please try again later.");
         }
-
-        return new ForgotPasswordResponse
-        {
-            Success = true,
-            Message = "If the email exists in our system, you will receive a password reset link shortly."
-        };
     }
 }

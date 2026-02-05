@@ -5,9 +5,9 @@ using MyQuizGenerator.Application.Common.Interfaces;
 
 namespace MyQuizGenerator.Application.Auth.Commands.ResetPassword;
 
-public record ResetPasswordCommand(ResetPasswordRequest Request) : IRequest<ResetPasswordResponse>;
+public record ResetPasswordCommand(ResetPasswordRequest Request) : IRequest;
 
-public class ResetPasswordCommandHandler : IRequestHandler<ResetPasswordCommand, ResetPasswordResponse>
+public class ResetPasswordCommandHandler : IRequestHandler<ResetPasswordCommand>
 {
     private readonly IAuthService _authService;
     private readonly ILogger<ResetPasswordCommandHandler> _logger;
@@ -20,7 +20,7 @@ public class ResetPasswordCommandHandler : IRequestHandler<ResetPasswordCommand,
         _logger = logger;
     }
 
-    public async Task<ResetPasswordResponse> Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
+    public async Task Handle(ResetPasswordCommand request, CancellationToken cancellationToken)
     {
         _logger.LogInformation("Password reset attempt for email: {Email}", request.Request.Email);
 
@@ -36,11 +36,5 @@ public class ResetPasswordCommandHandler : IRequestHandler<ResetPasswordCommand,
         }
 
         _logger.LogInformation("Password reset successfully for email: {Email}", request.Request.Email);
-
-        return new ResetPasswordResponse
-        {
-            Success = true,
-            Message = "Password has been reset successfully. You can now login with your new password."
-        };
     }
 }

@@ -3,6 +3,8 @@ using Amazon.S3.Model;
 using Microsoft.Extensions.Options;
 using MyQuizGenerator.Application.Common.Interfaces;
 using MyQuizGenerator.Infrastructure.Settings;
+using MyQuizGenerator.Application.Files.Commands;
+using MyQuizGenerator.Application.Files.Commands.UploadFile;
 
 namespace MyQuizGenerator.Infrastructure.Services;
 
@@ -17,16 +19,16 @@ public class S3FileService : IFileService
         _storageSettings = storageSettings.Value;
     }
 
-    public async Task<string> UploadFileAsync(Stream fileStream, string fileName, string contentType)
+    public async Task<string> UploadFileAsync(FileUploadRequest file)
     {
-        var key = $"{Guid.NewGuid()}_{fileName}";
+        var key = $"{Guid.NewGuid()}_{file.FileName}";
 
         var request = new PutObjectRequest
         {
             BucketName = _storageSettings.BucketName,
             Key = key,
-            InputStream = fileStream,
-            ContentType = contentType,
+            InputStream = file.FileStream,
+            ContentType = file.ContentType,
             // CannedACL is often not needed if bucket policy is public or using cloudfront/presigned urls, 
             // but user had acceptable config before. We will omit CannedACL if not strictly required or use based on verify.
             // Keeping it simple as per previous working version minus the CannedACL error if any.
@@ -38,5 +40,30 @@ public class S3FileService : IFileService
         await _s3Client.PutObjectAsync(request);
 
         return $"https://{_storageSettings.BucketName}.s3.{_storageSettings.Region}.amazonaws.com/{key}";
+    }
+
+    public async Task<List<string>> UploadMultipleFilesAsync(List<FileUploadRequest> files)
+    {
+        using var semaphore = new SemaphoreSlim(5);
+        var uploadTasks = new List<Task<string>>();
+
+        foreach (var file in files)
+        {
+            uploadTasks.Add(Task.Run(async () =>
+            {
+                await semaphore.WaitAsync();
+                try
+                {
+                    return await UploadFileAsync(file);
+                }
+                finally
+                {
+                    semaphore.Release();
+                }
+            }));
+        }
+
+        var results = await Task.WhenAll(uploadTasks);
+        return results.ToList();
     }
 }

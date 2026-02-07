@@ -4,7 +4,7 @@ using MyQuizGenerator.Domain.Entities;
 
 namespace MyQuizGenerator.Application.Files.Commands.UploadFile;
 
-public record UploadFileCommand(Stream FileStream, string FileName, string ContentType) : IRequest<string>;
+public record UploadFileCommand(FileUploadRequest File) : IRequest<string>;
 
 public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, string>
 {
@@ -24,14 +24,14 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, strin
 
     public async Task<string> Handle(UploadFileCommand request, CancellationToken cancellationToken)
     {
-        var url = await _fileService.UploadFileAsync(request.FileStream, request.FileName, request.ContentType);
+        var url = await _fileService.UploadFileAsync(request.File);
 
         var uploadedFile = new UploadedFile
         {
-            FileName = request.FileName,
-            OriginalFileName = request.FileName,
-            ContentType = request.ContentType,
-            Size = request.FileStream.Length,
+            FileName = request.File.FileName,
+            OriginalFileName = request.File.FileName,
+            ContentType = request.File.ContentType,
+            Size = request.File.FileStream.Length,
             Url = url
         };
 

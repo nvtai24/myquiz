@@ -16,6 +16,7 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, IdentityRole, str
     }
 
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<UploadedFile> UploadedFiles { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -38,5 +39,14 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, IdentityRole, str
             entity.Property(r => r.Invalidated).IsRequired();
             entity.Property(r => r.UserId).IsRequired();
         });
+
+        modelBuilder.Entity<UploadedFile>(entity =>
+        {
+            entity.ToTable("UploadedFiles");
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.Url).IsRequired();
+            entity.Property(e => e.OriginalFileName).IsRequired();
+        });
     }
+
 }

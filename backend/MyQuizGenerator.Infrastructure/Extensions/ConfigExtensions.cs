@@ -11,6 +11,7 @@ public static class ConfigExtensions
         services.Configure<JwtSettings>(configuration.GetSection(JwtSettings.SectionName));
         services.Configure<EmailSettings>(configuration.GetSection(EmailSettings.SectionName));
         services.Configure<GoogleSettings>(configuration.GetSection(GoogleSettings.SectionName));
+        services.Configure<StorageSettings>(configuration.GetSection(StorageSettings.SectionName));
         return services;
     }
 }

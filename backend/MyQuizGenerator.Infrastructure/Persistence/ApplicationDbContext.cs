@@ -38,6 +38,11 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, IdentityRole, str
             entity.Property(r => r.Used).IsRequired();
             entity.Property(r => r.Invalidated).IsRequired();
             entity.Property(r => r.UserId).IsRequired();
+
+            entity.HasOne<AppUser>()
+                .WithMany(u => u.RefreshTokens)
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<UploadedFile>(entity =>

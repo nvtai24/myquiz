@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Identity;
+using MyQuizGenerator.Domain.Entities;
 
 namespace MyQuizGenerator.Infrastructure.Identity;
 
@@ -12,4 +13,5 @@ public class AppUser : IdentityUser
     public string FullName => $"{FirstName} {LastName}".Trim();
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; }
+    public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
 }

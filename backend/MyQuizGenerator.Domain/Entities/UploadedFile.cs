@@ -5,7 +5,7 @@ namespace MyQuizGenerator.Domain.Entities;
 public class UploadedFile
 {
     [Key]
-    public string Id { get; set; } = Guid.NewGuid().ToString();
+    public Guid Id { get; set; } = Guid.NewGuid();
 
     public string FileName { get; set; } = string.Empty;
 

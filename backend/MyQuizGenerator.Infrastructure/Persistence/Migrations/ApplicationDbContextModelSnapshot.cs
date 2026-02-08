@@ -193,8 +193,9 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("MyQuizGenerator.Domain.Entities.UploadedFile", b =>
                 {
-                    b.Property<string>("Id")
-                        .HasColumnType("text");
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
 
                     b.Property<string>("ContentType")
                         .IsRequired()

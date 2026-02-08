@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyQuizGenerator.Application.Decks.DTOs;
 using CreateDeck = MyQuizGenerator.Application.Decks.Commands.CreateDeck;
+using UpdateDeck = MyQuizGenerator.Application.Decks.Commands.UpdateDeck;
+using DeleteDeck = MyQuizGenerator.Application.Decks.Commands.DeleteDeck;
 using UserDecks = MyQuizGenerator.Application.Decks.Queries.GetUserDecks;
 using DeckDetails = MyQuizGenerator.Application.Decks.Queries.GetDeckById;
 
@@ -35,12 +37,35 @@ public class DecksController : BaseApiController
     }
 
     /// <summary>
+    /// Updates a deck.
+    /// </summary>
+    /// <param name="id">The deck ID.</param>
+    /// <param name="request">The deck update request.</param>
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateDeckRequest request)
+    {
+        var command = new UpdateDeck.UpdateDeckCommand(id, request);
+        await _mediator.Send(command);
+        return ApiNoContent("Deck updated successfully");
+    }
+
+    /// <summary>
+    /// Deletes a deck.
+    /// </summary>
+    /// <param name="id">The deck ID.</param>
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var command = new DeleteDeck.DeleteDeckCommand(id);
+        await _mediator.Send(command);
+        return ApiNoContent("Deck deleted successfully");
+    }
+
+    /// <summary>
     /// Gets a list of decks for the current user.
     /// </summary>
     /// <returns>List of deck summaries.</returns>
     [HttpGet]
-    [ProducesResponseType(typeof(List<DeckSummaryResponse>), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetUserDecks()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -60,8 +85,6 @@ public class DecksController : BaseApiController
     /// <param name="id">The deck ID.</param>
     /// <returns>The deck details.</returns>
     [HttpGet("{id}")]
-    [ProducesResponseType(typeof(DeckDetailResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetDeckById(Guid id)
     {
         var query = new DeckDetails.GetDeckByIdQuery(id);

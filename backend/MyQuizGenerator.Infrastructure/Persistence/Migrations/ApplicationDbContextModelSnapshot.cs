@@ -154,6 +154,95 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("MyQuizGenerator.Domain.Entities.Deck", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("OwnerId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Source")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string[]>("Tags")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<string>("ThumbnailUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Visibility")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OwnerId");
+
+                    b.ToTable("Decks");
+                });
+
+            modelBuilder.Entity("MyQuizGenerator.Domain.Entities.Question", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string[]>("CorrectAnswers")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<Guid>("DeckId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Explanation")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Hint")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string[]>("Options")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeckId");
+
+                    b.ToTable("Questions");
+                });
+
             modelBuilder.Entity("MyQuizGenerator.Domain.Entities.RefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
@@ -207,6 +296,9 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                     b.Property<string>("CreatedBy")
                         .HasColumnType("text");
 
+                    b.Property<Guid?>("DeckId")
+                        .HasColumnType("uuid");
+
                     b.Property<string>("FileName")
                         .IsRequired()
                         .HasColumnType("text");
@@ -223,6 +315,8 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                         .HasColumnType("text");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DeckId");
 
                     b.ToTable("UploadedFiles", (string)null);
                 });
@@ -356,6 +450,26 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("MyQuizGenerator.Domain.Entities.Deck", b =>
+                {
+                    b.HasOne("MyQuizGenerator.Infrastructure.Identity.AppUser", null)
+                        .WithMany("Decks")
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("MyQuizGenerator.Domain.Entities.Question", b =>
+                {
+                    b.HasOne("MyQuizGenerator.Domain.Entities.Deck", "Deck")
+                        .WithMany("Questions")
+                        .HasForeignKey("DeckId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Deck");
+                });
+
             modelBuilder.Entity("MyQuizGenerator.Domain.Entities.RefreshToken", b =>
                 {
                     b.HasOne("MyQuizGenerator.Infrastructure.Identity.AppUser", null)
@@ -365,8 +479,25 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("MyQuizGenerator.Domain.Entities.UploadedFile", b =>
+                {
+                    b.HasOne("MyQuizGenerator.Domain.Entities.Deck", null)
+                        .WithMany("Documents")
+                        .HasForeignKey("DeckId")
+                        .OnDelete(DeleteBehavior.Cascade);
+                });
+
+            modelBuilder.Entity("MyQuizGenerator.Domain.Entities.Deck", b =>
+                {
+                    b.Navigation("Documents");
+
+                    b.Navigation("Questions");
+                });
+
             modelBuilder.Entity("MyQuizGenerator.Infrastructure.Identity.AppUser", b =>
                 {
+                    b.Navigation("Decks");
+
                     b.Navigation("RefreshTokens");
                 });
 #pragma warning restore 612, 618

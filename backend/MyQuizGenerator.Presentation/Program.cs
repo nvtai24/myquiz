@@ -7,7 +7,11 @@ using MyQuizGenerator.Presentation.Middlewares;
 var builder = WebApplication.CreateBuilder(args);
 
 // Service Configuration
-builder.Services.AddControllers();
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+});
 builder.Services.AddEndpointsApiExplorer();
 
 // Swagger with JWT support

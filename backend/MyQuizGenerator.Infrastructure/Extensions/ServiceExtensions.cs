@@ -1,7 +1,9 @@
 using Microsoft.Extensions.DependencyInjection;
 using MyQuizGenerator.Application.Common.Interfaces;
+using MyQuizGenerator.Application.Common.Interfaces.Repositories;
 using MyQuizGenerator.Infrastructure.Identity;
 using MyQuizGenerator.Infrastructure.Repositories;
+using MyQuizGenerator.Infrastructure.Persistence.Repositories;
 using MyQuizGenerator.Infrastructure.Services;
 using Amazon.S3;
 using Amazon;
@@ -14,8 +16,13 @@ public static class ServiceExtensions
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
+
+        // Repositories
         services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IDeckRepository, DeckRepository>();
+
+        // Services
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();

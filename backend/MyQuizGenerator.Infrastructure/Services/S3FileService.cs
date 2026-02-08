@@ -5,6 +5,7 @@ using MyQuizGenerator.Application.Common.Interfaces;
 using MyQuizGenerator.Infrastructure.Settings;
 using MyQuizGenerator.Application.Files.Commands;
 using MyQuizGenerator.Application.Files.Commands.UploadFile;
+using MyQuizGenerator.Application.Files.DTOs;
 
 namespace MyQuizGenerator.Infrastructure.Services;
 

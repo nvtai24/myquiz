@@ -2,8 +2,8 @@ using System.Security.Claims;
 using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using MyQuizGenerator.Application.Decks.Commands.CreateDeck;
 using MyQuizGenerator.Application.Decks.DTOs;
+using CreateDeck = MyQuizGenerator.Application.Decks.Commands.CreateDeck;
 using UserDecks = MyQuizGenerator.Application.Decks.Queries.GetUserDecks;
 using DeckDetails = MyQuizGenerator.Application.Decks.Queries.GetDeckById;
 
@@ -29,7 +29,7 @@ public class DecksController : BaseApiController
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateDeckRequest request)
     {
-        var command = new CreateDeckCommand(request);
+        var command = new CreateDeck.CreateDeckCommand(request);
         var deckId = await _mediator.Send(command);
         return ApiCreated(deckId, "Deck created successfully");
     }
@@ -39,7 +39,7 @@ public class DecksController : BaseApiController
     /// </summary>
     /// <returns>List of deck summaries.</returns>
     [HttpGet]
-    [ProducesResponseType(typeof(List<UserDecks.DeckSummaryDto>), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(List<DeckSummaryResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> GetUserDecks()
     {
@@ -60,7 +60,7 @@ public class DecksController : BaseApiController
     /// <param name="id">The deck ID.</param>
     /// <returns>The deck details.</returns>
     [HttpGet("{id}")]
-    [ProducesResponseType(typeof(DeckDetails.DeckDetailDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(DeckDetailResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetDeckById(Guid id)
     {

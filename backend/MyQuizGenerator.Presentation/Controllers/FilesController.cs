@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyQuizGenerator.Application.Files.Commands.UploadFile;
 using MyQuizGenerator.Application.Files.Commands;
+using MyQuizGenerator.Application.Files.DTOs;
+using MyQuizGenerator.Application.Files.Commands.UploadMultipleFiles;
 
 namespace MyQuizGenerator.Presentation.Controllers;
 

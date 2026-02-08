@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using MyQuizGenerator.Application.Common.Interfaces;
-using MyQuizGenerator.Application.Features.Auth.DTOs;
+using MyQuizGenerator.Application.Auth.DTOs;
 using MyQuizGenerator.Domain.Constants;
 using Google.Apis.Auth;
 using MyQuizGenerator.Infrastructure.Settings;

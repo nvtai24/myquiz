@@ -1,4 +1,4 @@
-namespace MyQuizGenerator.Application.Features.Auth.DTOs;
+namespace MyQuizGenerator.Application.Auth.DTOs;
 
 /// <summary>
 /// Basic user information DTO.

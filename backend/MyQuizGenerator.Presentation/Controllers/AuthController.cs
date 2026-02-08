@@ -12,7 +12,7 @@ using MyQuizGenerator.Application.Auth.Commands.Register;
 using MyQuizGenerator.Application.Auth.Commands.ResetPassword;
 using MyQuizGenerator.Application.Auth.Queries.GetCurrentUser;
 using MyQuizGenerator.Application.Common.Exceptions;
-using MyQuizGenerator.Application.Features.Auth.DTOs;
+using MyQuizGenerator.Application.Auth.DTOs;
 
 namespace MyQuizGenerator.Presentation.Controllers;
 

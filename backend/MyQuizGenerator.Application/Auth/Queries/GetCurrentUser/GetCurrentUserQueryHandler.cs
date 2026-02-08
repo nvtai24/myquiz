@@ -1,7 +1,7 @@
 using MediatR;
 using MyQuizGenerator.Application.Common.Exceptions;
 using MyQuizGenerator.Application.Common.Interfaces;
-using MyQuizGenerator.Application.Features.Auth.DTOs;
+using MyQuizGenerator.Application.Auth.DTOs;
 
 namespace MyQuizGenerator.Application.Auth.Queries.GetCurrentUser;
 

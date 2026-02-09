@@ -36,6 +36,7 @@ public class S3FileService : IFileService
             // Re-adding CannedACL.PublicRead as it was in original plan, user removed it likely due to bucket settings.
             // Safer to OMIT CannedACL for likely "Bucket Owner Enforced" settings or similar defaults in 2024.
             // I will OMIT it for now to avoid 400 Bad Request if bucket blocks ACLs.
+            AutoCloseStream = false // Prevent S3 SDK from closing the stream
         };
 
         await _s3Client.PutObjectAsync(request);

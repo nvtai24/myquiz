@@ -37,6 +37,25 @@ public class DecksController : BaseApiController
     }
 
     /// <summary>
+    /// Generates quiz questions from an uploaded file.
+    /// </summary>
+    /// <param name="file">The file to process (PDF, DOCX, PPTX, TXT).</param>
+    /// <returns>A generated deck with questions.</returns>
+    [HttpPost("generate")]
+    public async Task<IActionResult> Generate(IFormFile file)
+    {
+        if (file == null || file.Length == 0)
+        {
+            return BadRequest("No file uploaded.");
+        }
+
+        using var stream = file.OpenReadStream();
+        var command = new MyQuizGenerator.Application.Decks.Commands.GenerateDeckFromFiles.GenerateDeckFromFilesCommand(stream, file.FileName);
+        var result = await _mediator.Send(command);
+        return ApiOk(result);
+    }
+
+    /// <summary>
     /// Updates a deck.
     /// </summary>
     /// <param name="id">The deck ID.</param>

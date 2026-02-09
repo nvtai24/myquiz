@@ -12,6 +12,7 @@ public static class ConfigExtensions
         services.Configure<EmailSettings>(configuration.GetSection(EmailSettings.SectionName));
         services.Configure<GoogleSettings>(configuration.GetSection(GoogleSettings.SectionName));
         services.Configure<StorageSettings>(configuration.GetSection(StorageSettings.SectionName));
+        services.Configure<OpenAiSettings>(configuration.GetSection(OpenAiSettings.SectionName));
         return services;
     }
 }

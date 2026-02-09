@@ -12,23 +12,10 @@ public class CreateDeckRequest
 
     public DeckVisibility Visibility { get; set; } = DeckVisibility.Public;
 
+    public DeckSource Source { get; set; } = DeckSource.AiGenerated;
+
     public string[] Tags { get; set; } = Array.Empty<string>();
 
     public List<CreateQuestionRequest> Questions { get; set; } = new();
 }
 
-public class CreateQuestionRequest
-{
-    [Required(ErrorMessage = "Content is required")]
-    public string Content { get; set; } = string.Empty;
-
-    public QuestionType Type { get; set; } = QuestionType.MultipleChoice;
-
-    public string Hint { get; set; } = string.Empty;
-
-    public string Explanation { get; set; } = string.Empty;
-
-    public string[] Options { get; set; } = Array.Empty<string>();
-
-    public string[] CorrectAnswers { get; set; } = Array.Empty<string>();
-}

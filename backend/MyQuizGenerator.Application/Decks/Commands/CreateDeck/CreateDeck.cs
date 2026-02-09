@@ -50,7 +50,7 @@ public class CreateDeckCommandHandler : IRequestHandler<CreateDeckCommand, Guid>
             Name = request.Request.Name,
             Description = request.Request.Description,
             Visibility = request.Request.Visibility,
-            Source = DeckSource.Manual,
+            Source = request.Request.Source,
             Tags = request.Request.Tags,
             OwnerId = _currentUserService.UserId ?? string.Empty,
             Questions = listQuestions

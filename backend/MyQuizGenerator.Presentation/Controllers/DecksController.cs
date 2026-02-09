@@ -50,7 +50,7 @@ public class DecksController : BaseApiController
         }
 
         using var stream = file.OpenReadStream();
-        var command = new MyQuizGenerator.Application.Decks.Commands.GenerateDeckFromFiles.GenerateDeckFromFilesCommand(stream, file.FileName);
+        var command = new MyQuizGenerator.Application.Decks.Commands.GenerateDeckFromFiles.GenerateDeckFromFilesCommand(stream, file.FileName, file.ContentType);
         var result = await _mediator.Send(command);
         return ApiOk(result);
     }

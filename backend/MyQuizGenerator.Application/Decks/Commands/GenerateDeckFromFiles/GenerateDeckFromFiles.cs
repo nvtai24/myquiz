@@ -7,7 +7,7 @@ using MyQuizGenerator.Domain.Enums;
 
 namespace MyQuizGenerator.Application.Decks.Commands.GenerateDeckFromFiles;
 
-public record GenerateDeckFromFilesCommand(Stream FileStream, string FileName) : IRequest<GeneratedDeckResponse>;
+public record GenerateDeckFromFilesCommand(Stream FileStream, string FileName, string ContentType) : IRequest<GeneratedDeckResponse>;
 
 public class GenerateDeckFromFilesCommandHandler : IRequestHandler<GenerateDeckFromFilesCommand, GeneratedDeckResponse>
 {
@@ -37,7 +37,7 @@ public class GenerateDeckFromFilesCommandHandler : IRequestHandler<GenerateDeckF
     public async Task<GeneratedDeckResponse> Handle(GenerateDeckFromFilesCommand request, CancellationToken cancellationToken)
     {
         // 0. Upload file
-        var fileUploadRequest = new Application.Files.DTOs.FileUploadRequest(request.FileStream, request.FileName, "application/octet-stream");
+        var fileUploadRequest = new Application.Files.DTOs.FileUploadRequest(request.FileStream, request.FileName, request.ContentType);
 
         // We need a seekable stream for multiple reads (upload + extract)
         using var memoryStream = new MemoryStream();

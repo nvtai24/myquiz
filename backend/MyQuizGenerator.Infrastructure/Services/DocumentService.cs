@@ -42,7 +42,7 @@ public class DocumentService : IDocumentService
         using var wordDoc = WordprocessingDocument.Open(stream, false);
         var sb = new StringBuilder();
 
-        var body = wordDoc.MainDocumentPart?.Document.Body;
+        var body = wordDoc.MainDocumentPart!.Document!.Body;
         if (body == null) return string.Empty;
 
         foreach (var paragraph in body.Descendants<Paragraph>())
@@ -61,7 +61,7 @@ public class DocumentService : IDocumentService
         var presentationPart = pptDoc.PresentationPart;
         if (presentationPart == null) return string.Empty;
 
-        foreach (var slideId in presentationPart.Presentation.SlideIdList?.ChildElements.Cast<SlideId>() ?? Enumerable.Empty<SlideId>())
+        foreach (var slideId in presentationPart.Presentation!.SlideIdList!.ChildElements.Cast<SlideId>())
         {
             if (slideId.RelationshipId == null) continue;
 
@@ -69,7 +69,7 @@ public class DocumentService : IDocumentService
             var slideText = new StringBuilder();
 
             // Extract text from shapes
-            foreach (var paragraph in slidePart.Slide.Descendants<DocumentFormat.OpenXml.Drawing.Paragraph>())
+            foreach (var paragraph in slidePart.Slide!.Descendants<DocumentFormat.OpenXml.Drawing.Paragraph>())
             {
                 foreach (var text in paragraph.Descendants<DocumentFormat.OpenXml.Drawing.Text>())
                 {

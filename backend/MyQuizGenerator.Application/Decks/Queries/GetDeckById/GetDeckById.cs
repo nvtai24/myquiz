@@ -48,6 +48,13 @@ public class GetDeckByIdQueryHandler : IRequestHandler<GetDeckByIdQuery, DeckDet
                 Explanation = q.Explanation,
                 Options = q.Options,
                 CorrectAnswers = q.CorrectAnswers
+            }).ToList(),
+            Documents = deck.Documents.Select(d => new DeckDocumentResponse
+            {
+                FileName = d.OriginalFileName,
+                Url = d.Url,
+                ContentType = d.ContentType,
+                Size = d.Size
             }).ToList()
         };
     }

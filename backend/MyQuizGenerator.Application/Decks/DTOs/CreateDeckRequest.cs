@@ -12,6 +12,8 @@ public class CreateDeckRequest
 
     public DeckVisibility Visibility { get; set; } = DeckVisibility.Public;
 
+    public DeckStatus Status { get; set; } = DeckStatus.Draft;
+
     public DeckSource Source { get; set; } = DeckSource.AiGenerated;
 
     public string[] Tags { get; set; } = Array.Empty<string>();

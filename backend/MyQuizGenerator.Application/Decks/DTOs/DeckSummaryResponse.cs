@@ -8,6 +8,7 @@ public class DeckSummaryResponse
     public string Name { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
     public DeckVisibility Visibility { get; set; }
+    public DeckStatus Status { get; set; }
     public string[] Tags { get; set; } = Array.Empty<string>();
     public int QuestionCount { get; set; }
     public DateTime CreatedAt { get; set; }

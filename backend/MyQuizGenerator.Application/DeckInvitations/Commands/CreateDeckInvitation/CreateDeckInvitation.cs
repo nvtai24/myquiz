@@ -17,22 +17,19 @@ public class CreateDeckInvitationCommandHandler : IRequestHandler<CreateDeckInvi
     private readonly IAuthService _authService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEmailService _emailService;
-    private readonly string _baseUrl;
 
     public CreateDeckInvitationCommandHandler(
         IDeckRepository deckRepository,
         ICurrentUserService currentUserService,
         IAuthService authService,
         IUnitOfWork unitOfWork,
-        IEmailService emailService,
-        IConfiguration configuration)
+        IEmailService emailService)
     {
         _deckRepository = deckRepository;
         _currentUserService = currentUserService;
         _authService = authService;
         _unitOfWork = unitOfWork;
         _emailService = emailService;
-        _baseUrl = configuration["ClientSettings:BaseUrl"] ?? "https://learn.myquiz.fun";
     }
 
     public async Task<Guid> Handle(CreateDeckInvitationCommand request, CancellationToken cancellationToken)
@@ -86,18 +83,7 @@ public class CreateDeckInvitationCommandHandler : IRequestHandler<CreateDeckInvi
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 
         // 6. Send Email
-        // Assuming there is a frontend URL configuration, for now we mock the link.
-        // In real app, inject IConfiguration to get base URL.
-        var inviteLink = $"{_baseUrl}/accept-invitation?token={token}";
-        var emailBody = $@"
-            <h3>You have been invited to collaborate on a deck!</h3>
-            <p>Deck: {deck.Name}</p>
-            <p>Click the link below to accept the invitation:</p>
-            <a href='{inviteLink}'>Accept Invitation</a>
-            <p>This link expires in 7 days.</p>
-        ";
-
-        await _emailService.SendEmailAsync(request.Email, "You're invited to a deck", emailBody, cancellationToken);
+        await _emailService.SendDeckInvitationEmailAsync(request.Email, deck.Name, token, cancellationToken);
 
         return invitation.Id;
     }

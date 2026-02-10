@@ -13,4 +13,8 @@ public interface IEmailService
     /// Sends a password reset email to the user.
     /// </summary>
     Task SendPasswordResetEmailAsync(string email, string? firstName, string resetToken, CancellationToken cancellationToken = default);
+    /// <summary>
+    /// Sends a deck invitation email to the user.
+    /// </summary>
+    Task SendDeckInvitationEmailAsync(string email, string deckName, string token, CancellationToken cancellationToken = default);
 }

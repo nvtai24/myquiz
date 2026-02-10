@@ -178,4 +178,41 @@ public class EmailService : IEmailService
 </body>
 </html>";
     }
+    public async Task SendDeckInvitationEmailAsync(string email, string deckName, string token, CancellationToken cancellationToken = default)
+    {
+        var inviteLink = $"{_emailSettings.ClientBaseUrl}/accept-invitation?token={token}";
+        var emailBody = GenerateDeckInvitationEmailBody(deckName, inviteLink);
+
+        await SendEmailAsync(
+            email,
+            "You're invited to a deck - MyQuiz Generator",
+            emailBody,
+            cancellationToken);
+
+        _logger.LogInformation("Deck invitation email sent to: {Email}", email);
+    }
+
+    private static string GenerateDeckInvitationEmailBody(string deckName, string inviteLink)
+    {
+        return $@"
+            <div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 8px; background-color: #ffffff;'>
+                <div style='text-align: center; margin-bottom: 24px;'>
+                    <h2 style='color: #4F46E5; margin: 0;'>MyQuizGenerator</h2>
+                </div>
+                <div style='background-color: #f9fafb; padding: 32px; border-radius: 8px;'>
+                    <h3 style='color: #1f2937; margin-top: 0; font-size: 20px;'>Collaboration Invitation</h3>
+                    <p style='color: #4b5563; line-height: 1.6;'>Hello,</p>
+                    <p style='color: #4b5563; line-height: 1.6;'>You have been invited to collaborate on the deck <strong style='color: #111827;'>{deckName}</strong>.</p>
+                    
+                    <div style='text-align: center; margin: 32px 0;'>
+                        <a href='{inviteLink}' style='background-color: #4F46E5; color: white; padding: 12px 32px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block; font-size: 16px; box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);'>Accept Invitation</a>
+                    </div>
+                    
+                    <p style='color: #6b7280; font-size: 14px; margin-top: 24px; text-align: center;'>This invitation link will expire in 7 days.</p>
+                    <div style='border-top: 1px solid #e5e7eb; margin-top: 24px; padding-top: 24px; text-align: center;'>
+                        <p style='color: #9ca3af; font-size: 12px; margin: 0;'>If you did not expect this invitation, you can ignore this email.</p>
+                    </div>
+                </div>
+            </div>";
+    }
 }

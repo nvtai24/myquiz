@@ -17,19 +17,22 @@ public class CreateDeckInvitationCommandHandler : IRequestHandler<CreateDeckInvi
     private readonly IAuthService _authService;
     private readonly IUnitOfWork _unitOfWork;
     private readonly IEmailService _emailService;
+    private readonly string _baseUrl;
 
     public CreateDeckInvitationCommandHandler(
         IDeckRepository deckRepository,
         ICurrentUserService currentUserService,
         IAuthService authService,
         IUnitOfWork unitOfWork,
-        IEmailService emailService)
+        IEmailService emailService,
+        IConfiguration configuration)
     {
         _deckRepository = deckRepository;
         _currentUserService = currentUserService;
         _authService = authService;
         _unitOfWork = unitOfWork;
         _emailService = emailService;
+        _baseUrl = configuration["ClientSettings:BaseUrl"] ?? "https://learn.myquiz.fun";
     }
 
     public async Task<Guid> Handle(CreateDeckInvitationCommand request, CancellationToken cancellationToken)
@@ -85,7 +88,7 @@ public class CreateDeckInvitationCommandHandler : IRequestHandler<CreateDeckInvi
         // 6. Send Email
         // Assuming there is a frontend URL configuration, for now we mock the link.
         // In real app, inject IConfiguration to get base URL.
-        var inviteLink = $"https://myquizgenerator.com/accept-invitation?token={token}";
+        var inviteLink = $"{_baseUrl}/accept-invitation?token={token}";
         var emailBody = $@"
             <h3>You have been invited to collaborate on a deck!</h3>
             <p>Deck: {deck.Name}</p>

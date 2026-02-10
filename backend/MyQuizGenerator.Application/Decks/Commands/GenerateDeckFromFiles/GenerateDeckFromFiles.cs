@@ -34,6 +34,8 @@ public class GenerateDeckFromFilesCommandHandler : IRequestHandler<GenerateDeckF
         _currentUserService = currentUserService;
     }
 
+    private const int ChunkSize = 15000; // Characters per chunk
+
     public async Task<GeneratedDeckResponse> Handle(GenerateDeckFromFilesCommand request, CancellationToken cancellationToken)
     {
         // 0. Upload file
@@ -59,17 +61,31 @@ public class GenerateDeckFromFilesCommandHandler : IRequestHandler<GenerateDeckF
             throw new Exception("Could not extract text from file.");
         }
 
-        if (text.Length > 100000)
-        {
-            text = text.Substring(0, 100000);
-        }
+        // 2. Chunk text and generate questions
+        var chunks = ChunkText(text, ChunkSize);
+        GeneratedDeckResponse generatedDeck;
 
-        // 2. Generate Deck
-        var generatedDeck = await _aiService.GenerateDeckAsync(text, cancellationToken);
+        if (chunks.Count == 1)
+        {
+            // Single chunk - use original method
+            generatedDeck = await _aiService.GenerateDeckAsync(chunks[0], cancellationToken);
+        }
+        else
+        {
+            // Multiple chunks - generate deck from first chunk, then questions from remaining chunks
+            generatedDeck = await _aiService.GenerateDeckAsync(chunks[0], cancellationToken);
+
+            // Process remaining chunks sequentially as requested for better reliability
+            for (int i = 1; i < chunks.Count; i++)
+            {
+                var additionalQuestions = await _aiService.GenerateQuestionsFromChunkAsync(chunks[i], i, cancellationToken);
+                generatedDeck.Questions.AddRange(additionalQuestions);
+            }
+        }
 
         // 3. Create Entities
         var deckId = Guid.NewGuid();
-        var questions = generatedDeck.Questions.Select(q => new Question
+        var questionEntities = generatedDeck.Questions.Select(q => new Question
         {
             Content = q.Content,
             Type = q.Type,
@@ -101,7 +117,7 @@ public class GenerateDeckFromFilesCommandHandler : IRequestHandler<GenerateDeckF
             Source = DeckSource.AiGenerated,
             Tags = generatedDeck.Tags.ToArray(),
             OwnerId = _currentUserService.UserId ?? string.Empty,
-            Questions = questions,
+            Questions = questionEntities,
             Documents = new List<UploadedFile> { uploadedFile }
         };
 
@@ -114,5 +130,58 @@ public class GenerateDeckFromFilesCommandHandler : IRequestHandler<GenerateDeckF
         generatedDeck.FileUrl = fileUrl;
 
         return generatedDeck;
+    }
+
+    private static List<string> ChunkText(string text, int chunkSize)
+    {
+        var chunks = new List<string>();
+
+        if (string.IsNullOrEmpty(text))
+            return chunks;
+
+        // Try to split at paragraph boundaries for better context
+        var paragraphs = text.Split(new[] { "\n\n", "\r\n\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+
+        var currentChunk = new System.Text.StringBuilder();
+
+        foreach (var paragraph in paragraphs)
+        {
+            // If adding this paragraph exceeds chunk size, save current chunk and start new one
+            if (currentChunk.Length + paragraph.Length > chunkSize && currentChunk.Length > 0)
+            {
+                chunks.Add(currentChunk.ToString().Trim());
+                currentChunk.Clear();
+            }
+
+            // If single paragraph is larger than chunk size, split it
+            if (paragraph.Length > chunkSize)
+            {
+                // Save any pending content first
+                if (currentChunk.Length > 0)
+                {
+                    chunks.Add(currentChunk.ToString().Trim());
+                    currentChunk.Clear();
+                }
+
+                // Split large paragraph by sentences or fixed size
+                for (int i = 0; i < paragraph.Length; i += chunkSize)
+                {
+                    var length = Math.Min(chunkSize, paragraph.Length - i);
+                    chunks.Add(paragraph.Substring(i, length).Trim());
+                }
+            }
+            else
+            {
+                currentChunk.AppendLine(paragraph);
+            }
+        }
+
+        // Add remaining content
+        if (currentChunk.Length > 0)
+        {
+            chunks.Add(currentChunk.ToString().Trim());
+        }
+
+        return chunks;
     }
 }

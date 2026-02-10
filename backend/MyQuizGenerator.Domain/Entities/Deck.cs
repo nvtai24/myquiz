@@ -18,6 +18,7 @@ public class Deck
     public ICollection<UploadedFile> Documents { get; set; } = new List<UploadedFile>();
     public ICollection<Question> Questions { get; set; } = new List<Question>();
     public ICollection<DeckInvitation> DeckInvitations { get; set; } = new List<DeckInvitation>();
+    public ICollection<DeckMember> DeckMembers { get; set; } = new List<DeckMember>();
 }
 
 

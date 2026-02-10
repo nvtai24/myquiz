@@ -125,4 +125,17 @@ public class DecksController : BaseApiController
         var invitationId = await _mediator.Send(command);
         return ApiCreated(invitationId, "Invitation sent successfully");
     }
+
+    /// <summary>
+    /// Accepts a deck invitation.
+    /// </summary>
+    /// <param name="token">The invitation token.</param>
+    /// <returns>The ID of the new deck member.</returns>
+    [HttpPost("invite/accept")]
+    public async Task<IActionResult> AcceptInvitation([FromQuery] string token)
+    {
+        var command = new MyQuizGenerator.Application.DeckInvitations.Commands.AcceptDeckInvitation.AcceptDeckInvitationCommand(token);
+        var memberId = await _mediator.Send(command);
+        return ApiOk(memberId, "Invitation accepted successfully");
+    }
 }

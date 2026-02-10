@@ -20,6 +20,7 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, IdentityRole, str
     public DbSet<Deck> Decks { get; set; }
     public DbSet<Question> Questions { get; set; }
     public DbSet<DeckInvitation> DeckInvitations { get; set; }
+    public DbSet<DeckMember> DeckMembers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -101,6 +102,23 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, IdentityRole, str
             entity.HasOne(d => d.Deck)
                 .WithMany(d => d.DeckInvitations)
                 .HasForeignKey(d => d.DeckId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<DeckMember>(entity =>
+        {
+            entity.HasKey(dm => dm.Id);
+            entity.Property(dm => dm.UserId).IsRequired();
+            entity.Property(dm => dm.JoinedAt).IsRequired();
+
+            entity.HasOne(dm => dm.Deck)
+                .WithMany(d => d.DeckMembers)
+                .HasForeignKey(dm => dm.DeckId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne<AppUser>()
+                .WithMany(u => u.DeckMembers)
+                .HasForeignKey(dm => dm.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
     }

@@ -35,8 +35,19 @@ public class DeckRepository : Repository<Guid, Deck>, IDeckRepository
             .AnyAsync(i => i.DeckId == deckId && i.Email == email && i.Status == Domain.Enums.DeckInvitationStatus.Pending, cancellationToken);
     }
 
+    public async Task<DeckInvitation?> GetInvitationByTokenAsync(string token, CancellationToken cancellationToken = default)
+    {
+        return await _context.DeckInvitations
+            .FirstOrDefaultAsync(i => i.Token == token, cancellationToken);
+    }
+
     public async Task AddInvitationAsync(DeckInvitation invitation, CancellationToken cancellationToken = default)
     {
         await _context.DeckInvitations.AddAsync(invitation, cancellationToken);
+    }
+
+    public async Task AddDeckMemberAsync(DeckMember deckMember, CancellationToken cancellationToken = default)
+    {
+        await _context.DeckMembers.AddAsync(deckMember, cancellationToken);
     }
 }

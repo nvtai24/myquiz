@@ -7,6 +7,7 @@ using OpenAI.Chat;
 using Polly;
 using Polly.Retry;
 using System.ClientModel;
+using Microsoft.Extensions.Logging;
 
 namespace MyQuizGenerator.Infrastructure.Services;
 
@@ -14,12 +15,14 @@ public class OpenAiService : IAiService
 {
     private readonly ChatClient _chatClient;
     private readonly OpenAiSettings _settings;
+    private readonly ILogger<OpenAiService> _logger;
 
     private readonly ResiliencePipeline _resiliencePipeline;
 
-    public OpenAiService(IOptions<OpenAiSettings> settings)
+    public OpenAiService(IOptions<OpenAiSettings> settings, ILogger<OpenAiService> logger)
     {
         _settings = settings.Value;
+        _logger = logger;
         _chatClient = new ChatClient(_settings.Model, _settings.ApiKey);
 
         // Define a resilience pipeline with retry logic for 429 Too Many Requests
@@ -30,7 +33,13 @@ public class OpenAiService : IAiService
                 MaxRetryAttempts = 5,
                 Delay = TimeSpan.FromSeconds(2),
                 BackoffType = DelayBackoffType.Exponential,
-                UseJitter = true
+                UseJitter = true,
+                OnRetry = args =>
+                {
+                    _logger.LogWarning("Retry {AttemptNumber} after {RetryDelay}, reason: {Message}",
+                        args.AttemptNumber, args.RetryDelay, args.Outcome.Exception?.Message);
+                    return ValueTask.CompletedTask;
+                }
             })
             .Build();
     }

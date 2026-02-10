@@ -205,6 +205,43 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                     b.ToTable("Decks");
                 });
 
+            modelBuilder.Entity("MyQuizGenerator.Domain.Entities.DeckInvitation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("AcceptedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("DeckId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("ExpiredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("SharedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeckId");
+
+                    b.ToTable("DeckInvitations");
+                });
+
             modelBuilder.Entity("MyQuizGenerator.Domain.Entities.Question", b =>
                 {
                     b.Property<int>("Id")
@@ -463,6 +500,17 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                         .IsRequired();
                 });
 
+            modelBuilder.Entity("MyQuizGenerator.Domain.Entities.DeckInvitation", b =>
+                {
+                    b.HasOne("MyQuizGenerator.Domain.Entities.Deck", "Deck")
+                        .WithMany("DeckInvitations")
+                        .HasForeignKey("DeckId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Deck");
+                });
+
             modelBuilder.Entity("MyQuizGenerator.Domain.Entities.Question", b =>
                 {
                     b.HasOne("MyQuizGenerator.Domain.Entities.Deck", "Deck")
@@ -493,6 +541,8 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
 
             modelBuilder.Entity("MyQuizGenerator.Domain.Entities.Deck", b =>
                 {
+                    b.Navigation("DeckInvitations");
+
                     b.Navigation("Documents");
 
                     b.Navigation("Questions");

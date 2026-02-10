@@ -28,4 +28,15 @@ public class DeckRepository : Repository<Guid, Deck>, IDeckRepository
             .Include(d => d.Questions)
             .FirstOrDefaultAsync(d => d.Id == id, cancellationToken);
     }
+
+    public async Task<bool> HasInvitationAsync(Guid deckId, string email, CancellationToken cancellationToken = default)
+    {
+        return await _context.DeckInvitations
+            .AnyAsync(i => i.DeckId == deckId && i.Email == email && i.Status == Domain.Enums.DeckInvitationStatus.Pending, cancellationToken);
+    }
+
+    public async Task AddInvitationAsync(DeckInvitation invitation, CancellationToken cancellationToken = default)
+    {
+        await _context.DeckInvitations.AddAsync(invitation, cancellationToken);
+    }
 }

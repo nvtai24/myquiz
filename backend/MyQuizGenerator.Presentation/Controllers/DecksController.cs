@@ -8,6 +8,8 @@ using UpdateDeck = MyQuizGenerator.Application.Decks.Commands.UpdateDeck;
 using DeleteDeck = MyQuizGenerator.Application.Decks.Commands.DeleteDeck;
 using UserDecks = MyQuizGenerator.Application.Decks.Queries.GetUserDecks;
 using DeckDetails = MyQuizGenerator.Application.Decks.Queries.GetDeckById;
+using MyQuizGenerator.Application.DeckInvitations.DTOs;
+using MyQuizGenerator.Application.DeckInvitations.Commands.CreateDeckInvitation;
 
 namespace MyQuizGenerator.Presentation.Controllers;
 
@@ -109,5 +111,18 @@ public class DecksController : BaseApiController
         var query = new DeckDetails.GetDeckByIdQuery(id);
         var result = await _mediator.Send(query);
         return ApiOk(result);
+    }
+
+    /// <summary>
+    /// Invites a user to a deck.
+    /// </summary>
+    /// <param name="id">The deck ID.</param>
+    /// <param name="request">The invitation request.</param>
+    [HttpPost("{id}/invite")]
+    public async Task<IActionResult> Invite(Guid id, [FromBody] MyQuizGenerator.Application.DeckInvitations.DTOs.CreateDeckInvitationRequest request)
+    {
+        var command = new CreateDeckInvitationCommand(id, request.Email);
+        var invitationId = await _mediator.Send(command);
+        return ApiCreated(invitationId, "Invitation sent successfully");
     }
 }

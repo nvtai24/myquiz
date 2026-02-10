@@ -17,6 +17,7 @@ public class Deck
     public string OwnerId { get; set; } = string.Empty;
     public ICollection<UploadedFile> Documents { get; set; } = new List<UploadedFile>();
     public ICollection<Question> Questions { get; set; } = new List<Question>();
+    public ICollection<DeckInvitation> DeckInvitations { get; set; } = new List<DeckInvitation>();
 }
 
 

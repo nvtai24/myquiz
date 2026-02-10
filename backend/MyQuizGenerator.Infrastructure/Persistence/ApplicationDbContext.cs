@@ -18,8 +18,8 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, IdentityRole, str
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<UploadedFile> UploadedFiles { get; set; }
     public DbSet<Deck> Decks { get; set; }
-
     public DbSet<Question> Questions { get; set; }
+    public DbSet<DeckInvitation> DeckInvitations { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -87,6 +87,20 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, IdentityRole, str
             entity.HasOne(q => q.Deck)
                 .WithMany(d => d.Questions)
                 .HasForeignKey(q => q.DeckId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<DeckInvitation>(entity =>
+        {
+            entity.Property(d => d.DeckId).IsRequired();
+            entity.Property(d => d.Email).IsRequired();
+            entity.Property(d => d.Token).IsRequired();
+            entity.Property(d => d.SharedAt).IsRequired();
+            entity.Property(d => d.Status).IsRequired();
+
+            entity.HasOne(d => d.Deck)
+                .WithMany(d => d.DeckInvitations)
+                .HasForeignKey(d => d.DeckId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
     }

@@ -47,9 +47,9 @@ public class GetQuizAttemptByIdQueryHandler : IRequestHandler<GetQuizAttemptById
             {
                 Id = ua.Id,
                 QuestionId = ua.QuestionId,
-                Question = ua.Question.Content,
-                Options = ua.Question.Options,
-                CorrectAnswers = ua.Question.CorrectAnswers,
+                Question = ua.QuestionSnapshot,
+                Options = ua.OptionsSnapshot,
+                CorrectAnswers = ua.CorrectAnswersSnapshot,
                 Answer = ua.Answer,
                 IsCorrect = ua.IsCorrect
             }).ToList()

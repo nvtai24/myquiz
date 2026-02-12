@@ -151,6 +151,9 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, IdentityRole, str
             entity.Property(q => q.QuestionId).IsRequired();
             entity.Property(q => q.Answer).IsRequired();
             entity.Property(q => q.IsCorrect).IsRequired();
+            entity.Property(q => q.OptionsSnapshot).IsRequired();
+            entity.Property(q => q.CorrectAnswersSnapshot).IsRequired();
+            entity.Property(q => q.QuestionSnapshot).IsRequired();
 
             entity.HasOne(q => q.QuizAttempt)
                 .WithMany(qa => qa.UserAnswers)

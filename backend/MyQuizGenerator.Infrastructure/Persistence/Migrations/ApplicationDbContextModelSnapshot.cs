@@ -434,11 +434,23 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text[]");
 
+                    b.Property<string[]>("CorrectAnswersSnapshot")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
                     b.Property<bool>("IsCorrect")
                         .HasColumnType("boolean");
 
+                    b.Property<string[]>("OptionsSnapshot")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
                     b.Property<int>("QuestionId")
                         .HasColumnType("integer");
+
+                    b.Property<string>("QuestionSnapshot")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<Guid>("QuizAttemptId")
                         .HasColumnType("uuid");

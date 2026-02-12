@@ -33,19 +33,30 @@ public class CreateQuizAttemptCommandHandler : IRequestHandler<CreateQuizAttempt
         var userId = _currentUserService.UserId
             ?? throw new UnauthorizedException("User is not authenticated.");
 
-        // Verify deck exists
-        var deck = await _deckRepository.GetByIdAsync(command.Request.DeckId, cancellationToken)
+        // Verify deck exists and load questions for snapshots
+        var deck = await _deckRepository.GetDeckByIdWithQuestionsAsync(command.Request.DeckId, cancellationToken)
             ?? throw new NotFoundException("Deck", command.Request.DeckId);
+
+        var questionsMap = deck.Questions.ToDictionary(q => q.Id);
 
         var attemptId = Guid.NewGuid();
 
-        var userAnswers = command.Request.UserAnswers.Select(ua => new UserAnswer
+        var userAnswers = command.Request.UserAnswers.Select(ua =>
         {
-            Id = Guid.NewGuid(),
-            QuizAttemptId = attemptId,
-            QuestionId = ua.QuestionId,
-            Answer = ua.Answer,
-            IsCorrect = ua.IsCorrect
+            var question = questionsMap.GetValueOrDefault(ua.QuestionId)
+                ?? throw new NotFoundException("Question", ua.QuestionId);
+
+            return new UserAnswer
+            {
+                Id = Guid.NewGuid(),
+                QuizAttemptId = attemptId,
+                QuestionId = ua.QuestionId,
+                QuestionSnapshot = question.Content,
+                OptionsSnapshot = question.Options,
+                CorrectAnswersSnapshot = question.CorrectAnswers,
+                Answer = ua.Answer,
+                IsCorrect = ua.IsCorrect
+            };
         }).ToList();
 
         var correctCount = userAnswers.Count(ua => ua.IsCorrect);
@@ -83,6 +94,9 @@ public class CreateQuizAttemptCommandHandler : IRequestHandler<CreateQuizAttempt
             {
                 Id = ua.Id,
                 QuestionId = ua.QuestionId,
+                Question = ua.QuestionSnapshot,
+                Options = ua.OptionsSnapshot,
+                CorrectAnswers = ua.CorrectAnswersSnapshot,
                 Answer = ua.Answer,
                 IsCorrect = ua.IsCorrect
             }).ToList()

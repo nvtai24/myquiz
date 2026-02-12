@@ -7,6 +7,9 @@ public class UserAnswer
     public virtual QuizAttempt QuizAttempt { get; set; } = null!;
     public int QuestionId { get; set; }
     public virtual Question Question { get; set; } = null!;
+    public string QuestionSnapshot { get; set; } = string.Empty;
+    public string[] OptionsSnapshot { get; set; } = [];
+    public string[] CorrectAnswersSnapshot { get; set; } = [];
     public string[] Answer { get; set; } = [];
     public bool IsCorrect { get; set; }
 }

@@ -69,12 +69,15 @@ app.UseRequestLogging();
 // 2. Global exception handler
 app.UseGlobalExceptionHandler();
 
+
+
+// Disable Swagger in production - comment out if you want to enable it
 // 3. Development tools
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
+// if (app.Environment.IsDevelopment())
+// {
+app.UseSwagger();
+app.UseSwaggerUI();
+// }
 
 // 4. HTTPS redirection
 app.UseHttpsRedirection();

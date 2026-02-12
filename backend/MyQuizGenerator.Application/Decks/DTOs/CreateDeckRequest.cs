@@ -19,5 +19,10 @@ public class CreateDeckRequest
     public string[] Tags { get; set; } = Array.Empty<string>();
 
     public List<CreateQuestionRequest> Questions { get; set; } = new();
+
+    // File info (populated by Controller from IFormFile)
+    public Stream? FileStream { get; set; }
+    public string? FileName { get; set; }
+    public string? FileContentType { get; set; }
 }
 

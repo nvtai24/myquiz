@@ -2,6 +2,7 @@ using MediatR;
 using MyQuizGenerator.Application.Common.Interfaces;
 using MyQuizGenerator.Application.Common.Interfaces.Repositories;
 using MyQuizGenerator.Application.Decks.DTOs;
+using MyQuizGenerator.Application.Files.DTOs;
 using MyQuizGenerator.Domain.Entities;
 using MyQuizGenerator.Domain.Enums;
 
@@ -14,15 +15,18 @@ public class CreateDeckCommandHandler : IRequestHandler<CreateDeckCommand, Guid>
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDeckRepository _deckRepository;
     private readonly ICurrentUserService _currentUserService;
+    private readonly IFileService _fileService;
 
     public CreateDeckCommandHandler(
         IUnitOfWork unitOfWork,
         IDeckRepository deckRepository,
-        ICurrentUserService currentUserService)
+        ICurrentUserService currentUserService,
+        IFileService fileService)
     {
         _unitOfWork = unitOfWork;
         _deckRepository = deckRepository;
         _currentUserService = currentUserService;
+        _fileService = fileService;
     }
 
     public async Task<Guid> Handle(CreateDeckCommand request, CancellationToken cancellationToken)
@@ -56,6 +60,30 @@ public class CreateDeckCommandHandler : IRequestHandler<CreateDeckCommand, Guid>
             OwnerId = _currentUserService.UserId ?? string.Empty,
             Questions = listQuestions
         };
+
+        // Upload file and attach to deck if provided
+        if (request.Request.FileStream != null && !string.IsNullOrEmpty(request.Request.FileName))
+        {
+            var fileUploadRequest = new FileUploadRequest(
+                request.Request.FileStream,
+                request.Request.FileName,
+                request.Request.FileContentType ?? "application/octet-stream"); // default content type
+
+            var fileUrl = await _fileService.UploadFileAsync(fileUploadRequest);
+
+            var uploadedFile = new UploadedFile
+            {
+                FileName = request.Request.FileName,
+                OriginalFileName = request.Request.FileName,
+                Url = fileUrl,
+                ContentType = request.Request.FileContentType!,
+                Size = request.Request.FileStream.Length,
+                DeckId = deckId,
+                CreatedBy = _currentUserService.UserId
+            };
+
+            deck.Documents = new List<UploadedFile> { uploadedFile };
+        }
 
         await _deckRepository.AddAsync(deck, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

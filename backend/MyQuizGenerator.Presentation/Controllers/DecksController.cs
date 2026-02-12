@@ -26,13 +26,21 @@ public class DecksController : BaseApiController
     }
 
     /// <summary>
-    /// Creates a new deck with questions.
+    /// Creates a new deck with questions and optionally attaches a file.
     /// </summary>
     /// <param name="request">The deck creation request.</param>
+    /// <param name="file">Optional file to attach to the deck.</param>
     /// <returns>The ID of the created deck.</returns>
     [HttpPost]
-    public async Task<IActionResult> Create([FromBody] CreateDeckRequest request)
+    public async Task<IActionResult> Create([FromForm] CreateDeckRequest request, IFormFile? file)
     {
+        if (file != null && file.Length > 0)
+        {
+            request.FileStream = file.OpenReadStream();
+            request.FileName = file.FileName;
+            request.FileContentType = file.ContentType;
+        }
+
         var command = new CreateDeck.CreateDeckCommand(request);
         var deckId = await _mediator.Send(command);
         return ApiCreated(deckId, "Deck created successfully");

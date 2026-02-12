@@ -12,5 +12,8 @@ public class Question
     public string[] CorrectAnswers { get; set; } = Array.Empty<string>();
     public Guid DeckId { get; set; }
     public virtual Deck Deck { get; set; } = null!;
+
+    // Maybe not needed
+    public virtual ICollection<UserAnswer> UserAnswers { get; set; } = new List<UserAnswer>();
 }
 

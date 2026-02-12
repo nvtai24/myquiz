@@ -19,6 +19,7 @@ public class Deck
     public ICollection<Question> Questions { get; set; } = new List<Question>();
     public ICollection<DeckInvitation> DeckInvitations { get; set; } = new List<DeckInvitation>();
     public ICollection<DeckMember> DeckMembers { get; set; } = new List<DeckMember>();
+    public ICollection<QuizAttempt> QuizAttempts { get; set; } = new List<QuizAttempt>();
 }
 
 

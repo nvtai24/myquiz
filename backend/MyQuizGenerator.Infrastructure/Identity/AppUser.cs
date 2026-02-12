@@ -16,4 +16,5 @@ public class AppUser : IdentityUser
     public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
     public ICollection<Deck> Decks { get; set; } = new List<Deck>();
     public ICollection<DeckMember> DeckMembers { get; set; } = new List<DeckMember>();
+    public ICollection<QuizAttempt> QuizAttempts { get; set; } = new List<QuizAttempt>();
 }

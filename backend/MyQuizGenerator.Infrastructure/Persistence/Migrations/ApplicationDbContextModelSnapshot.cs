@@ -309,6 +309,43 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                     b.ToTable("Questions");
                 });
 
+            modelBuilder.Entity("MyQuizGenerator.Domain.Entities.QuizAttempt", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<int>("CorrectAnswers")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("DeckId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("EndedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("TotalQuestions")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("TotalTime")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("DeckId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("QuizAttempts");
+                });
+
             modelBuilder.Entity("MyQuizGenerator.Domain.Entities.RefreshToken", b =>
                 {
                     b.Property<Guid>("Id")
@@ -385,6 +422,34 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                     b.HasIndex("DeckId");
 
                     b.ToTable("UploadedFiles", (string)null);
+                });
+
+            modelBuilder.Entity("MyQuizGenerator.Domain.Entities.UserAnswer", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string[]>("Answer")
+                        .IsRequired()
+                        .HasColumnType("text[]");
+
+                    b.Property<bool>("IsCorrect")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("QuestionId")
+                        .HasColumnType("integer");
+
+                    b.Property<Guid>("QuizAttemptId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("QuestionId");
+
+                    b.HasIndex("QuizAttemptId");
+
+                    b.ToTable("UserAnswers");
                 });
 
             modelBuilder.Entity("MyQuizGenerator.Infrastructure.Identity.AppUser", b =>
@@ -564,6 +629,23 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                     b.Navigation("Deck");
                 });
 
+            modelBuilder.Entity("MyQuizGenerator.Domain.Entities.QuizAttempt", b =>
+                {
+                    b.HasOne("MyQuizGenerator.Domain.Entities.Deck", "Deck")
+                        .WithMany("QuizAttempts")
+                        .HasForeignKey("DeckId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MyQuizGenerator.Infrastructure.Identity.AppUser", null)
+                        .WithMany("QuizAttempts")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Deck");
+                });
+
             modelBuilder.Entity("MyQuizGenerator.Domain.Entities.RefreshToken", b =>
                 {
                     b.HasOne("MyQuizGenerator.Infrastructure.Identity.AppUser", null)
@@ -581,6 +663,25 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
+            modelBuilder.Entity("MyQuizGenerator.Domain.Entities.UserAnswer", b =>
+                {
+                    b.HasOne("MyQuizGenerator.Domain.Entities.Question", "Question")
+                        .WithMany("UserAnswers")
+                        .HasForeignKey("QuestionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MyQuizGenerator.Domain.Entities.QuizAttempt", "QuizAttempt")
+                        .WithMany("UserAnswers")
+                        .HasForeignKey("QuizAttemptId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Question");
+
+                    b.Navigation("QuizAttempt");
+                });
+
             modelBuilder.Entity("MyQuizGenerator.Domain.Entities.Deck", b =>
                 {
                     b.Navigation("DeckInvitations");
@@ -590,6 +691,18 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                     b.Navigation("Documents");
 
                     b.Navigation("Questions");
+
+                    b.Navigation("QuizAttempts");
+                });
+
+            modelBuilder.Entity("MyQuizGenerator.Domain.Entities.Question", b =>
+                {
+                    b.Navigation("UserAnswers");
+                });
+
+            modelBuilder.Entity("MyQuizGenerator.Domain.Entities.QuizAttempt", b =>
+                {
+                    b.Navigation("UserAnswers");
                 });
 
             modelBuilder.Entity("MyQuizGenerator.Infrastructure.Identity.AppUser", b =>
@@ -597,6 +710,8 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                     b.Navigation("DeckMembers");
 
                     b.Navigation("Decks");
+
+                    b.Navigation("QuizAttempts");
 
                     b.Navigation("RefreshTokens");
                 });

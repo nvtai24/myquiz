@@ -21,6 +21,8 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, IdentityRole, str
     public DbSet<Question> Questions { get; set; }
     public DbSet<DeckInvitation> DeckInvitations { get; set; }
     public DbSet<DeckMember> DeckMembers { get; set; }
+    public DbSet<QuizAttempt> QuizAttempts { get; set; }
+    public DbSet<UserAnswer> UserAnswers { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -121,8 +123,46 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, IdentityRole, str
                 .HasForeignKey(dm => dm.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
-    }
 
+        modelBuilder.Entity<QuizAttempt>(entity =>
+        {
+            entity.Property(q => q.DeckId).IsRequired();
+            entity.Property(q => q.UserId).IsRequired();
+            entity.Property(q => q.StartedAt).IsRequired();
+            entity.Property(q => q.EndedAt).IsRequired();
+            entity.Property(q => q.TotalTime).IsRequired();
+            entity.Property(q => q.TotalQuestions).IsRequired();
+            entity.Property(q => q.CorrectAnswers).IsRequired();
+
+            entity.HasOne(q => q.Deck)
+                .WithMany(d => d.QuizAttempts)
+                .HasForeignKey(q => q.DeckId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne<AppUser>()
+                .WithMany(u => u.QuizAttempts)
+                .HasForeignKey(q => q.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<UserAnswer>(entity =>
+        {
+            entity.Property(q => q.QuizAttemptId).IsRequired();
+            entity.Property(q => q.QuestionId).IsRequired();
+            entity.Property(q => q.Answer).IsRequired();
+            entity.Property(q => q.IsCorrect).IsRequired();
+
+            entity.HasOne(q => q.QuizAttempt)
+                .WithMany(qa => qa.UserAnswers)
+                .HasForeignKey(q => q.QuizAttemptId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(q => q.Question)
+                .WithMany(qa => qa.UserAnswers)
+                .HasForeignKey(q => q.QuestionId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+    }
 
     // convert enum to string in EF Core
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)

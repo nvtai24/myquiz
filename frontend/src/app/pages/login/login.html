@@ -1,0 +1,160 @@
+<!-- Left Panel: Login Form -->
+<div class="w-full md:w-[45%] lg:w-[40%] h-full bg-white flex flex-col overflow-y-auto relative z-10 shadow-2xl">
+  <!-- Header -->
+  <div class="p-6 md:p-8 flex justify-between items-center">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded bg-primary flex items-center justify-center text-white">
+        <span class="material-symbols-outlined text-[20px]">school</span>
+      </div>
+      <span class="text-xl font-bold tracking-tight text-[#141118]">QuizMate</span>
+    </div>
+    <a class="text-sm font-medium text-[#726388] hover:text-primary transition-colors cursor-pointer">
+      Sign Up
+    </a>
+  </div>
+
+  <!-- Form Section -->
+  <div class="flex-1 flex flex-col justify-center px-6 md:px-12 lg:px-16 py-8">
+    <div class="max-w-[480px] mx-auto w-full flex flex-col gap-6">
+      <!-- Title -->
+      <div class="flex flex-col gap-2">
+        <h1 class="text-[#141118] text-[32px] font-black leading-tight tracking-[-0.033em]">
+          Welcome Back!
+        </h1>
+        <p class="text-[#726388] text-base font-normal">
+          Sign in to continue your learning journey.
+        </p>
+      </div>
+
+      <!-- Form -->
+      <form class="flex flex-col gap-5 mt-2">
+        <div class="space-y-4">
+          <!-- Email -->
+          <label class="block">
+            <span class="text-[#141118] text-sm font-medium mb-1.5 block">Email Address</span>
+            <div class="relative group">
+              <input
+                type="email"
+                placeholder="name@example.com"
+                class="w-full h-12 rounded-xl border border-[#e0dce5] px-4 pl-11 text-base text-[#141118] placeholder:text-[#726388]/60 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all bg-white"
+              />
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#726388] group-focus-within:text-primary transition-colors text-[20px]">
+                mail
+              </span>
+            </div>
+          </label>
+
+          <!-- Password -->
+          <label class="block">
+            <span class="text-[#141118] text-sm font-medium mb-1.5 block">Password</span>
+            <div class="relative group">
+              <input
+                [type]="showPassword ? 'text' : 'password'"
+                placeholder="Enter your password"
+                class="w-full h-12 rounded-xl border border-[#e0dce5] px-4 pl-11 pr-10 text-base text-[#141118] placeholder:text-[#726388]/60 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all bg-white"
+              />
+              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#726388] group-focus-within:text-primary transition-colors text-[20px]">
+                lock
+              </span>
+              <button
+                type="button"
+                (click)="showPassword = !showPassword"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-[#726388] hover:text-[#141118] transition-colors focus:outline-none cursor-pointer"
+              >
+                <span class="material-symbols-outlined text-[20px]">
+                  {{ showPassword ? 'visibility_off' : 'visibility' }}
+                </span>
+              </button>
+            </div>
+          </label>
+        </div>
+
+        <!-- Sign In Button -->
+        <button
+          type="submit"
+          class="w-full h-14 mt-2 rounded-xl bg-gradient-to-r from-brand-purple to-brand-blue text-white font-semibold text-lg hover:shadow-lg hover:shadow-primary/30 transition-all active:scale-[0.99] flex items-center justify-center gap-2 group cursor-pointer"
+        >
+          Sign In
+          <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">
+            arrow_forward
+          </span>
+        </button>
+
+        <!-- Divider -->
+        <div class="relative py-2">
+          <div class="absolute inset-0 flex items-center">
+            <div class="w-full border-t border-[#e0dce5]"></div>
+          </div>
+          <div class="relative flex justify-center text-sm">
+            <span class="px-2 bg-white text-[#726388]">Or continue with</span>
+          </div>
+        </div>
+
+        <!-- Google Sign In -->
+        <button
+          type="button"
+          class="w-full flex items-center justify-center gap-3 h-12 rounded-xl border border-[#e0dce5] hover:bg-gray-50 hover:border-[#d1cbd8] transition-all cursor-pointer"
+        >
+          <svg class="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z" fill="#4285F4"/>
+            <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+            <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+            <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+          </svg>
+          <span class="text-sm font-medium text-[#141118]">Sign in with Google</span>
+        </button>
+
+        <!-- Sign Up Link -->
+        <p class="text-sm text-center text-[#726388] mt-4 font-medium">
+          Don't have an account?
+          <a class="text-brand-purple hover:text-brand-blue font-semibold transition-colors cursor-pointer">
+            Sign Up
+          </a>
+        </p>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Right Panel: Decorative -->
+<div class="hidden md:flex flex-1 custom-gradient relative flex-col justify-center items-center overflow-hidden p-12 text-white">
+  <!-- Grid Pattern Background -->
+  <div class="absolute inset-0 opacity-20 grid-pattern"></div>
+
+  <!-- Hero Image Section -->
+  <div class="relative w-full max-w-2xl h-[500px] flex items-center justify-center">
+    <div class="relative z-10 w-full h-full flex items-center justify-center">
+      <img
+        alt="Students studying together"
+        class="rounded-2xl shadow-2xl object-cover w-[400px] h-[300px] transform -rotate-3 hover:rotate-0 transition-transform duration-700 ease-out border-4 border-white/20"
+        src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80"
+      />
+
+      <!-- Floating Icons -->
+      <div class="absolute -top-10 -right-4 glass-panel p-5 rounded-2xl floating-icon shadow-lg">
+        <span class="material-symbols-outlined text-5xl text-yellow-300">school</span>
+      </div>
+      <div class="absolute -bottom-8 -left-8 glass-panel p-5 rounded-2xl floating-icon-delayed shadow-lg">
+        <span class="material-symbols-outlined text-5xl text-pink-300">menu_book</span>
+      </div>
+      <div class="absolute top-1/2 -right-20 glass-panel p-4 rounded-xl floating-icon-slow shadow-lg">
+        <span class="material-symbols-outlined text-4xl text-cyan-300">lightbulb</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quote Section -->
+  <div class="relative z-10 mt-12 max-w-lg text-center space-y-4">
+    <h2 class="text-3xl md:text-4xl font-bold leading-tight">
+      "Education is the passport to the future."
+    </h2>
+    <div class="flex items-center justify-center gap-3 mt-4">
+      <div class="flex -space-x-2">
+        <div class="w-10 h-10 rounded-full border-2 border-primary bg-purple-300 flex items-center justify-center text-white text-xs font-bold">A</div>
+        <div class="w-10 h-10 rounded-full border-2 border-primary bg-blue-300 flex items-center justify-center text-white text-xs font-bold">B</div>
+        <div class="w-10 h-10 rounded-full border-2 border-primary bg-pink-300 flex items-center justify-center text-white text-xs font-bold">C</div>
+      </div>
+      <p class="text-white/80 text-sm font-medium">Joined by 10k+ students</p>
+    </div>
+  </div>
+</div>

@@ -1,3 +1,20 @@
 /* You can add global styles to this file, and also import other style files */
 
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap") layer(base);
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap") layer(base);
+
 @import "tailwindcss";
+
+@theme {
+  --color-primary: #853cec;
+  --color-primary-dark: #7C3AED;
+  --color-background-light: #f7f6f8;
+  --color-background-dark: #181121;
+  --color-brand-blue: #4255FF;
+  --color-brand-purple: #7C3AED;
+  --font-family-display: "Inter", sans-serif;
+}
+
+body {
+  font-family: var(--font-family-display);
+}

@@ -1,0 +1,8 @@
+{
+  "/api": {
+    "target": "https://be.myquiz.fun",
+    "secure": false,
+    "changeOrigin": true,
+    "logLevel": "debug"
+  }
+}

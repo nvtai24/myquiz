@@ -13,6 +13,7 @@ using MyQuizGenerator.Application.Auth.Commands.ResetPassword;
 using MyQuizGenerator.Application.Auth.Queries.GetCurrentUser;
 using MyQuizGenerator.Application.Common.Exceptions;
 using MyQuizGenerator.Application.Auth.DTOs;
+using System.Net;
 
 namespace MyQuizGenerator.Presentation.Controllers;
 
@@ -35,6 +36,8 @@ public class AuthController : BaseApiController
     {
         var command = new LoginCommand(request);
         var response = await Mediator.Send(command);
+        SetCookies(response.AccessToken, response.RefreshToken, response.ExpiresAt);
+
         return ApiOk(response, "Login successful");
     }
 
@@ -46,6 +49,7 @@ public class AuthController : BaseApiController
     {
         var command = new GoogleLoginCommand(request);
         var response = await Mediator.Send(command);
+        SetCookies(response.AccessToken, response.RefreshToken, response.ExpiresAt);
         return ApiOk(response, "Google login successful");
     }
 
@@ -54,6 +58,7 @@ public class AuthController : BaseApiController
     {
         var command = new RefreshTokenCommand(request);
         var response = await Mediator.Send(command);
+        SetCookies(response.AccessToken, response.RefreshToken, response.ExpiresAt);
         return ApiOk(response, "Token refreshed successfully");
     }
 
@@ -62,6 +67,8 @@ public class AuthController : BaseApiController
     {
         var command = new LogoutCommand(request);
         await Mediator.Send(command);
+        Response.Cookies.Delete("access_token");
+        Response.Cookies.Delete("refresh_token");
         return ApiOk("Logout successful");
     }
 
@@ -133,5 +140,27 @@ public class AuthController : BaseApiController
         var command = new ChangePasswordCommand(userId, request);
         await Mediator.Send(command);
         return ApiOk("Password changed successfully");
+    }
+
+
+    private void SetCookies(string accessToken, string refreshToken, DateTime expiresAt)
+    {
+        Response.Cookies.Append("access_token", accessToken, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.None,
+            Expires = expiresAt,
+            Path = "/"
+        });
+
+        Response.Cookies.Append("refresh_token", refreshToken, new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = true,
+            SameSite = SameSiteMode.None,
+            Expires = expiresAt.AddDays(7),
+            Path = "/api/auth/refresh-token" // only send to refresh-token endpoint
+        });
     }
 }

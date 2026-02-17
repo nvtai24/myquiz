@@ -52,6 +52,18 @@ builder.Services.AddSwaggerGen(options =>
     });
 });
 
+// CORS policy
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowClient", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173", "http://localhost:3000", "https://learn.myquiz.fun")
+        .AllowAnyHeader()
+        .AllowAnyMethod()
+        .AllowCredentials();
+    });
+});
+
 // Clean Architecture layers
 builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
@@ -82,13 +94,16 @@ app.UseSwaggerUI();
 // 4. HTTPS redirection
 app.UseHttpsRedirection();
 
-// 5. Authentication - validates JWT token and populates User
+// 5. CORS - must be before Authentication/Authorization
+app.UseCors("AllowClient");
+
+// 6. Authentication - validates JWT token and populates User
 app.UseAuthentication();
 
-// 6. Authorization - checks roles and policies
+// 7. Authorization - checks roles and policies
 app.UseAuthorization();
 
-// 7. Map controllers
+// 8. Map controllers
 app.MapControllers();
 
 app.Run();

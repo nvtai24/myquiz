@@ -7,6 +7,8 @@ using MyQuizGenerator.Domain.Constants;
 using Google.Apis.Auth;
 using MyQuizGenerator.Infrastructure.Settings;
 using Microsoft.Extensions.Options;
+using MyQuizGenerator.Domain.Entities;
+using MyQuizGenerator.Infrastructure.Persistence;
 
 namespace MyQuizGenerator.Infrastructure.Identity;
 
@@ -19,17 +21,26 @@ public class AuthService : IAuthService
     private readonly SignInManager<AppUser> _signInManager;
     private readonly ILogger<AuthService> _logger;
     private readonly GoogleSettings _googleSettings;
+    private readonly IRepository<Guid, SubscriptionPlan> _subscriptionPlanRepository;
+    private readonly IRepository<Guid, UserSubscriptionPlan> _userSubscriptionPlanRepository;
+    private readonly IUnitOfWork _unitOfWork;
 
     public AuthService(
         UserManager<AppUser> userManager,
         SignInManager<AppUser> signInManager,
         ILogger<AuthService> logger,
-        IOptions<GoogleSettings> googleSettings)
+        IOptions<GoogleSettings> googleSettings,
+        IRepository<Guid, SubscriptionPlan> subscriptionPlanRepository,
+        IRepository<Guid, UserSubscriptionPlan> userSubscriptionPlanRepository,
+        IUnitOfWork unitOfWork)
     {
         _userManager = userManager;
         _signInManager = signInManager;
         _logger = logger;
         _googleSettings = googleSettings.Value;
+        _subscriptionPlanRepository = subscriptionPlanRepository;
+        _unitOfWork = unitOfWork;
+        _userSubscriptionPlanRepository = userSubscriptionPlanRepository;
     }
 
     public async Task<(string UserId, string Email)> RegisterUserAsync(
@@ -58,6 +69,9 @@ public class AuthService : IAuthService
         }
 
         await _userManager.AddToRoleAsync(user, Roles.User);
+
+        // Assign default free subscription plan
+        await AssignDefaultFreePlanAsync(user.Id);
 
         return (user.Id, user.Email!);
     }
@@ -305,11 +319,50 @@ public class AuthService : IAuthService
 
             await _userManager.AddToRoleAsync(user, Roles.User);
 
+            // Assign default free subscription plan
+            await AssignDefaultFreePlanAsync(user.Id);
+
             _logger.LogInformation("New user created via Google login: {Email}", email);
             return (user.Id, user.Email!, user.FirstName, user.LastName, true);
         }
 
         _logger.LogInformation("Existing user logged in via Google: {Email}", email);
         return (user.Id, user.Email!, user.FirstName, user.LastName, false);
+    }
+
+    private async Task AssignDefaultFreePlanAsync(string userId)
+    {
+        try
+        {
+            var plans = await _subscriptionPlanRepository.GetAllAsync();
+            var freePlan = plans
+                .Where(p => p.IsActive && p.Price == 0)
+                .OrderBy(p => p.Order)
+                .FirstOrDefault();
+
+            if (freePlan == null)
+            {
+                _logger.LogWarning("No active free subscription plan found for user: {UserId}", userId);
+                return;
+            }
+
+            var userSubscription = new UserSubscriptionPlan
+            {
+                UserId = userId,
+                SubscriptionPlanId = freePlan.Id,
+                StartDate = DateTime.UtcNow,
+                EndDate = DateTime.MaxValue // Free plan never expires
+            };
+
+            await _userSubscriptionPlanRepository.AddAsync(userSubscription);
+            await _unitOfWork.SaveChangesAsync();
+
+            _logger.LogInformation("Assigned free plan '{PlanName}' to user: {UserId}", freePlan.Name, userId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to assign default free plan to user: {UserId}", userId);
+            // Don't fail registration if plan assignment fails
+        }
     }
 }

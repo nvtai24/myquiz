@@ -23,6 +23,8 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, IdentityRole, str
     public DbSet<DeckMember> DeckMembers { get; set; }
     public DbSet<QuizAttempt> QuizAttempts { get; set; }
     public DbSet<UserAnswer> UserAnswers { get; set; }
+    public DbSet<SubscriptionPlan> SubscriptionPlans { get; set; }
+    public DbSet<UserSubscriptionPlan> UserSubscriptionPlans { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -163,6 +165,38 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, IdentityRole, str
             entity.HasOne(q => q.Question)
                 .WithMany(qa => qa.UserAnswers)
                 .HasForeignKey(q => q.QuestionId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<SubscriptionPlan>(entity =>
+        {
+            entity.Property(s => s.Name).IsRequired();
+            entity.Property(s => s.Description).IsRequired();
+            entity.Property(s => s.DailyGenerateLimit).IsRequired();
+            entity.Property(s => s.NumDeckLimit).IsRequired();
+            entity.Property(s => s.Price).IsRequired();
+            entity.Property(s => s.Duration).IsRequired();
+            entity.Property(s => s.IsActive).IsRequired();
+            entity.Property(s => s.Order).IsRequired();
+            entity.Property(s => s.CreatedAt).IsRequired();
+            entity.Property(s => s.UpdatedAt);
+
+            entity.HasMany(s => s.UserSubscriptionPlans)
+                .WithOne(usp => usp.SubscriptionPlan)
+                .HasForeignKey(usp => usp.SubscriptionPlanId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<UserSubscriptionPlan>(entity =>
+        {
+            entity.Property(s => s.UserId).IsRequired();
+            entity.Property(s => s.SubscriptionPlanId).IsRequired();
+            entity.Property(s => s.StartDate).IsRequired();
+            entity.Property(s => s.EndDate).IsRequired();
+
+            entity.HasOne<AppUser>()
+                .WithMany(u => u.UserSubscriptionPlans)
+                .HasForeignKey(usp => usp.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
     }

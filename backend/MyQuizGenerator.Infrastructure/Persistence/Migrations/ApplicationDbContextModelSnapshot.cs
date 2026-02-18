@@ -383,6 +383,49 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                     b.ToTable("RefreshTokens");
                 });
 
+            modelBuilder.Entity("MyQuizGenerator.Domain.Entities.SubscriptionPlan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<int>("DailyGenerateLimit")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("Duration")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("NumDeckLimit")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("Order")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SubscriptionPlans");
+                });
+
             modelBuilder.Entity("MyQuizGenerator.Domain.Entities.UploadedFile", b =>
                 {
                     b.Property<Guid>("Id")
@@ -462,6 +505,34 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                     b.HasIndex("QuizAttemptId");
 
                     b.ToTable("UserAnswers");
+                });
+
+            modelBuilder.Entity("MyQuizGenerator.Domain.Entities.UserSubscriptionPlan", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("SubscriptionPlanId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SubscriptionPlanId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserSubscriptionPlans");
                 });
 
             modelBuilder.Entity("MyQuizGenerator.Infrastructure.Identity.AppUser", b =>
@@ -694,6 +765,23 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                     b.Navigation("QuizAttempt");
                 });
 
+            modelBuilder.Entity("MyQuizGenerator.Domain.Entities.UserSubscriptionPlan", b =>
+                {
+                    b.HasOne("MyQuizGenerator.Domain.Entities.SubscriptionPlan", "SubscriptionPlan")
+                        .WithMany("UserSubscriptionPlans")
+                        .HasForeignKey("SubscriptionPlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MyQuizGenerator.Infrastructure.Identity.AppUser", null)
+                        .WithMany("UserSubscriptionPlans")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SubscriptionPlan");
+                });
+
             modelBuilder.Entity("MyQuizGenerator.Domain.Entities.Deck", b =>
                 {
                     b.Navigation("DeckInvitations");
@@ -717,6 +805,11 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                     b.Navigation("UserAnswers");
                 });
 
+            modelBuilder.Entity("MyQuizGenerator.Domain.Entities.SubscriptionPlan", b =>
+                {
+                    b.Navigation("UserSubscriptionPlans");
+                });
+
             modelBuilder.Entity("MyQuizGenerator.Infrastructure.Identity.AppUser", b =>
                 {
                     b.Navigation("DeckMembers");
@@ -726,6 +819,8 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                     b.Navigation("QuizAttempts");
 
                     b.Navigation("RefreshTokens");
+
+                    b.Navigation("UserSubscriptionPlans");
                 });
 #pragma warning restore 612, 618
         }

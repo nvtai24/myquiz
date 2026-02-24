@@ -25,6 +25,7 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, IdentityRole, str
     public DbSet<UserAnswer> UserAnswers { get; set; }
     public DbSet<SubscriptionPlan> SubscriptionPlans { get; set; }
     public DbSet<UserSubscriptionPlan> UserSubscriptionPlans { get; set; }
+    public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -197,6 +198,30 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, IdentityRole, str
             entity.HasOne<AppUser>()
                 .WithMany(u => u.UserSubscriptionPlans)
                 .HasForeignKey(usp => usp.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<PaymentTransaction>(entity =>
+        {
+            entity.Property(p => p.UserId).IsRequired();
+            entity.Property(p => p.SubscriptionPlanId).IsRequired();
+            entity.Property(p => p.OrderCode).IsRequired();
+            entity.Property(p => p.Amount).IsRequired();
+            entity.Property(p => p.Status).IsRequired();
+            entity.Property(p => p.Content).IsRequired();
+            entity.Property(p => p.Description).IsRequired();
+            entity.Property(p => p.CreatedAt).IsRequired();
+
+            entity.HasIndex(p => p.OrderCode).IsUnique();
+
+            entity.HasOne<AppUser>()
+                .WithMany()
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne(p => p.SubscriptionPlan)
+                .WithMany()
+                .HasForeignKey(p => p.SubscriptionPlanId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
     }

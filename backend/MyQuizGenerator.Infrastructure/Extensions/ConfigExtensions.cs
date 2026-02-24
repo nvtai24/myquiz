@@ -13,6 +13,7 @@ public static class ConfigExtensions
         services.Configure<GoogleSettings>(configuration.GetSection(GoogleSettings.SectionName));
         services.Configure<StorageSettings>(configuration.GetSection(StorageSettings.SectionName));
         services.Configure<OpenAiSettings>(configuration.GetSection(OpenAiSettings.SectionName));
+        services.Configure<PaymentSettings>(configuration.GetSection(PaymentSettings.SectionName));
         return services;
     }
 }

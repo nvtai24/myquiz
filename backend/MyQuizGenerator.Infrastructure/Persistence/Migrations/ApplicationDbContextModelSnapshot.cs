@@ -267,6 +267,68 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                     b.ToTable("DeckMembers");
                 });
 
+            modelBuilder.Entity("MyQuizGenerator.Domain.Entities.PaymentTransaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("AccountNumber")
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Gateway")
+                        .HasColumnType("text");
+
+                    b.Property<string>("OrderCode")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long>("SepayTransactionId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<Guid>("SubscriptionPlanId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime?>("TransactionDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OrderCode")
+                        .IsUnique();
+
+                    b.HasIndex("SubscriptionPlanId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("PaymentTransactions");
+                });
+
             modelBuilder.Entity("MyQuizGenerator.Domain.Entities.Question", b =>
                 {
                     b.Property<int>("Id")
@@ -699,6 +761,23 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Deck");
+                });
+
+            modelBuilder.Entity("MyQuizGenerator.Domain.Entities.PaymentTransaction", b =>
+                {
+                    b.HasOne("MyQuizGenerator.Domain.Entities.SubscriptionPlan", "SubscriptionPlan")
+                        .WithMany()
+                        .HasForeignKey("SubscriptionPlanId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MyQuizGenerator.Infrastructure.Identity.AppUser", null)
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SubscriptionPlan");
                 });
 
             modelBuilder.Entity("MyQuizGenerator.Domain.Entities.Question", b =>

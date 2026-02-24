@@ -12,4 +12,5 @@ public class PaymentOrderResponse
     public string TransferContent { get; set; } = string.Empty;
     public string PlanName { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
+    public DateTime ExpiresAt { get; set; }
 }

@@ -68,6 +68,18 @@ public class HandleSepayWebhookCommandHandler : IRequestHandler<HandleSepayWebho
             return true;
         }
 
+        // Check if transaction has expired
+        if (DateTime.UtcNow > transaction.ExpiresAt)
+        {
+            transaction.Status = PaymentStatus.Expired;
+            _paymentRepository.Update(transaction);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            _logger.LogWarning("Transaction expired for order code: {OrderCode}, expired at {ExpiresAt}",
+                orderCode, transaction.ExpiresAt);
+            return true;
+        }
+
         // Verify amount matches
         if (webhook.TransferAmount < transaction.Amount)
         {

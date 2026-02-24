@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using MyQuizGenerator.Application.Common.Exceptions;
 using MyQuizGenerator.Application.Common.Interfaces;
@@ -44,6 +45,38 @@ public class CreatePaymentOrderCommandHandler : IRequestHandler<CreatePaymentOrd
             throw new BadRequestException("This plan is free and does not require payment.");
         }
 
+        // Check for existing pending, non-expired transaction with same user, plan, and amount
+        var existingTransaction = await _paymentRepository.GetQueryable()
+            .FirstOrDefaultAsync(t =>
+                t.UserId == command.UserId &&
+                t.SubscriptionPlanId == plan.Id &&
+                t.Amount == plan.Price &&
+                t.Status == PaymentStatus.Pending &&
+                t.ExpiresAt > DateTime.UtcNow,
+                cancellationToken);
+
+        if (existingTransaction != null)
+        {
+            // Reset expiration time
+            existingTransaction.ExpiresAt = DateTime.UtcNow.AddMinutes(15);
+            _paymentRepository.Update(existingTransaction);
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+            _logger.LogInformation("Reusing existing payment order: {OrderCode} for user {UserId}, plan {PlanName}",
+                existingTransaction.OrderCode, command.UserId, plan.Name);
+
+            return new PaymentOrderResponse
+            {
+                PaymentTransactionId = existingTransaction.Id,
+                OrderCode = existingTransaction.OrderCode,
+                Amount = existingTransaction.Amount,
+                TransferContent = existingTransaction.OrderCode,
+                PlanName = plan.Name,
+                CreatedAt = existingTransaction.CreatedAt,
+                ExpiresAt = existingTransaction.ExpiresAt
+            };
+        }
+
         // Generate unique order code: MQSUB + timestamp + random
         var orderCode = $"MQSUB{DateTime.UtcNow:yyyyMMddHHmmss}{Random.Shared.Next(1000, 9999)}";
 
@@ -69,7 +102,8 @@ public class CreatePaymentOrderCommandHandler : IRequestHandler<CreatePaymentOrd
             Amount = plan.Price,
             TransferContent = orderCode,
             PlanName = plan.Name,
-            CreatedAt = transaction.CreatedAt
+            CreatedAt = transaction.CreatedAt,
+            ExpiresAt = transaction.ExpiresAt
         };
     }
 

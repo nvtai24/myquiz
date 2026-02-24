@@ -293,6 +293,9 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Gateway")
                         .HasColumnType("text");
 

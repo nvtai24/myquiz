@@ -21,6 +21,7 @@ namespace MyQuizGenerator.Domain.Entities
         public string Description { get; set; } = string.Empty;
 
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime ExpiresAt { get; set; } = DateTime.UtcNow.AddMinutes(15);
         public DateTime? CompletedAt { get; set; }
     }
 }

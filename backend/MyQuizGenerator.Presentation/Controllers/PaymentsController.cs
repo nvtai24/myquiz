@@ -73,7 +73,7 @@ public class PaymentsController : BaseApiController
         [FromBody] SepayWebhookRequest request)
     {
         // Verify API token
-        var expectedToken = $"Apikey {_paymentSettings.ApiToken}";
+        var expectedToken = $"Apikey {_paymentSettings.WebhooksApiKey}";
         if (string.IsNullOrEmpty(authorization) || authorization != expectedToken)
         {
             return Unauthorized(new { success = false, message = "Invalid API token" });

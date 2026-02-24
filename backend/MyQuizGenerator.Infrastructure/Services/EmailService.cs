@@ -12,11 +12,13 @@ namespace MyQuizGenerator.Infrastructure.Services;
 public class EmailService : IEmailService
 {
     private readonly EmailSettings _emailSettings;
+    private readonly AppSettings _appSettings;
     private readonly ILogger<EmailService> _logger;
 
-    public EmailService(IOptions<EmailSettings> emailSettings, ILogger<EmailService> logger)
+    public EmailService(IOptions<EmailSettings> emailSettings, IOptions<AppSettings> appSettings, ILogger<EmailService> logger)
     {
         _emailSettings = emailSettings.Value;
+        _appSettings = appSettings.Value;
         _logger = logger;
     }
 
@@ -62,7 +64,7 @@ public class EmailService : IEmailService
     public async Task SendConfirmationEmailAsync(string userId, string email, string? firstName, string confirmationToken, CancellationToken cancellationToken = default)
     {
         var encodedToken = HttpUtility.UrlEncode(confirmationToken);
-        var confirmationLink = $"{_emailSettings.ClientBaseUrl}/confirm-email?userId={userId}&token={encodedToken}";
+        var confirmationLink = $"{_appSettings.ClientBaseUrl}/confirm-email?userId={userId}&token={encodedToken}";
 
         var emailBody = GenerateConfirmationEmailBody(firstName ?? "User", confirmationLink);
 
@@ -122,7 +124,7 @@ public class EmailService : IEmailService
     {
         var encodedToken = HttpUtility.UrlEncode(resetToken);
         var encodedEmail = HttpUtility.UrlEncode(email);
-        var resetLink = $"{_emailSettings.ClientBaseUrl}/reset-password?email={encodedEmail}&token={encodedToken}";
+        var resetLink = $"{_appSettings.ClientBaseUrl}/reset-password?email={encodedEmail}&token={encodedToken}";
 
         var emailBody = GeneratePasswordResetEmailBody(firstName ?? "User", resetLink);
 
@@ -180,7 +182,7 @@ public class EmailService : IEmailService
     }
     public async Task SendDeckInvitationEmailAsync(string email, string deckName, string token, CancellationToken cancellationToken = default)
     {
-        var inviteLink = $"{_emailSettings.ClientBaseUrl}/accept-invitation?token={token}";
+        var inviteLink = $"{_appSettings.ClientBaseUrl}/accept-invitation?token={token}";
         var emailBody = GenerateDeckInvitationEmailBody(deckName, inviteLink);
 
         await SendEmailAsync(

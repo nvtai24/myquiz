@@ -84,13 +84,7 @@ public class HandleSepayWebhookCommandHandler : IRequestHandler<HandleSepayWebho
         transaction.Content = webhook.Content;
         transaction.Description = webhook.Description;
         transaction.CompletedAt = DateTime.UtcNow;
-
-        // Parse transaction date
-        if (DateTime.TryParseExact(webhook.TransactionDate, "yyyy-MM-dd HH:mm:ss",
-            CultureInfo.InvariantCulture, DateTimeStyles.None, out var txDate))
-        {
-            transaction.TransactionDate = txDate;
-        }
+        transaction.TransactionDate = DateTime.SpecifyKind(DateTime.Parse(webhook.TransactionDate), DateTimeKind.Utc);
 
         _paymentRepository.Update(transaction);
 

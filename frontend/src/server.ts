@@ -5,12 +5,27 @@ import {
   writeResponseToNodeResponse,
 } from '@angular/ssr/node';
 import express from 'express';
+import { createProxyMiddleware } from 'http-proxy-middleware';
 import { join } from 'node:path';
 
 const browserDistFolder = join(import.meta.dirname, '../browser');
 
 const app = express();
 const angularApp = new AngularNodeAppEngine();
+
+/**
+ * Proxy /api requests to the backend API server.
+ * This works in both development (ng serve uses proxy.conf.json)
+ * and production (SSR Express server uses this middleware).
+ */
+app.use(
+  '/api',
+  createProxyMiddleware({
+    target: 'https://be.myquiz.fun',
+    changeOrigin: true,
+    secure: false,
+  }),
+);
 
 app.use(
   express.static(browserDistFolder, {

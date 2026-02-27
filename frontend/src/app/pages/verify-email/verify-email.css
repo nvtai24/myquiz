@@ -1,0 +1,311 @@
+/* ===================== Base Layout ===================== */
+:host { display: block; }
+
+.page-container {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px 40px;
+  background: linear-gradient(145deg, #f8f7fc 0%, #eee9f7 100%);
+  position: relative;
+}
+
+/* ===================== Blurred Login Background ===================== */
+/* Hiện lên khi ở state success / failed / verifying — giả lập trang Login phía sau */
+.login-bg-blur {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  z-index: 0;
+  filter: blur(5px);
+  transform: scale(1.04); /* tránh viền blur */
+}
+
+.login-bg-left {
+  flex: 0 0 42%;
+  background: #ffffff;
+  /* Giả lập form login với các đường kẻ nhẹ */
+  background-image:
+    repeating-linear-gradient(0deg, transparent, transparent 56px, #f0eef5 56px, #f0eef5 57px),
+    repeating-linear-gradient(90deg, transparent, transparent 200px, #f0eef5 200px, #f0eef5 201px);
+}
+
+.login-bg-right {
+  flex: 1;
+  background: linear-gradient(135deg, #4255FF 0%, #7C3AED 100%);
+  /* Grid pattern */
+  background-image:
+    linear-gradient(135deg, #4255FF 0%, #7C3AED 100%),
+    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.15'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+}
+
+/* Dark overlay phía trên blurred background */
+.overlay-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  background: rgba(20, 17, 35, 0.50);
+  animation: fade-in 0.3s ease;
+}
+
+/* ===================== Overlay Card (success / failed / verifying) ===================== */
+.overlay-card {
+  position: relative;
+  z-index: 2;
+  background: #ffffff;
+  border-radius: 28px;
+  padding: 48px 40px;
+  width: 100%;
+  max-width: 460px;
+  box-shadow:
+    0 24px 60px rgba(124, 58, 237, 0.25),
+    0 4px 20px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+  text-align: center;
+  overflow: hidden;
+  animation: card-in 0.45s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ===================== Pending State Card (plain background) ===================== */
+.card {
+  background: #ffffff;
+  border-radius: 28px;
+  padding: 48px 40px;
+  box-shadow: 0 12px 50px rgba(124, 58, 237, 0.12), 0 2px 12px rgba(0,0,0,0.06);
+  width: 100%;
+  max-width: 460px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  animation: card-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ===================== Logo ===================== */
+.logo-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.logo-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, #7C3AED, #4255FF);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+}
+
+.logo-icon .material-symbols-outlined { font-size: 20px; }
+
+.logo-text {
+  font-size: 20px;
+  font-weight: 800;
+  color: #141118;
+  letter-spacing: -0.5px;
+}
+
+/* ===================== Icon circles ===================== */
+.icon-wrap {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.success-icon-wrap {
+  background: linear-gradient(135deg, #d1fae5, #6ee7b7);
+  box-shadow: 0 8px 24px rgba(5, 150, 105, 0.25);
+  animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s both;
+}
+.success-icon { font-size: 48px; color: #059669; font-variation-settings: 'FILL' 1; }
+
+.failed-icon-wrap {
+  background: linear-gradient(135deg, #fee2e2, #fca5a5);
+  box-shadow: 0 8px 24px rgba(239, 68, 68, 0.2);
+  animation: pop-in 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) 0.2s both;
+}
+.failed-icon { font-size: 48px; color: #dc2626; font-variation-settings: 'FILL' 1; }
+
+.email-icon-wrap {
+  background: linear-gradient(135deg, #ede9f7, #ddd6fe);
+  box-shadow: 0 8px 24px rgba(124, 58, 237, 0.15);
+}
+.email-icon { font-size: 46px; color: #7C3AED; }
+
+.spin-wrap { background: linear-gradient(135deg, #ede9f7, #ddd6fe); }
+.spin-icon { font-size: 44px; color: #7C3AED; animation: spin 1s linear infinite; }
+
+/* ===================== Confetti dots ===================== */
+.conf-dot {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.conf-1 { width: 13px; height: 13px; background: #a78bfa; top: 14px; left: 22px; animation: dot-float 3s ease-in-out infinite; }
+.conf-2 { width: 9px;  height: 9px;  background: #34d399; top: 20px; right: 30px; animation: dot-float 3.5s ease-in-out infinite 0.3s; border-radius: 3px; }
+.conf-3 { width: 11px; height: 11px; background: #fbbf24; top: 10px; left: 48%; animation: dot-float 4s ease-in-out infinite 0.7s; }
+.conf-4 { width: 8px;  height: 8px;  background: #f472b6; top: 18px; right: 58px; animation: dot-float 3.2s ease-in-out infinite 0.1s; }
+.conf-5 { width: 10px; height: 10px; background: #60a5fa; top: 12px; left: 70px; animation: dot-float 3.8s ease-in-out infinite 0.5s; border-radius: 3px; }
+
+/* ===================== Typography ===================== */
+.title {
+  font-size: 28px;
+  font-weight: 800;
+  color: #141118;
+  letter-spacing: -0.5px;
+  margin: 0;
+  line-height: 1.2;
+}
+
+.subtitle {
+  font-size: 15px;
+  color: #726388;
+  margin: 0;
+  line-height: 1.6;
+}
+
+.email-display {
+  font-size: 15px;
+  font-weight: 700;
+  color: #7C3AED;
+  background: #f5f3ff;
+  padding: 8px 20px;
+  border-radius: 10px;
+  border: 1px solid #ddd6fe;
+  margin: 0;
+  word-break: break-all;
+  width: 100%;
+}
+
+.error-text { color: #dc2626; font-weight: 500; }
+
+/* ===================== Buttons ===================== */
+.btn-primary {
+  width: 100%;
+  height: 52px;
+  border: none;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #7C3AED, #4255FF);
+  color: #fff;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s;
+  margin-top: 8px;
+}
+
+.btn-primary:hover {
+  box-shadow: 0 8px 28px rgba(124, 58, 237, 0.4);
+  transform: translateY(-1px);
+}
+
+.btn-primary .material-symbols-outlined { font-size: 20px; }
+
+.btn-secondary {
+  width: 100%;
+  height: 52px;
+  border: 2px solid #e0dce5;
+  border-radius: 14px;
+  background: transparent;
+  color: #726388;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-secondary:hover { border-color: #7C3AED; color: #7C3AED; background: #faf9ff; }
+
+.btn-group {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 100%;
+  margin-top: 8px;
+}
+
+/* ===================== Info note ===================== */
+.info-note {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  background: #faf9fc;
+  border: 1px solid #e0dce5;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 13px;
+  color: #726388;
+  width: 100%;
+  text-align: left;
+}
+
+.info-note .material-symbols-outlined { font-size: 18px; color: #7C3AED; flex-shrink: 0; margin-top: 1px; }
+
+/* ===================== Bottom link ===================== */
+.bottom-link { font-size: 14px; color: #726388; margin: 0; }
+
+.link-btn {
+  background: none;
+  border: none;
+  color: #7C3AED;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0 2px;
+  transition: color 0.2s;
+}
+
+.link-btn:hover { color: #5b21b6; }
+
+/* ===================== Footer ===================== */
+.footer {
+  margin-top: 32px;
+  font-size: 13px;
+  color: #9ca3af;
+}
+
+/* ===================== Keyframes ===================== */
+@keyframes card-in {
+  from { transform: translateY(20px) scale(0.97); opacity: 0; }
+  to   { transform: translateY(0) scale(1); opacity: 1; }
+}
+
+@keyframes pop-in {
+  0%   { transform: scale(0.4); opacity: 0; }
+  100% { transform: scale(1);   opacity: 1; }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes dot-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); opacity: 0.8; }
+  50%       { transform: translateY(8px) rotate(180deg); opacity: 1; }
+}

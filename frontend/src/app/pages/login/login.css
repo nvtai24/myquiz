@@ -46,3 +46,47 @@
     transform: translateY(-12px);
   }
 }
+
+/* Google Sign-In: custom button with invisible Google overlay */
+.google-signin-wrapper {
+  position: relative;
+  width: 100%;
+  height: 48px;
+  border-radius: 12px;
+  border: 1px solid #e0dce5;
+  overflow: hidden;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.google-signin-wrapper:hover {
+  background-color: #f9fafb;
+  border-color: #d1cbd8;
+}
+
+.google-signin-visual {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+.google-signin-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  opacity: 0.01;
+  overflow: hidden;
+}
+
+/* Force Google's rendered iframe / div to fill the container */
+.google-signin-overlay > div,
+.google-signin-overlay iframe {
+  width: 100% !important;
+  height: 100% !important;
+  min-height: 48px !important;
+}

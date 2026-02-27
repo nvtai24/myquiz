@@ -1,0 +1,134 @@
+<!-- Verify Email Page -->
+<div class="page-container">
+
+  <!-- ============ VERIFYING STATE ============ -->
+  @if (pageState() === 'verifying') {
+    <!-- Blurred login-like background -->
+    <div class="login-bg-blur" aria-hidden="true">
+      <div class="login-bg-left"></div>
+      <div class="login-bg-right"></div>
+    </div>
+    <!-- Card -->
+    <div class="overlay-card">
+      <div class="icon-wrap spin-wrap">
+        <span class="material-symbols-outlined spin-icon">progress_activity</span>
+      </div>
+      <h1 class="title">Verifying your email...</h1>
+      <p class="subtitle">Please wait a moment.</p>
+    </div>
+  }
+
+  <!-- ============ SUCCESS STATE — nền Login mờ phía sau ============ -->
+  @if (pageState() === 'success') {
+    <!-- Blurred login-like background -->
+    <div class="login-bg-blur" aria-hidden="true">
+      <div class="login-bg-left"></div>
+      <div class="login-bg-right"></div>
+    </div>
+    <!-- Dark overlay on top of blurred bg -->
+    <div class="overlay-backdrop"></div>
+
+    <!-- Success card -->
+    <div class="overlay-card success-card">
+      <!-- Confetti dots -->
+      <span class="conf-dot conf-1"></span>
+      <span class="conf-dot conf-2"></span>
+      <span class="conf-dot conf-3"></span>
+      <span class="conf-dot conf-4"></span>
+      <span class="conf-dot conf-5"></span>
+
+      <div class="icon-wrap success-icon-wrap">
+        <span class="material-symbols-outlined success-icon">check_circle</span>
+      </div>
+
+      <h1 class="title">Email Verified!</h1>
+      <p class="subtitle">
+        Your account has been successfully verified.<br>
+        You can now sign in and start learning.
+      </p>
+
+      <button class="btn-primary" (click)="goToLogin()">
+        <span class="material-symbols-outlined">login</span>
+        Sign In Now
+      </button>
+    </div>
+  }
+
+  <!-- ============ FAILED STATE — nền Register mờ phía sau ============ -->
+  @if (pageState() === 'failed') {
+    <div class="login-bg-blur" aria-hidden="true">
+      <div class="login-bg-left"></div>
+      <div class="login-bg-right"></div>
+    </div>
+    <div class="overlay-backdrop"></div>
+
+    <div class="overlay-card failed-card">
+      <div class="icon-wrap failed-icon-wrap">
+        <span class="material-symbols-outlined failed-icon">cancel</span>
+      </div>
+
+      <h1 class="title">Verification Failed</h1>
+      <p class="subtitle error-text">
+        {{ errorMessage() || 'The verification link is invalid or has expired.' }}
+      </p>
+      <p class="subtitle">
+        Please use the correct link or try registering again.
+      </p>
+
+      <div class="btn-group">
+        <button class="btn-primary" (click)="goToLogin()">
+          <span class="material-symbols-outlined">login</span>
+          Go to Sign In
+        </button>
+        <button class="btn-secondary" (click)="goToRegister()">
+          Try Again
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- ============ PENDING STATE (chờ bấm link email) ============ -->
+  @if (pageState() === 'pending') {
+    <div class="card">
+      <!-- Logo -->
+      <div class="logo-wrap">
+        <div class="logo-icon">
+          <span class="material-symbols-outlined">school</span>
+        </div>
+        <span class="logo-text">QuizMate</span>
+      </div>
+
+      <div class="icon-wrap email-icon-wrap">
+        <span class="material-symbols-outlined email-icon">forward_to_inbox</span>
+      </div>
+
+      <h1 class="title">Check your email</h1>
+      <p class="subtitle">
+        We've sent a confirmation link to
+      </p>
+      @if (email()) {
+        <p class="email-display">{{ email() }}</p>
+      }
+      <p class="subtitle">
+        Click the <strong>Confirm Email</strong> button in the email to verify your account.
+      </p>
+
+      <!-- Note -->
+      <div class="info-note">
+        <span class="material-symbols-outlined">info</span>
+        <span>Didn't receive it? Check your spam folder. The link expires in 24 hours.</span>
+      </div>
+
+      <p class="bottom-link">
+        Already verified?
+        <button class="link-btn" (click)="goToLogin()">Sign In</button>
+      </p>
+    </div>
+
+    <!-- Footer -->
+    <div class="footer">
+      <span>© 2026 QuizMate</span>
+    </div>
+  }
+
+</div>

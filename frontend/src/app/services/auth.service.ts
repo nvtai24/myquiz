@@ -1,9 +1,8 @@
 import { inject, Injectable, signal, PLATFORM_ID } from "@angular/core";
 import { isPlatformBrowser } from "@angular/common";
-import { environment } from "../../environments/environment";
 import { HttpClient } from "@angular/common/http";
 import { Router } from "@angular/router";
-import { LoginRequest, LoginResponse, User } from "../models/auth.models";
+import { LoginRequest, LoginResponse, User, RegisterRequest, RegisterResponse, ConfirmEmailRequest, ConfirmEmailResponse, ForgotPasswordRequest, ForgotPasswordResponse, ResetPasswordRequest, ResetPasswordResponse } from "../models/auth.models";
 import { Observable, tap } from "rxjs";
 
 @Injectable({
@@ -13,7 +12,7 @@ export class AuthService {
     private http = inject(HttpClient);
     private router = inject(Router);
     private platformId = inject(PLATFORM_ID);
-    private apiUrl = `${environment.apiUrl}/Auth`;
+    private apiUrl = '/api/Auth';
 
     currentUser = signal<User | null>(null);
     constructor() {
@@ -29,6 +28,22 @@ export class AuthService {
         })
      );   
     } 
+
+    register(data: RegisterRequest): Observable<RegisterResponse> {
+        return this.http.post<RegisterResponse>(`${this.apiUrl}/register`, data);
+    }
+
+    confirmEmail(data: ConfirmEmailRequest): Observable<ConfirmEmailResponse> {
+        return this.http.post<ConfirmEmailResponse>(`${this.apiUrl}/confirm-email`, data);
+    }
+
+    forgotPassword(data: ForgotPasswordRequest): Observable<ForgotPasswordResponse> {
+        return this.http.post<ForgotPasswordResponse>(`${this.apiUrl}/forgot-password`, data);
+    }
+
+    resetPassword(data: ResetPasswordRequest): Observable<ResetPasswordResponse> {
+        return this.http.post<ResetPasswordResponse>(`${this.apiUrl}/reset-password`, data);
+    }
 
     private setSession(authResult: LoginResponse) {
        if (!isPlatformBrowser(this.platformId)) return;
@@ -74,5 +89,14 @@ export class AuthService {
       this.logout();
     }
   }
-}
+} 
+ loginWithGoogle(idToken: string): Observable<LoginResponse> {
+    return this.http.post<LoginResponse>(`${this.apiUrl}/google-login`, { idToken }).pipe(
+      tap(response => {
+        if (response.success) {
+          this.setSession(response);
+        }
+      })
+    );
+  }
 }

@@ -1,33 +1,69 @@
-import { CommonModule } from '@angular/common';
-import { Component, inject, signal } from '@angular/core';
+import { CommonModule, isPlatformBrowser } from '@angular/common';
+import { AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit, PLATFORM_ID, signal, ViewChild } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
-import { Router } from '@angular/router';
-import { finalize } from 'rxjs';
+import { GoogleAuthService } from '../../services/google-auth.service';
+import { Router, RouterModule } from '@angular/router';
+import { finalize, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, RouterModule, CommonModule],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
-export class Login {
+export class Login implements OnInit, AfterViewInit, OnDestroy {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private googleAuthService = inject(GoogleAuthService);
+  private platformId = inject(PLATFORM_ID);
+  private valueChangesSub?: Subscription;
+  private errorTimer?: ReturnType<typeof setTimeout>;
 
-  ngOnInit() {
-    if (this.authService.isLoggedIn()) {
-      this.router.navigate(['/dashboard']);
+  @ViewChild('googleBtnContainer') googleBtnContainer!: ElementRef<HTMLDivElement>;
+
+  ngOnInit() {}
+
+  ngAfterViewInit() {
+    if (isPlatformBrowser(this.platformId) && this.googleBtnContainer) {
+      this.googleAuthService.renderButton(
+        this.googleBtnContainer.nativeElement,
+        (idToken) => this.handleGoogleLogin(idToken)
+      );
     }
+  }
+  ngOnDestroy() {
+    this.valueChangesSub?.unsubscribe();
+    clearTimeout(this.errorTimer);
   }
 
   showPassword = signal(false);
   errorMessage = signal<string | null>(null);
   isLoading = signal(false);
 
+  // Kiểm soát lỗi validation: tự ẩn sau 3s + ẩn khi gõ
+  showErrors = signal(false);
+
+  handleGoogleLogin(idToken: string) {
+    this.isLoading.set(true);
+    this.errorMessage.set(null);
+
+    this.authService.loginWithGoogle(idToken)
+      .pipe(finalize(() => this.isLoading.set(false)))
+      .subscribe({
+        next: () => {
+          this.router.navigate(['/dashboard']);
+        },
+        error: (err) => {
+          this.errorMessage.set(err.error?.message || 'Google Login failed. Please try again.');
+          setTimeout(() => this.errorMessage.set(null), 5000);
+        }
+      });
+  }
+
   loginForm = new FormGroup({
     email: new FormControl('', {
-      nonNullable: true, 
+      nonNullable: true,
       validators: [Validators.required, Validators.email]
     }),
     password: new FormControl('', {
@@ -40,14 +76,28 @@ export class Login {
     this.showPassword.update(v => !v);
   }
 
+  private showValidationErrors() {
+    this.showErrors.set(true);
+    clearTimeout(this.errorTimer);
+    this.errorTimer = setTimeout(() => this.showErrors.set(false), 3000);
+
+    this.valueChangesSub?.unsubscribe();
+    this.valueChangesSub = this.loginForm.valueChanges.subscribe(() => {
+      this.showErrors.set(false);
+      this.valueChangesSub?.unsubscribe();
+      clearTimeout(this.errorTimer);
+    });
+  }
+
   onSubmit() {
     if (this.loginForm.invalid) {
-      this.loginForm.markAllAsTouched(); 
+      this.loginForm.markAllAsTouched();
+      this.showValidationErrors();
       return;
     }
 
     this.isLoading.set(true);
-    this.errorMessage.set(null); 
+    this.errorMessage.set(null);
 
     const rawValue = this.loginForm.getRawValue();
 
@@ -64,4 +114,3 @@ export class Login {
       });
   }
 }
-  

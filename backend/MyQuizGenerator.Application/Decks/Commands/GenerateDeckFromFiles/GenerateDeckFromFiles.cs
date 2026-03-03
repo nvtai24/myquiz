@@ -1,6 +1,9 @@
 using MediatR;
+using Microsoft.EntityFrameworkCore;
+using MyQuizGenerator.Application.Common.Exceptions;
 using MyQuizGenerator.Application.Common.Interfaces;
 using MyQuizGenerator.Application.Decks.DTOs;
+using MyQuizGenerator.Domain.Entities;
 
 namespace MyQuizGenerator.Application.Decks.Commands.GenerateDeckFromFiles;
 
@@ -10,20 +13,50 @@ public class GenerateDeckFromFilesCommandHandler : IRequestHandler<GenerateDeckF
 {
     private readonly IDocumentService _documentService;
     private readonly IAiService _aiService;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly IRateLimitService _rateLimitService;
+    private readonly IRepository<Guid, UserSubscriptionPlan> _userSubscriptionRepository;
 
     public GenerateDeckFromFilesCommandHandler(
         IDocumentService documentService,
-        IAiService aiService)
+        IAiService aiService,
+        ICurrentUserService currentUserService,
+        IRateLimitService rateLimitService,
+        IRepository<Guid, UserSubscriptionPlan> userSubscriptionRepository)
     {
         _documentService = documentService;
         _aiService = aiService;
+        _currentUserService = currentUserService;
+        _rateLimitService = rateLimitService;
+        _userSubscriptionRepository = userSubscriptionRepository;
     }
 
     private const int ChunkSize = 15000; // Characters per chunk
 
     public async Task<GeneratedDeckResponse> Handle(GenerateDeckFromFilesCommand request, CancellationToken cancellationToken)
     {
-        // 1. Extract text from the file
+        var userId = _currentUserService.UserId ?? string.Empty;
+
+        // 1. Check DailyGenerateLimit from user's active subscription plan
+        var now = DateTime.UtcNow;
+        var activePlan = await _userSubscriptionRepository.GetQueryable()
+            .Include(usp => usp.SubscriptionPlan)
+            .Where(usp => usp.UserId == userId && usp.StartDate <= now && usp.EndDate > now)
+            .OrderByDescending(usp => usp.SubscriptionPlan.Order)
+            .Select(usp => usp.SubscriptionPlan)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (activePlan != null && activePlan.DailyGenerateLimit > 0)
+        {
+            var currentCount = await _rateLimitService.GetDailyGenerateCountAsync(userId, cancellationToken);
+            if (currentCount >= activePlan.DailyGenerateLimit)
+            {
+                throw new BadRequestException(
+                    $"You have reached the daily generation limit ({activePlan.DailyGenerateLimit}) for your current plan ({activePlan.Name}). Please try again tomorrow or upgrade your plan.");
+            }
+        }
+
+        // 2. Extract text from the file
         using var memoryStream = new MemoryStream();
         await request.FileStream.CopyToAsync(memoryStream, cancellationToken);
         memoryStream.Position = 0;
@@ -35,7 +68,7 @@ public class GenerateDeckFromFilesCommandHandler : IRequestHandler<GenerateDeckF
             throw new Exception("Could not extract text from file.");
         }
 
-        // 2. Chunk text and generate questions
+        // 3. Chunk text and generate questions
         var chunks = ChunkText(text, ChunkSize);
         GeneratedDeckResponse generatedDeck;
 
@@ -54,7 +87,13 @@ public class GenerateDeckFromFilesCommandHandler : IRequestHandler<GenerateDeckF
             }
         }
 
-        // 3. Return generated deck (no DB save - FE will call save API separately)
+        // 4. Increment counter only after successful generation (AI errors don't consume quota)
+        if (activePlan != null && activePlan.DailyGenerateLimit > 0)
+        {
+            await _rateLimitService.IncrementDailyGenerateCountAsync(userId, cancellationToken);
+        }
+
+        // 5. Return generated deck (no DB save - FE will call save API separately)
         return generatedDeck;
     }
 

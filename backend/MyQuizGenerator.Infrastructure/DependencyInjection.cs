@@ -13,6 +13,7 @@ public static class DependencyInjection
         services
             .AddConfig(configuration)
             .AddDatabase(configuration)
+            .AddRedis(configuration)
             .AddIdentityServices(configuration)
             .AddApplicationServices();
 

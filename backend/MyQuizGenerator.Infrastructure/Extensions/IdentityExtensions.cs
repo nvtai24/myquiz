@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.IdentityModel.Tokens;
+using MyQuizGenerator.Application.Common.Interfaces;
 using MyQuizGenerator.Domain.Constants;
 using MyQuizGenerator.Infrastructure.Identity;
 using MyQuizGenerator.Infrastructure.Persistence;
@@ -75,6 +76,19 @@ public static class IdentityExtensions
                 {
                     context.Token = context.Request.Cookies["access_token"];
                     return Task.CompletedTask;
+                },
+                OnTokenValidated = async context =>
+                {
+                    var jti = context.Principal?.FindFirst("jti")?.Value;
+                    if (!string.IsNullOrEmpty(jti))
+                    {
+                        var tokenService = context.HttpContext.RequestServices
+                            .GetRequiredService<ITokenService>();
+                        if (await tokenService.IsAccessTokenBlacklistedAsync(jti))
+                        {
+                            context.Fail("Token has been revoked");
+                        }
+                    }
                 },
                 OnAuthenticationFailed = context =>
                 {

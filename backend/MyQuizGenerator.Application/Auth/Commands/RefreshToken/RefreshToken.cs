@@ -13,18 +13,15 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, R
 {
     private readonly ITokenService _tokenService;
     private readonly IAuthService _authService;
-    private readonly IRefreshTokenCacheService _refreshTokenCache;
     private readonly ILogger<RefreshTokenCommandHandler> _logger;
 
     public RefreshTokenCommandHandler(
         ITokenService tokenService,
         IAuthService authService,
-        IRefreshTokenCacheService refreshTokenCache,
         ILogger<RefreshTokenCommandHandler> logger)
     {
         _tokenService = tokenService;
         _authService = authService;
-        _refreshTokenCache = refreshTokenCache;
         _logger = logger;
     }
 
@@ -32,22 +29,17 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, R
     {
         var refreshToken = request.request.RefreshToken;
 
-        // 1. Validate: key exists in Redis → token is valid (not expired, not revoked)
-        var userId = await _refreshTokenCache.GetUserIdAsync(refreshToken, cancellationToken);
+        // 1. Validate — key absence means expired or revoked
+        var userId = await _tokenService.GetUserIdFromRefreshTokenAsync(refreshToken, cancellationToken);
         if (userId == null)
-        {
             throw new ValidationException(new List<string> { "Refresh token is invalid or has expired" });
-        }
 
         // 2. Get user
-        var user = await _authService.GetUserByIdAsync(userId);
-        if (user == null)
-        {
-            throw new NotFoundException("User", userId);
-        }
+        var user = await _authService.GetUserByIdAsync(userId)
+            ?? throw new NotFoundException("User", userId);
 
-        // 3. Token rotation: revoke old token, issue new one (prevents replay)
-        await _refreshTokenCache.RemoveAsync(refreshToken, cancellationToken);
+        // 3. Token rotation: revoke old → issue new (prevents replay attacks)
+        await _tokenService.RevokeRefreshTokenAsync(refreshToken, cancellationToken);
 
         var roles = await _authService.GetUserRolesAsync(userId);
         var tokenUser = new TokenUserInfo(user.Id, user.Email, user.FirstName, user.LastName);
@@ -55,7 +47,7 @@ public class RefreshTokenCommandHandler : IRequestHandler<RefreshTokenCommand, R
         var newAccessToken = _tokenService.GenerateAccessToken(tokenUser, roles);
         var newRefreshToken = _tokenService.GenerateRefreshToken();
 
-        await _refreshTokenCache.StoreAsync(newRefreshToken, userId, TimeSpan.FromDays(7), cancellationToken);
+        await _tokenService.StoreRefreshTokenAsync(newRefreshToken, userId, TimeSpan.FromDays(7), cancellationToken);
 
         _logger.LogInformation("Refresh token rotated for user {UserId}", userId);
 

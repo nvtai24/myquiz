@@ -8,16 +8,16 @@ public record LogoutCommand(LogoutRequest Request) : IRequest;
 
 public class LogoutCommandHandler : IRequestHandler<LogoutCommand>
 {
-    private readonly IRefreshTokenCacheService _refreshTokenCache;
+    private readonly ITokenService _tokenService;
 
-    public LogoutCommandHandler(IRefreshTokenCacheService refreshTokenCache)
+    public LogoutCommandHandler(ITokenService tokenService)
     {
-        _refreshTokenCache = refreshTokenCache;
+        _tokenService = tokenService;
     }
 
     public Task Handle(LogoutCommand command, CancellationToken cancellationToken)
     {
-        // Revoke by deleting the Redis key — instantly invalidates the token
-        return _refreshTokenCache.RemoveAsync(command.Request.RefreshToken, cancellationToken);
+        // Revoke refresh token from Redis — instantly invalidates the session
+        return _tokenService.RevokeRefreshTokenAsync(command.Request.RefreshToken, cancellationToken);
     }
 }

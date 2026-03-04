@@ -18,6 +18,7 @@ public static class RedisExtensions
         var multiplexer = ConnectionMultiplexer.Connect(connectionString);
         services.AddSingleton<IConnectionMultiplexer>(multiplexer);
         services.AddSingleton<IRateLimitService, RedisRateLimitService>();
+        services.AddScoped<IRefreshTokenCacheService, RedisRefreshTokenService>();
 
         return services;
     }

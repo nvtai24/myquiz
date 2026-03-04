@@ -14,23 +14,20 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
     private readonly IAuthService _authService;
     private readonly ITokenService _tokenService;
     private readonly IEmailService _emailService;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IRepository<Guid, Domain.Entities.RefreshToken> _refreshTokenRepository;
+    private readonly IRefreshTokenCacheService _refreshTokenCache;
     private readonly ILogger<LoginCommandHandler> _logger;
 
     public LoginCommandHandler(
         IAuthService authService,
         ITokenService tokenService,
         IEmailService emailService,
-        IUnitOfWork unitOfWork,
-        IRepository<Guid, Domain.Entities.RefreshToken> refreshTokenRepository,
+        IRefreshTokenCacheService refreshTokenCache,
         ILogger<LoginCommandHandler> logger)
     {
         _authService = authService;
         _tokenService = tokenService;
         _emailService = emailService;
-        _unitOfWork = unitOfWork;
-        _refreshTokenRepository = refreshTokenRepository;
+        _refreshTokenCache = refreshTokenCache;
         _logger = logger;
     }
 
@@ -84,7 +81,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
             throw new UnauthorizedException("Please confirm your email before logging in. A new confirmation email has been sent to your inbox.");
         }
 
-        // Get user info and generate token
+        // Get user info and generate tokens
         var userInfo = await _authService.GetUserByIdAsync(userId);
         if (userInfo == null)
         {
@@ -95,25 +92,13 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
         var tokenUser = new TokenUserInfo(userId, userInfo.Email, userInfo.FirstName, userInfo.LastName);
         var accessToken = _tokenService.GenerateAccessToken(tokenUser, roles);
         var refreshToken = _tokenService.GenerateRefreshToken();
-        var refreshTokenExpiryDate = DateTime.UtcNow.AddDays(7); // Assuming 7 days from settings, ideally inject settings
 
-        // Save refresh token
-        var refreshTokenEntity = new Domain.Entities.RefreshToken
-        {
-            Id = Guid.NewGuid(),
-            Token = refreshToken,
-            JwtId = Guid.NewGuid().ToString(), // Should ideally extract from access token or generate
-            CreationAt = DateTime.UtcNow,
-            ExpiryAt = refreshTokenExpiryDate,
-            Used = false,
-            Invalidated = false,
-            UserId = userId
-        };
+        // Store refresh token in Redis with 7-day TTL
+        await _refreshTokenCache.StoreAsync(refreshToken, userId, TimeSpan.FromDays(7), cancellationToken);
 
-        await _refreshTokenRepository.AddAsync(refreshTokenEntity, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        _logger.LogInformation("User logged in successfully: {Email}", request.loginRequest.Email);
 
-        var response = new LoginResponse
+        return new LoginResponse
         {
             AccessToken = accessToken,
             RefreshToken = refreshToken,
@@ -127,8 +112,5 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
                 Roles = roles.ToList()
             }
         };
-
-        _logger.LogInformation("User logged in successfully: {Email}", request.loginRequest.Email);
-        return response;
     }
 }

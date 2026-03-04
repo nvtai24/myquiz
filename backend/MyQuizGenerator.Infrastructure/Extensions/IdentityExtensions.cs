@@ -90,13 +90,23 @@ public static class IdentityExtensions
                         }
                     }
                 },
-                OnAuthenticationFailed = context =>
+                OnAuthenticationFailed = async context =>
                 {
+                    var jti = context.Principal?.FindFirst("jti")?.Value;
+                    if (!string.IsNullOrEmpty(jti))
+                    {
+                        var tokenService = context.HttpContext.RequestServices
+                            .GetRequiredService<ITokenService>();
+                        if (await tokenService.IsAccessTokenBlacklistedAsync(jti))
+                        {
+                            context.Fail("Token has been revoked");
+                        }
+                    }
+
                     if (context.Exception.GetType() == typeof(SecurityTokenExpiredException))
                     {
                         context.Response.Headers["Token-Expired"] = "true";
                     }
-                    return Task.CompletedTask;
                 },
                 OnForbidden = async context =>
                 {

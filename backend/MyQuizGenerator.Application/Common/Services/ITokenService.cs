@@ -17,6 +17,12 @@ public interface ITokenService
     /// <summary>Returns the access token expiration timestamp.</summary>
     DateTime GetAccessTokenExpiration();
 
+    /// <summary>
+    /// Reads JTI ("jti" claim) and expiry time from a raw access token
+    /// without full signature validation. Used during logout.
+    /// </summary>
+    (string Jti, DateTime Exp) GetAccessTokenClaims(string accessToken);
+
     // ── Refresh token (Redis) ─────────────────────────────────────────────────
 
     /// <summary>Generates a random opaque refresh token.</summary>
@@ -33,4 +39,15 @@ public interface ITokenService
 
     /// <summary>Immediately removes (revokes) a refresh token from Redis.</summary>
     Task RevokeRefreshTokenAsync(string token, CancellationToken ct = default);
+
+    // ── Access token blacklist (Redis) ────────────────────────────────────────
+
+    /// <summary>
+    /// Adds an access token JTI to the Redis blacklist.
+    /// TTL should equal the token's remaining lifetime.
+    /// </summary>
+    Task BlacklistAccessTokenAsync(string jti, TimeSpan ttl, CancellationToken ct = default);
+
+    /// <summary>Returns true when the JTI is on the blacklist.</summary>
+    Task<bool> IsAccessTokenBlacklistedAsync(string jti, CancellationToken ct = default);
 }

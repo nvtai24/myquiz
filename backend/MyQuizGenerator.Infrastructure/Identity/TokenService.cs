@@ -65,6 +65,18 @@ public class TokenService : ITokenService
     public DateTime GetAccessTokenExpiration()
         => DateTime.UtcNow.AddMinutes(_jwtSettings.AccessTokenExpirationMinutes);
 
+    public (string Jti, DateTime Exp) GetAccessTokenClaims(string accessToken)
+    {
+        var handler = new JwtSecurityTokenHandler();
+        if (!handler.CanReadToken(accessToken))
+            return (string.Empty, DateTime.MinValue);
+
+        var jwt = handler.ReadJwtToken(accessToken);
+        var jti = jwt.Id ?? string.Empty;
+        var exp = jwt.ValidTo; // UTC
+        return (jti, exp);
+    }
+
     // ── Refresh token (Redis) ─────────────────────────────────────────────────
 
     public string GenerateRefreshToken()
@@ -89,4 +101,14 @@ public class TokenService : ITokenService
 
     public Task RevokeRefreshTokenAsync(string token, CancellationToken ct = default)
         => _redis.KeyDeleteAsync(RefreshKey(token));
+
+    // ── Access token blacklist (Redis) ────────────────────────────────────────
+
+    private static string BlacklistKey(string jti) => $"bl:{jti}";
+
+    public Task BlacklistAccessTokenAsync(string jti, TimeSpan ttl, CancellationToken ct = default)
+        => _redis.StringSetAsync(BlacklistKey(jti), "1", ttl);
+
+    public async Task<bool> IsAccessTokenBlacklistedAsync(string jti, CancellationToken ct = default)
+        => await _redis.KeyExistsAsync(BlacklistKey(jti));
 }

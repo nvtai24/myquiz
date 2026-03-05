@@ -19,11 +19,12 @@ const angularApp = new AngularNodeAppEngine();
  * and production (SSR Express server uses this middleware).
  */
 app.use(
-  '/api',
   createProxyMiddleware({
     target: 'https://be.myquiz.fun',
+    pathFilter: '/api',
     changeOrigin: true,
     secure: false,
+    cookieDomainRewrite: '',
   }),
 );
 

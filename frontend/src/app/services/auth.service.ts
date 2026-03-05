@@ -47,20 +47,13 @@ export class AuthService {
 
     private setSession(authResult: LoginResponse) {
        if (!isPlatformBrowser(this.platformId)) return;
-       const authData = authResult.data ; 
-       localStorage.setItem('accessToken', authData.accessToken);
-       localStorage.setItem('refreshToken',authData.refreshToken);
-       const expiresAt = authData.expiresAt;
-       localStorage.setItem('expiresAt', expiresAt);
-       localStorage.setItem('user', JSON.stringify(authData.user));
-       this.currentUser.set(authData.user);
+       localStorage.setItem('user', JSON.stringify(authResult.data.user));
+       this.currentUser.set(authResult.data.user);
     }
 
     logout(): void {
      if (!isPlatformBrowser(this.platformId)) return;
-     localStorage.removeItem('accessToken');
-     localStorage.removeItem('refreshToken');
-     localStorage.removeItem('expiresAt');
+     this.http.post(`${this.apiUrl}/logout`, {}).subscribe();
      localStorage.removeItem('user');
      this.currentUser.set(null);
      this.router.navigate(['/login']);
@@ -68,19 +61,13 @@ export class AuthService {
 
     isLoggedIn(): boolean {
     if (!isPlatformBrowser(this.platformId)) return false;
-    return !!localStorage.getItem('accessToken');
+    return !!this.currentUser();
    }
-
-   getToken(): string | null {
-    if (!isPlatformBrowser(this.platformId)) return null;
-    return localStorage.getItem('accessToken');
-  }
 
   private loadUserFromStorage(){
   if (!isPlatformBrowser(this.platformId)) return;
   const userJson = localStorage.getItem('user');
-  const token = localStorage.getItem('accessToken');
-  if (userJson && token) {
+  if (userJson) {
     try {
       const user: User = JSON.parse(userJson);
       this.currentUser.set(user);

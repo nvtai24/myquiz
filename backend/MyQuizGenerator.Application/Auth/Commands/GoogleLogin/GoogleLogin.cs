@@ -19,21 +19,15 @@ public class GoogleLoginCommandHandler : IRequestHandler<GoogleLoginCommand, Log
 {
     private readonly IAuthService _authService;
     private readonly ITokenService _tokenService;
-    private readonly IUnitOfWork _unitOfWork;
-    private readonly IRepository<Guid, Domain.Entities.RefreshToken> _refreshTokenRepository;
     private readonly ILogger<GoogleLoginCommandHandler> _logger;
 
     public GoogleLoginCommandHandler(
         IAuthService authService,
         ITokenService tokenService,
-        IUnitOfWork unitOfWork,
-        IRepository<Guid, Domain.Entities.RefreshToken> refreshTokenRepository,
         ILogger<GoogleLoginCommandHandler> logger)
     {
         _authService = authService;
         _tokenService = tokenService;
-        _unitOfWork = unitOfWork;
-        _refreshTokenRepository = refreshTokenRepository;
         _logger = logger;
     }
 
@@ -51,23 +45,9 @@ public class GoogleLoginCommandHandler : IRequestHandler<GoogleLoginCommand, Log
         var tokenUser = new TokenUserInfo(userId, email, firstName, lastName);
         var accessToken = _tokenService.GenerateAccessToken(tokenUser, roles);
         var refreshToken = _tokenService.GenerateRefreshToken();
-        var refreshTokenExpiryDate = _tokenService.GetRefreshTokenExpiration();
 
-        // Save refresh token
-        var refreshTokenEntity = new Domain.Entities.RefreshToken
-        {
-            Id = Guid.NewGuid(),
-            Token = refreshToken,
-            JwtId = Guid.NewGuid().ToString(),
-            CreationAt = DateTime.UtcNow,
-            ExpiryAt = refreshTokenExpiryDate,
-            Used = false,
-            Invalidated = false,
-            UserId = userId
-        };
-
-        await _refreshTokenRepository.AddAsync(refreshTokenEntity, cancellationToken);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        // Store refresh token in Redis (7-day TTL)
+        await _tokenService.StoreRefreshTokenAsync(refreshToken, userId, TimeSpan.FromDays(7), cancellationToken);
 
         var response = new LoginResponse
         {
@@ -88,3 +68,4 @@ public class GoogleLoginCommandHandler : IRequestHandler<GoogleLoginCommand, Log
         return response;
     }
 }
+

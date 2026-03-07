@@ -411,43 +411,6 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                     b.ToTable("QuizAttempts");
                 });
 
-            modelBuilder.Entity("MyQuizGenerator.Domain.Entities.RefreshToken", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<DateTime>("CreationAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<DateTime>("ExpiryAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<bool>("Invalidated")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("JwtId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("Token")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<bool>("Used")
-                        .HasColumnType("boolean");
-
-                    b.Property<string>("UserId")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("UserId");
-
-                    b.ToTable("RefreshTokens");
-                });
-
             modelBuilder.Entity("MyQuizGenerator.Domain.Entities.SubscriptionPlan", b =>
                 {
                     b.Property<Guid>("Id")
@@ -811,15 +774,6 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                     b.Navigation("Deck");
                 });
 
-            modelBuilder.Entity("MyQuizGenerator.Domain.Entities.RefreshToken", b =>
-                {
-                    b.HasOne("MyQuizGenerator.Infrastructure.Identity.AppUser", null)
-                        .WithMany("RefreshTokens")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-                });
-
             modelBuilder.Entity("MyQuizGenerator.Domain.Entities.UploadedFile", b =>
                 {
                     b.HasOne("MyQuizGenerator.Domain.Entities.Deck", null)
@@ -899,8 +853,6 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                     b.Navigation("Decks");
 
                     b.Navigation("QuizAttempts");
-
-                    b.Navigation("RefreshTokens");
 
                     b.Navigation("UserSubscriptionPlans");
                 });

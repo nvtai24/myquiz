@@ -40,7 +40,9 @@ public class GetSharedDecksQueryHandler : IRequestHandler<GetSharedDecksQuery, L
                 CreatedAt = d.CreatedAt,
                 UpdatedAt = d.UpdatedAt,
                 OwnerName = ownerInfo?.FullName ?? string.Empty,
-                OwnerEmail = ownerInfo?.Email ?? string.Empty
+                OwnerEmail = ownerInfo?.Email ?? string.Empty,
+                AverageRating = d.DeckRatings.Count != 0 ? Math.Round(d.DeckRatings.Average(r => r.Rating), 1) : 0,
+                TotalRatings = d.DeckRatings.Count
             });
         }
 

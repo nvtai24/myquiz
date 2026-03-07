@@ -29,7 +29,9 @@ public class GetUserDecksQueryHandler : IRequestHandler<GetUserDecksQuery, List<
             QuestionCount = d.Questions.Count,
             ThumbnailUrl = d.ThumbnailUrl,
             CreatedAt = d.CreatedAt,
-            UpdatedAt = d.UpdatedAt
+            UpdatedAt = d.UpdatedAt,
+            AverageRating = d.DeckRatings.Count != 0 ? Math.Round(d.DeckRatings.Average(r => r.Rating), 1) : 0,
+            TotalRatings = d.DeckRatings.Count
         }).ToList();
     }
 }

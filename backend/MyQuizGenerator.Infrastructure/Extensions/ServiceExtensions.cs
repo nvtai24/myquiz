@@ -23,6 +23,7 @@ public static class ServiceExtensions
         services.AddScoped<IDeckRepository, DeckRepository>();
         services.AddScoped<IQuizAttemptRepository, QuizAttemptRepository>();
         services.AddScoped<ISubscriptionPlanRepository, SubscriptionPlanRepository>();
+        services.AddScoped<IDeckRatingRepository, DeckRatingRepository>();
 
         // Services
         services.AddScoped<ITokenService, TokenService>();

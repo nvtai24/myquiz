@@ -40,6 +40,8 @@ public class GetDeckByIdQueryHandler : IRequestHandler<GetDeckByIdQuery, DeckDet
             ThumbnailUrl = deck.ThumbnailUrl,
             CreatedAt = deck.CreatedAt,
             UpdatedAt = deck.UpdatedAt,
+            AverageRating = deck.DeckRatings?.Count > 0 ? Math.Round(deck.DeckRatings.Average(r => r.Rating), 1) : 0,
+            TotalRatings = deck.DeckRatings?.Count ?? 0,
             Questions = deck.Questions.Select(q => new QuestionResponse
             {
                 Id = q.Id,

@@ -17,6 +17,7 @@ public class DeckRepository : Repository<Guid, Deck>, IDeckRepository
             .AsNoTracking()
             .Where(d => d.OwnerId == userId)
             .Include(d => d.Questions)
+            .Include(d => d.DeckRatings)
             .OrderByDescending(d => d.CreatedAt)
             .ToListAsync(cancellationToken);
     }
@@ -26,6 +27,7 @@ public class DeckRepository : Repository<Guid, Deck>, IDeckRepository
         return await _context.Decks
             .AsNoTracking()
             .Include(d => d.Questions)
+            .Include(d => d.DeckRatings)
             .FirstOrDefaultAsync(d => d.Id == id, cancellationToken);
     }
 
@@ -57,6 +59,7 @@ public class DeckRepository : Repository<Guid, Deck>, IDeckRepository
             .AsNoTracking()
             .Where(d => d.DeckMembers.Any(dm => dm.UserId == userId))
             .Include(d => d.Questions)
+            .Include(d => d.DeckRatings)
             .OrderByDescending(d => d.CreatedAt)
             .ToListAsync(cancellationToken);
     }
@@ -70,7 +73,7 @@ public class DeckRepository : Repository<Guid, Deck>, IDeckRepository
             .Select(g => new { DeckId = g.Key, LatestAttempt = g.Max(qa => qa.StartedAt) })
             .OrderByDescending(x => x.LatestAttempt)
             .Join(
-                _context.Decks.AsNoTracking().Include(d => d.Questions),
+                _context.Decks.AsNoTracking().Include(d => d.Questions).Include(d => d.DeckRatings),
                 attempt => attempt.DeckId,
                 deck => deck.Id,
                 (attempt, deck) => deck)
@@ -94,6 +97,7 @@ public class DeckRepository : Repository<Guid, Deck>, IDeckRepository
 
         return await query
             .Include(d => d.Questions)
+            .Include(d => d.DeckRatings)
             .OrderByDescending(d => d.CreatedAt)
             .ToListAsync(cancellationToken);
     }

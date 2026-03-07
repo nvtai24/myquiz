@@ -1,0 +1,85 @@
+<div class="layout" [class.sidebar-collapsed]="sidebarCollapsed()">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <button class="sidebar-toggle" (click)="toggleSidebar()">
+        <span class="material-symbols-outlined">menu</span>
+      </button>
+      <span class="material-symbols-outlined text-[20px]">school</span>
+      <span class="sidebar-brand-text">QuizMate</span>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a class="nav-item" routerLink="/dashboard" routerLinkActive="active">
+        <span class="material-symbols-outlined">home</span>
+        <span class="nav-label">Home</span>
+      </a>
+      <div class="sidebar-divider"></div>
+      <a class="nav-item" routerLink="/library" routerLinkActive="active">
+        <span class="material-symbols-outlined">folder_open</span>
+        <span class="nav-label">Your library</span>
+      </a>
+      <div class="sidebar-divider"></div>
+      <a class="nav-item" routerLink="/subscription" routerLinkActive="active">
+        <span class="material-symbols-outlined">credit_card</span>
+        <span class="nav-label">Subscription</span>
+      </a>
+    </nav>
+    <div class="sidebar-divider"></div>
+    <div class="sidebar-section">
+      <a class="nav-item" routerLink="/add-deck" routerLinkActive="active">
+        <span class="material-symbols-outlined">add</span>
+        <span class="nav-label">Create Study Set</span>
+      </a>
+      <div class="sidebar-divider"></div>
+    </div>
+  </aside>
+
+  <!-- Right content area -->
+  <div class="content-area">
+    <!-- Top Navbar -->
+    <nav class="navbar">
+      <div class="navbar-left">
+        <div class="search-bar">
+          <span class="material-symbols-outlined search-icon">search</span>
+          <input type="text" placeholder="Search study sets, textbooks, questions..." />
+        </div>
+      </div>
+      <div class="navbar-right">
+        <div class="avatar-wrapper">
+          <div class="avatar" (click)="toggleProfileMenu()">
+            <span class="material-symbols-outlined">account_circle</span>
+          </div>
+          @if (profileMenuOpen()) {
+            <div class="profile-dropdown">
+              <div class="dropdown-arrow"></div>
+              <a class="dropdown-item" routerLink="/profile">
+                <span class="material-symbols-outlined">person</span>
+                My Profile
+              </a>
+              <a class="dropdown-item" routerLink="/account-settings">
+                <span class="material-symbols-outlined">settings</span>
+                Settings
+              </a>
+              <div class="dropdown-divider"></div>
+              <button class="dropdown-item logout" (click)="logout()">
+                <span class="material-symbols-outlined">logout</span>
+                Log out
+              </button>
+            </div>
+          }
+        </div>
+      </div>
+    </nav>
+
+    <!-- Page content injected here -->
+    <div class="page-content">
+      <router-outlet />
+    </div>
+
+    <!-- Floating Action Button -->
+    <a class="fab" routerLink="/add-deck">
+      <span class="material-symbols-outlined">add</span>
+    </a>
+  </div>
+</div>

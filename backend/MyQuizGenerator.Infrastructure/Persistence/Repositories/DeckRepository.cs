@@ -76,4 +76,25 @@ public class DeckRepository : Repository<Guid, Deck>, IDeckRepository
                 (attempt, deck) => deck)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<List<Deck>> SearchPublicDecksAsync(string? searchTerm, CancellationToken cancellationToken = default)
+    {
+        var query = _context.Decks
+            .AsNoTracking()
+            .Where(d => d.Visibility == Domain.Enums.DeckVisibility.Public);
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var term = searchTerm.Trim().ToLower();
+            query = query.Where(d =>
+                d.Name.ToLower().Contains(term) ||
+                d.Description.ToLower().Contains(term) ||
+                d.Tags.Any(t => t.ToLower().Contains(term)));
+        }
+
+        return await query
+            .Include(d => d.Questions)
+            .OrderByDescending(d => d.CreatedAt)
+            .ToListAsync(cancellationToken);
+    }
 }

@@ -7,6 +7,7 @@ using CreateDeck = MyQuizGenerator.Application.Decks.Commands.CreateDeck;
 using UpdateDeck = MyQuizGenerator.Application.Decks.Commands.UpdateDeck;
 using DeleteDeck = MyQuizGenerator.Application.Decks.Commands.DeleteDeck;
 using UserDecks = MyQuizGenerator.Application.Decks.Queries.GetUserDecks;
+using SharedDecks = MyQuizGenerator.Application.Decks.Queries.GetSharedDecks;
 using DeckDetails = MyQuizGenerator.Application.Decks.Queries.GetDeckById;
 using MyQuizGenerator.Application.DeckInvitations.DTOs;
 using MyQuizGenerator.Application.DeckInvitations.Commands.CreateDeckInvitation;
@@ -118,6 +119,24 @@ public class DecksController : BaseApiController
         }
 
         var query = new UserDecks.GetUserDecksQuery(userId);
+        var result = await _mediator.Send(query);
+        return ApiOk(result);
+    }
+
+    /// <summary>
+    /// Gets a list of decks shared with the current user.
+    /// </summary>
+    /// <returns>List of deck summaries shared with the user.</returns>
+    [HttpGet("shared")]
+    public async Task<IActionResult> GetSharedDecks()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return ApiUnauthorized();
+        }
+
+        var query = new SharedDecks.GetSharedDecksQuery(userId);
         var result = await _mediator.Send(query);
         return ApiOk(result);
     }

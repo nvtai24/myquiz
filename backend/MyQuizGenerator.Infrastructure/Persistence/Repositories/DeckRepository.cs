@@ -50,4 +50,14 @@ public class DeckRepository : Repository<Guid, Deck>, IDeckRepository
     {
         await _context.DeckMembers.AddAsync(deckMember, cancellationToken);
     }
+
+    public async Task<List<Deck>> GetSharedDecksAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        return await _context.Decks
+            .AsNoTracking()
+            .Where(d => d.DeckMembers.Any(dm => dm.UserId == userId))
+            .Include(d => d.Questions)
+            .OrderByDescending(d => d.CreatedAt)
+            .ToListAsync(cancellationToken);
+    }
 }

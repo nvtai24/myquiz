@@ -11,4 +11,5 @@ public interface IDeckRepository : IRepository<Guid, Deck>
     Task<DeckInvitation?> GetInvitationByTokenAsync(string token, CancellationToken cancellationToken = default);
     Task AddInvitationAsync(DeckInvitation invitation, CancellationToken cancellationToken = default);
     Task AddDeckMemberAsync(DeckMember deckMember, CancellationToken cancellationToken = default);
+    Task<List<Deck>> GetSharedDecksAsync(string userId, CancellationToken cancellationToken = default);
 }

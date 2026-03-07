@@ -28,6 +28,7 @@ public static class ServiceExtensions
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IAuthService, AuthService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddScoped<IUserService, UserService>();
         services.AddTransient<IEmailService, EmailService>();
 
         services.AddScoped<IAmazonS3>(sp =>

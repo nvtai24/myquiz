@@ -44,7 +44,7 @@ export class AddDeck {
 
   private nextId = 3;
   cards = signal<Card[]>([
-    { id: 1, type: 'fill-blank', term: '', blankAnswer: '' },
+    { id: 1, type: 'multiple-choice', term: '', options: ['', '', '', ''], correctAnswers: [0] },
     { id: 2, type: 'multiple-choice', term: '', options: ['', '', '', ''], correctAnswers: [0] },
   ]);
 
@@ -75,7 +75,7 @@ export class AddDeck {
   }
 
   addCard() {
-    this.cards.update(cards => [...cards, { id: this.nextId++, type: 'fill-blank', term: '', blankAnswer: '' }]);
+    this.cards.update(cards => [...cards, { id: this.nextId++, type: 'multiple-choice', term: '', options: ['', '', '', ''], correctAnswers: [0] }]);
   }
 
   duplicateCard(index: number) {

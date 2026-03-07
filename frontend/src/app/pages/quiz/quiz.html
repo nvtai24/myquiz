@@ -1,181 +1,191 @@
 <!-- ===== SETUP SCREEN ===== -->
 @if (quizState() === 'setup') {
-<div class="setup-page">
-  <div class="setup-header">
-    <div class="setup-icon-wrap">
-      <span class="material-symbols-outlined">quiz</span>
+<div class="max-w-[1100px] mx-auto py-12 px-6 sm:px-8 animate-[fadeIn_0.5s_ease]">
+  <div class="flex flex-col items-center text-center mb-12">
+    <div class="w-16 h-16 rounded-[18px] bg-gradient-to-br from-[#4255FF] to-indigo-600 text-white flex items-center justify-center shadow-lg mb-4">
+      <span class="material-symbols-outlined text-[32px]">quiz</span>
     </div>
-    <h1 class="setup-title">Quiz Mode</h1>
-    <p class="setup-subtitle">Configure your quiz for <strong>{{ deckTitle }}</strong></p>
+    <h1 class="text-3xl font-black text-gray-900 m-1 tracking-tight">Quiz Mode</h1>
+    <p class="text-[15px] text-gray-500 font-medium">Configure your quiz for <strong class="text-[#4255FF]">{{ deckTitle }}</strong></p>
   </div>
 
-  <div class="setup-content">
-    <div class="setup-main">
+  <div class="flex flex-col lg:flex-row gap-10 items-start">
+    <div class="flex-1 w-full space-y-6">
       <!-- Question Types -->
-      <div class="setup-card">
-        <div class="setup-card-header">
-          <span class="material-symbols-outlined setup-card-icon">category</span>
+      <div class="bg-white border border-gray-200 rounded-[24px] p-7 shadow-sm transition-all hover:shadow-md group">
+        <div class="flex items-start gap-4 mb-6">
+          <span class="material-symbols-outlined text-[24px] text-gray-400 group-hover:text-[#4255FF] transition-colors">category</span>
           <div>
-            <h3 class="setup-card-title">Question Types</h3>
-            <p class="setup-card-desc">Select which types of questions to include</p>
+            <h3 class="text-[17px] font-black text-gray-900 m-0">Question Types</h3>
+            <p class="text-[13px] text-gray-400 font-medium mt-0.5">Select which types of questions to include</p>
           </div>
         </div>
-        <div class="type-options">
+        <div class="flex flex-col gap-3">
           <button
-            class="type-btn"
-            [class.active]="selectedQuestionTypes().has('multiple_choice')"
+            class="flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all cursor-pointer group/btn"
+            [class]="selectedQuestionTypes().has('multiple_choice') ? 'border-[#4255FF] bg-indigo-50/50' : 'border-gray-50 bg-gray-50/30 hover:border-gray-200'"
             (click)="toggleQuestionType('multiple_choice')"
           >
-            <span class="material-symbols-outlined type-icon">checklist</span>
-            <div class="type-info">
-              <span class="type-label">Multiple Choice</span>
-              <span class="type-count">{{ getQuestionTypeCounts().mc }} questions</span>
+            <span class="material-symbols-outlined text-[22px]" [class]="selectedQuestionTypes().has('multiple_choice') ? 'text-[#4255FF]' : 'text-gray-300'">checklist</span>
+            <div class="flex-1">
+              <span class="block text-[14px] font-bold text-gray-900">Multiple Choice</span>
+              <span class="block text-[11px] font-semibold text-gray-400">{{ getQuestionTypeCounts().mc }} questions</span>
             </div>
-            <span class="material-symbols-outlined type-check">{{ selectedQuestionTypes().has('multiple_choice') ? 'check_circle' : 'radio_button_unchecked' }}</span>
+            <span class="material-symbols-outlined text-[20px]" [class]="selectedQuestionTypes().has('multiple_choice') ? 'text-[#4255FF]' : 'text-gray-200 hover:text-gray-300'">{{ selectedQuestionTypes().has('multiple_choice') ? 'check_circle' : 'radio_button_unchecked' }}</span>
           </button>
           <button
-            class="type-btn"
-            [class.active]="selectedQuestionTypes().has('true_false')"
+            class="flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all cursor-pointer group/btn"
+            [class]="selectedQuestionTypes().has('true_false') ? 'border-[#4255FF] bg-indigo-50/50' : 'border-gray-50 bg-gray-50/30 hover:border-gray-200'"
             (click)="toggleQuestionType('true_false')"
           >
-            <span class="material-symbols-outlined type-icon">check_circle</span>
-            <div class="type-info">
-              <span class="type-label">True / False</span>
-              <span class="type-count">{{ getQuestionTypeCounts().tf }} questions</span>
+            <span class="material-symbols-outlined text-[22px]" [class]="selectedQuestionTypes().has('true_false') ? 'text-[#4255FF]' : 'text-gray-300'">check_circle</span>
+            <div class="flex-1">
+              <span class="block text-[14px] font-bold text-gray-900">True / False</span>
+              <span class="block text-[11px] font-semibold text-gray-400">{{ getQuestionTypeCounts().tf }} questions</span>
             </div>
-            <span class="material-symbols-outlined type-check">{{ selectedQuestionTypes().has('true_false') ? 'check_circle' : 'radio_button_unchecked' }}</span>
+            <span class="material-symbols-outlined text-[20px]" [class]="selectedQuestionTypes().has('true_false') ? 'text-[#4255FF]' : 'text-gray-200 hover:text-gray-300'">{{ selectedQuestionTypes().has('true_false') ? 'check_circle' : 'radio_button_unchecked' }}</span>
           </button>
           <button
-            class="type-btn"
-            [class.active]="selectedQuestionTypes().has('fill_blank')"
+            class="flex items-center gap-4 p-4 rounded-xl border-2 text-left transition-all cursor-pointer group/btn"
+            [class]="selectedQuestionTypes().has('fill_blank') ? 'border-[#4255FF] bg-indigo-50/50' : 'border-gray-50 bg-gray-50/30 hover:border-gray-200'"
             (click)="toggleQuestionType('fill_blank')"
           >
-            <span class="material-symbols-outlined type-icon">edit_note</span>
-            <div class="type-info">
-              <span class="type-label">Fill in the Blank</span>
-              <span class="type-count">{{ getQuestionTypeCounts().fb }} questions</span>
+            <span class="material-symbols-outlined text-[22px]" [class]="selectedQuestionTypes().has('fill_blank') ? 'text-[#4255FF]' : 'text-gray-300'">edit_note</span>
+            <div class="flex-1">
+              <span class="block text-[14px] font-bold text-gray-900">Fill in the Blank</span>
+              <span class="block text-[11px] font-semibold text-gray-400">{{ getQuestionTypeCounts().fb }} questions</span>
             </div>
-            <span class="material-symbols-outlined type-check">{{ selectedQuestionTypes().has('fill_blank') ? 'check_circle' : 'radio_button_unchecked' }}</span>
+            <span class="material-symbols-outlined text-[20px]" [class]="selectedQuestionTypes().has('fill_blank') ? 'text-[#4255FF]' : 'text-gray-200 hover:text-gray-300'">{{ selectedQuestionTypes().has('fill_blank') ? 'check_circle' : 'radio_button_unchecked' }}</span>
           </button>
         </div>
       </div>
 
       <!-- Question Count -->
-      <div class="setup-card">
-        <div class="setup-card-header">
-          <span class="material-symbols-outlined setup-card-icon">format_list_numbered</span>
+      <div class="bg-white border border-gray-200 rounded-[24px] p-7 shadow-sm transition-all hover:shadow-md group">
+        <div class="flex items-start gap-4 mb-6">
+          <span class="material-symbols-outlined text-[24px] text-gray-400 group-hover:text-[#4255FF] transition-colors">format_list_numbered</span>
           <div>
-            <h3 class="setup-card-title">Number of Questions</h3>
-            <p class="setup-card-desc">Choose how many questions you want to answer ({{ filteredQuestionPool.length }} available)</p>
+            <h3 class="text-[17px] font-black text-gray-900 m-0">Number of Questions</h3>
+            <p class="text-[13px] text-gray-400 font-medium mt-0.5">Choose how many questions you want to answer ({{ filteredQuestionPool.length }} available)</p>
           </div>
         </div>
-        <div class="count-options">
+        <div class="flex flex-wrap gap-2.5">
           @for (opt of questionCountOptions; track opt) {
             <button
-              class="count-btn"
-              [class.active]="questionCount() === opt"
+              class="flex flex-col items-center justify-center min-w-[76px] h-[76px] rounded-xl border-2 transition-all cursor-pointer"
+              [class]="questionCount() === opt ? 'border-[#4255FF] bg-indigo-50/50 text-[#4255FF] ring-4 ring-indigo-50/50' : 'border-gray-50 bg-gray-50/30 text-gray-400 hover:border-gray-200'"
               (click)="setQuestionCount(opt)"
             >
-              <span class="count-number">{{ opt }}</span>
-              @if (opt === filteredQuestionPool.length) {
-                <span class="count-label">All</span>
-              } @else {
-                <span class="count-label">Questions</span>
-              }
+              <span class="text-[18px] font-black leading-none">{{ opt }}</span>
+              <span class="text-[10px] font-bold uppercase mt-1 opacity-70">{{ opt === filteredQuestionPool.length ? 'All' : 'Cards' }}</span>
             </button>
           }
         </div>
       </div>
 
-      <!-- Options -->
-      <div class="setup-card">
-        <div class="setup-card-header">
-          <span class="material-symbols-outlined setup-card-icon">tune</span>
+      <!-- Quiz Options -->
+      <div class="bg-white border border-gray-200 rounded-[24px] p-7 shadow-sm transition-all hover:shadow-md group">
+        <div class="flex items-start gap-4 mb-6">
+          <span class="material-symbols-outlined text-[24px] text-gray-400 group-hover:text-[#4255FF] transition-colors">tune</span>
           <div>
-            <h3 class="setup-card-title">Quiz Options</h3>
-            <p class="setup-card-desc">Customize your quiz experience</p>
+            <h3 class="text-[17px] font-black text-gray-900 m-0">Quiz Config</h3>
+            <p class="text-[13px] text-gray-400 font-medium mt-0.5">Customize your quiz experience</p>
           </div>
         </div>
-        <div class="toggle-options">
-          <div class="toggle-row">
-            <div class="toggle-info">
-              <span class="material-symbols-outlined toggle-icon">shuffle</span>
-              <div>
-                <span class="toggle-label">Shuffle Questions</span>
-                <span class="toggle-desc">Randomize question order</span>
+        <div class="divide-y divide-gray-100">
+          <label class="flex items-center justify-between py-4 cursor-pointer">
+            <div class="flex items-center gap-3.5">
+              <div class="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:text-[#4255FF]">
+                <span class="material-symbols-outlined text-[22px]">shuffle</span>
+              </div>
+              <div class="flex flex-col">
+                <span class="text-[14px] font-bold text-gray-900">Shuffle Questions</span>
+                <span class="text-[11px] font-medium text-gray-400">Randomize question order</span>
               </div>
             </div>
-            <button class="toggle-switch" [class.on]="shuffleQuestions()" (click)="shuffleQuestions.set(!shuffleQuestions())">
-              <span class="toggle-knob"></span>
+            <button class="w-11 h-6 rounded-full relative transition-[background] duration-200" [class]="shuffleQuestions() ? 'bg-[#4255FF]' : 'bg-gray-200'" (click)="shuffleQuestions.set(!shuffleQuestions())">
+              <span class="absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform duration-200" [class.translate-x-5]="shuffleQuestions()"></span>
             </button>
-          </div>
-          <div class="toggle-row">
-            <div class="toggle-info">
-              <span class="material-symbols-outlined toggle-icon">timer</span>
-              <div>
-                <span class="toggle-label">Show Timer</span>
-                <span class="toggle-desc">Track your quiz duration</span>
+          </label>
+          <label class="flex items-center justify-between py-4 cursor-pointer">
+            <div class="flex items-center gap-3.5">
+              <div class="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:text-[#4255FF]">
+                <span class="material-symbols-outlined text-[22px]">timer</span>
+              </div>
+              <div class="flex flex-col">
+                <span class="text-[14px] font-bold text-gray-900">Show Timer</span>
+                <span class="text-[11px] font-medium text-gray-400">Track your quiz duration</span>
               </div>
             </div>
-            <button class="toggle-switch" [class.on]="showTimer()" (click)="showTimer.set(!showTimer())">
-              <span class="toggle-knob"></span>
+            <button class="w-11 h-6 rounded-full relative transition-[background] duration-200" [class]="showTimer() ? 'bg-[#4255FF]' : 'bg-gray-200'" (click)="showTimer.set(!showTimer())">
+              <span class="absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform duration-200" [class.translate-x-5]="showTimer()"></span>
             </button>
-          </div>
-          <div class="toggle-row">
-            <div class="toggle-info">
-              <span class="material-symbols-outlined toggle-icon">lightbulb</span>
-              <div>
-                <span class="toggle-label">Enable Hints</span>
-                <span class="toggle-desc">Get help when stuck</span>
+          </label>
+          <label class="flex items-center justify-between py-4 cursor-pointer">
+            <div class="flex items-center gap-3.5">
+              <div class="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center text-gray-400 group-hover:text-[#4255FF]">
+                <span class="material-symbols-outlined text-[22px]">lightbulb</span>
+              </div>
+              <div class="flex flex-col">
+                <span class="text-[14px] font-bold text-gray-900">Enable Hints</span>
+                <span class="text-[11px] font-medium text-gray-400">Get help when stuck</span>
               </div>
             </div>
-            <button class="toggle-switch" [class.on]="showHintsOption()" (click)="showHintsOption.set(!showHintsOption())">
-              <span class="toggle-knob"></span>
+            <button class="w-11 h-6 rounded-full relative transition-[background] duration-200" [class]="showHintsOption() ? 'bg-[#4255FF]' : 'bg-gray-200'" (click)="showHintsOption.set(!showHintsOption())">
+              <span class="absolute top-1 left-1 w-4 h-4 rounded-full bg-white transition-transform duration-200" [class.translate-x-5]="showHintsOption()"></span>
             </button>
-          </div>
+          </label>
         </div>
       </div>
     </div>
 
     <!-- Preview Sidebar -->
-    <div class="setup-sidebar">
-      <div class="preview-card">
-        <h3 class="preview-title">Quiz Preview</h3>
-        <div class="preview-stats">
-          <div class="preview-stat">
-            <span class="material-symbols-outlined">help_outline</span>
-            <span>{{ questionCount() }} questions</span>
+    <div class="w-full lg:w-[350px] lg:sticky lg:top-8 shrink-0 flex flex-col gap-6">
+      <div class="bg-gray-900 rounded-[28px] p-8 text-white shadow-xl relative overflow-hidden">
+        <div class="absolute top-0 right-0 w-32 h-32 bg-white/5 blur-3xl rounded-full translate-x-10 -translate-y-10"></div>
+        <h3 class="text-[13px] font-black uppercase tracking-widest text-indigo-300 mb-8 opacity-70">Quiz Preview</h3>
+        <div class="flex flex-col gap-5">
+          <div class="flex items-center gap-3.5 group">
+            <span class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-indigo-300 group-hover:scale-110 transition-transform">
+              <span class="material-symbols-outlined text-[18px]">help_outline</span>
+            </span>
+            <span class="text-[15px] font-bold">{{ questionCount() }} questions</span>
           </div>
-          <div class="preview-stat">
-            <span class="material-symbols-outlined">timer</span>
-            <span>~{{ questionCount() * 1.5 | number: '1.0-0' }} min estimated</span>
+          <div class="flex items-center gap-3.5 group">
+            <span class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-indigo-300 group-hover:scale-110 transition-transform">
+              <span class="material-symbols-outlined text-[18px]">timer</span>
+            </span>
+            <span class="text-[15px] font-bold">~{{ questionCount() * 1.5 | number: '1.0-0' }} min estimated</span>
           </div>
-          <div class="preview-stat">
-            <span class="material-symbols-outlined">category</span>
-            <span>{{ selectedQuestionTypes().size }} type{{ selectedQuestionTypes().size > 1 ? 's' : '' }} selected</span>
+          <div class="flex items-center gap-3.5 group">
+            <span class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-indigo-300 group-hover:scale-110 transition-transform">
+              <span class="material-symbols-outlined text-[18px]">category</span>
+            </span>
+            <span class="text-[15px] font-bold">{{ selectedQuestionTypes().size }} type{{ selectedQuestionTypes().size > 1 ? 's' : '' }} selected</span>
           </div>
-          <div class="preview-stat">
-            <span class="material-symbols-outlined">{{ shuffleQuestions() ? 'shuffle' : 'sort' }}</span>
-            <span>{{ shuffleQuestions() ? 'Shuffled' : 'In Order' }}</span>
+          <div class="flex items-center gap-3.5 group">
+            <span class="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center text-indigo-300 group-hover:scale-110 transition-transform">
+              <span class="material-symbols-outlined text-[18px]">{{ shuffleQuestions() ? 'shuffle' : 'sort' }}</span>
+            </span>
+            <span class="text-[15px] font-bold">{{ shuffleQuestions() ? 'Questions Shuffled' : 'Logical Order' }}</span>
           </div>
         </div>
-        <div class="preview-divider"></div>
-        <div class="preview-tips">
-          <h4 class="tips-title">
-            <span class="material-symbols-outlined">tips_and_updates</span>
+        <div class="my-8 h-px bg-white/10"></div>
+        <div class="flex flex-col gap-4">
+          <h4 class="text-[12px] font-black uppercase tracking-wider text-indigo-300/60 flex items-center gap-2">
+            <span class="material-symbols-outlined text-[16px]">tips_and_updates</span>
             Quick Tips
           </h4>
-          <ul class="tips-list">
-            <li>Read each question carefully</li>
-            <li>You can flag questions to review later</li>
-            <li>Navigate between questions freely</li>
-            <li>No penalty for wrong answers</li>
+          <ul class="flex flex-col gap-2.5 text-[13.5px] font-medium text-white/50 pl-0 list-none m-0 italic">
+            <li class="flex items-start gap-2 before:content-['·'] before:font-bold before:text-indigo-400">Read each question carefully</li>
+            <li class="flex items-start gap-2 before:content-['·'] before:font-bold before:text-indigo-400">You can flag questions to review later</li>
+            <li class="flex items-start gap-2 before:content-['·'] before:font-bold before:text-indigo-400">Navigate between questions freely</li>
           </ul>
         </div>
       </div>
 
-      <button class="start-quiz-btn" (click)="startQuiz()">
-        <span class="material-symbols-outlined">play_arrow</span>
+      <button class="w-full py-5 rounded-2xl bg-[#4255FF] border-none text-white font-black text-[17px] shadow-[0_8px_20px_rgba(66,85,255,0.3)] cursor-pointer transition-all hover:translate-y-[-2px] hover:shadow-[0_12px_28px_rgba(66,85,255,0.4)] flex items-center justify-center gap-2.5 active:scale-[0.98]" (click)="startQuiz()">
+        <span class="material-symbols-outlined text-[24px]">play_arrow</span>
         Start Quiz
       </button>
     </div>
@@ -185,61 +195,65 @@
 
 <!-- ===== QUIZ IN PROGRESS ===== -->
 @if (quizState() === 'in-progress') {
-<div class="quiz-page">
-  <div class="quiz-main">
+<div class="max-w-[1100px] mx-auto py-8 px-6 sm:px-8 flex flex-col lg:flex-row gap-10 items-start animate-[fadeIn_0.5s_ease]">
+  <div class="flex-1 w-full min-w-0">
     <!-- Progress Header -->
-    <div class="quiz-header">
-      <div class="quiz-header-left">
-        <span class="deck-label">{{ deckTitle | uppercase }}</span>
-        <h2 class="question-counter">Question {{ currentIndex() + 1 }} of {{ totalQuestions }}</h2>
+    <div class="flex items-end justify-between mb-4">
+      <div class="flex flex-col">
+        <span class="text-[10px] font-black uppercase tracking-widest text-[#4255FF] mb-1.5 opacity-60">{{ deckTitle }}</span>
+        <h2 class="text-xl font-black text-gray-900 m-0">Question {{ currentIndex() + 1 }} of {{ totalQuestions }}</h2>
       </div>
-      <div class="quiz-header-right">
+      <div class="flex items-center gap-4">
         @if (showTimer()) {
-          <div class="timer-badge">
-            <span class="material-symbols-outlined timer-icon">timer</span>
-            <span class="timer-text">{{ formattedTime }}</span>
+          <div class="flex items-center gap-1.5 bg-gray-50 px-3.5 py-1.5 rounded-full border border-gray-100 text-[13px] font-bold text-gray-600">
+            <span class="material-symbols-outlined text-[18px] text-[#4255FF]">timer</span>
+            {{ formattedTime }}
           </div>
         }
-        <span class="progress-label">{{ progress() }}%</span>
+        <span class="text-[13px] font-black text-[#4255FF] bg-indigo-50 px-3 py-1.5 rounded-lg border border-indigo-100">{{ progress() }}%</span>
       </div>
     </div>
-    <div class="progress-bar">
-      <div class="progress-fill" [style.width]="progress() + '%'"></div>
+    <div class="w-full h-2 bg-gray-100 rounded-full mb-10 overflow-hidden relative shadow-inner">
+      <div class="absolute h-full bg-gradient-to-r from-[#4255FF] to-indigo-400 transition-[width] duration-500 ease-out" [style.width]="progress() + '%'"></div>
     </div>
 
     <!-- Question Card -->
-    <div class="question-card">
-      <div class="question-top">
-        <div class="question-top-left">
-          <span class="question-type-badge">
-            <span class="material-symbols-outlined">{{ getTypeIcon(currentQuestion().type) }}</span>
+    <div class="bg-white border border-gray-200 rounded-[32px] p-8 shadow-sm mb-8 relative min-h-[400px] flex flex-col animate-[fadeSlide_0.4s_ease_both]">
+      <div class="flex items-start justify-between gap-6 mb-10">
+        <div class="flex flex-col gap-3">
+          <span class="inline-flex items-center gap-1.5 text-[11px] font-black uppercase tracking-widest text-[#4255FF] opacity-50 px-2 py-0.5 rounded-lg bg-indigo-50/50 self-start">
+            <span class="material-symbols-outlined text-[16px]">{{ getTypeIcon(currentQuestion().type) }}</span>
             {{ getTypeLabel(currentQuestion().type) }}
           </span>
-          <h3 class="question-text">{{ currentQuestion().text }}</h3>
+          <h3 class="text-2xl font-extrabold text-gray-900 m-0 leading-tight tracking-tight">{{ currentQuestion().text }}</h3>
         </div>
         <button
-          class="flag-btn"
-          [class.flagged]="flaggedQuestions().has(currentIndex())"
+          class="w-12 h-12 rounded-2xl bg-transparent border-none flex items-center justify-center cursor-pointer transition-all self-start shrink-0 hover:bg-red-50 hover:text-red-500"
+          [class.text-red-500]="flaggedQuestions().has(currentIndex())"
+          [class.text-gray-300]="!flaggedQuestions().has(currentIndex())"
           (click)="toggleFlag()"
           title="Flag for review"
         >
-          <span class="material-symbols-outlined">{{ flaggedQuestions().has(currentIndex()) ? 'flag' : 'outlined_flag' }}</span>
+          <span class="material-symbols-outlined text-[28px]">{{ flaggedQuestions().has(currentIndex()) ? 'flag' : 'outlined_flag' }}</span>
         </button>
       </div>
 
       <!-- Multiple Choice -->
       @if (currentQuestion().type === 'multiple_choice') {
-        <div class="options-list">
+        <div class="grid grid-cols-1 gap-3.5 flex-1">
           @for (opt of $any(currentQuestion()).options; track opt.label; let j = $index) {
             <button
-              class="option-btn"
-              [class.selected]="selectedAnswers()[currentIndex()] === j"
+              class="w-full p-6 rounded-[22px] border-2 text-left flex items-center gap-5 transition-all cursor-pointer group relative overflow-hidden active:scale-[0.99]"
+              [class]="selectedAnswers()[currentIndex()] === j ? 'border-[#4255FF] bg-indigo-50/50 ring-4 ring-indigo-50/20' : 'border-gray-50 bg-gray-50/40 hover:border-gray-200 hover:bg-gray-50'"
               (click)="selectAnswer(j)"
             >
-              <span class="option-letter">{{ opt.label }}</span>
-              <span class="option-text">{{ opt.text }}</span>
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center font-black text-[14px] transition-all shrink-0"
+                   [class]="selectedAnswers()[currentIndex()] === j ? 'bg-[#4255FF] text-white shadow-md' : 'bg-white border border-gray-100 text-gray-400 group-hover:text-gray-600'">
+                {{ opt.label }}
+              </div>
+              <span class="text-[17px] font-bold text-gray-800 flex-1 leading-tight">{{ opt.text }}</span>
               @if (selectedAnswers()[currentIndex()] === j) {
-                <span class="material-symbols-outlined check-mark">check_circle</span>
+                <span class="material-symbols-outlined text-[26px] text-[#4255FF] animate-[bounceIn_0.3s_ease]">check_circle</span>
               }
             </button>
           }
@@ -248,48 +262,54 @@
 
       <!-- True / False -->
       @if (currentQuestion().type === 'true_false') {
-        <div class="tf-options">
+        <div class="flex gap-4 flex-1 items-center">
           <button
-            class="tf-btn true"
-            [class.selected]="selectedAnswers()[currentIndex()] === true"
+            class="flex-1 flex flex-col items-center justify-center gap-4 py-12 rounded-[28px] border-2 transition-all cursor-pointer group"
+            [class]="selectedAnswers()[currentIndex()] === true ? 'border-green-500 bg-green-50/60 ring-4 ring-green-100' : 'border-gray-50 bg-gray-50/40 hover:border-gray-200 hover:bg-gray-50'"
             (click)="selectAnswer(true)"
           >
-            <span class="material-symbols-outlined tf-icon">check_circle</span>
-            <span class="tf-label">True</span>
+            <div class="w-16 h-16 rounded-[20px] flex items-center justify-center transition-all bg-white border border-gray-100 text-gray-200 group-hover:text-green-500/30"
+                 [class]="selectedAnswers()[currentIndex()] === true ? 'text-green-600 border-green-200 shadow-md' : ''">
+              <span class="material-symbols-outlined text-[42px]">check_circle</span>
+            </div>
+            <span class="text-xl font-black transition-colors" [class]="selectedAnswers()[currentIndex()] === true ? 'text-green-700' : 'text-gray-400 group-hover:text-gray-600'">TRUE</span>
           </button>
           <button
-            class="tf-btn false"
-            [class.selected]="selectedAnswers()[currentIndex()] === false"
+            class="flex-1 flex flex-col items-center justify-center gap-4 py-12 rounded-[28px] border-2 transition-all cursor-pointer group"
+            [class]="selectedAnswers()[currentIndex()] === false ? 'border-red-500 bg-red-50/60 ring-4 ring-red-100' : 'border-gray-50 bg-gray-50/40 hover:border-gray-200 hover:bg-gray-50'"
             (click)="selectAnswer(false)"
           >
-            <span class="material-symbols-outlined tf-icon">cancel</span>
-            <span class="tf-label">False</span>
+            <div class="w-16 h-16 rounded-[20px] flex items-center justify-center transition-all bg-white border border-gray-100 text-gray-200 group-hover:text-red-500/30"
+                 [class]="selectedAnswers()[currentIndex()] === false ? 'text-red-600 border-red-200 shadow-md' : ''">
+              <span class="material-symbols-outlined text-[42px]">cancel</span>
+            </div>
+            <span class="text-xl font-black transition-colors" [class]="selectedAnswers()[currentIndex()] === false ? 'text-red-700' : 'text-gray-400 group-hover:text-gray-600'">FALSE</span>
           </button>
         </div>
       }
 
       <!-- Fill in the Blank -->
       @if (currentQuestion().type === 'fill_blank') {
-        <div class="fill-blank-area">
-          <div class="fill-input-wrap">
-            <span class="material-symbols-outlined fill-icon">edit</span>
+        <div class="flex-1 flex flex-col items-center justify-center max-w-[600px] mx-auto w-full gap-5">
+          <div class="w-full relative group">
+            <span class="absolute left-6 top-1/2 -translate-y-1/2 material-symbols-outlined text-[28px] text-gray-300 group-focus-within:text-[#4255FF] transition-colors">edit</span>
             <input
               type="text"
-              class="fill-input"
-              [placeholder]="$any(currentQuestion()).placeholder || 'Type your answer...'"
+              class="w-full pl-16 pr-8 py-7 bg-gray-50 border-2 border-gray-50 rounded-[28px] text-xl font-bold text-gray-900 outline-none transition-all placeholder-gray-300 focus:bg-white focus:border-[#4255FF] focus:shadow-md"
+              [placeholder]="$any(currentQuestion()).placeholder || 'Type your answer here...'"
               [value]="fillBlankInput()"
               (input)="onFillInput($event)"
               (keyup.enter)="submitFillBlank()"
             />
           </div>
-          <button class="fill-submit-btn" (click)="submitFillBlank()" [disabled]="!fillBlankInput().trim()">
-            <span class="material-symbols-outlined">send</span>
+          <button class="w-full py-5 rounded-2xl bg-gray-900 border-none text-white font-black text-[16px] flex items-center justify-center gap-3 cursor-pointer transition-all shadow-lg hover:shadow-xl hover:translate-y-[-1px] disabled:opacity-30 disabled:cursor-not-allowed disabled:translate-y-0" (click)="submitFillBlank()" [disabled]="!fillBlankInput().trim()">
+            <span class="material-symbols-outlined text-[22px]">send</span>
             Submit Answer
           </button>
           @if (selectedAnswers()[currentIndex()] !== null) {
-            <div class="fill-submitted">
-              <span class="material-symbols-outlined">check_circle</span>
-              Answer submitted: <strong>{{ selectedAnswers()[currentIndex()] }}</strong>
+            <div class="mt-4 flex items-center gap-2 px-6 py-3 bg-green-50 text-green-700 font-black text-[14px] rounded-2xl border border-green-200 animate-[bounceIn_0.4s_ease]">
+              <span class="material-symbols-outlined text-[20px]">check_circle</span>
+              Answer locked: <span class="bg-white/50 px-2.5 py-1 rounded-lg ml-1 border border-green-100">{{ selectedAnswers()[currentIndex()] }}</span>
             </div>
           }
         </div>
@@ -297,22 +317,24 @@
     </div>
 
     <!-- Navigation -->
-    <div class="quiz-nav">
-      <button class="nav-btn secondary" (click)="prevQuestion()" [disabled]="currentIndex() === 0">
-        <span class="material-symbols-outlined">chevron_left</span>
+    <div class="flex items-center justify-between gap-6">
+      <button class="flex items-center gap-2 px-8 py-4 rounded-[20px] bg-white border border-gray-200 text-gray-600 font-bold text-[15px] cursor-pointer transition-all hover:bg-gray-50 disabled:opacity-20 disabled:cursor-not-allowed" (click)="prevQuestion()" [disabled]="currentIndex() === 0">
+        <span class="material-symbols-outlined text-[24px]">chevron_left</span>
         Back
       </button>
-      <div class="nav-center">
-        <span class="answered-status">{{ answeredCount() }}/{{ totalQuestions }} answered</span>
+      <div class="hidden sm:flex items-center gap-2 text-[14px] font-black text-gray-400 bg-gray-50 px-5 py-2 rounded-full border border-gray-100">
+        <span class="text-[#4255FF]">{{ answeredCount() }}</span>
+        <span>/</span>
+        <span>{{ totalQuestions }} Answered</span>
       </div>
       @if (currentIndex() < totalQuestions - 1) {
-        <button class="nav-btn primary" (click)="nextQuestion()">
+        <button class="flex items-center gap-2 px-10 py-4 rounded-[20px] bg-gray-900 border-none text-white font-black text-[15px] cursor-pointer transition-all hover:translate-y-[-1px] hover:shadow-lg active:scale-[0.98]" (click)="nextQuestion()">
           Next
-          <span class="material-symbols-outlined">chevron_right</span>
+          <span class="material-symbols-outlined text-[24px]">chevron_right</span>
         </button>
       } @else {
-        <button class="nav-btn primary finish" (click)="finishQuiz()">
-          <span class="material-symbols-outlined">check</span>
+        <button class="flex items-center gap-2 px-10 py-4 rounded-[20px] bg-green-600 border-none text-white font-black text-[15px] cursor-pointer transition-all shadow-[0_8px_20px_rgba(22,163,74,0.3)] hover:translate-y-[-1px] hover:shadow-[0_12px_28px_rgba(22,163,74,0.4)] active:scale-[0.98]" (click)="finishQuiz()">
+          <span class="material-symbols-outlined text-[22px]">check</span>
           Finish Quiz
         </button>
       }
@@ -320,57 +342,80 @@
   </div>
 
   <!-- Sidebar -->
-  <aside class="quiz-sidebar">
-    <div class="nav-panel">
-      <div class="nav-panel-header">
-        <h4 class="nav-panel-title">Navigator</h4>
-        <span class="nav-total">{{ answeredCount() }}/{{ totalQuestions }}</span>
+  <aside class="w-full lg:w-[320px] lg:sticky lg:top-8 shrink-0 flex flex-col gap-6">
+    <div class="bg-white border border-gray-200 rounded-[28px] p-6 shadow-sm overflow-hidden">
+      <div class="flex items-center justify-between mb-6">
+        <h4 class="text-[13px] font-black uppercase tracking-widest text-gray-400">Navigation</h4>
+        <div class="bg-indigo-50 text-[#4255FF] px-2.5 py-0.5 rounded-lg text-[13px] font-black border border-indigo-100">
+          {{ answeredCount() }}/{{ totalQuestions }}
+        </div>
       </div>
-      <div class="nav-grid">
+      <div class="grid grid-cols-5 gap-2.5 mb-8">
         @for (q of questions; track q.id; let i = $index) {
           <button
-            class="nav-dot"
-            [class.current]="getQuestionStatus(i) === 'current'"
-            [class.answered]="getQuestionStatus(i) === 'answered'"
-            [class.flagged]="getQuestionStatus(i) === 'flagged'"
+            class="aspect-square rounded-xl flex items-center justify-center font-black text-[13px] transition-all cursor-pointer border-2 active:scale-95"
+            [class]="getQuestionStatus(i) === 'current' ? 'border-[#4255FF] bg-indigo-50 text-[#4255FF] ring-4 ring-indigo-50/50' : 
+                     getQuestionStatus(i) === 'flagged' ? 'border-red-500 bg-red-50 text-red-500' :
+                     getQuestionStatus(i) === 'answered' ? 'border-green-600 bg-green-50 text-green-600' :
+                     'border-gray-100 bg-gray-50 text-gray-300 hover:border-gray-200'"
             (click)="goToQuestion(i)"
           >{{ i + 1 }}</button>
         }
       </div>
-      <div class="nav-legend">
-        <span class="legend-item"><span class="legend-dot current"></span> Current</span>
-        <span class="legend-item"><span class="legend-dot answered"></span> Answered</span>
-        <span class="legend-item"><span class="legend-dot flagged"></span> Flagged</span>
-        <span class="legend-item"><span class="legend-dot unanswered"></span> Not Attempted</span>
+      <div class="flex flex-col gap-3">
+        <label class="flex items-center gap-3 text-[11px] font-black text-gray-500 uppercase tracking-wide">
+          <span class="w-2.5 h-2.5 rounded-full bg-indigo-50 border-2 border-[#4255FF]"></span> 
+          Current
+        </label>
+        <label class="flex items-center gap-3 text-[11px] font-black text-gray-500 uppercase tracking-wide">
+          <span class="w-2.5 h-2.5 rounded-full bg-green-50 border-2 border-green-600"></span>
+          Answered
+        </label>
+        <label class="flex items-center gap-3 text-[11px] font-black text-gray-500 uppercase tracking-wide">
+          <span class="w-2.5 h-2.5 rounded-full bg-red-50 border-2 border-red-500"></span>
+          Flagged
+        </label>
+        <label class="flex items-center gap-3 text-[11px] font-black text-gray-500 uppercase tracking-wide opacity-50">
+          <span class="w-2.5 h-2.5 rounded-full bg-gray-50 border-2 border-gray-100"></span>
+          Not Attempted
+        </label>
       </div>
     </div>
 
-    <!-- Hint -->
+    <!-- Hint Panel -->
     @if (showHintsOption() && currentQuestion().hint) {
-      <div class="hint-panel">
-        <div class="hint-header" (click)="toggleHint()">
-          <span class="material-symbols-outlined hint-icon">lightbulb</span>
-          <span class="hint-title">Need a hint?</span>
-          <span class="material-symbols-outlined hint-chevron">{{ showHint() ? 'expand_less' : 'expand_more' }}</span>
+      <div class="bg-amber-50 border border-amber-200 rounded-2xl p-5 group">
+        <div class="flex items-center justify-between cursor-pointer" (click)="toggleHint()">
+          <div class="flex items-center gap-2.5">
+            <span class="material-symbols-outlined text-[20px] text-amber-500">lightbulb</span>
+            <span class="text-[14px] font-black text-amber-800 tracking-tight">Need a hint?</span>
+          </div>
+          <span class="material-symbols-outlined text-[20px] text-amber-400 transition-transform group-hover:scale-110" [class.rotate-180]="showHint()">{{ showHint() ? 'expand_less' : 'expand_more' }}</span>
         </div>
         @if (showHint()) {
-          <p class="hint-text">{{ currentQuestion().hint }}</p>
+          <div class="mt-4 pt-4 border-t border-amber-200/50">
+            <p class="text-[13px] font-medium text-amber-700 leading-relaxed italic m-0">"{{ currentQuestion().hint }}"</p>
+          </div>
         }
       </div>
     }
 
     <!-- Quick Stats -->
-    <div class="sidebar-stats">
+    <div class="flex flex-col gap-3">
       @if (unansweredCount > 0) {
-        <div class="mini-stat">
-          <span class="material-symbols-outlined mini-stat-icon orange">help_outline</span>
-          <span>{{ unansweredCount }} unanswered</span>
+        <div class="flex items-center gap-3 px-5 py-4 bg-white border border-gray-200 rounded-2xl group shadow-sm">
+          <div class="w-9 h-9 rounded-xl bg-orange-50 text-orange-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined text-[20px]">help_outline</span>
+          </div>
+          <span class="text-[14px] font-bold text-gray-600">{{ unansweredCount }} unanswered</span>
         </div>
       }
       @if (flaggedCount > 0) {
-        <div class="mini-stat">
-          <span class="material-symbols-outlined mini-stat-icon amber">flag</span>
-          <span>{{ flaggedCount }} flagged</span>
+        <div class="flex items-center gap-3 px-5 py-4 bg-white border border-gray-200 rounded-2xl group shadow-sm">
+          <div class="w-9 h-9 rounded-xl bg-red-50 text-red-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+            <span class="material-symbols-outlined text-[20px]">flag</span>
+          </div>
+          <span class="text-[14px] font-bold text-gray-600">{{ flaggedCount }} flagged</span>
         </div>
       }
     </div>

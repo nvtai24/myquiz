@@ -1,37 +1,48 @@
 import { Routes } from '@angular/router';
-import { Landing } from './pages/landing/landing';
-import { Login } from './pages/login/login';
-import { Dashboard } from './pages/dashboard/dashboard';
 import { authGuard } from './guards/auth.guard';
 import { noAuthGuard } from './guards/no-auth.guard';
-import { register } from './pages/register/register';
-import { VerifyEmail } from './pages/verify-email/verify-email';
-import { ForgotPassword } from './pages/forgot-password/forgot-password';
-import { ResetPassword } from './pages/reset-password/reset-password';
 import { MainLayout } from './layouts/main-layout';
-import { Library } from './pages/library/library';
-import { AddDeck } from './pages/add-deck/add-deck';
-import { DeckDetail } from './pages/deck-detail/deck-detail';
-import { Quiz } from './pages/quiz/quiz';
-import { Learn } from './pages/learn/learn';
-import { QuizResult } from './pages/quiz-result/quiz-result';
-import { AccountSettings } from './pages/account-settings/account-settings';
-import { UserProfile } from './pages/user-profile/user-profile';
-import { SubscriptionSettings } from './pages/subscription-settings/subscription-settings';
 
 export const routes: Routes = [
   // Trang auth: nếu đã đăng nhập → redirect về /dashboard
-  { path: 'login',          component: Login,          canActivate: [noAuthGuard] },
-  { path: 'register',       component: register,       canActivate: [noAuthGuard] },
-  { path: 'forgot-password', component: ForgotPassword, canActivate: [noAuthGuard] },
-  { path: 'reset-password', component: ResetPassword,  canActivate: [noAuthGuard] },
+  { 
+    path: 'login',          
+    loadComponent: () => import('./pages/login/login').then(m => m.Login),
+    canActivate: [noAuthGuard] 
+  },
+  { 
+    path: 'register',       
+    loadComponent: () => import('./pages/register/register').then(m => m.register),
+    canActivate: [noAuthGuard] 
+  },
+  { 
+    path: 'forgot-password', 
+    loadComponent: () => import('./pages/forgot-password/forgot-password').then(m => m.ForgotPassword),
+    canActivate: [noAuthGuard] 
+  },
+  { 
+    path: 'reset-password', 
+    loadComponent: () => import('./pages/reset-password/reset-password').then(m => m.ResetPassword),
+    canActivate: [noAuthGuard] 
+  },
 
-  // Verify email không cần guard (có thể mở ngay sau khi click link email)
-  { path: 'verify-email',   component: VerifyEmail },
-  { path: 'confirm-email',  component: VerifyEmail },
+  // Verify email
+  { 
+    path: 'verify-email',   
+    loadComponent: () => import('./pages/verify-email/verify-email').then(m => m.VerifyEmail) 
+  },
+  { 
+    path: 'confirm-email',  
+    loadComponent: () => import('./pages/verify-email/verify-email').then(m => m.VerifyEmail) 
+  },
 
-  // Landing page route MUST be before MainLayout so it doesn't get caught by authGuard empty path
-  { path: '', component: Landing, canActivate: [noAuthGuard], pathMatch: 'full' },
+  // Landing page
+  { 
+    path: '', 
+    loadComponent: () => import('./pages/landing/landing').then(m => m.Landing),
+    canActivate: [noAuthGuard], 
+    pathMatch: 'full' 
+  },
 
   // Pages with shared layout (sidebar + navbar)
   {
@@ -39,16 +50,46 @@ export const routes: Routes = [
     component: MainLayout,
     canActivate: [authGuard],
     children: [
-      { path: 'dashboard', component: Dashboard },
-      { path: 'library', component: Library },
-      { path: 'add-deck', component: AddDeck },
-      { path: 'deck/:id', component: DeckDetail },
-      { path: 'quiz/:id', component: Quiz },
-      { path: 'learn/:id', component: Learn },
-      { path: 'quiz-result/:id', component: QuizResult },
-      { path: 'account-settings', component: AccountSettings },
-      { path: 'profile', component: UserProfile },
-      { path: 'subscription', component: SubscriptionSettings },
+      { 
+        path: 'dashboard', 
+        loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.Dashboard) 
+      },
+      { 
+        path: 'library', 
+        loadComponent: () => import('./pages/library/library').then(m => m.Library) 
+      },
+      { 
+        path: 'add-deck', 
+        loadComponent: () => import('./pages/add-deck/add-deck').then(m => m.AddDeck) 
+      },
+      { 
+        path: 'deck/:id', 
+        loadComponent: () => import('./pages/deck-detail/deck-detail').then(m => m.DeckDetail) 
+      },
+      { 
+        path: 'quiz/:id', 
+        loadComponent: () => import('./pages/quiz/quiz').then(m => m.Quiz) 
+      },
+      { 
+        path: 'learn/:id', 
+        loadComponent: () => import('./pages/learn/learn').then(m => m.Learn) 
+      },
+      { 
+        path: 'quiz-result/:id', 
+        loadComponent: () => import('./pages/quiz-result/quiz-result').then(m => m.QuizResult) 
+      },
+      { 
+        path: 'account-settings', 
+        loadComponent: () => import('./pages/account-settings/account-settings').then(m => m.AccountSettings) 
+      },
+      { 
+        path: 'profile', 
+        loadComponent: () => import('./pages/user-profile/user-profile').then(m => m.UserProfile) 
+      },
+      { 
+        path: 'subscription', 
+        loadComponent: () => import('./pages/subscription-settings/subscription-settings').then(m => m.SubscriptionSettings) 
+      },
     ]
   },
 

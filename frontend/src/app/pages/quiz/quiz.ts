@@ -1,5 +1,5 @@
 import { Component, signal, computed } from '@angular/core';
-import { UpperCasePipe, DecimalPipe } from '@angular/common';
+import { DecimalPipe } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 
@@ -36,7 +36,7 @@ type QuizState = 'setup' | 'in-progress';
 @Component({
   selector: 'app-quiz',
   standalone: true,
-  imports: [UpperCasePipe, DecimalPipe, FormsModule],
+  imports: [DecimalPipe, FormsModule],
   templateUrl: './quiz.html',
   styleUrl: './quiz.css',
 })

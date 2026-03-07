@@ -1,202 +1,208 @@
-<div class="deck-detail-page">
+<div class="max-w-[1100px] mx-auto py-6 pb-20 px-6 sm:px-8">
   <!-- Breadcrumb -->
-  <div class="breadcrumb">
-    <a routerLink="/library" class="breadcrumb-link">
-      <span class="material-symbols-outlined">arrow_back</span>
+  <div class="flex items-center gap-2.5 mb-8">
+    <a routerLink="/library" class="flex items-center gap-1.5 text-gray-400 font-bold no-underline transition-colors hover:text-[#4255FF]">
+      <span class="material-symbols-outlined text-[20px]">arrow_back</span>
       Library
     </a>
-    <span class="breadcrumb-sep">/</span>
-    <span class="breadcrumb-current">{{ deck.title }}</span>
+    <span class="text-gray-200 text-[18px]">/</span>
+    <span class="text-gray-900 font-bold overflow-hidden truncate whitespace-nowrap">{{ deck.title }}</span>
   </div>
 
   <!-- Hero Card -->
-  <div class="hero-card">
-    <div class="hero-top">
-      <div class="hero-cover">
-        <span class="material-symbols-outlined cover-icon">calculate</span>
-        <div class="cover-overlay"></div>
+  <div class="bg-white border border-gray-200 rounded-[28px] overflow-hidden shadow-sm mb-10 transition-shadow hover:shadow-md animate-[fadeIn_0.5s_ease]">
+    <div class="flex flex-col lg:flex-row p-8 gap-8 items-start border-b border-gray-100">
+      <div class="w-24 h-24 lg:w-40 lg:h-40 rounded-[22px] bg-gradient-to-br from-[#4255FF] to-indigo-500 shrink-0 relative flex items-center justify-center text-white shadow-lg lg:rounded-[28px]">
+        <span class="material-symbols-outlined text-[48px] lg:text-[64px] relative z-10 drop-shadow-md">calculate</span>
+        <div class="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.2)_0%,rgba(255,255,255,0)_100%)]"></div>
       </div>
-      <div class="hero-info">
-        <div class="hero-title-row">
-          <h1 class="hero-title">{{ deck.title }}</h1>
-          <span class="visibility-badge">
-            <span class="material-symbols-outlined badge-dot">public</span>
+      <div class="flex-1 min-w-0">
+        <div class="flex flex-wrap items-center gap-3 mb-3">
+          <h1 class="text-2xl lg:text-[2.2rem] font-black text-gray-900 m-0 leading-tight tracking-tight">{{ deck.title }}</h1>
+          <span class="inline-flex items-center gap-1 px-3 py-1 bg-green-50 rounded-full text-[12px] font-extrabold text-green-600 border border-green-200">
+            <span class="material-symbols-outlined text-[16px] leading-none">public</span>
             {{ deck.visibility }}
           </span>
         </div>
-        <p class="hero-description">{{ deck.description }}</p>
-        <div class="hero-author">
-          <div class="author-avatar">{{ deck.author.charAt(0) }}</div>
-          <div>
-            <span class="author-name">{{ deck.author }}</span>
-            <span class="author-meta">Created {{ deck.createdAgo }} · {{ deck.role }}</span>
+        <p class="text-[17px] text-gray-500 leading-relaxed max-w-[700px] m-0 mb-6 font-medium">{{ deck.description }}</p>
+        <div class="flex items-center gap-3.5">
+          <div class="w-11 h-11 rounded-full bg-slate-100 border-2 border-white shadow-sm flex items-center justify-center text-[#4255FF] font-black text-[15px]">{{ deck.author.charAt(0) }}</div>
+          <div class="flex flex-col">
+            <span class="text-[15px] font-extrabold text-gray-900">{{ deck.author }}</span>
+            <span class="text-[13px] text-gray-400 font-semibold">Created {{ deck.createdAgo }} · {{ deck.role }}</span>
           </div>
         </div>
       </div>
-      <div class="hero-actions">
-        <button class="action-icon-btn" title="Share">
-          <span class="material-symbols-outlined">share</span>
+      <div class="flex gap-2.5 lg:flex-col shrink-0">
+        <button class="w-11 h-11 rounded-xl bg-gray-50 border border-transparent text-gray-500 flex items-center justify-center cursor-pointer transition-all hover:bg-indigo-50 hover:text-[#4255FF] hover:border-indigo-100" title="Share">
+          <span class="material-symbols-outlined text-[22px]">share</span>
         </button>
-        <button class="action-icon-btn" title="Edit">
-          <span class="material-symbols-outlined">edit</span>
+        <button class="w-11 h-11 rounded-xl bg-gray-50 border border-transparent text-gray-500 flex items-center justify-center cursor-pointer transition-all hover:bg-indigo-50 hover:text-[#4255FF] hover:border-indigo-100" title="Edit">
+          <span class="material-symbols-outlined text-[22px]">edit</span>
         </button>
-        <button class="action-icon-btn bookmark" title="Bookmark">
-          <span class="material-symbols-outlined">bookmark</span>
+        <button class="w-11 h-11 rounded-xl bg-gray-50 border border-transparent text-gray-500 flex items-center justify-center cursor-pointer transition-all hover:bg-indigo-50 hover:text-amber-500 hover:border-indigo-100" title="Bookmark">
+          <span class="material-symbols-outlined text-[22px]">bookmark</span>
         </button>
       </div>
     </div>
 
-    <!-- Stats -->
-    <div class="hero-stats">
-      <div class="stat">
-        <div class="stat-icon-wrap blue">
-          <span class="material-symbols-outlined">style</span>
+    <!-- Stats Bar -->
+    <div class="grid grid-cols-2 md:grid-cols-4 bg-gray-50/50">
+      <div class="flex items-center gap-4 p-6 border-r border-b md:border-b-0 border-gray-100/10">
+        <div class="w-12 h-12 rounded-[14px] bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined text-[26px]">style</span>
         </div>
-        <div class="stat-data">
-          <span class="stat-value">{{ deck.stats.cards }}</span>
-          <span class="stat-label">Cards</span>
-        </div>
-      </div>
-      <div class="stat">
-        <div class="stat-icon-wrap indigo">
-          <span class="material-symbols-outlined">bar_chart</span>
-        </div>
-        <div class="stat-data">
-          <span class="stat-value">{{ deck.stats.attempts }}</span>
-          <span class="stat-label">Attempts</span>
+        <div class="flex flex-col">
+          <span class="text-xl font-black text-gray-900 leading-none">{{ deck.stats.cards }}</span>
+          <span class="text-[11px] font-bold text-gray-400 tracking-wider uppercase mt-1">Cards</span>
         </div>
       </div>
-      <div class="stat">
-        <div class="stat-icon-wrap amber">
-          <span class="material-symbols-outlined">star</span>
+      <div class="flex items-center gap-4 p-6 border-r border-b md:border-b-0 border-gray-100/10">
+        <div class="w-12 h-12 rounded-[14px] bg-indigo-50 text-indigo-600 flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined text-[26px]">bar_chart</span>
         </div>
-        <div class="stat-data">
-          <span class="stat-value">{{ deck.stats.rating }}<small>/5</small></span>
-          <span class="stat-label">Rating</span>
+        <div class="flex flex-col">
+          <span class="text-xl font-black text-gray-900 leading-none">{{ deck.stats.attempts }}</span>
+          <span class="text-[11px] font-bold text-gray-400 tracking-wider uppercase mt-1">Attempts</span>
         </div>
       </div>
-      <div class="stat">
-        <div class="stat-icon-wrap green">
-          <span class="material-symbols-outlined">check_circle</span>
+      <div class="flex items-center gap-4 p-6 border-r border-gray-100/10">
+        <div class="w-12 h-12 rounded-[14px] bg-amber-50 text-amber-500 flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined text-[26px]">star</span>
         </div>
-        <div class="stat-data">
-          <span class="stat-value">{{ deck.stats.avgScore }}<small>%</small></span>
-          <span class="stat-label">Avg Score</span>
+        <div class="flex flex-col">
+          <span class="text-xl font-black text-gray-900 leading-none">{{ deck.stats.rating }}<small class="text-[13px] opacity-70 ml-0.5">/5</small></span>
+          <span class="text-[11px] font-bold text-gray-400 tracking-wider uppercase mt-1">Rating</span>
+        </div>
+      </div>
+      <div class="flex items-center gap-4 p-6 border-gray-100/10">
+        <div class="w-12 h-12 rounded-[14px] bg-green-50 text-green-600 flex items-center justify-center shrink-0">
+          <span class="material-symbols-outlined text-[26px]">check_circle</span>
+        </div>
+        <div class="flex flex-col">
+          <span class="text-xl font-black text-gray-900 leading-none">{{ deck.stats.avgScore }}<small class="text-[13px] opacity-70 ml-0.5">%</small></span>
+          <span class="text-[11px] font-bold text-gray-400 tracking-wider uppercase mt-1">Avg Score</span>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Study Modes -->
-  <section class="section">
-    <div class="section-header">
-      <h2 class="section-title">
-        <span class="material-symbols-outlined section-icon">school</span>
-        Choose a Study Mode
+  <!-- Study Modes Section -->
+  <section class="mb-10">
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <h2 class="flex items-center gap-3 text-xl font-black text-gray-900 m-0">
+        <span class="material-symbols-outlined text-[28px] text-[#4255FF]">school</span>
+        Study Mode
       </h2>
-      <button class="start-study-btn" (click)="startStudy()">
-        <span class="material-symbols-outlined">play_arrow</span>
+      <button class="flex items-center gap-2 px-7 py-3 bg-[#4255FF] border-none rounded-xl text-white font-black text-[15px] cursor-pointer transition-all shadow-[0_4px_14px_rgba(66,85,255,0.3)] hover:translate-y-[-2px] hover:shadow-[0_8px_20px_rgba(66,85,255,0.4)]" (click)="startStudy()">
+        <span class="material-symbols-outlined text-[22px]">play_arrow</span>
         Start {{ studyMode() === 'learn' ? 'Learning' : 'Quiz' }}
       </button>
     </div>
-    <div class="mode-grid">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       @for (mode of studyModes; track mode.key) {
         <button
-          class="mode-card"
-          [class.active]="studyMode() === mode.key"
+          class="flex items-center gap-5 p-6 bg-white border-2 rounded-2xl cursor-pointer transition-all text-left group"
+          [class]="studyMode() === mode.key ? 'border-[#4255FF] bg-indigo-50/40 shadow-sm transition-transform -translate-y-[1px]' : 'border-gray-100 hover:border-gray-200 hover:shadow-xs'"
           (click)="selectMode(mode.key)"
         >   
-          <div class="mode-icon-wrap" [style.background]="mode.gradient">
-            <span class="material-symbols-outlined mode-icon">{{ mode.icon }}</span>
+          <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-white shrink-0 shadow-md group-hover:scale-110 transition-transform" [style.background]="mode.gradient">
+            <span class="material-symbols-outlined text-[32px]">{{ mode.icon }}</span>
           </div>
-          <span class="mode-label">{{ mode.label }}</span>
-          <span class="mode-desc">{{ mode.desc }}</span>
+          <div class="flex-1">
+            <span class="block text-[15px] font-black text-gray-900 mb-0.5 uppercase tracking-wide">{{ mode.label }}</span>
+            <span class="block text-[12px] font-medium text-gray-500 leading-tight">{{ mode.desc }}</span>
+          </div>
         </button>
       }
     </div>
   </section>
 
-  <!-- Terms & Reviews -->
-  <div class="terms-reviews-layout">
-    <!-- Terms -->
-    <section class="terms-section">
-      <div class="terms-header">
-        <h2 class="section-title">
-          <span class="material-symbols-outlined section-icon">list_alt</span>
-          Terms in this set ({{ deck.stats.cards }})
+  <!-- Terms & Reviews Layout -->
+  <div class="flex flex-col lg:flex-row gap-10 items-start">
+    <!-- Terms List Section -->
+    <section class="flex-1 w-full min-w-0">
+      <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <h2 class="flex items-center gap-3 text-xl font-black text-gray-900 m-0">
+          <span class="material-symbols-outlined text-[28px] text-[#4255FF]">list_alt</span>
+          Terms ({{ deck.stats.cards }})
         </h2>
-        <div class="terms-filter">
-          <span class="material-symbols-outlined filter-icon">search</span>
-          <input type="text" placeholder="Filter terms..." class="filter-input" (input)="onFilterInput($event)" />
+        <div class="relative flex-1 max-w-[280px]">
+          <span class="absolute left-3.5 top-1/2 -translate-y-1/2 material-symbols-outlined text-[20px] text-gray-300">search</span>
+          <input type="text" placeholder="Filter terms..." class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-[14px] font-semibold text-gray-900 outline-none transition-all placeholder-gray-400 focus:bg-white focus:border-[#4255FF] focus:shadow-sm" (input)="onFilterInput($event)" />
         </div>
       </div>
-      <div class="terms-list">
+      <div class="flex flex-col gap-3">
         @for (t of visibleTerms; track t.term; let i = $index) {
-          <div class="term-row" [style.animation-delay]="(i * 0.05) + 's'">
-            <div class="term-number">{{ i + 1 }}</div>
-            <div class="term-word">{{ t.term }}</div>
-            <div class="term-def">{{ t.definition }}</div>
-            <button class="term-audio-btn" title="Listen">
-              <span class="material-symbols-outlined">volume_up</span>
-            </button>
+          <div class="flex flex-col sm:flex-row sm:items-stretch bg-white border border-gray-100 rounded-xl px-5 py-4 transition-all animate-[fadeSlide_0.3s_ease_both] hover:border-[#4255FF] hover:shadow-sm group" [style.animation-delay]="(i * 0.05) + 's'">
+            <div class="text-[12px] font-black text-[#4255FF] opacity-40 mb-2 sm:mb-0 sm:mr-6 shrink-0 pt-0.5">{{ i + 1 }}</div>
+            <div class="flex-1 sm:border-r border-gray-50 sm:pr-8 mb-4 sm:mb-0">
+              <span class="text-[15px] font-black text-gray-900 leading-tight break-words">{{ t.term }}</span>
+            </div>
+            <div class="flex-[1.5] sm:pl-8 flex items-start gap-3 min-w-0">
+              <span class="flex-1 text-[14px] font-medium text-gray-500 leading-relaxed min-w-0 break-words">{{ t.definition }}</span>
+              <button class="w-8 h-8 rounded-lg border-none bg-transparent text-gray-300 flex items-center justify-center cursor-pointer transition-all shrink-0 hover:bg-gray-100 hover:text-[#4255FF]" title="Listen">
+                <span class="material-symbols-outlined text-[20px]">volume_up</span>
+              </button>
+            </div>
           </div>
         }
       </div>
       @if (totalFilteredTerms > 4) {
-        <button class="view-all-btn" (click)="toggleTerms()">
-          <span class="material-symbols-outlined">{{ showAllTerms() ? 'expand_less' : 'expand_more' }}</span>
+        <button class="w-full flex items-center justify-center gap-2 py-4 mt-4 bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl text-gray-500 font-bold text-[14px] cursor-pointer transition-all hover:bg-indigo-50 hover:border-[#4255FF] hover:text-[#4255FF]" (click)="toggleTerms()">
+          <span class="material-symbols-outlined text-[22px]">{{ showAllTerms() ? 'expand_less' : 'expand_more' }}</span>
           {{ showAllTerms() ? 'Show Less' : 'View All ' + totalFilteredTerms + ' Terms' }}
         </button>
       }
     </section>
 
     <!-- Ratings Sidebar -->
-    <aside class="ratings-sidebar">
-      <div class="sidebar-card">
-        <h3 class="sidebar-title">Ratings & Reviews</h3>
-        <div class="rating-summary">
-          <span class="big-rating">{{ deck.stats.rating }}</span>
-          <div class="rating-right">
-            <div class="stars-row">
+    <aside class="w-full lg:w-[320px] sticky top-8 flex flex-col gap-6 shrink-0">
+      <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+        <h3 class="text-[15px] font-black text-gray-900 m-0 mb-6 uppercase tracking-wider">Ratings & Reviews</h3>
+        <div class="flex items-center gap-5 mb-8">
+          <span class="text-[3.5rem] font-black text-[#4255FF] leading-none tracking-tighter">{{ deck.stats.rating }}</span>
+          <div class="flex flex-col">
+            <div class="flex gap-0.5 mb-1.5">
               @for (s of [1,2,3,4,5]; track s) {
-                <span class="material-symbols-outlined star-filled">star</span>
+                <span class="material-symbols-outlined text-[18px] text-amber-400">star</span>
               }
             </div>
-            <span class="rating-count">{{ totalRatings }} ratings</span>
+            <span class="text-[12px] font-extrabold text-gray-400 uppercase tracking-wide">{{ totalRatings }} ratings</span>
           </div>
         </div>
-        <div class="rating-bars">
+        <div class="flex flex-col gap-2.5">
           @for (r of ratingBreakdown; track r.stars) {
-            <div class="bar-row">
-              <span class="bar-label">{{ r.stars }}</span>
-              <span class="material-symbols-outlined bar-star">star</span>
-              <div class="bar-track">
-                <div class="bar-fill" [style.width]="getBarWidth(r.count)"></div>
+            <div class="flex items-center gap-2.5">
+              <span class="w-2 text-[12px] font-black text-gray-400">{{ r.stars }}</span>
+              <span class="material-symbols-outlined text-[13px] text-gray-300">star</span>
+              <div class="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden relative">
+                <div class="absolute inset-y-0 left-0 bg-[#4255FF] rounded-full transition-[width] duration-700 ease-out" [style.width]="getBarWidth(r.count)"></div>
               </div>
-              <span class="bar-count">{{ r.count }}</span>
+              <span class="text-[11px] font-black text-gray-400 min-w-[15px] text-right">{{ r.count }}</span>
             </div>
           }
         </div>
       </div>
 
-      <div class="sidebar-card reviews-card">
-        <h3 class="sidebar-title">Recent Reviews</h3>
-        <div class="reviews-list">
+      <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+        <h3 class="text-[15px] font-black text-gray-900 m-0 mb-6 uppercase tracking-wider">Recent Reviews</h3>
+        <div class="flex flex-col gap-6">
           @for (rev of reviews; track rev.name) {
-            <div class="review-item">
-              <div class="review-header">
-                <div class="review-avatar">{{ rev.avatar }}</div>
-                <div class="review-meta">
-                  <span class="review-author">{{ rev.name }}</span>
-                  <span class="review-time">{{ rev.timeAgo }}</span>
+            <div class="flex flex-col gap-3 pb-6 border-b border-gray-50 last:pb-0 last:border-0">
+              <div class="flex items-start gap-3">
+                <div class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-indigo-500 font-black text-[13px] shrink-0 border border-white shadow-xs">{{ rev.avatar }}</div>
+                <div class="flex flex-col min-w-0 flex-1">
+                  <span class="text-[14px] font-black text-gray-900 truncate leading-tight">{{ rev.name }}</span>
+                  <span class="text-[11px] font-semibold text-gray-400 mt-0.5">{{ rev.timeAgo }}</span>
                 </div>
-                <div class="review-stars">
+                <div class="flex gap-px shrink-0 mt-0.5">
                   @for (s of getStarArray(rev.rating); track $index) {
-                    <span class="material-symbols-outlined mini-star" [class.empty]="s === 'empty'">star</span>
+                    <span class="material-symbols-outlined text-[11px]" [class]="s === 'empty' ? 'text-gray-200' : 'text-amber-400'">star</span>
                   }
                 </div>
               </div>
-              <p class="review-text">"{{ rev.text }}"</p>
+              <p class="text-[13px] italic font-medium text-gray-500 leading-[1.6] m-0 pr-2">"{{ rev.text }}"</p>
             </div>
           }
         </div>

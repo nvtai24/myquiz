@@ -1,0 +1,53 @@
+<div class="subscription-page">
+  <!-- Current Plan Banner -->
+  <div class="current-plan-card">
+    <div class="plan-info">
+      <span class="material-symbols-outlined plan-icon">workspace_premium</span>
+      <div>
+        <p class="plan-label">Current Plan</p>
+        <h2 class="plan-name">{{ currentPlan() === 'pro' ? 'Pro Plan' : 'Free Plan' }}</h2>
+      </div>
+    </div>
+    <div class="plan-meta">
+      @if (currentPlan() === 'pro') {
+        <span class="renewal">Renews on Jan 1, 2025</span>
+        <button class="btn-outline-danger">Cancel Subscription</button>
+      } @else {
+        <span class="renewal free-tag">No active subscription</span>
+      }
+    </div>
+  </div>
+
+  <!-- Pricing -->
+  <h3 class="section-title">Choose Your Plan</h3>
+  <div class="plans-grid">
+    @for (plan of plans; track plan.id) {
+      <div class="plan-card" [class.popular]="plan.popular" [class.active]="currentPlan() === plan.id">
+        @if (plan.popular) {
+          <span class="popular-badge">Most Popular</span>
+        }
+        <h3 class="plan-card-name">{{ plan.name }}</h3>
+        <div class="plan-price">
+          <span class="price">{{ plan.price }}</span>
+          <span class="period">{{ plan.period }}</span>
+        </div>
+        <ul class="feature-list">
+          @for (f of plan.features; track f.text) {
+            <li class="feature-item" [class.disabled]="!f.included">
+              <span class="material-symbols-outlined feature-icon">
+                {{ f.included ? 'check_circle' : 'cancel' }}
+              </span>
+              {{ f.text }}
+            </li>
+          }
+        </ul>
+        <button
+          class="plan-btn"
+          [class.current]="currentPlan() === plan.id"
+          (click)="selectPlan(plan.id)">
+          {{ currentPlan() === plan.id ? 'Current Plan' : (plan.id === 'pro' ? 'Upgrade to Pro' : 'Downgrade') }}
+        </button>
+      </div>
+    }
+  </div>
+</div>

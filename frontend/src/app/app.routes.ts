@@ -14,7 +14,6 @@ import { AddDeck } from './pages/add-deck/add-deck';
 import { DeckDetail } from './pages/deck-detail/deck-detail';
 import { Quiz } from './pages/quiz/quiz';
 import { Learn } from './pages/learn/learn';
-import { AiGenerator } from './pages/ai-generator/ai-generator';
 import { QuizResult } from './pages/quiz-result/quiz-result';
 import { AccountSettings } from './pages/account-settings/account-settings';
 import { UserProfile } from './pages/user-profile/user-profile';
@@ -46,7 +45,6 @@ export const routes: Routes = [
       { path: 'deck/:id', component: DeckDetail },
       { path: 'quiz/:id', component: Quiz },
       { path: 'learn/:id', component: Learn },
-      { path: 'ai-generator', component: AiGenerator },
       { path: 'quiz-result/:id', component: QuizResult },
       { path: 'account-settings', component: AccountSettings },
       { path: 'profile', component: UserProfile },

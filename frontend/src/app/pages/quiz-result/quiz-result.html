@@ -1,0 +1,128 @@
+<div class="result-page">
+  <!-- Header -->
+  <div class="result-header">
+    <h1 class="result-title">Quiz Complete! 🎉</h1>
+    <div class="perfect-badge">
+      <span class="material-symbols-outlined badge-icon">emoji_events</span>
+      <span>PERFECT STREAK!</span>
+    </div>
+  </div>
+
+  <!-- Score Card -->
+  <div class="score-card">
+    <div class="score-ring">
+      <svg viewBox="0 0 120 120" class="ring-svg">
+        <circle cx="60" cy="60" r="52" class="ring-bg" />
+        <circle cx="60" cy="60" r="52" class="ring-fill"
+          [style.stroke-dasharray]="326.7"
+          [style.stroke-dashoffset]="326.7 - (326.7 * score / 100)" />
+      </svg>
+      <div class="ring-text">
+        <span class="ring-percent">{{ score }}%</span>
+        <span class="ring-label">SCORE</span>
+      </div>
+    </div>
+    <div class="score-info">
+      <h2 class="greeting">{{ greeting }}</h2>
+      <p class="performance-text">{{ performanceText }}</p>
+      <div class="stars-row">
+        @for (s of [1,2,3,4,5]; track s) {
+          <span class="material-symbols-outlined" [class.star-filled]="s <= 4" [class.star-empty]="s > 4">star</span>
+        }
+      </div>
+      <p class="correct-summary">{{ totalCorrect }} out of {{ totalQuestions }} correct</p>
+    </div>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="stats-row">
+    <div class="result-stat">
+      <span class="stat-title">CORRECT</span>
+      <span class="material-symbols-outlined stat-icon green">check_circle</span>
+      <span class="stat-val green">{{ totalCorrect }}</span>
+    </div>
+    <div class="result-stat">
+      <span class="stat-title">INCORRECT</span>
+      <span class="material-symbols-outlined stat-icon red">cancel</span>
+      <span class="stat-val red">{{ totalIncorrect < 10 ? '0' + totalIncorrect : totalIncorrect }}</span>
+    </div>
+    <div class="result-stat">
+      <span class="stat-title">TIME</span>
+      <span class="material-symbols-outlined stat-icon blue">schedule</span>
+      <span class="stat-val">{{ timeTaken }}</span>
+    </div>
+    <div class="result-stat">
+      <span class="stat-title">HINTS USED</span>
+      <span class="material-symbols-outlined stat-icon orange">lightbulb</span>
+      <span class="stat-val orange">{{ hintsUsed < 10 ? '0' + hintsUsed : hintsUsed }}</span>
+    </div>
+  </div>
+
+  <!-- Performance by Category -->
+  <div class="section-card">
+    <h3 class="section-heading">
+      <span class="material-symbols-outlined">bar_chart</span>
+      Performance by Category
+    </h3>
+    @for (cat of categories; track cat.name) {
+      <div class="category-row">
+        <span class="cat-name">{{ cat.name }}</span>
+        <div class="cat-bar-track">
+          <div class="cat-bar-fill" [style.width]="cat.score + '%'" [style.background]="cat.color"></div>
+        </div>
+        <span class="cat-score">{{ cat.score }}%</span>
+      </div>
+    }
+  </div>
+
+  <!-- Question Review -->
+  <div class="section-card">
+    <div class="section-heading-row">
+      <h3 class="section-heading">
+        <span class="material-symbols-outlined">rate_review</span>
+        Question Review
+      </h3>
+      <button class="expand-all-btn" (click)="expandAll()">Expand All</button>
+    </div>
+
+    @for (q of questions; track q.number) {
+      <div class="review-item" [class.incorrect]="!q.isCorrect">
+        <div class="review-row" (click)="toggleQuestion(q.number)">
+          <span class="material-symbols-outlined review-status" [class.correct]="q.isCorrect" [class.wrong]="!q.isCorrect">
+            {{ q.isCorrect ? 'check_circle' : 'cancel' }}
+          </span>
+          <div class="review-content">
+            <span class="review-q">{{ q.number }}. {{ q.text }}</span>
+            <span class="review-answer">
+              Your answer: <strong>{{ q.answer }}</strong>
+              @if (!q.isCorrect && q.correct) {
+                 · Correct: <strong class="correct-answer">{{ q.correct }}</strong>
+              }
+            </span>
+          </div>
+          <span class="material-symbols-outlined expand-icon">
+            {{ expandedQuestion() === q.number || expandedQuestion() === -1 ? 'expand_less' : 'expand_more' }}
+          </span>
+        </div>
+        @if ((expandedQuestion() === q.number || expandedQuestion() === -1) && q.explanation) {
+          <div class="review-explanation">
+            <span class="material-symbols-outlined explain-icon">school</span>
+            <div>
+              <strong>Explanation</strong>
+              <p>{{ q.explanation }}</p>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- CTA Buttons -->
+  <div class="result-cta">
+    <button class="cta-retry" routerLink="/quiz">Retake Quiz</button>
+    <button class="cta-dashboard" routerLink="/dashboard">
+      Back to Dashboard
+      <span class="material-symbols-outlined">arrow_forward</span>
+    </button>
+  </div>
+</div>

@@ -1,0 +1,379 @@
+<!-- ===== SETUP SCREEN ===== -->
+@if (quizState() === 'setup') {
+<div class="setup-page">
+  <div class="setup-header">
+    <div class="setup-icon-wrap">
+      <span class="material-symbols-outlined">quiz</span>
+    </div>
+    <h1 class="setup-title">Quiz Mode</h1>
+    <p class="setup-subtitle">Configure your quiz for <strong>{{ deckTitle }}</strong></p>
+  </div>
+
+  <div class="setup-content">
+    <div class="setup-main">
+      <!-- Question Types -->
+      <div class="setup-card">
+        <div class="setup-card-header">
+          <span class="material-symbols-outlined setup-card-icon">category</span>
+          <div>
+            <h3 class="setup-card-title">Question Types</h3>
+            <p class="setup-card-desc">Select which types of questions to include</p>
+          </div>
+        </div>
+        <div class="type-options">
+          <button
+            class="type-btn"
+            [class.active]="selectedQuestionTypes().has('multiple_choice')"
+            (click)="toggleQuestionType('multiple_choice')"
+          >
+            <span class="material-symbols-outlined type-icon">checklist</span>
+            <div class="type-info">
+              <span class="type-label">Multiple Choice</span>
+              <span class="type-count">{{ getQuestionTypeCounts().mc }} questions</span>
+            </div>
+            <span class="material-symbols-outlined type-check">{{ selectedQuestionTypes().has('multiple_choice') ? 'check_circle' : 'radio_button_unchecked' }}</span>
+          </button>
+          <button
+            class="type-btn"
+            [class.active]="selectedQuestionTypes().has('true_false')"
+            (click)="toggleQuestionType('true_false')"
+          >
+            <span class="material-symbols-outlined type-icon">check_circle</span>
+            <div class="type-info">
+              <span class="type-label">True / False</span>
+              <span class="type-count">{{ getQuestionTypeCounts().tf }} questions</span>
+            </div>
+            <span class="material-symbols-outlined type-check">{{ selectedQuestionTypes().has('true_false') ? 'check_circle' : 'radio_button_unchecked' }}</span>
+          </button>
+          <button
+            class="type-btn"
+            [class.active]="selectedQuestionTypes().has('fill_blank')"
+            (click)="toggleQuestionType('fill_blank')"
+          >
+            <span class="material-symbols-outlined type-icon">edit_note</span>
+            <div class="type-info">
+              <span class="type-label">Fill in the Blank</span>
+              <span class="type-count">{{ getQuestionTypeCounts().fb }} questions</span>
+            </div>
+            <span class="material-symbols-outlined type-check">{{ selectedQuestionTypes().has('fill_blank') ? 'check_circle' : 'radio_button_unchecked' }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Question Count -->
+      <div class="setup-card">
+        <div class="setup-card-header">
+          <span class="material-symbols-outlined setup-card-icon">format_list_numbered</span>
+          <div>
+            <h3 class="setup-card-title">Number of Questions</h3>
+            <p class="setup-card-desc">Choose how many questions you want to answer ({{ filteredQuestionPool.length }} available)</p>
+          </div>
+        </div>
+        <div class="count-options">
+          @for (opt of questionCountOptions; track opt) {
+            <button
+              class="count-btn"
+              [class.active]="questionCount() === opt"
+              (click)="setQuestionCount(opt)"
+            >
+              <span class="count-number">{{ opt }}</span>
+              @if (opt === filteredQuestionPool.length) {
+                <span class="count-label">All</span>
+              } @else {
+                <span class="count-label">Questions</span>
+              }
+            </button>
+          }
+        </div>
+      </div>
+
+      <!-- Options -->
+      <div class="setup-card">
+        <div class="setup-card-header">
+          <span class="material-symbols-outlined setup-card-icon">tune</span>
+          <div>
+            <h3 class="setup-card-title">Quiz Options</h3>
+            <p class="setup-card-desc">Customize your quiz experience</p>
+          </div>
+        </div>
+        <div class="toggle-options">
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <span class="material-symbols-outlined toggle-icon">shuffle</span>
+              <div>
+                <span class="toggle-label">Shuffle Questions</span>
+                <span class="toggle-desc">Randomize question order</span>
+              </div>
+            </div>
+            <button class="toggle-switch" [class.on]="shuffleQuestions()" (click)="shuffleQuestions.set(!shuffleQuestions())">
+              <span class="toggle-knob"></span>
+            </button>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <span class="material-symbols-outlined toggle-icon">timer</span>
+              <div>
+                <span class="toggle-label">Show Timer</span>
+                <span class="toggle-desc">Track your quiz duration</span>
+              </div>
+            </div>
+            <button class="toggle-switch" [class.on]="showTimer()" (click)="showTimer.set(!showTimer())">
+              <span class="toggle-knob"></span>
+            </button>
+          </div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <span class="material-symbols-outlined toggle-icon">lightbulb</span>
+              <div>
+                <span class="toggle-label">Enable Hints</span>
+                <span class="toggle-desc">Get help when stuck</span>
+              </div>
+            </div>
+            <button class="toggle-switch" [class.on]="showHintsOption()" (click)="showHintsOption.set(!showHintsOption())">
+              <span class="toggle-knob"></span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Preview Sidebar -->
+    <div class="setup-sidebar">
+      <div class="preview-card">
+        <h3 class="preview-title">Quiz Preview</h3>
+        <div class="preview-stats">
+          <div class="preview-stat">
+            <span class="material-symbols-outlined">help_outline</span>
+            <span>{{ questionCount() }} questions</span>
+          </div>
+          <div class="preview-stat">
+            <span class="material-symbols-outlined">timer</span>
+            <span>~{{ questionCount() * 1.5 | number: '1.0-0' }} min estimated</span>
+          </div>
+          <div class="preview-stat">
+            <span class="material-symbols-outlined">category</span>
+            <span>{{ selectedQuestionTypes().size }} type{{ selectedQuestionTypes().size > 1 ? 's' : '' }} selected</span>
+          </div>
+          <div class="preview-stat">
+            <span class="material-symbols-outlined">{{ shuffleQuestions() ? 'shuffle' : 'sort' }}</span>
+            <span>{{ shuffleQuestions() ? 'Shuffled' : 'In Order' }}</span>
+          </div>
+        </div>
+        <div class="preview-divider"></div>
+        <div class="preview-tips">
+          <h4 class="tips-title">
+            <span class="material-symbols-outlined">tips_and_updates</span>
+            Quick Tips
+          </h4>
+          <ul class="tips-list">
+            <li>Read each question carefully</li>
+            <li>You can flag questions to review later</li>
+            <li>Navigate between questions freely</li>
+            <li>No penalty for wrong answers</li>
+          </ul>
+        </div>
+      </div>
+
+      <button class="start-quiz-btn" (click)="startQuiz()">
+        <span class="material-symbols-outlined">play_arrow</span>
+        Start Quiz
+      </button>
+    </div>
+  </div>
+</div>
+}
+
+<!-- ===== QUIZ IN PROGRESS ===== -->
+@if (quizState() === 'in-progress') {
+<div class="quiz-page">
+  <div class="quiz-main">
+    <!-- Progress Header -->
+    <div class="quiz-header">
+      <div class="quiz-header-left">
+        <span class="deck-label">{{ deckTitle | uppercase }}</span>
+        <h2 class="question-counter">Question {{ currentIndex() + 1 }} of {{ totalQuestions }}</h2>
+      </div>
+      <div class="quiz-header-right">
+        @if (showTimer()) {
+          <div class="timer-badge">
+            <span class="material-symbols-outlined timer-icon">timer</span>
+            <span class="timer-text">{{ formattedTime }}</span>
+          </div>
+        }
+        <span class="progress-label">{{ progress() }}%</span>
+      </div>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" [style.width]="progress() + '%'"></div>
+    </div>
+
+    <!-- Question Card -->
+    <div class="question-card">
+      <div class="question-top">
+        <div class="question-top-left">
+          <span class="question-type-badge">
+            <span class="material-symbols-outlined">{{ getTypeIcon(currentQuestion().type) }}</span>
+            {{ getTypeLabel(currentQuestion().type) }}
+          </span>
+          <h3 class="question-text">{{ currentQuestion().text }}</h3>
+        </div>
+        <button
+          class="flag-btn"
+          [class.flagged]="flaggedQuestions().has(currentIndex())"
+          (click)="toggleFlag()"
+          title="Flag for review"
+        >
+          <span class="material-symbols-outlined">{{ flaggedQuestions().has(currentIndex()) ? 'flag' : 'outlined_flag' }}</span>
+        </button>
+      </div>
+
+      <!-- Multiple Choice -->
+      @if (currentQuestion().type === 'multiple_choice') {
+        <div class="options-list">
+          @for (opt of $any(currentQuestion()).options; track opt.label; let j = $index) {
+            <button
+              class="option-btn"
+              [class.selected]="selectedAnswers()[currentIndex()] === j"
+              (click)="selectAnswer(j)"
+            >
+              <span class="option-letter">{{ opt.label }}</span>
+              <span class="option-text">{{ opt.text }}</span>
+              @if (selectedAnswers()[currentIndex()] === j) {
+                <span class="material-symbols-outlined check-mark">check_circle</span>
+              }
+            </button>
+          }
+        </div>
+      }
+
+      <!-- True / False -->
+      @if (currentQuestion().type === 'true_false') {
+        <div class="tf-options">
+          <button
+            class="tf-btn true"
+            [class.selected]="selectedAnswers()[currentIndex()] === true"
+            (click)="selectAnswer(true)"
+          >
+            <span class="material-symbols-outlined tf-icon">check_circle</span>
+            <span class="tf-label">True</span>
+          </button>
+          <button
+            class="tf-btn false"
+            [class.selected]="selectedAnswers()[currentIndex()] === false"
+            (click)="selectAnswer(false)"
+          >
+            <span class="material-symbols-outlined tf-icon">cancel</span>
+            <span class="tf-label">False</span>
+          </button>
+        </div>
+      }
+
+      <!-- Fill in the Blank -->
+      @if (currentQuestion().type === 'fill_blank') {
+        <div class="fill-blank-area">
+          <div class="fill-input-wrap">
+            <span class="material-symbols-outlined fill-icon">edit</span>
+            <input
+              type="text"
+              class="fill-input"
+              [placeholder]="$any(currentQuestion()).placeholder || 'Type your answer...'"
+              [value]="fillBlankInput()"
+              (input)="onFillInput($event)"
+              (keyup.enter)="submitFillBlank()"
+            />
+          </div>
+          <button class="fill-submit-btn" (click)="submitFillBlank()" [disabled]="!fillBlankInput().trim()">
+            <span class="material-symbols-outlined">send</span>
+            Submit Answer
+          </button>
+          @if (selectedAnswers()[currentIndex()] !== null) {
+            <div class="fill-submitted">
+              <span class="material-symbols-outlined">check_circle</span>
+              Answer submitted: <strong>{{ selectedAnswers()[currentIndex()] }}</strong>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Navigation -->
+    <div class="quiz-nav">
+      <button class="nav-btn secondary" (click)="prevQuestion()" [disabled]="currentIndex() === 0">
+        <span class="material-symbols-outlined">chevron_left</span>
+        Back
+      </button>
+      <div class="nav-center">
+        <span class="answered-status">{{ answeredCount() }}/{{ totalQuestions }} answered</span>
+      </div>
+      @if (currentIndex() < totalQuestions - 1) {
+        <button class="nav-btn primary" (click)="nextQuestion()">
+          Next
+          <span class="material-symbols-outlined">chevron_right</span>
+        </button>
+      } @else {
+        <button class="nav-btn primary finish" (click)="finishQuiz()">
+          <span class="material-symbols-outlined">check</span>
+          Finish Quiz
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Sidebar -->
+  <aside class="quiz-sidebar">
+    <div class="nav-panel">
+      <div class="nav-panel-header">
+        <h4 class="nav-panel-title">Navigator</h4>
+        <span class="nav-total">{{ answeredCount() }}/{{ totalQuestions }}</span>
+      </div>
+      <div class="nav-grid">
+        @for (q of questions; track q.id; let i = $index) {
+          <button
+            class="nav-dot"
+            [class.current]="getQuestionStatus(i) === 'current'"
+            [class.answered]="getQuestionStatus(i) === 'answered'"
+            [class.flagged]="getQuestionStatus(i) === 'flagged'"
+            (click)="goToQuestion(i)"
+          >{{ i + 1 }}</button>
+        }
+      </div>
+      <div class="nav-legend">
+        <span class="legend-item"><span class="legend-dot current"></span> Current</span>
+        <span class="legend-item"><span class="legend-dot answered"></span> Answered</span>
+        <span class="legend-item"><span class="legend-dot flagged"></span> Flagged</span>
+        <span class="legend-item"><span class="legend-dot unanswered"></span> Not Attempted</span>
+      </div>
+    </div>
+
+    <!-- Hint -->
+    @if (showHintsOption() && currentQuestion().hint) {
+      <div class="hint-panel">
+        <div class="hint-header" (click)="toggleHint()">
+          <span class="material-symbols-outlined hint-icon">lightbulb</span>
+          <span class="hint-title">Need a hint?</span>
+          <span class="material-symbols-outlined hint-chevron">{{ showHint() ? 'expand_less' : 'expand_more' }}</span>
+        </div>
+        @if (showHint()) {
+          <p class="hint-text">{{ currentQuestion().hint }}</p>
+        }
+      </div>
+    }
+
+    <!-- Quick Stats -->
+    <div class="sidebar-stats">
+      @if (unansweredCount > 0) {
+        <div class="mini-stat">
+          <span class="material-symbols-outlined mini-stat-icon orange">help_outline</span>
+          <span>{{ unansweredCount }} unanswered</span>
+        </div>
+      }
+      @if (flaggedCount > 0) {
+        <div class="mini-stat">
+          <span class="material-symbols-outlined mini-stat-icon amber">flag</span>
+          <span>{{ flaggedCount }} flagged</span>
+        </div>
+      }
+    </div>
+  </aside>
+</div>
+}

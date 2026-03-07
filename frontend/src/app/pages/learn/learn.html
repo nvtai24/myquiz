@@ -1,0 +1,213 @@
+<!-- ===== COMPLETE SCREEN ===== -->
+@if (showCompleteScreen()) {
+<div class="complete-page">
+  <div class="complete-card">
+    <div class="confetti">
+      <span>🎓</span><span>⭐</span><span>🏆</span>
+    </div>
+    <div class="complete-emoji">🎉</div>
+    <h1 class="complete-title">Amazing Work!</h1>
+    <p class="complete-sub">You've mastered all <strong>{{ totalCards }} cards</strong> in this deck!</p>
+
+    <div class="complete-stats">
+      <div class="complete-stat green-bg">
+        <span class="material-symbols-outlined">check_circle</span>
+        <span class="cs-value">{{ totalCards }}</span>
+        <span class="cs-label">Mastered</span>
+      </div>
+      <div class="complete-stat blue-bg">
+        <span class="material-symbols-outlined">style</span>
+        <span class="cs-value">100%</span>
+        <span class="cs-label">Complete</span>
+      </div>
+    </div>
+
+    <div class="complete-actions">
+      <button class="cbtn outline" (click)="resetProgress()">
+        <span class="material-symbols-outlined">replay</span>
+        Study Again
+      </button>
+      <button class="cbtn primary" (click)="goBackToDeck()">
+        Back to Deck
+        <span class="material-symbols-outlined">arrow_forward</span>
+      </button>
+    </div>
+  </div>
+</div>
+}
+
+<!-- ===== LEARN / FLASHCARD MODE ===== -->
+@if (!showCompleteScreen()) {
+<div class="learn-page" (keydown)="handleKeydown($event)" tabindex="0">
+  <!-- Header -->
+  <div class="learn-header">
+    <button class="back-btn" (click)="goBackToDeck()">
+      <span class="material-symbols-outlined">arrow_back</span>
+    </button>
+    <div class="header-center">
+      <h2 class="learn-title">{{ deckTitle }}</h2>
+    </div>
+    <div class="header-badges">
+      <div class="badge green-badge">
+        <span class="material-symbols-outlined">check_circle</span>
+        {{ masteredCount() }}
+      </div>
+      <div class="badge orange-badge">
+        <span class="material-symbols-outlined">refresh</span>
+        {{ learningCount() }}
+      </div>
+      <div class="badge gray-badge">
+        <span class="material-symbols-outlined">circle</span>
+        {{ newCount() }}
+      </div>
+    </div>
+  </div>
+
+  <!-- Progress -->
+  <div class="progress-row">
+    <div class="progress-track">
+      <div class="progress-seg mastered" [style.width]="(masteredCount() / totalCards * 100) + '%'"></div>
+      <div class="progress-seg learning" [style.width]="(learningCount() / totalCards * 100) + '%'"></div>
+    </div>
+    <span class="progress-text">{{ currentIndex() + 1 }} / {{ totalCards }}</span>
+  </div>
+
+  <!-- Flashcard Area -->
+  <div class="flashcard-area">
+    <!-- Nav Arrow Left -->
+    <button class="nav-arrow left" (click)="goPrev()" [disabled]="currentIndex() === 0">
+      <span class="material-symbols-outlined">chevron_left</span>
+    </button>
+
+    <!-- Card -->
+    <div class="flashcard-container">
+      <div
+        class="flashcard"
+        [class.flipped]="isFlipped()"
+        [class.slide-left]="slideDirection() === 'left'"
+        [class.slide-right]="slideDirection() === 'right'"
+        (click)="flipCard()"
+      >
+        <!-- Front -->
+        <div class="card-face card-front">
+          <div class="card-badge">
+            <span class="material-symbols-outlined">visibility</span>
+          </div>
+          <div class="card-body">
+            <h2 class="card-term">{{ currentCard().term }}</h2>
+          </div>
+        </div>
+        <!-- Back -->
+        <div class="card-face card-back">
+          <div class="card-badge back-badge">
+            <span class="material-symbols-outlined">menu_book</span>
+          </div>
+          <div class="card-body">
+            <p class="card-definition">{{ currentCard().definition }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Nav Arrow Right -->
+    <button class="nav-arrow right" (click)="goNext()" [disabled]="currentIndex() === totalCards - 1">
+      <span class="material-symbols-outlined">chevron_right</span>
+    </button>
+  </div>
+
+  <!-- Card Actions -->
+  @if (isFlipped()) {
+    <div class="card-actions">
+      <button class="action-btn learning-btn" (click)="markCard('learning'); $event.stopPropagation()">
+        Still Learning
+      </button>
+      <button class="action-btn mastered-btn" (click)="markCard('mastered'); $event.stopPropagation()">
+        Done
+      </button>
+    </div>
+  }
+
+  <!-- Navigation: dots (few cards) or compact (many cards) -->
+  @if (useDots) {
+    <div class="dots-row">
+      @for (card of cards; track card.id; let i = $index) {
+        <button
+          class="dot"
+          [class.active]="i === currentIndex()"
+          [class.mastered]="getCardStatus(i) === 'mastered'"
+          [class.learning]="getCardStatus(i) === 'learning'"
+          (click)="goToCard(i)"
+        ></button>
+      }
+    </div>
+  } @else {
+    <div class="compact-nav">
+      <button class="compact-arrow" (click)="goPrev()" [disabled]="currentIndex() === 0">
+        <span class="material-symbols-outlined">chevron_left</span>
+      </button>
+      <div class="compact-counter">
+        <span class="compact-current">{{ currentIndex() + 1 }}</span>
+        <span class="compact-sep">/</span>
+        <span class="compact-total">{{ totalCards }}</span>
+      </div>
+      <button class="compact-arrow" (click)="goNext()" [disabled]="currentIndex() === totalCards - 1">
+        <span class="material-symbols-outlined">chevron_right</span>
+      </button>
+    </div>
+  }
+  <!-- Term List (Quizlet style) -->
+  <div class="term-list-section">
+    <h3 class="term-list-title">
+      <span class="material-symbols-outlined">list_alt</span>
+      Terms in this set ({{ totalCards }})
+    </h3>
+    <div class="term-list">
+      @for (card of visibleTerms; track card.id; let i = $index) {
+        <div
+          class="term-row"
+          [class.active]="i === currentIndex()"
+          [class.mastered]="getCardStatus(i) === 'mastered'"
+          [class.learning]="getCardStatus(i) === 'learning'"
+          (click)="goToCard(i)"
+        >
+          <div class="term-side">
+            <span class="term-text">{{ card.term }}</span>
+          </div>
+          <div class="term-divider"></div>
+          <div class="def-side">
+            <span class="def-text">{{ card.definition }}</span>
+          </div>
+          <div class="term-actions">
+            @if (getCardStatus(i) === 'mastered') {
+              <span class="material-symbols-outlined term-status-icon ts-green">check_circle</span>
+            } @else if (getCardStatus(i) === 'learning') {
+              <span class="material-symbols-outlined term-status-icon ts-orange">refresh</span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    @if (hasMoreTerms) {
+      <button class="show-more-btn" (click)="toggleShowAll()">
+        <span class="material-symbols-outlined">expand_more</span>
+        Show {{ remainingTermsCount }} more terms
+      </button>
+    }
+    @if (showAllTerms() && totalCards > TERMS_PAGE_SIZE) {
+      <button class="show-more-btn" (click)="toggleShowAll()">
+        <span class="material-symbols-outlined">expand_less</span>
+        Show less
+      </button>
+    }
+  </div>
+
+  <!-- Reset -->
+  <div class="reset-row">
+    <button class="reset-btn" (click)="resetProgress()">
+      <span class="material-symbols-outlined">restart_alt</span>
+      Reset All Progress
+    </button>
+  </div>
+</div>
+}

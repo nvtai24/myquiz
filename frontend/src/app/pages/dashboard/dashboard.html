@@ -1,170 +1,87 @@
-<div class="layout" [class.sidebar-collapsed]="sidebarCollapsed()">
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-top">
-      <button class="sidebar-toggle" (click)="toggleSidebar()">
-        <span class="material-symbols-outlined">menu</span>
-      </button>
-      <span class="material-symbols-outlined text-[20px]">school</span>
-      <span class="text-xl font-bold tracking-tight text-[#ffff]">QuizMate</span>
-    </div>
-
-    <nav class="sidebar-nav">
-      <a class="nav-item active">
-        <span class="material-symbols-outlined">home</span>
-        <span class="nav-label">Trang chủ</span>
-      </a>
-      <a class="nav-item">
-        <span class="material-symbols-outlined">folder_open</span>
-        <span class="nav-label">Thư viện của bạn</span>
-      </a>
-      <a class="nav-item">
-        <span class="material-symbols-outlined">groups</span>
-        <span class="nav-label">Nhóm học</span>
-        <span class="nav-badge">Mới</span>
-      </a>
-      <a class="nav-item">
-        <span class="material-symbols-outlined">notifications</span>
-        <span class="nav-label">Thông báo</span>
-      </a>
-    </nav>
-
-    <div class="sidebar-divider"></div>
-
-    <div class="sidebar-section">
-      <span class="sidebar-section-title">Thư mục của bạn</span>
-      <a class="nav-item">
-        <span class="material-symbols-outlined">add</span>
-        <span class="nav-label">Thư mục mới</span>
-      </a>
-    </div>
-
-    <div class="sidebar-divider"></div>
-
-    <div class="sidebar-section">
-      <span class="sidebar-section-title">Bắt đầu tại đây</span>
-      <a class="nav-item">
-        <span class="material-symbols-outlined">style</span>
-        <span class="nav-label">Thẻ ghi nhớ</span>
-      </a>
-      <a class="nav-item">
-        <span class="material-symbols-outlined">chat</span>
-        <span class="nav-label">Lời giải chuyên gia</span>
-      </a>
-    </div>
-  </aside>
-
-  <!-- Right content area -->
-  <div class="content-area">
-    <!-- Top Navbar -->
-    <nav class="navbar">
-      <div class="navbar-left">
-        <div class="search-bar">
-          <span class="material-symbols-outlined search-icon">search</span>
-          <input type="text" placeholder="Search study sets, textbooks, questions..." />
-        </div>
-      </div>
-      <div class="navbar-right">
-        <button class="icon-btn">
-          <span class="material-symbols-outlined">notifications</span>
-        </button>
-        <div class="avatar" (click)="logout()">
-          <span class="material-symbols-outlined">account_circle</span>
-        </div>
-      </div>
-    </nav>
-
-    <!-- Main Content -->
-    <main class="dashboard-main">
-  <!-- Greeting Section -->
-  <section class="greeting-section">
-    <div>
-      <h1 class="greeting-title">Good morning, {{ userName() }}!</h1>
-      <p class="greeting-sub">Ready to master your classes today?</p>
-    </div>
-    <div class="streak-badge">
-      <span class="material-symbols-outlined streak-icon">local_fire_department</span>
-      <span>7 day streak</span>
-    </div>
-  </section>
-
-  <!-- Stats Cards -->
-  <section class="stats-section">
-    <div class="stat-card">
-      <span class="material-symbols-outlined stat-icon blue">style</span>
-      <div class="stat-label">STUDY SETS</div>
-      <div class="stat-value">24</div>
-    </div>
-    <div class="stat-card">
-      <span class="material-symbols-outlined stat-icon indigo">quiz</span>
-      <div class="stat-label">QUIZZES TAKEN</div>
-      <div class="stat-value">12</div>
-    </div>
-    <div class="stat-card">
-      <span class="material-symbols-outlined stat-icon green">trending_up</span>
-      <div class="stat-label">AVERAGE SCORE</div>
-      <div class="stat-value">92%</div>
-    </div>
-    <div class="stat-card">
-      <span class="material-symbols-outlined stat-icon orange">emoji_events</span>
-      <div class="stat-label">GLOBAL RANKING</div>
-      <div class="stat-value">Top 5%</div>
-    </div>
-  </section>
-
-  <!-- Continue Studying -->
-  <section class="section">
-    <div class="section-header">
-      <h2 class="section-title">Continue Studying</h2>
-      <a class="view-all">View all</a>
-    </div>
-    <div class="course-grid">
-      @for (course of continueStudying; track course.title) {
-        <div class="course-card">
-          <div class="course-img" [style.background-color]="course.color">
-            <span class="material-symbols-outlined course-icon">{{ course.icon }}</span>
-          </div>
-          <div class="course-info">
-            <h3 class="course-title">{{ course.title }}</h3>
-            <p class="course-meta">{{ course.terms }} Terms &bull; {{ course.topic }}</p>
-            <div class="progress-bar">
-              <div class="progress-fill" [style.width]="course.progress + '%'" [style.background-color]="course.barColor"></div>
-            </div>
-            <span class="progress-text">{{ course.progress }}% complete</span>
-          </div>
-        </div>
-      }
-    </div>
-  </section>
-
-  <!-- Recommended for You -->
-  <section class="section">
-    <h2 class="section-title">Recommended for You</h2>
-    <div class="recommended-grid">
-      @for (rec of recommended; track rec.title) {
-        <div class="rec-card">
-          <div class="rec-img" [style.background-color]="rec.color">
-            <span class="material-symbols-outlined rec-icon">{{ rec.icon }}</span>
-          </div>
-          <div class="rec-info">
-            <h3 class="rec-title">{{ rec.title }}</h3>
-            <div class="rec-rating">
-              <span class="material-symbols-outlined star-icon">star</span>
-              <span class="rating-value">{{ rec.rating }}</span>
-              <span class="rating-count">({{ rec.reviews }})</span>
-            </div>
-            <p class="rec-meta">{{ rec.terms }} terms</p>
-          </div>
-          <button class="study-btn">Study</button>
-        </div>
-      }
-    </div>
-  </section>
-</main>
-
-    <!-- Floating Action Button -->
-    <button class="fab">
-      <span class="material-symbols-outlined">add</span>
-    </button>
+<!-- Greeting Section -->
+<section class="greeting-section">
+  <div>
+    <h1 class="greeting-title">Good morning, {{ userName() }}!</h1>
+    <p class="greeting-sub">Ready to master your classes today?</p>
   </div>
-</div>
+  <div class="streak-badge">
+    <span class="material-symbols-outlined streak-icon">local_fire_department</span>
+    <span>7 day streak</span>
+  </div>
+</section>
+
+<!-- Stats Cards -->
+<section class="stats-section">
+  <div class="stat-card">
+    <span class="material-symbols-outlined stat-icon blue">style</span>
+    <div class="stat-label">STUDY SETS</div>
+    <div class="stat-value">24</div>
+  </div>
+  <div class="stat-card">
+    <span class="material-symbols-outlined stat-icon indigo">quiz</span>
+    <div class="stat-label">QUIZZES TAKEN</div>
+    <div class="stat-value">12</div>
+  </div>
+  <div class="stat-card">
+    <span class="material-symbols-outlined stat-icon green">trending_up</span>
+    <div class="stat-label">AVERAGE SCORE</div>
+    <div class="stat-value">92%</div>
+  </div>
+  <div class="stat-card">
+    <span class="material-symbols-outlined stat-icon orange">emoji_events</span>
+    <div class="stat-label">GLOBAL RANKING</div>
+    <div class="stat-value">Top 5%</div>
+  </div>
+</section>
+
+<!-- Continue Studying -->
+<section class="section">
+  <div class="section-header">
+    <h2 class="section-title">Continue Studying</h2>
+    <a class="view-all" routerLink="/library">View all</a>
+  </div>
+  <div class="course-grid">
+    @for (course of continueStudying; track course.title) {
+      <div class="course-card" routerLink="/deck/1" style="cursor:pointer">
+        <div class="course-img" [style.background-color]="course.color">
+          <span class="material-symbols-outlined course-icon">{{ course.icon }}</span>
+        </div>
+        <div class="course-info">
+          <h3 class="course-title">{{ course.title }}</h3>
+          <p class="course-meta">{{ course.terms }} Terms &bull; {{ course.topic }}</p>
+          <div class="progress-bar">
+            <div class="progress-fill" [style.width]="course.progress + '%'" [style.background-color]="course.barColor"></div>
+          </div>
+          <span class="progress-text">{{ course.progress }}% complete</span>
+        </div>
+      </div>
+    }
+  </div>
+</section>
+
+<!-- Recommended for You -->
+<section class="section">
+  <div class="section-header">
+    <h2 class="section-title">Recommended for You</h2>
+    <a class="view-all">View all</a>
+  </div>
+  <div class="recommended-grid">
+    @for (rec of recommended; track rec.title) {
+      <div class="rec-card">
+        <div class="rec-img" [style.background-color]="rec.color">
+          <span class="material-symbols-outlined rec-icon">{{ rec.icon }}</span>
+        </div>
+        <div class="rec-info">
+          <h3 class="rec-title">{{ rec.title }}</h3>
+          <div class="rec-rating">
+            <span class="material-symbols-outlined star-icon">star</span>
+            <span class="rating-value">{{ rec.rating }}</span>
+            <span class="rating-count">({{ rec.reviews }})</span>
+          </div>
+          <p class="rec-meta">{{ rec.terms }} terms</p>
+        </div>
+        <button class="study-btn" routerLink="/deck/1">Study</button>
+      </div>
+    }
+  </div>
+</section>

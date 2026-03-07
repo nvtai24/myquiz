@@ -1,20 +1,16 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject } from '@angular/core';
+import { RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [],
+  imports: [RouterModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
 export class Dashboard {
   private authService = inject(AuthService);
-  sidebarCollapsed = signal(false);
-
-  toggleSidebar() {
-    this.sidebarCollapsed.update(v => !v);
-  }
 
   userName = computed(() => {
     const user = this.authService.currentUser();
@@ -33,8 +29,4 @@ export class Dashboard {
     { title: 'Comp Sci: Algorithms', rating: 4.8, reviews: '859', terms: 110, color: '#0ea5e9', icon: 'code' },
     { title: 'Intro to Psychology', rating: 4.7, reviews: '2.4k', terms: 92, color: '#ec4899', icon: 'psychology' },
   ];
-
-  logout() {
-    this.authService.logout();
-  }
 }

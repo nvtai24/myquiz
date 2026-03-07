@@ -1,0 +1,127 @@
+<div class="library-page">
+  <h1 class="page-title">Your Library</h1>
+
+  <!-- Tabs & Search -->
+  <div class="tabs-container">
+    <div class="tabs">
+      <button class="tab" [class.active]="activeTab() === 'all'" (click)="setTab('all')">All Decks</button>
+      <button class="tab" [class.active]="activeTab() === 'created'" (click)="setTab('created')">Created by you</button>
+      <button class="tab" [class.active]="activeTab() === 'studying'" (click)="setTab('studying')">Studying</button>
+      <button class="tab" [class.active]="activeTab() === 'folders'" (click)="setTab('folders')">Folders</button>
+    </div>
+    
+    <div class="search-bar">
+      <span class="material-symbols-outlined search-icon">search</span>
+      <input type="text" placeholder="Search decks..." [ngModel]="searchQuery()" (ngModelChange)="onSearchChange($event)" />
+    </div>
+  </div>
+
+  <div class="library-content">
+    <!-- Filters Sidebar -->
+    <aside class="filters-panel">
+      <h3 class="filters-title">FILTERS</h3>
+
+      <div class="filter-group">
+        <h4 class="filter-label">Minimum Rating</h4>
+        <input type="range" class="rating-slider" min="1" max="5" step="0.1"
+          [value]="minRating()" (input)="onMinRatingChange(+$any($event.target).value)" />
+        <div class="rating-labels">
+          <span>1.0</span>
+          <span>3.0</span>
+          <span>5.0</span>
+        </div>
+      </div>
+
+      <div class="filter-group">
+        <h4 class="filter-label">Sort By</h4>
+        
+        <div class="custom-select-wrapper">
+          <div class="custom-select-header" (click)="toggleSort()">
+            <span class="custom-select-value">
+              {{ sortBy() === 'recent' ? 'Most Recent' : (sortBy() === 'rating' ? 'Highest Rated' : 'Most Terms') }}
+            </span>
+            <span class="material-symbols-outlined dropdown-icon" [class.open]="isSortOpen()">expand_more</span>
+          </div>
+          
+          @if (isSortOpen()) {
+            <ul class="custom-select-list">
+              <li [class.selected]="sortBy() === 'recent'" (click)="setSort('recent')">Most Recent</li>
+              <li [class.selected]="sortBy() === 'rating'" (click)="setSort('rating')">Highest Rated</li>
+              <li [class.selected]="sortBy() === 'terms'" (click)="setSort('terms')">Most Terms</li>
+            </ul>
+          }
+        </div>
+      </div>
+
+      <button class="clear-btn" (click)="clearFilters()">Clear All Filters</button>
+    </aside>
+
+    <!-- Main Content Area -->
+    <div class="main-content">
+      <!-- Quiz Grid -->
+      <div class="quiz-grid">
+        @for (deck of paginatedSets; track deck.id) {
+          <div class="quiz-card" [routerLink]="['/deck', deck.id]">
+            <div class="quiz-img" [style.background-color]="deck.color">
+              <span class="terms-badge">{{ deck.questionCount }} TERMS</span>
+              <span class="material-symbols-outlined quiz-icon">{{ deck.icon }}</span>
+            </div>
+            <div class="quiz-info">
+              <div class="quiz-badges">
+                <span class="visibility-badge" [class.private]="deck.visibility === 'Private'">
+                  <span class="material-symbols-outlined">{{ deck.visibility === 'Private' ? 'lock' : 'public' }}</span>
+                  {{ deck.visibility }}
+                </span>
+                <span class="status-badge" [class.draft]="deck.status === 'Draft'">{{ deck.status }}</span>
+                
+                @for (tag of deck.tags | slice:0:2; track tag) {
+                  <span class="tag-badge">{{ tag }}</span>
+                }
+                @if (deck.tags.length > 2) {
+                  <span class="tag-badge extra">+{{ deck.tags.length - 2 }}</span>
+                }
+              </div>
+
+              <h3 class="quiz-title">{{ deck.name }}</h3>
+              <p class="quiz-desc" [title]="deck.description">{{ deck.description }}</p>
+              <p class="quiz-date">Created on {{ deck.createdAt | date:'MMM d, yyyy' }}</p>
+
+              <div class="quiz-footer">
+                <div class="quiz-rating" (click)="$event.stopPropagation()">
+                  <span class="material-symbols-outlined star">star</span>
+                  <span class="rating-val">{{ deck.rating }}</span>
+                  <span class="rating-count">({{ deck.reviews }})</span>
+                </div>
+                <button class="study-btn" (click)="$event.stopPropagation()" [routerLink]="['/learn']">Study</button>
+              </div>
+            </div>
+          </div>
+        }
+
+        @if (filteredSets.length === 0) {
+          <div class="empty-state">
+            <span class="material-symbols-outlined empty-icon">search_off</span>
+            <p>No decks match your filters.</p>
+          </div>
+        }
+      </div>
+
+      <!-- Pagination -->
+      @if (totalPages > 1) {
+        <div class="pagination">
+          <button class="page-btn" [disabled]="currentPage() === 1" (click)="changePage(currentPage() - 1)">
+            <span class="material-symbols-outlined">chevron_left</span>
+          </button>
+          
+          <div class="page-info">
+            Page <span class="current-page">{{ currentPage() }}</span> of {{ totalPages }}
+          </div>
+          
+          <button class="page-btn" [disabled]="currentPage() === totalPages" (click)="changePage(currentPage() + 1)">
+            <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+</div>

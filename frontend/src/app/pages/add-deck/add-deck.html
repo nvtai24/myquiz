@@ -1,0 +1,333 @@
+<div class="add-deck-page">
+  <!-- Hero Top Bar -->
+  <div class="top-bar">
+    <div class="top-bar-left">
+      <button class="back-btn" (click)="cancel()">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </button>
+      <div class="title-block">
+        <h1 class="page-title">Create a new study set</h1>
+        <p class="page-subtitle">Build your flashcards manually or let AI do the heavy lifting</p>
+      </div>
+    </div>
+    <div class="top-bar-right">
+      @if (saved()) {
+        <span class="saved-indicator">
+          <span class="material-symbols-outlined saved-icon">check_circle</span>
+          Saved
+        </span>
+      }
+      <button class="visibility-btn" [class.private]="visibility() === 'private'" (click)="toggleVisibility()">
+        <span class="material-symbols-outlined">{{ visibility() === 'private' ? 'lock' : 'public' }}</span>
+        {{ visibility() === 'private' ? 'Private' : 'Public' }}
+      </button>
+      <span class="card-count">
+        <span class="material-symbols-outlined card-count-icon">style</span>
+        {{ cards().length }}
+      </span>
+      <button class="btn-draft" (click)="saveDraft()">
+        <span class="material-symbols-outlined btn-icon">save</span>
+        Draft
+      </button>
+      <button class="btn-create" (click)="create()">
+        <span class="material-symbols-outlined btn-icon">publish</span>
+        Create Set
+      </button>
+    </div>
+  </div>
+
+  <!-- Mode Selector Cards -->
+  <div class="mode-selector">
+    <button class="mode-card" [class.active]="mode() === 'manual'" (click)="mode.set('manual')">
+      <div class="mode-card-icon-wrap manual-icon">
+        <span class="material-symbols-outlined">edit_note</span>
+      </div>
+      <div class="mode-card-text">
+        <span class="mode-card-title">Manual</span>
+        <span class="mode-card-desc">Write your own cards</span>
+      </div>
+      @if (mode() === 'manual') {
+        <span class="material-symbols-outlined mode-check">check_circle</span>
+      }
+    </button>
+    <button class="mode-card" [class.active]="mode() === 'ai'" (click)="mode.set('ai')">
+      <div class="mode-card-icon-wrap ai-icon">
+        <span class="material-symbols-outlined">auto_awesome</span>
+      </div>
+      <div class="mode-card-text">
+        <span class="mode-card-title">AI Generate</span>
+        <span class="mode-card-desc">Create from your materials</span>
+      </div>
+      @if (mode() === 'ai') {
+        <span class="material-symbols-outlined mode-check">check_circle</span>
+      }
+    </button>
+  </div>
+
+  <!-- Meta Section: Title / Description / Cover -->
+  <div class="meta-section">
+    <div class="meta-fields">
+      <div class="field-group">
+        <label class="field-label">
+          <span class="material-symbols-outlined field-label-icon">title</span>
+          TITLE
+        </label>
+        <input
+          type="text"
+          class="field-input"
+          placeholder="Enter a title, like 'Biology – Chapter 1'"
+          [ngModel]="title()"
+          (ngModelChange)="title.set($event)"
+        />
+      </div>
+      <div class="field-group">
+        <label class="field-label">
+          <span class="material-symbols-outlined field-label-icon">notes</span>
+          DESCRIPTION
+        </label>
+        <textarea
+          class="field-textarea"
+          placeholder="Add a description..."
+          rows="3"
+          [ngModel]="description()"
+          (ngModelChange)="description.set($event)"
+        ></textarea>
+      </div>
+    </div>
+    <div class="cover-image-area" (click)="coverInput.click()">
+      @if (coverImage()) {
+        <img [src]="coverImage()" alt="Cover image" class="cover-preview" />
+        <button class="cover-remove" (click)="removeCoverImage(); $event.stopPropagation()">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      } @else {
+        <div class="cover-placeholder">
+          <span class="material-symbols-outlined cover-placeholder-icon">add_photo_alternate</span>
+          <span class="cover-placeholder-text">Cover Image</span>
+          <span class="cover-placeholder-hint">Click to upload</span>
+        </div>
+      }
+      <input
+        #coverInput
+        type="file"
+        accept="image/*"
+        hidden
+        (change)="onCoverImageSelect($event)"
+      />
+    </div>
+  </div>
+
+  <!-- AI Generation Panel -->
+  @if (mode() === 'ai') {
+    <div class="ai-panel">
+      <div class="ai-panel-header">
+        <div class="ai-icon-badge">
+          <span class="material-symbols-outlined">auto_awesome</span>
+        </div>
+        <div>
+          <h3 class="ai-panel-title">AI Card Generator</h3>
+          <p class="ai-panel-desc">Upload study material or paste text — AI will create flashcards instantly</p>
+        </div>
+      </div>
+
+      <!-- Source Tabs -->
+      <div class="ai-source-tabs">
+        <button class="ai-tab" [class.active]="aiSource() === 'upload'" (click)="aiSource.set('upload')">
+          <span class="material-symbols-outlined">upload_file</span>
+          Upload File
+        </button>
+        <button class="ai-tab" [class.active]="aiSource() === 'paste'" (click)="aiSource.set('paste')">
+          <span class="material-symbols-outlined">content_paste</span>
+          Paste Text
+        </button>
+      </div>
+
+      <!-- Upload Zone -->
+      @if (aiSource() === 'upload') {
+        <div class="ai-upload-zone"
+             (dragover)="$event.preventDefault()"
+             (drop)="onAiFileDrop($event)"
+             (click)="aiFileInput.click()">
+          @if (aiFileName()) {
+            <div class="ai-file-attached">
+              <div class="ai-file-badge">
+                <span class="material-symbols-outlined">description</span>
+              </div>
+              <div class="ai-file-info">
+                <span class="ai-file-name">{{ aiFileName() }}</span>
+                <span class="ai-file-ready">Ready for processing</span>
+              </div>
+              <button class="ai-file-remove" (click)="removeAiFile(); $event.stopPropagation()">
+                <span class="material-symbols-outlined">close</span>
+              </button>
+            </div>
+          } @else {
+            <div class="upload-drop-graphic">
+              <span class="material-symbols-outlined upload-drop-icon">cloud_upload</span>
+            </div>
+            <p class="upload-drop-text">Drag & drop your file here</p>
+            <p class="upload-drop-or">or</p>
+            <span class="upload-browse-btn">Browse Files</span>
+            <span class="upload-drop-hint">PDF, DOCX, TXT, Images up to 25 MB</span>
+          }
+          <input #aiFileInput type="file" hidden accept=".pdf,.docx,.txt,.png,.jpg,.jpeg" (change)="onAiFileSelect($event)" />
+        </div>
+      }
+
+      <!-- Paste Zone -->
+      @if (aiSource() === 'paste') {
+        <textarea
+          class="ai-paste-area"
+          rows="6"
+          placeholder="Paste your notes, textbook content, or any study material here..."
+          [ngModel]="aiPasteText()"
+          (ngModelChange)="aiPasteText.set($event)"
+        ></textarea>
+      }
+      <!-- Generate Button -->
+      <button class="ai-generate-btn" [disabled]="aiGenerating()" (click)="generateWithAi()">
+        @if (aiGenerating()) {
+          <span class="material-symbols-outlined spin">progress_activity</span>
+          Generating your cards...
+        } @else {
+          <span class="material-symbols-outlined">auto_awesome</span>
+          Generate Cards with AI
+        }
+      </button>
+    </div>
+  }
+
+  <!-- Cards List -->
+  @if (mode() === 'manual') {
+    <div class="cards-section">
+      <div class="cards-section-header">
+        <h3 class="cards-section-title">
+          <span class="material-symbols-outlined">style</span>
+          Your Cards
+        </h3>
+        <span class="cards-section-count">{{ cards().length }} cards</span>
+      </div>
+
+      @for (card of cards(); track card.id; let i = $index) {
+        <div
+          class="card-row"
+          [class.dragging]="dragIndex() === i"
+          draggable="true"
+          (dragstart)="onDragStart(i)"
+          (dragover)="onDragOver($event, i)"
+          (dragend)="onDragEnd()"
+        >
+          <div class="card-number-strip">
+            <span class="card-number">{{ i + 1 }}</span>
+            <span class="material-symbols-outlined drag-handle">drag_indicator</span>
+          </div>
+
+          <div class="card-content">
+            <div class="card-type-tabs">
+              <button class="card-tab" [class.active]="card.type === 'multiple-choice'" (click)="updateCardType(i, 'multiple-choice')">
+                <span class="material-symbols-outlined">check_box</span>
+                <span class="card-tab-label">Multiple Choice</span>
+              </button>
+              <button class="card-tab" [class.active]="card.type === 'true-false'" (click)="updateCardType(i, 'true-false')">
+                <span class="material-symbols-outlined">rule</span>
+                <span class="card-tab-label">True / False</span>
+              </button>
+              <button class="card-tab" [class.active]="card.type === 'fill-blank'" (click)="updateCardType(i, 'fill-blank')">
+                <span class="material-symbols-outlined">edit_note</span>
+                <span class="card-tab-label">Fill in the Blank</span>
+              </button>
+            </div>
+
+            <div class="card-body">
+              <div class="card-field">
+                <label class="card-field-label">QUESTION / TERM</label>
+                <input
+                  type="text"
+                  class="card-field-input"
+                  placeholder="Enter term or question"
+                  [ngModel]="card.term"
+                  (ngModelChange)="updateTerm(i, $event)"
+                />
+              </div>
+              <div class="card-divider"></div>
+              
+              <div class="card-field flex-2">
+                @if (card.type === 'fill-blank') {
+                  <label class="card-field-label">ANSWER</label>
+                  <input
+                    type="text"
+                    class="card-field-input"
+                    placeholder="Enter the correct answer for the blank"
+                    [ngModel]="card.blankAnswer"
+                    (ngModelChange)="updateBlankAnswer(i, $event)"
+                  />
+                }
+                
+                @if (card.type === 'multiple-choice') {
+                  <label class="card-field-label">OPTIONS (Select multiple correct answers)</label>
+                  <div class="mc-options">
+                    @for (opt of card.options; track $index; let optIdx = $index) {
+                      <div 
+                        class="mc-option-row" 
+                        [class.correct]="card.correctAnswers?.includes(optIdx)"
+                      >
+                        <button class="mc-radio" (click)="toggleCorrectAnswer(i, optIdx)">
+                          @if (card.correctAnswers?.includes(optIdx)) {
+                            <span class="material-symbols-outlined">check_circle</span>
+                          } @else {
+                            <span class="material-symbols-outlined">radio_button_unchecked</span>
+                          }
+                        </button>
+                        <input
+                          type="text"
+                          class="mc-input"
+                          placeholder="Option {{ optIdx + 1 }}"
+                          [ngModel]="opt"
+                          (ngModelChange)="updateOption(i, optIdx, $event)"
+                        />
+                      </div>
+                    }
+                  </div>
+                }
+
+                @if (card.type === 'true-false') {
+                  <label class="card-field-label">CORRECT ANSWER</label>
+                  <div class="tf-answers">
+                    <button class="tf-btn true-btn" [class.active]="card.isTrue" (click)="updateIsTrue(i, true)">
+                      <span class="material-symbols-outlined">check</span>
+                      True
+                    </button>
+                    <button class="tf-btn false-btn" [class.active]="!card.isTrue" (click)="updateIsTrue(i, false)">
+                      <span class="material-symbols-outlined">close</span>
+                      False
+                    </button>
+                  </div>
+                }
+              </div>
+            </div>
+            
+            <div class="card-actions">
+              <button class="card-action-btn" (click)="duplicateCard(i)" title="Duplicate">
+                <span class="material-symbols-outlined">content_copy</span>
+              </button>
+              <button
+                class="card-action-btn delete-btn"
+                (click)="deleteCard(i)"
+                [class.disabled]="cards().length <= 2"
+                title="Delete"
+              >
+                <span class="material-symbols-outlined">delete</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      }
+
+      <!-- Add Card Button -->
+      <button class="add-card-btn" (click)="addCard()">
+        <span class="material-symbols-outlined add-icon">add_circle</span>
+        <span>ADD CARD</span>
+      </button>
+    </div>
+  }
+</div>

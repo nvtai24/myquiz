@@ -1,0 +1,206 @@
+<div class="deck-detail-page">
+  <!-- Breadcrumb -->
+  <div class="breadcrumb">
+    <a routerLink="/library" class="breadcrumb-link">
+      <span class="material-symbols-outlined">arrow_back</span>
+      Library
+    </a>
+    <span class="breadcrumb-sep">/</span>
+    <span class="breadcrumb-current">{{ deck.title }}</span>
+  </div>
+
+  <!-- Hero Card -->
+  <div class="hero-card">
+    <div class="hero-top">
+      <div class="hero-cover">
+        <span class="material-symbols-outlined cover-icon">calculate</span>
+        <div class="cover-overlay"></div>
+      </div>
+      <div class="hero-info">
+        <div class="hero-title-row">
+          <h1 class="hero-title">{{ deck.title }}</h1>
+          <span class="visibility-badge">
+            <span class="material-symbols-outlined badge-dot">public</span>
+            {{ deck.visibility }}
+          </span>
+        </div>
+        <p class="hero-description">{{ deck.description }}</p>
+        <div class="hero-author">
+          <div class="author-avatar">{{ deck.author.charAt(0) }}</div>
+          <div>
+            <span class="author-name">{{ deck.author }}</span>
+            <span class="author-meta">Created {{ deck.createdAgo }} · {{ deck.role }}</span>
+          </div>
+        </div>
+      </div>
+      <div class="hero-actions">
+        <button class="action-icon-btn" title="Share">
+          <span class="material-symbols-outlined">share</span>
+        </button>
+        <button class="action-icon-btn" title="Edit">
+          <span class="material-symbols-outlined">edit</span>
+        </button>
+        <button class="action-icon-btn bookmark" title="Bookmark">
+          <span class="material-symbols-outlined">bookmark</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="hero-stats">
+      <div class="stat">
+        <div class="stat-icon-wrap blue">
+          <span class="material-symbols-outlined">style</span>
+        </div>
+        <div class="stat-data">
+          <span class="stat-value">{{ deck.stats.cards }}</span>
+          <span class="stat-label">Cards</span>
+        </div>
+      </div>
+      <div class="stat">
+        <div class="stat-icon-wrap indigo">
+          <span class="material-symbols-outlined">bar_chart</span>
+        </div>
+        <div class="stat-data">
+          <span class="stat-value">{{ deck.stats.attempts }}</span>
+          <span class="stat-label">Attempts</span>
+        </div>
+      </div>
+      <div class="stat">
+        <div class="stat-icon-wrap amber">
+          <span class="material-symbols-outlined">star</span>
+        </div>
+        <div class="stat-data">
+          <span class="stat-value">{{ deck.stats.rating }}<small>/5</small></span>
+          <span class="stat-label">Rating</span>
+        </div>
+      </div>
+      <div class="stat">
+        <div class="stat-icon-wrap green">
+          <span class="material-symbols-outlined">check_circle</span>
+        </div>
+        <div class="stat-data">
+          <span class="stat-value">{{ deck.stats.avgScore }}<small>%</small></span>
+          <span class="stat-label">Avg Score</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Study Modes -->
+  <section class="section">
+    <div class="section-header">
+      <h2 class="section-title">
+        <span class="material-symbols-outlined section-icon">school</span>
+        Choose a Study Mode
+      </h2>
+      <button class="start-study-btn" (click)="startStudy()">
+        <span class="material-symbols-outlined">play_arrow</span>
+        Start {{ studyMode() === 'learn' ? 'Learning' : 'Quiz' }}
+      </button>
+    </div>
+    <div class="mode-grid">
+      @for (mode of studyModes; track mode.key) {
+        <button
+          class="mode-card"
+          [class.active]="studyMode() === mode.key"
+          (click)="selectMode(mode.key)"
+        >   
+          <div class="mode-icon-wrap" [style.background]="mode.gradient">
+            <span class="material-symbols-outlined mode-icon">{{ mode.icon }}</span>
+          </div>
+          <span class="mode-label">{{ mode.label }}</span>
+          <span class="mode-desc">{{ mode.desc }}</span>
+        </button>
+      }
+    </div>
+  </section>
+
+  <!-- Terms & Reviews -->
+  <div class="terms-reviews-layout">
+    <!-- Terms -->
+    <section class="terms-section">
+      <div class="terms-header">
+        <h2 class="section-title">
+          <span class="material-symbols-outlined section-icon">list_alt</span>
+          Terms in this set ({{ deck.stats.cards }})
+        </h2>
+        <div class="terms-filter">
+          <span class="material-symbols-outlined filter-icon">search</span>
+          <input type="text" placeholder="Filter terms..." class="filter-input" (input)="onFilterInput($event)" />
+        </div>
+      </div>
+      <div class="terms-list">
+        @for (t of visibleTerms; track t.term; let i = $index) {
+          <div class="term-row" [style.animation-delay]="(i * 0.05) + 's'">
+            <div class="term-number">{{ i + 1 }}</div>
+            <div class="term-word">{{ t.term }}</div>
+            <div class="term-def">{{ t.definition }}</div>
+            <button class="term-audio-btn" title="Listen">
+              <span class="material-symbols-outlined">volume_up</span>
+            </button>
+          </div>
+        }
+      </div>
+      @if (totalFilteredTerms > 4) {
+        <button class="view-all-btn" (click)="toggleTerms()">
+          <span class="material-symbols-outlined">{{ showAllTerms() ? 'expand_less' : 'expand_more' }}</span>
+          {{ showAllTerms() ? 'Show Less' : 'View All ' + totalFilteredTerms + ' Terms' }}
+        </button>
+      }
+    </section>
+
+    <!-- Ratings Sidebar -->
+    <aside class="ratings-sidebar">
+      <div class="sidebar-card">
+        <h3 class="sidebar-title">Ratings & Reviews</h3>
+        <div class="rating-summary">
+          <span class="big-rating">{{ deck.stats.rating }}</span>
+          <div class="rating-right">
+            <div class="stars-row">
+              @for (s of [1,2,3,4,5]; track s) {
+                <span class="material-symbols-outlined star-filled">star</span>
+              }
+            </div>
+            <span class="rating-count">{{ totalRatings }} ratings</span>
+          </div>
+        </div>
+        <div class="rating-bars">
+          @for (r of ratingBreakdown; track r.stars) {
+            <div class="bar-row">
+              <span class="bar-label">{{ r.stars }}</span>
+              <span class="material-symbols-outlined bar-star">star</span>
+              <div class="bar-track">
+                <div class="bar-fill" [style.width]="getBarWidth(r.count)"></div>
+              </div>
+              <span class="bar-count">{{ r.count }}</span>
+            </div>
+          }
+        </div>
+      </div>
+
+      <div class="sidebar-card reviews-card">
+        <h3 class="sidebar-title">Recent Reviews</h3>
+        <div class="reviews-list">
+          @for (rev of reviews; track rev.name) {
+            <div class="review-item">
+              <div class="review-header">
+                <div class="review-avatar">{{ rev.avatar }}</div>
+                <div class="review-meta">
+                  <span class="review-author">{{ rev.name }}</span>
+                  <span class="review-time">{{ rev.timeAgo }}</span>
+                </div>
+                <div class="review-stars">
+                  @for (s of getStarArray(rev.rating); track $index) {
+                    <span class="material-symbols-outlined mini-star" [class.empty]="s === 'empty'">star</span>
+                  }
+                </div>
+              </div>
+              <p class="review-text">"{{ rev.text }}"</p>
+            </div>
+          }
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>

@@ -1,0 +1,118 @@
+<div class="landing-page">
+  <header class="landing-header">
+    <div class="header-left">
+      <div class="logo">
+        <div class="logo-icon">
+          <span class="material-symbols-outlined">school</span>
+        </div>
+        <span class="logo-text">QuizMate</span>
+      </div>
+    </div>
+    <div class="search-wrap">
+      <div class="search-bar">
+        <span class="material-symbols-outlined search-icon">search</span>
+        <input type="text" placeholder="Search study sets, textbooks, questions..." />
+      </div>
+    </div>
+    <div class="header-actions">
+      <a routerLink="/login" class="login-link">Log in</a>
+      <a routerLink="/register" class="signup-btn">Sign up</a>
+    </div>
+  </header>
+
+  <section class="study-modes-section">
+    <h1 class="section-title">How do you want to study?</h1>
+    <p class="section-subtitle">Master your subjects with interactive flashcards, practice tests, and study activities from QuizMate.</p>
+    
+    <a routerLink="/register" class="main-action-btn">Sign up for free</a>
+    <a routerLink="/register" class="teacher-link">I'm a teacher</a>
+
+    <div class="carousel-container">
+      <button class="nav-arrow left-arrow">
+        <span class="material-symbols-outlined">chevron_left</span>
+      </button>
+
+      <div class="modes-track">
+        <!-- Học / Learn -->
+        <div class="mode-card bg-learn">
+          <h3 class="mc-title text-dark">Learn</h3>
+          <div class="mc-graphic">
+            <div class="mg-learn">
+              <div class="mgl-content">
+                <span class="mgl-text">la pintura</span>
+                <div class="mgl-img">🎨</div>
+              </div>
+              <div class="mgl-input">Enter answer</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Thẻ ghi nhớ / Flashcards -->
+        <div class="mode-card bg-flash">
+          <h3 class="mc-title text-white">Flashcards</h3>
+          <div class="mc-graphic">
+            <div class="mg-flash">
+              <div class="mgf-bg"></div>
+              <div class="mgf-card">
+                <div class="mgf-text">superior<br>vena cava</div>
+                <div class="mgf-icon">🫀</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Kiểm tra / Test -->
+        <div class="mode-card bg-test">
+          <h3 class="mc-title text-dark">Test</h3>
+          <div class="mc-graphic">
+            <div class="mg-test">
+              <div class="mgt-time">Time: 6 mins</div>
+              <div class="mgt-stats">
+                <div class="mgt-circle">
+                  <div class="mgtc-inner">75%</div>
+                </div>
+                <div class="mgt-bars">
+                  <div class="mgt-bar green">
+                    <span class="material-symbols-outlined check">check</span> 9
+                  </div>
+                  <div class="mgt-bar red">
+                    <span class="material-symbols-outlined cross">close</span> 3
+                  </div>
+                </div>
+              </div>
+              <div class="mgt-lines">
+                <div class="mgt-line"></div>
+                <div class="mgt-line short"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ghép thẻ / Match -->
+        <div class="mode-card bg-match">
+          <h3 class="mc-title text-dark">Match</h3>
+          <div class="mc-graphic">
+            <div class="mg-match">
+              <div class="mgm-cell"><div class="mgm-icon org">🫁</div></div>
+              <div class="mgm-cell"><div class="mgm-line"></div></div>
+              <div class="mgm-cell active">
+                <span class="material-symbols-outlined mc-tick">check</span>
+                <div class="mgm-img">🫁</div>
+              </div>
+              <div class="mgm-cell"><div class="mgm-line"></div></div>
+              <div class="mgm-cell active">
+                <span class="material-symbols-outlined mc-tick">check</span>
+                lungs
+              </div>
+              <div class="mgm-cell"><div class="mgm-line"></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <button class="nav-arrow right-arrow">
+        <span class="material-symbols-outlined">chevron_right</span>
+      </button>
+    </div>
+  </section>
+</div>

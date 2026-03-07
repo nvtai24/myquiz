@@ -1,0 +1,77 @@
+<div class="profile-page">
+  <!-- Profile Hero -->
+  <div class="hero-card">
+    <div class="hero-left">
+      <div class="hero-avatar">
+        <span class="material-symbols-outlined avatar-icon">account_circle</span>
+      </div>
+      <div class="hero-info">
+        <div class="name-row">
+          <h1 class="user-name">{{ user.name }}</h1>
+          <span class="role-badge">{{ user.role }}</span>
+        </div>
+        <p class="user-email">{{ user.email }}</p>
+        <p class="user-bio">{{ user.bio }}</p>
+      </div>
+    </div>
+    <button class="create-set-btn" routerLink="/add-deck">
+      <span class="material-symbols-outlined">add</span>
+      Create Set
+    </button>
+  </div>
+
+  <!-- Stats + Activity -->
+  <div class="two-col">
+    <!-- Stats -->
+    <div class="stats-card">
+      <div class="stats-grid">
+        @for (s of stats; track s.label) {
+          <div class="stat-item">
+            <span class="material-symbols-outlined stat-icon">{{ s.icon }}</span>
+            <span class="stat-value">{{ s.value }}</span>
+            <span class="stat-label">{{ s.label }}</span>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="activity-card">
+      <h3 class="card-title">Recent Activity</h3>
+      <div class="activity-list">
+        @for (a of activities; track a.text) {
+          <div class="activity-item">
+            <span class="material-symbols-outlined activity-icon" [style.color]="a.color">{{ a.icon }}</span>
+            <div class="activity-content">
+              <span class="activity-text">{{ a.text }}</span>
+              <span class="activity-detail">{{ a.detail }}</span>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Achievements -->
+  <div class="section-card">
+    <div class="section-header">
+      <h3 class="card-title">Achievements</h3>
+      <button class="view-all-link">View All</button>
+    </div>
+    <div class="achievements-grid">
+      @for (a of achievements; track a.label) {
+        <div class="achievement" [class.locked]="!a.unlocked">
+          <div class="achievement-icon-wrap" [class.unlocked]="a.unlocked">
+            <span class="material-symbols-outlined achievement-icon">{{ a.icon }}</span>
+          </div>
+          <span class="achievement-label">{{ a.label }}</span>
+          @if (a.unlocked) {
+            <span class="achievement-date">{{ a.date }}</span>
+          } @else {
+            <span class="achievement-date locked-text">LOCKED</span>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</div>

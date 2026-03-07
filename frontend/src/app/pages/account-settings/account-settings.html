@@ -1,0 +1,111 @@
+<div class="settings-page">
+  <h1 class="page-title">Account Settings</h1>
+  <p class="page-subtitle">Update your personal information and security preferences.</p>
+
+  <!-- Profile Picture -->
+  <div class="section-card profile-section">
+    <div class="avatar-wrapper">
+      @if (avatarUrl()) {
+        <img [src]="avatarUrl()" alt="Avatar" class="avatar-img" />
+      } @else {
+        <span class="material-symbols-outlined avatar-placeholder">account_circle</span>
+      }
+      <button class="avatar-edit-btn" (click)="avatarInput.click()">
+        <span class="material-symbols-outlined">edit</span>
+      </button>
+    </div>
+    <div class="profile-info">
+      <h3 class="profile-label">Profile Picture</h3>
+      <p class="profile-hint">JPG, GIF or PNG. Max size of 800K.</p>
+      <div class="profile-actions">
+        <button class="btn-change-photo" (click)="avatarInput.click()">Change Photo</button>
+        <button class="btn-remove-photo" (click)="removeAvatar()">Remove</button>
+      </div>
+    </div>
+    <input #avatarInput type="file" accept="image/*" hidden (change)="onAvatarSelect($event)" />
+  </div>
+
+  <!-- Personal Information -->
+  <div class="section-card">
+    <h3 class="section-heading">Personal Information</h3>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Full Name</label>
+        <input type="text" class="form-input" [ngModel]="fullName()" (ngModelChange)="fullName.set($event)" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Username</label>
+        <input type="text" class="form-input" [ngModel]="username()" (ngModelChange)="username.set($event)" />
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="form-label">Email Address</label>
+      <div class="email-row">
+        <input type="email" class="form-input" [ngModel]="email()" (ngModelChange)="email.set($event)" />
+        @if (emailVerified()) {
+          <span class="verified-badge">
+            <span class="material-symbols-outlined">check_circle</span>
+            VERIFIED
+          </span>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Change Password -->
+  <div class="section-card">
+    <h3 class="section-heading">Change Password</h3>
+    <div class="form-group">
+      <label class="form-label">Current Password</label>
+      <input type="password" class="form-input" placeholder="••••••••" [ngModel]="currentPassword()" (ngModelChange)="currentPassword.set($event)" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">New Password</label>
+        <input type="password" class="form-input" placeholder="New Password" [ngModel]="newPassword()" (ngModelChange)="newPassword.set($event)" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Confirm New Password</label>
+        <input type="password" class="form-input" placeholder="Confirm Password" [ngModel]="confirmPassword()" (ngModelChange)="confirmPassword.set($event)" />
+      </div>
+    </div>
+  </div>
+
+  <!-- Preferences -->
+  <div class="section-card">
+    <h3 class="section-heading">Preferences</h3>
+    <div class="pref-row">
+      <div>
+        <span class="pref-label">Two-Factor Authentication</span>
+        <p class="pref-hint">Add an extra layer of security to your account.</p>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" [checked]="twoFactorEnabled()" (change)="twoFactorEnabled.set(!twoFactorEnabled())" />
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+    <div class="pref-row">
+      <div>
+        <span class="pref-label">Email Notifications</span>
+        <p class="pref-hint">Receive daily quiz updates and results via email.</p>
+      </div>
+      <label class="toggle">
+        <input type="checkbox" [checked]="emailNotifications()" (change)="emailNotifications.set(!emailNotifications())" />
+        <span class="toggle-slider"></span>
+      </label>
+    </div>
+  </div>
+
+  <!-- Danger Zone -->
+  <div class="section-card danger-section">
+    <h3 class="section-heading danger">Danger Zone</h3>
+    <p class="danger-text">Once you delete your account, there is no going back. Please be certain.</p>
+    <button class="btn-delete" (click)="deleteAccount()">Delete Account</button>
+  </div>
+
+  <!-- Footer Actions -->
+  <div class="footer-actions">
+    <button class="btn-discard" (click)="discard()">Discard</button>
+    <button class="btn-save" (click)="saveChanges()">Save Changes</button>
+  </div>
+</div>

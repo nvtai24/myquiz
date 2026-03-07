@@ -60,4 +60,20 @@ public class DeckRepository : Repository<Guid, Deck>, IDeckRepository
             .OrderByDescending(d => d.CreatedAt)
             .ToListAsync(cancellationToken);
     }
+
+    public async Task<List<Deck>> GetAttemptedDecksAsync(string userId, CancellationToken cancellationToken = default)
+    {
+        return await _context.QuizAttempts
+            .AsNoTracking()
+            .Where(qa => qa.UserId == userId)
+            .GroupBy(qa => qa.DeckId)
+            .Select(g => new { DeckId = g.Key, LatestAttempt = g.Max(qa => qa.StartedAt) })
+            .OrderByDescending(x => x.LatestAttempt)
+            .Join(
+                _context.Decks.AsNoTracking().Include(d => d.Questions),
+                attempt => attempt.DeckId,
+                deck => deck.Id,
+                (attempt, deck) => deck)
+            .ToListAsync(cancellationToken);
+    }
 }

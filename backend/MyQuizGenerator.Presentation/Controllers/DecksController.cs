@@ -8,6 +8,7 @@ using UpdateDeck = MyQuizGenerator.Application.Decks.Commands.UpdateDeck;
 using DeleteDeck = MyQuizGenerator.Application.Decks.Commands.DeleteDeck;
 using UserDecks = MyQuizGenerator.Application.Decks.Queries.GetUserDecks;
 using SharedDecks = MyQuizGenerator.Application.Decks.Queries.GetSharedDecks;
+using AttemptedDecks = MyQuizGenerator.Application.Decks.Queries.GetAttemptedDecks;
 using DeckDetails = MyQuizGenerator.Application.Decks.Queries.GetDeckById;
 using MyQuizGenerator.Application.DeckInvitations.DTOs;
 using MyQuizGenerator.Application.DeckInvitations.Commands.CreateDeckInvitation;
@@ -137,6 +138,24 @@ public class DecksController : BaseApiController
         }
 
         var query = new SharedDecks.GetSharedDecksQuery(userId);
+        var result = await _mediator.Send(query);
+        return ApiOk(result);
+    }
+
+    /// <summary>
+    /// Gets a list of decks the current user has attempted, sorted by most recent attempt.
+    /// </summary>
+    /// <returns>List of deck summaries the user has attempted.</returns>
+    [HttpGet("attempted")]
+    public async Task<IActionResult> GetAttemptedDecks()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return ApiUnauthorized();
+        }
+
+        var query = new AttemptedDecks.GetAttemptedDecksQuery(userId);
         var result = await _mediator.Send(query);
         return ApiOk(result);
     }

@@ -89,6 +89,18 @@ public class CreateDeckCommandHandler : IRequestHandler<CreateDeckCommand, Guid>
             Questions = listQuestions
         };
 
+        // Upload thumbnail file and set URL if provided
+        if (request.Request.ThumbnailStream != null && !string.IsNullOrEmpty(request.Request.ThumbnailFileName))
+        {
+            var thumbnailUploadRequest = new FileUploadRequest(
+                request.Request.ThumbnailStream,
+                request.Request.ThumbnailFileName,
+                request.Request.ThumbnailContentType ?? "image/png");
+
+            var thumbnailUrl = await _fileService.UploadFileAsync(thumbnailUploadRequest);
+            deck.ThumbnailUrl = thumbnailUrl;
+        }
+
         // Upload file and attach to deck if provided
         if (request.Request.FileStream != null && !string.IsNullOrEmpty(request.Request.FileName))
         {

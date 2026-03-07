@@ -24,5 +24,10 @@ public class CreateDeckRequest
     public Stream? FileStream { get; set; }
     public string? FileName { get; set; }
     public string? FileContentType { get; set; }
+
+    // Thumbnail file info (populated by Controller from IFormFile)
+    public Stream? ThumbnailStream { get; set; }
+    public string? ThumbnailFileName { get; set; }
+    public string? ThumbnailContentType { get; set; }
 }
 

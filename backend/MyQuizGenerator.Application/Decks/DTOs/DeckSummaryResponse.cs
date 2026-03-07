@@ -11,6 +11,7 @@ public class DeckSummaryResponse
     public DeckStatus Status { get; set; }
     public string[] Tags { get; set; } = Array.Empty<string>();
     public int QuestionCount { get; set; }
+    public string ThumbnailUrl { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; }
     public DateTime? UpdatedAt { get; set; }
 }

@@ -32,13 +32,20 @@ public class DecksController : BaseApiController
     /// <param name="file">Optional file to attach to the deck.</param>
     /// <returns>The ID of the created deck.</returns>
     [HttpPost]
-    public async Task<IActionResult> Create([FromForm] CreateDeckRequest request, IFormFile? file)
+    public async Task<IActionResult> Create([FromForm] CreateDeckRequest request, IFormFile? file, IFormFile? thumbnail)
     {
         if (file != null && file.Length > 0)
         {
             request.FileStream = file.OpenReadStream();
             request.FileName = file.FileName;
             request.FileContentType = file.ContentType;
+        }
+
+        if (thumbnail != null && thumbnail.Length > 0)
+        {
+            request.ThumbnailStream = thumbnail.OpenReadStream();
+            request.ThumbnailFileName = thumbnail.FileName;
+            request.ThumbnailContentType = thumbnail.ContentType;
         }
 
         var command = new CreateDeck.CreateDeckCommand(request);
@@ -71,8 +78,15 @@ public class DecksController : BaseApiController
     /// <param name="id">The deck ID.</param>
     /// <param name="request">The deck update request.</param>
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateDeckRequest request)
+    public async Task<IActionResult> Update(Guid id, [FromForm] UpdateDeckRequest request, IFormFile? thumbnail)
     {
+        if (thumbnail != null && thumbnail.Length > 0)
+        {
+            request.ThumbnailStream = thumbnail.OpenReadStream();
+            request.ThumbnailFileName = thumbnail.FileName;
+            request.ThumbnailContentType = thumbnail.ContentType;
+        }
+
         var command = new UpdateDeck.UpdateDeckCommand(id, request);
         await _mediator.Send(command);
         return ApiNoContent("Deck updated successfully");

@@ -13,4 +13,9 @@ public class UpdateDeckRequest
     public DeckVisibility Visibility { get; set; } = DeckVisibility.Public;
 
     public string[] Tags { get; set; } = Array.Empty<string>();
+
+    // Thumbnail file info (populated by Controller from IFormFile)
+    public Stream? ThumbnailStream { get; set; }
+    public string? ThumbnailFileName { get; set; }
+    public string? ThumbnailContentType { get; set; }
 }

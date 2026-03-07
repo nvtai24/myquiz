@@ -37,6 +37,7 @@ public class GetDeckByIdQueryHandler : IRequestHandler<GetDeckByIdQuery, DeckDet
             Visibility = deck.Visibility,
             Tags = deck.Tags,
             QuestionCount = deck.Questions.Count,
+            ThumbnailUrl = deck.ThumbnailUrl,
             CreatedAt = deck.CreatedAt,
             UpdatedAt = deck.UpdatedAt,
             Questions = deck.Questions.Select(q => new QuestionResponse

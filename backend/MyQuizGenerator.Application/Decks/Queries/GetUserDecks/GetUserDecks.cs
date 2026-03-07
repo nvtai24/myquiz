@@ -27,6 +27,7 @@ public class GetUserDecksQueryHandler : IRequestHandler<GetUserDecksQuery, List<
             Visibility = d.Visibility,
             Tags = d.Tags,
             QuestionCount = d.Questions.Count,
+            ThumbnailUrl = d.ThumbnailUrl,
             CreatedAt = d.CreatedAt,
             UpdatedAt = d.UpdatedAt
         }).ToList();

@@ -69,7 +69,7 @@ builder.Services.AddInfrastructure(builder.Configuration);
 builder.Services.AddApplication();
 
 // Background jobs
-builder.Services.AddHostedService<MyQuizGenerator.Infrastructure.BackgroundJobs.ExpirePaymentTransactionsJob>();
+// builder.Services.AddHostedService<MyQuizGenerator.Infrastructure.BackgroundJobs.ExpirePaymentTransactionsJob>();
 
 var app = builder.Build();
 

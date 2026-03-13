@@ -1,6 +1,8 @@
-import { Component, signal } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
+import { DeckService } from '../../services/deck.service';
+import { CreateDeckRequest, CreateQuestionRequest, GeneratedDeck, GeneratedQuestion, QuestionType } from '../../models/deck.models';
 
 interface Card {
   id: number;
@@ -11,6 +13,9 @@ interface Card {
   options?: string[];
   correctAnswers?: number[];
   isTrue?: boolean;
+  hint?: string;
+  explanation?: string;
+  showExtra?: boolean;
 }
 
 @Component({
@@ -26,7 +31,10 @@ export class AddDeck {
   visibility = signal<'public' | 'private'>('public');
   coverImage = signal<string | null>(null);
   coverFile = signal<File | null>(null);
-  saved = signal(false);
+  savingDraft = signal(false);
+  creating = signal(false);
+  errorMessage = signal<string | null>(null);
+  successMessage = signal<string | null>(null);
 
   /* ── Creation mode ── */
   mode = signal<'manual' | 'ai'>('manual');
@@ -41,6 +49,7 @@ export class AddDeck {
   aiFocusInput = signal('');
   aiFocusTopics = signal<string[]>([]);
   aiGenerating = signal(false);
+  aiGenerated = signal(false); // true if cards came from AI
 
   private nextId = 3;
   cards = signal<Card[]>([
@@ -49,6 +58,9 @@ export class AddDeck {
   ]);
 
   dragIndex = signal<number | null>(null);
+  grabIndex = signal<number | null>(null); // which card's handle is being held
+
+  private deckService = inject(DeckService);
 
   constructor(private router: Router) {}
 
@@ -87,7 +99,9 @@ export class AddDeck {
       definition: card.definition,
       options: card.options ? [...card.options] : undefined,
       correctAnswers: card.correctAnswers ? [...card.correctAnswers] : undefined,
-      isTrue: card.isTrue
+      isTrue: card.isTrue,
+      hint: card.hint,
+      explanation: card.explanation,
     };
     this.cards.update(cards => {
       const updated = [...cards];
@@ -174,8 +188,41 @@ export class AddDeck {
     });
   }
 
+  updateHint(index: number, value: string) {
+    this.cards.update(cards => {
+      const updated = [...cards];
+      updated[index] = { ...updated[index], hint: value };
+      return updated;
+    });
+  }
+
+  updateExplanation(index: number, value: string) {
+    this.cards.update(cards => {
+      const updated = [...cards];
+      updated[index] = { ...updated[index], explanation: value };
+      return updated;
+    });
+  }
+
+  toggleExtra(index: number) {
+    this.cards.update(cards => {
+      const updated = [...cards];
+      updated[index] = { ...updated[index], showExtra: !updated[index].showExtra };
+      return updated;
+    });
+  }
+
   onDragStart(index: number) {
+    if (this.grabIndex() !== index) return; // only allow drag from handle
     this.dragIndex.set(index);
+  }
+
+  onGrabStart(index: number) {
+    this.grabIndex.set(index);
+  }
+
+  onGrabEnd() {
+    this.grabIndex.set(null);
   }
 
   onDragOver(event: DragEvent, index: number) {
@@ -195,13 +242,150 @@ export class AddDeck {
     this.dragIndex.set(null);
   }
 
+  get canSaveDraft(): boolean {
+    return !!this.title().trim() && !!this.coverFile();
+  }
+
   saveDraft() {
-    this.saved.set(true);
+    if (this.savingDraft()) return;
+    this.errorMessage.set(null);
+
+    if (!this.title().trim() && !this.coverFile()) {
+      this.showError('Title and Cover Image are required to save as draft');
+      return;
+    }
+    if (!this.title().trim()) {
+      this.showError('Title is required to save as draft');
+      return;
+    }
+    if (!this.coverFile()) {
+      this.showError('Cover Image is required to save as draft');
+      return;
+    }
+
+    this.savingDraft.set(true);
+
+    const questions = this.buildQuestions();
+
+    const request: CreateDeckRequest = {
+      name: this.title().trim(),
+      description: this.description().trim(),
+      visibility: this.visibility() === 'public' ? 'Public' : 'Private',
+      status: 'Draft',
+      source: this.aiGenerated() ? 'AiGenerated' : 'Manual',
+      tags: [],
+      questions,
+    };
+
+    this.deckService.createDeck(request, this.coverFile() ?? undefined).subscribe({
+      next: (res) => {
+        this.savingDraft.set(false);
+        if (res.success) {
+          this.showSuccess('Draft saved successfully!');
+        } else {
+          this.showError(res.message || 'Failed to save draft');
+        }
+      },
+      error: (err) => {
+        this.savingDraft.set(false);
+        this.showError(this.extractErrorMessage(err));
+      },
+    });
   }
 
   create() {
-    // API call to create deck
-    this.router.navigate(['/library']);
+    if (this.creating()) return;
+    if (!this.title().trim()) {
+      this.showError('Title is required');
+      return;
+    }
+
+    this.creating.set(true);
+    this.errorMessage.set(null);
+
+    const questions = this.buildQuestions();
+
+    const request: CreateDeckRequest = {
+      name: this.title().trim(),
+      description: this.description().trim(),
+      visibility: this.visibility() === 'public' ? 'Public' : 'Private',
+      status: 'Draft',
+      source: this.aiGenerated() ? 'AiGenerated' : 'Manual',
+      tags: [],
+      questions,
+    };
+
+    this.deckService.createDeck(request, this.coverFile() ?? undefined).subscribe({
+      next: (res) => {
+        this.creating.set(false);
+        if (res.success) {
+          this.router.navigate(['/library']);
+        } else {
+          this.showError(res.message || 'Failed to create deck');
+        }
+      },
+      error: (err) => {
+        this.creating.set(false);
+        this.showError(this.extractErrorMessage(err));
+      },
+    });
+  }
+
+  private buildQuestions(): CreateQuestionRequest[] {
+    return this.cards()
+      .filter(card => card.term.trim())
+      .map(card => {
+        const type = this.mapCardType(card.type);
+        let options: string[] = [];
+        let correctAnswers: string[] = [];
+
+        if (card.type === 'multiple-choice') {
+          options = (card.options || []).filter(o => o.trim());
+          correctAnswers = (card.correctAnswers || []).map(i => (card.options || [])[i]).filter(Boolean);
+        } else if (card.type === 'true-false') {
+          options = ['True', 'False'];
+          correctAnswers = [card.isTrue ? 'True' : 'False'];
+        } else if (card.type === 'fill-blank') {
+          correctAnswers = card.blankAnswer ? [card.blankAnswer] : [];
+        }
+
+        return {
+          content: card.term,
+          type,
+          hint: card.hint?.trim() || '',
+          explanation: card.explanation?.trim() || '',
+          options,
+          correctAnswers,
+        };
+      });
+  }
+
+  private mapCardType(type: 'fill-blank' | 'multiple-choice' | 'true-false'): QuestionType {
+    switch (type) {
+      case 'multiple-choice': return 'MultipleChoice';
+      case 'true-false': return 'TrueFalse';
+      case 'fill-blank': return 'FillInTheBlank';
+    }
+  }
+
+  private showError(msg: string) {
+    this.errorMessage.set(msg);
+    setTimeout(() => this.errorMessage.set(null), 5000);
+  }
+
+  private showSuccess(msg: string) {
+    this.successMessage.set(msg);
+    setTimeout(() => this.successMessage.set(null), 3000);
+  }
+
+  private extractErrorMessage(err: any): string {
+    const body = err.error;
+    // ASP.NET ValidationProblemDetails format
+    if (body?.errors && typeof body.errors === 'object') {
+      const messages = Object.values(body.errors).flat() as string[];
+      return messages.join('. ') || body.title || 'Validation failed';
+    }
+    return body?.message || 'An error occurred';
   }
 
   cancel() {
@@ -252,17 +436,101 @@ export class AddDeck {
   }
 
   generateWithAi() {
+    if (this.aiGenerating()) return;
+
+    let fileToSend: File | null = null;
+
+    if (this.aiSource() === 'upload') {
+      if (!this.aiFile()) {
+        this.showError('Please upload a file to generate cards.');
+        return;
+      }
+      fileToSend = this.aiFile();
+    } else {
+      const text = this.aiPasteText().trim();
+      if (!text) {
+        this.showError('Please paste some text to generate cards.');
+        return;
+      }
+      // Convert pasted text to a .txt file and send to the same endpoint
+      const blob = new Blob([text], { type: 'text/plain' });
+      fileToSend = new File([blob], 'pasted-content.txt', { type: 'text/plain' });
+    }
+
     this.aiGenerating.set(true);
-    setTimeout(() => {
-      const generated: Card[] = Array.from({ length: this.aiCardCount() }, (_, i) => ({
+    this.errorMessage.set(null);
+
+    this.deckService.generateDeck(fileToSend!).subscribe({
+      next: (res) => {
+        this.aiGenerating.set(false);
+        if (!res.success || !res.data) {
+          this.showError(res.message || 'AI generation failed');
+          return;
+        }
+        this.applyGeneratedDeck(res.data);
+      },
+      error: (err) => {
+        this.aiGenerating.set(false);
+        this.showError(this.extractErrorMessage(err));
+      },
+    });
+  }
+
+  private applyGeneratedDeck(deck: GeneratedDeck) {
+    // Auto-fill title/description only if user hasn't typed anything yet
+    if (!this.title().trim() && deck.name) {
+      this.title.set(deck.name);
+    }
+    if (!this.description().trim() && deck.description) {
+      this.description.set(deck.description);
+    }
+
+    // Map GeneratedQuestion[] → Card[]
+    const mapped: Card[] = deck.questions.map((q: GeneratedQuestion) => {
+      const cardType = this.mapQuestionTypeToCardType(q.type);
+      const card: Card = {
         id: this.nextId++,
-        type: 'fill-blank' as const,
-        term: `Generated Term ${i + 1}`,
-        blankAnswer: `Generated Answer ${i + 1}`,
-      }));
-      this.cards.set(generated);
-      this.mode.set('manual');
-      this.aiGenerating.set(false);
-    }, 1500);
+        type: cardType,
+        term: q.content,
+        hint: q.hint || undefined,
+        explanation: q.explanation || undefined,
+        showExtra: !!(q.hint || q.explanation),
+      };
+
+      if (cardType === 'multiple-choice') {
+        card.options = q.options.length > 0 ? [...q.options] : ['', '', '', ''];
+        // Map correctAnswers strings back to indices
+        card.correctAnswers = q.correctAnswers
+          .map(ans => card.options!.indexOf(ans))
+          .filter(idx => idx >= 0);
+        if (card.correctAnswers.length === 0) card.correctAnswers = [0];
+      } else if (cardType === 'true-false') {
+        const correct = q.correctAnswers[0]?.toLowerCase();
+        card.isTrue = correct !== 'false';
+      } else if (cardType === 'fill-blank') {
+        card.blankAnswer = q.correctAnswers[0] || '';
+      }
+
+      return card;
+    });
+
+    this.cards.set(mapped.length > 0 ? mapped : [
+      { id: this.nextId++, type: 'multiple-choice', term: '', options: ['', '', '', ''], correctAnswers: [0] },
+      { id: this.nextId++, type: 'multiple-choice', term: '', options: ['', '', '', ''], correctAnswers: [0] },
+    ]);
+
+    // Switch to manual mode so the user can review/edit
+    this.mode.set('manual');
+    this.aiGenerated.set(true);
+    this.showSuccess(`${mapped.length} cards generated! Review and edit them before saving.`);
+  }
+
+  private mapQuestionTypeToCardType(type: QuestionType): 'multiple-choice' | 'true-false' | 'fill-blank' {
+    switch (type) {
+      case 'MultipleChoice': return 'multiple-choice';
+      case 'TrueFalse': return 'true-false';
+      case 'FillInTheBlank': return 'fill-blank';
+      default: return 'multiple-choice';
+    }
   }
 }

@@ -3,7 +3,7 @@ import { isPlatformBrowser } from "@angular/common";
 import { HttpClient } from "@angular/common/http";
 import { Router } from "@angular/router";
 import { LoginRequest, LoginResponse, User, RegisterRequest, RegisterResponse, ConfirmEmailRequest, ConfirmEmailResponse, ForgotPasswordRequest, ForgotPasswordResponse, ResetPasswordRequest, ResetPasswordResponse } from "../models/auth.models";
-import { Observable, tap } from "rxjs";
+import { Observable, tap, throwError } from "rxjs";
 
 @Injectable({
     providedIn: 'root'
@@ -53,10 +53,37 @@ export class AuthService {
 
     logout(): void {
      if (!isPlatformBrowser(this.platformId)) return;
-     this.http.post(`${this.apiUrl}/logout`, {}).subscribe();
-     localStorage.removeItem('user');
-     this.currentUser.set(null);
-     this.router.navigate(['/login']);
+
+     this.http.post(`${this.apiUrl}/logout`, {}).subscribe({
+       complete: () => {
+         this.clearSession();
+       },
+       error: () => {
+         this.clearSession();
+       }
+     });
+    }
+
+    private clearSession(): void {
+      localStorage.removeItem('user');
+      this.currentUser.set(null);
+      this.router.navigate(['/login']);
+    }
+
+    /** Called by the interceptor when a 401 occurs — silently renews the access token. */
+    refreshTokenSilent(): Observable<any> {
+      if (!isPlatformBrowser(this.platformId)) {
+        return throwError(() => new Error('Not a browser environment'));
+      }
+      return this.http.post<{ success: boolean; data: { expiresAt: string } }>(
+        `${this.apiUrl}/refresh-token`,
+        {}
+      );
+    }
+
+    /** Called by the interceptor when refresh also fails — clear everything and go to login. */
+    forceLogout(): void {
+      this.clearSession();
     }
 
     isLoggedIn(): boolean {

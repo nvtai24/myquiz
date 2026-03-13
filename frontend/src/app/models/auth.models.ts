@@ -38,6 +38,9 @@ export interface LoginResponse {
    statusCode: number;
    message: string;
    data: {
+    accessToken: string;
+    refreshToken: string;
+    expiresAt: string;
     user: User;
    }
 }

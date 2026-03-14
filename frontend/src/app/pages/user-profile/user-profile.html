@@ -7,71 +7,94 @@
       </div>
       <div class="hero-info">
         <div class="name-row">
-          <h1 class="user-name">{{ user.name }}</h1>
-          <span class="role-badge">{{ user.role }}</span>
+          <h1 class="user-name">{{ displayName }}</h1>
+          <span class="role-badge">{{ primaryRole }}</span>
         </div>
-        <p class="user-email">{{ user.email }}</p>
-        <p class="user-bio">{{ user.bio }}</p>
+        <p class="user-email">{{ currentUser()?.email }}</p>
       </div>
     </div>
     <button class="create-set-btn" routerLink="/add-deck">
       <span class="material-symbols-outlined">add</span>
-      Create Set
+      Tạo bộ thẻ
     </button>
   </div>
 
-  <!-- Stats + Activity -->
-  <div class="two-col">
-    <!-- Stats -->
-    <div class="stats-card">
-      <div class="stats-grid">
-        @for (s of stats; track s.label) {
-          <div class="stat-item">
-            <span class="material-symbols-outlined stat-icon">{{ s.icon }}</span>
-            <span class="stat-value">{{ s.value }}</span>
-            <span class="stat-label">{{ s.label }}</span>
-          </div>
+  <!-- Subscription Info -->
+  <div class="subscription-card">
+    <div class="sub-header">
+      <span class="material-symbols-outlined sub-icon">workspace_premium</span>
+      <div>
+        <p class="sub-label">Gói hiện tại</p>
+        @if (loadingSubscription()) {
+          <div class="skeleton-line wide"></div>
+        } @else if (subscription()) {
+          <h2 class="sub-name">{{ subscription()!.planName }}</h2>
+        } @else {
+          <h2 class="sub-name free">Free Plan</h2>
         }
       </div>
     </div>
 
-    <!-- Recent Activity -->
-    <div class="activity-card">
-      <h3 class="card-title">Recent Activity</h3>
-      <div class="activity-list">
-        @for (a of activities; track a.text) {
-          <div class="activity-item">
-            <span class="material-symbols-outlined activity-icon" [style.color]="a.color">{{ a.icon }}</span>
-            <div class="activity-content">
-              <span class="activity-text">{{ a.text }}</span>
-              <span class="activity-detail">{{ a.detail }}</span>
+    @if (!loadingSubscription()) {
+      <div class="sub-stats">
+        @if (subscription()) {
+          <div class="sub-stat">
+            <span class="material-symbols-outlined">style</span>
+            <div>
+              <span class="sub-stat-value">{{ subscription()!.numDeckLimit }}</span>
+              <span class="sub-stat-label">Bộ thẻ tối đa</span>
+            </div>
+          </div>
+          <div class="sub-stat">
+            <span class="material-symbols-outlined">auto_awesome</span>
+            <div>
+              <span class="sub-stat-value">{{ subscription()!.dailyGenerateLimit }}</span>
+              <span class="sub-stat-label">Lần tạo AI / ngày</span>
+            </div>
+          </div>
+          <div class="sub-stat">
+            <span class="material-symbols-outlined">event</span>
+            <div>
+              <span class="sub-stat-value">{{ formatDate(subscription()!.endDate) }}</span>
+              <span class="sub-stat-label">Hết hạn</span>
+            </div>
+          </div>
+          @if (subscription()!.isExpired) {
+            <div class="expired-badge">
+              <span class="material-symbols-outlined">warning</span>
+              Gói đã hết hạn
+            </div>
+          }
+        } @else {
+          <div class="sub-stat">
+            <span class="material-symbols-outlined">style</span>
+            <div>
+              <span class="sub-stat-value">–</span>
+              <span class="sub-stat-label">Bộ thẻ tối đa</span>
+            </div>
+          </div>
+          <div class="sub-stat">
+            <span class="material-symbols-outlined">auto_awesome</span>
+            <div>
+              <span class="sub-stat-value">–</span>
+              <span class="sub-stat-label">Lần tạo AI / ngày</span>
+            </div>
+          </div>
+          <div class="sub-stat upgrade">
+            <span class="material-symbols-outlined">trending_up</span>
+            <div>
+              <a class="upgrade-link" routerLink="/subscription-settings">Nâng cấp ngay →</a>
+              <span class="sub-stat-label">Để mở khoá thêm tính năng</span>
             </div>
           </div>
         }
       </div>
-    </div>
-  </div>
-
-  <!-- Achievements -->
-  <div class="section-card">
-    <div class="section-header">
-      <h3 class="card-title">Achievements</h3>
-      <button class="view-all-link">View All</button>
-    </div>
-    <div class="achievements-grid">
-      @for (a of achievements; track a.label) {
-        <div class="achievement" [class.locked]="!a.unlocked">
-          <div class="achievement-icon-wrap" [class.unlocked]="a.unlocked">
-            <span class="material-symbols-outlined achievement-icon">{{ a.icon }}</span>
-          </div>
-          <span class="achievement-label">{{ a.label }}</span>
-          @if (a.unlocked) {
-            <span class="achievement-date">{{ a.date }}</span>
-          } @else {
-            <span class="achievement-date locked-text">LOCKED</span>
-          }
-        </div>
-      }
-    </div>
+    } @else {
+      <div class="sub-stats">
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line"></div>
+        <div class="skeleton-line"></div>
+      </div>
+    }
   </div>
 </div>

@@ -1,53 +1,195 @@
 <div class="subscription-page">
+
   <!-- Current Plan Banner -->
   <div class="current-plan-card">
     <div class="plan-info">
       <span class="material-symbols-outlined plan-icon">workspace_premium</span>
       <div>
-        <p class="plan-label">Current Plan</p>
-        <h2 class="plan-name">{{ currentPlan() === 'pro' ? 'Pro Plan' : 'Free Plan' }}</h2>
+        <p class="plan-label">Gói hiện tại</p>
+        @if (loadingSubscription()) {
+          <div class="plan-name-skeleton"></div>
+        } @else if (mySubscription() && !mySubscription()!.isExpired) {
+          <h2 class="plan-name">{{ mySubscription()!.planName }}</h2>
+        } @else {
+          <h2 class="plan-name">Free Plan</h2>
+        }
       </div>
     </div>
     <div class="plan-meta">
-      @if (currentPlan() === 'pro') {
-        <span class="renewal">Renews on Jan 1, 2025</span>
-        <button class="btn-outline-danger">Cancel Subscription</button>
+      @if (mySubscription() && !mySubscription()!.isExpired) {
+        <span class="renewal">
+          <span class="material-symbols-outlined">event</span>
+          Hết hạn: {{ formatDate(mySubscription()!.endDate) }}
+        </span>
+      } @else if (mySubscription()?.isExpired) {
+        <span class="renewal expired-tag">
+          <span class="material-symbols-outlined">warning</span>
+          Gói đã hết hạn – Gia hạn ngay bên dưới
+        </span>
       } @else {
-        <span class="renewal free-tag">No active subscription</span>
+        <span class="renewal free-tag">Chưa có gói trả phí</span>
       }
     </div>
   </div>
 
-  <!-- Pricing -->
-  <h3 class="section-title">Choose Your Plan</h3>
-  <div class="plans-grid">
-    @for (plan of plans; track plan.id) {
-      <div class="plan-card" [class.popular]="plan.popular" [class.active]="currentPlan() === plan.id">
-        @if (plan.popular) {
-          <span class="popular-badge">Most Popular</span>
-        }
-        <h3 class="plan-card-name">{{ plan.name }}</h3>
-        <div class="plan-price">
-          <span class="price">{{ plan.price }}</span>
-          <span class="period">{{ plan.period }}</span>
-        </div>
-        <ul class="feature-list">
-          @for (f of plan.features; track f.text) {
-            <li class="feature-item" [class.disabled]="!f.included">
-              <span class="material-symbols-outlined feature-icon">
-                {{ f.included ? 'check_circle' : 'cancel' }}
-              </span>
-              {{ f.text }}
-            </li>
+  <!-- Plans Grid -->
+  <h3 class="section-title">Chọn gói phù hợp</h3>
+
+  @if (loadingPlans()) {
+    <div class="plans-loading">
+      <div class="plan-skeleton"></div>
+      <div class="plan-skeleton"></div>
+      <div class="plan-skeleton"></div>
+    </div>
+  } @else if (plansError()) {
+    <div class="error-state">
+      <span class="material-symbols-outlined">cloud_off</span>
+      <p>Không thể tải danh sách gói. Vui lòng thử lại.</p>
+    </div>
+  } @else {
+    <div class="plans-grid">
+      @for (plan of plans(); track plan.id) {
+        <div class="plan-card"
+          [class.active]="isCurrentPlan(plan)"
+          [class.highlighted]="!isFree(plan) && !isCurrentPlan(plan)">
+          @if (!isFree(plan) && !isCurrentPlan(plan)) {
+            <span class="popular-badge">Nổi bật</span>
           }
-        </ul>
-        <button
-          class="plan-btn"
-          [class.current]="currentPlan() === plan.id"
-          (click)="selectPlan(plan.id)">
-          {{ currentPlan() === plan.id ? 'Current Plan' : (plan.id === 'pro' ? 'Upgrade to Pro' : 'Downgrade') }}
-        </button>
-      </div>
-    }
-  </div>
+          @if (isCurrentPlan(plan)) {
+            <span class="current-badge">Đang dùng</span>
+          }
+
+          <h3 class="plan-card-name">{{ plan.name }}</h3>
+          <p class="plan-desc">{{ plan.description }}</p>
+
+          <div class="plan-price">
+            <span class="price">{{ formatPlanPrice(plan) }}</span>
+            @if (plan.price > 0) {
+              <span class="period">/ {{ plan.duration }} ngày</span>
+            }
+          </div>
+
+          <ul class="feature-list">
+            <li class="feature-item">
+              <span class="material-symbols-outlined feature-icon">style</span>
+              @if (plan.numDeckLimit > 0) {
+                Tối đa <strong>{{ plan.numDeckLimit }}</strong> bộ thẻ
+              } @else {
+                Không giới hạn bộ thẻ
+              }
+            </li>
+            <li class="feature-item">
+              <span class="material-symbols-outlined feature-icon">auto_awesome</span>
+              @if (plan.dailyGenerateLimit > 0) {
+                <strong>{{ plan.dailyGenerateLimit }}</strong> lần tạo AI / ngày
+              } @else {
+                Tạo AI không giới hạn
+              }
+            </li>
+          </ul>
+
+          <button
+            class="plan-btn"
+            [class.current]="isCurrentPlan(plan)"
+            [class.free-btn]="isFree(plan)"
+            [disabled]="isCurrentPlan(plan) || isFree(plan) || creatingOrder()"
+            (click)="selectPlan(plan)">
+            @if (isCurrentPlan(plan)) {
+              <span class="material-symbols-outlined">check_circle</span> Gói hiện tại
+            } @else if (isFree(plan)) {
+              Gói cơ bản
+            } @else {
+              <span class="material-symbols-outlined">bolt</span> Nâng cấp ngay
+            }
+          </button>
+        </div>
+      }
+    </div>
+  }
 </div>
+
+<!-- Payment Modal -->
+@if (showModal()) {
+  <div class="modal-overlay" (click)="closeModal()">
+    <div class="modal-box" (click)="$event.stopPropagation()">
+      <button class="modal-close" (click)="closeModal()">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+
+      @if (creatingOrder()) {
+        <div class="modal-loading">
+          <div class="spinner"></div>
+          <p>Đang tạo lệnh thanh toán…</p>
+        </div>
+      } @else if (orderError()) {
+        <div class="modal-error">
+          <span class="material-symbols-outlined">error</span>
+          <p>{{ orderError() }}</p>
+          <button class="btn-retry" (click)="closeModal()">Đóng</button>
+        </div>
+      } @else if (paymentOrder()) {
+        <div class="payment-content">
+          <h2 class="modal-title">
+            <span class="material-symbols-outlined">qr_code_2</span>
+            Thanh toán – {{ paymentOrder()!.planName }}
+          </h2>
+          <p class="modal-subtitle">Quét mã QR hoặc chuyển khoản theo thông tin bên dưới</p>
+
+          <!-- QR Code -->
+          <div class="qr-section">
+            <img class="qr-img" [src]="paymentOrder()!.qrCodeUrl" alt="QR Code thanh toán" />
+          </div>
+
+          <!-- Bank Info -->
+          <div class="bank-info">
+            <div class="bank-row">
+              <span class="bank-label">Ngân hàng</span>
+              <span class="bank-value">{{ paymentOrder()!.bankCode }}</span>
+            </div>
+            <div class="bank-row">
+              <span class="bank-label">Số tài khoản</span>
+              <div class="bank-value copy-row">
+                <span>{{ paymentOrder()!.bankAccount }}</span>
+                <button class="btn-copy" (click)="copyToClipboard(paymentOrder()!.bankAccount)" title="Sao chép">
+                  <span class="material-symbols-outlined">content_copy</span>
+                </button>
+              </div>
+            </div>
+            <div class="bank-row">
+              <span class="bank-label">Tên tài khoản</span>
+              <span class="bank-value">{{ paymentOrder()!.accountName }}</span>
+            </div>
+            <div class="bank-row highlight-row">
+              <span class="bank-label">Số tiền</span>
+              <span class="bank-value amount-text">{{ formatCurrency(paymentOrder()!.amount) }}</span>
+            </div>
+            <div class="bank-row highlight-row">
+              <span class="bank-label">Nội dung CK</span>
+              <div class="bank-value copy-row">
+                <span class="transfer-content">{{ paymentOrder()!.transferContent }}</span>
+                <button class="btn-copy" (click)="copyToClipboard(paymentOrder()!.transferContent)" title="Sao chép">
+                  <span class="material-symbols-outlined">content_copy</span>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          @if (copySuccess()) {
+            <div class="copy-toast">
+              <span class="material-symbols-outlined">check_circle</span>
+              Đã sao chép!
+            </div>
+          }
+
+          <div class="modal-note">
+            <span class="material-symbols-outlined">info</span>
+            <span>Hệ thống sẽ tự động kích hoạt gói sau khi nhận được thanh toán.<br>
+            Lệnh hết hạn lúc: <strong>{{ formatDatetime(paymentOrder()!.expiresAt) }}</strong></span>
+          </div>
+
+          <button class="btn-close-full" (click)="closeModal()">Đóng</button>
+        </div>
+      }
+    </div>
+  </div>
+}

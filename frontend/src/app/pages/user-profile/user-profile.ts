@@ -1,53 +1,55 @@
-import { Component } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterModule } from '@angular/router';
-
-interface Achievement {
-  icon: string;
-  label: string;
-  date: string;
-  unlocked: boolean;
-}
-
-interface Activity {
-  icon: string;
-  color: string;
-  text: string;
-  detail: string;
-}
+import { CommonModule } from '@angular/common';
+import { AuthService } from '../../services/auth.service';
+import { PaymentService } from '../../services/payment.service';
+import { UserSubscriptionResponse } from '../../models/payment.models';
 
 @Component({
   selector: 'app-user-profile',
   standalone: true,
-  imports: [RouterModule],
+  imports: [RouterModule, CommonModule],
   templateUrl: './user-profile.html',
   styleUrl: './user-profile.css',
 })
-export class UserProfile {
-  user = {
-    name: 'Alex Johnson',
-    role: 'STUDENT',
-    email: 'alex.j@quizmate.com',
-    bio: 'Passionate learner and quiz enthusiast. Currently mastering Advanced Web Development and Data Science. Aiming for a 100-day streak!',
-  };
+export class UserProfile implements OnInit {
+  private authService = inject(AuthService);
+  private paymentService = inject(PaymentService);
 
-  stats = [
-    { label: 'Sets', value: '12', icon: 'style' },
-    { label: 'Quizzes', value: '47', icon: 'quiz' },
-    { label: 'Study Time', value: '24h', icon: 'schedule' },
-    { label: 'Streak', value: '7 days', icon: 'local_fire_department' },
-  ];
+  currentUser = this.authService.currentUser;
+  subscription = signal<UserSubscriptionResponse | null>(null);
+  loadingSubscription = signal(true);
+  subscriptionError = signal(false);
 
-  achievements: Achievement[] = [
-    { icon: 'emoji_events', label: 'First Quiz', date: '11/2023', unlocked: true },
-    { icon: 'star', label: 'Perfect Score', date: '12/2023', unlocked: true },
-    { icon: 'bolt', label: 'Quick Learner', date: '', unlocked: false },
-    { icon: 'dark_mode', label: 'Night Owl', date: '', unlocked: false },
-  ];
+  get displayName(): string {
+    const u = this.currentUser();
+    if (!u) return '';
+    const first = u.firstName?.trim() ?? '';
+    const last = u.lastName?.trim() ?? '';
+    return [first, last].filter(Boolean).join(' ') || u.email;
+  }
 
-  activities: Activity[] = [
-    { icon: 'check_circle', color: '#16a34a', text: 'Finished "Data Structures 101"', detail: 'Today, 2:43 PM • Score: 86%' },
-    { icon: 'add_circle', color: '#4255FF', text: 'Created "Biology - Finals"', detail: 'Yesterday, 10:20 AM • 43 Cards' },
-    { icon: 'group', color: '#7c3aed', text: 'Joined "Python Devs" Class', detail: 'Oct 24, 2023 • 12 Members' },
-    { icon: 'military_tech', color: '#f59e0b', text: 'Unlocked "Perfect Score" Badge', detail: 'Oct 23, 2023' },
-  ];
+  get primaryRole(): string {
+    const u = this.currentUser();
+    if (!u || !u.roles?.length) return 'USER';
+    return u.roles[0].toUpperCase();
+  }
+
+  ngOnInit(): void {
+    this.paymentService.getMySubscription().subscribe({
+      next: (data) => {
+        this.subscription.set(data);
+        this.loadingSubscription.set(false);
+      },
+      error: () => {
+        this.loadingSubscription.set(false);
+        this.subscriptionError.set(true);
+      }
+    });
+  }
+
+  formatDate(dateStr: string): string {
+    if (!dateStr) return '';
+    return new Date(dateStr).toLocaleDateString('vi-VN');
+  }
 }

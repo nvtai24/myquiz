@@ -1,112 +1,123 @@
-import { Component, signal } from '@angular/core';
-import { Router, RouterModule } from '@angular/router';
-
-interface Term {
-  term: string;
-  definition: string;
-}
-
-interface Review {
-  name: string;
-  timeAgo: string;
-  text: string;
-  avatar: string;
-  rating: number;
-}
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
+import { DeckService } from '../../services/deck.service';
+import { AuthService } from '../../services/auth.service';
+import {
+  DeckDetailResponse,
+  DeckRatingSummaryResponse,
+  QuestionResponse
+} from '../../models/deck.models';
 
 @Component({
   selector: 'app-deck-detail',
   standalone: true,
-  imports: [RouterModule],
+  imports: [RouterModule, CommonModule, FormsModule],
   templateUrl: './deck-detail.html',
   styleUrl: './deck-detail.css',
 })
-export class DeckDetail {
+export class DeckDetail implements OnInit {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
+  private deckService = inject(DeckService);
+  private authService = inject(AuthService);
+
+  // State
+  deck = signal<DeckDetailResponse | null>(null);
+  ratingSummary = signal<DeckRatingSummaryResponse | null>(null);
+  loadingDeck = signal(true);
+  loadingRatings = signal(true);
+  deckError = signal<string | null>(null);
+
+  // UI
   studyMode = signal<string>('quiz');
   showAllTerms = signal(false);
   filterText = signal('');
 
-  deck = {
-    id: 1,
-    title: 'Mathematics Basics',
-    description: 'A comprehensive set of essential mathematics concepts, from algebra to calculus. Perfect for students preparing for exams.',
-    visibility: 'PUBLIC',
-    author: 'Alex Johnson',
-    role: 'Professor',
-    createdAgo: '2 months ago',
-    coverImage: '',
-    stats: {
-      cards: 25,
-      attempts: 143,
-      rating: 4.7,
-      avgScore: 87,
-    },
-  };
+  // Rating form
+  myRating = signal(0);
+  myComment = signal('');
+  hoverRating = signal(0);
+  submittingRating = signal(false);
+  ratingSuccess = signal(false);
+  ratingError = signal<string | null>(null);
+
+  isLoggedIn = computed(() => this.authService.isLoggedIn());
 
   studyModes = [
-    { key: 'learn', label: 'Learn', icon: 'auto_stories', desc: 'Personalized study path', gradient: 'linear-gradient(135deg, #f093fb, #f5576c)' },
-    { key: 'quiz', label: 'Quiz', icon: 'quiz', desc: 'Test your knowledge', gradient: 'linear-gradient(135deg, #4255FF, #6366f1)' },
+    { key: 'learn', label: 'Learn', icon: 'auto_stories', desc: 'Lộ trình học cá nhân hóa', gradient: 'linear-gradient(135deg, #f093fb, #f5576c)' },
+    { key: 'quiz', label: 'Quiz', icon: 'quiz', desc: 'Kiểm tra kiến thức', gradient: 'linear-gradient(135deg, #4255FF, #6366f1)' },
   ];
 
-  terms: Term[] = [
-    { term: 'Pythagorean Theorem', definition: 'A fundamental relation in Euclidean geometry among the three sides of a right triangle. It states that the area of the square whose side is the hypotenuse is equal to the sum of the areas of the squares on the other two sides.' },
-    { term: 'Prime Number', definition: 'A natural number greater than 1 that is not a product of two smaller natural numbers. It only has two divisors: 1 and itself.' },
-    { term: 'Golden Ratio', definition: 'Approximately 1.618, often denoted by the Greek letter phi (φ). Two quantities are in the golden ratio if their ratio is the same as the ratio of their sum to the larger of the two quantities.' },
-    { term: 'Quadratic Formula', definition: 'The formula x = (-b ± √(b²-4ac)) / 2a used to find the solutions of a quadratic equation ax² + bx + c = 0.' },
-    { term: 'Fibonacci Sequence', definition: 'A sequence where each number is the sum of the two preceding ones, starting from 0 and 1. The sequence goes 0, 1, 1, 2, 3, 5, 8, 13, 21, ...' },
-    { term: 'Euler\'s Number', definition: 'The mathematical constant e ≈ 2.71828, which is the base of the natural logarithm. It is the limit of (1 + 1/n)^n as n approaches infinity.' },
-  ];
+  ngOnInit(): void {
+    const id = this.route.snapshot.paramMap.get('id');
+    if (!id) {
+      this.deckError.set('Không tìm thấy bộ thẻ.');
+      this.loadingDeck.set(false);
+      return;
+    }
 
-  ratingBreakdown = [
-    { stars: 5, count: 85 },
-    { stars: 4, count: 35 },
-    { stars: 3, count: 15 },
-    { stars: 2, count: 5 },
-    { stars: 1, count: 3 },
-  ];
+    this.deckService.getDeckById(id).subscribe({
+      next: (res) => {
+        this.deck.set(res.data);
+        this.loadingDeck.set(false);
+      },
+      error: (err) => {
+        this.deckError.set(err?.error?.message ?? 'Không thể tải bộ thẻ này.');
+        this.loadingDeck.set(false);
+      }
+    });
 
-  reviews: Review[] = [
-    { name: 'Sarah M.', timeAgo: '3d ago', text: 'Perfect for brushing up before my calc exam. The quiz mode is great!', avatar: 'S', rating: 5 },
-    { name: 'James T.', timeAgo: '1w ago', text: 'Clear definitions and useful diagrams. Highly recommended.', avatar: 'J', rating: 4 },
-    { name: 'Michelle K.', timeAgo: '2w ago', text: 'Really helped me understand the fundamentals. Will definitely come back!', avatar: 'M', rating: 5 },
-  ];
-
-  constructor(private router: Router) {}
-
-  get totalRatings(): number {
-    return this.ratingBreakdown.reduce((sum, r) => sum + r.count, 0);
+    this.deckService.getRatings(id).subscribe({
+      next: (res) => {
+        this.ratingSummary.set(res.data);
+        this.loadingRatings.set(false);
+      },
+      error: () => this.loadingRatings.set(false)
+    });
   }
 
-  get visibleTerms(): Term[] {
+  get deckId(): string {
+    return this.deck()?.id ?? '';
+  }
+
+  get visibleTerms(): QuestionResponse[] {
+    const all = this.deck()?.questions ?? [];
     const filtered = this.filterText()
-      ? this.terms.filter(t =>
-          t.term.toLowerCase().includes(this.filterText().toLowerCase()) ||
-          t.definition.toLowerCase().includes(this.filterText().toLowerCase())
+      ? all.filter(q =>
+          q.content.toLowerCase().includes(this.filterText().toLowerCase()) ||
+          q.explanation?.toLowerCase().includes(this.filterText().toLowerCase())
         )
-      : this.terms;
+      : all;
     return this.showAllTerms() ? filtered : filtered.slice(0, 4);
   }
 
   get totalFilteredTerms(): number {
-    if (!this.filterText()) return this.terms.length;
-    return this.terms.filter(t =>
-      t.term.toLowerCase().includes(this.filterText().toLowerCase()) ||
-      t.definition.toLowerCase().includes(this.filterText().toLowerCase())
+    const all = this.deck()?.questions ?? [];
+    if (!this.filterText()) return all.length;
+    return all.filter(q =>
+      q.content.toLowerCase().includes(this.filterText().toLowerCase()) ||
+      q.explanation?.toLowerCase().includes(this.filterText().toLowerCase())
     ).length;
   }
 
+  get ratingBreakdown(): { stars: number; count: number }[] {
+    const ratings = this.ratingSummary()?.ratings ?? [];
+    return [5, 4, 3, 2, 1].map(stars => ({
+      stars,
+      count: ratings.filter(r => r.rating === stars).length
+    }));
+  }
+
   getBarWidth(count: number): string {
-    const max = Math.max(...this.ratingBreakdown.map(r => r.count));
+    const max = Math.max(...this.ratingBreakdown.map(r => r.count), 1);
     return (count / max * 100) + '%';
   }
 
-  selectMode(key: string) {
-    this.studyMode.set(key);
-  }
+  selectMode(key: string) { this.studyMode.set(key); }
 
-  toggleTerms() {
-    this.showAllTerms.update(v => !v);
-  }
+  toggleTerms() { this.showAllTerms.update(v => !v); }
 
   onFilterInput(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -115,11 +126,41 @@ export class DeckDetail {
 
   startStudy() {
     const mode = this.studyMode();
-    if (mode === 'quiz') {
-      this.router.navigate(['/quiz', this.deck.id]);
-    } else if (mode === 'learn') {
-      this.router.navigate(['/learn', this.deck.id]);
-    }
+    if (mode === 'quiz') this.router.navigate(['/quiz', this.deckId]);
+    else if (mode === 'learn') this.router.navigate(['/learn', this.deckId]);
+  }
+
+  setMyRating(value: number) { this.myRating.set(value); }
+  setHoverRating(value: number) { this.hoverRating.set(value); }
+  clearHover() { this.hoverRating.set(0); }
+
+  getStarState(star: number): 'filled' | 'empty' {
+    const active = this.hoverRating() || this.myRating();
+    return star <= active ? 'filled' : 'empty';
+  }
+
+  submitRating() {
+    if (!this.myRating()) return;
+    this.submittingRating.set(true);
+    this.ratingError.set(null);
+    this.deckService.submitRating(this.deckId, {
+      rating: this.myRating(),
+      comment: this.myComment() || undefined
+    }).subscribe({
+      next: () => {
+        this.submittingRating.set(false);
+        this.ratingSuccess.set(true);
+        // Reload ratings
+        this.deckService.getRatings(this.deckId).subscribe(res => {
+          this.ratingSummary.set(res.data);
+        });
+        setTimeout(() => this.ratingSuccess.set(false), 3000);
+      },
+      error: (err) => {
+        this.submittingRating.set(false);
+        this.ratingError.set(err?.error?.message ?? 'Không thể gửi đánh giá.');
+      }
+    });
   }
 
   getStarArray(rating: number): string[] {
@@ -130,5 +171,19 @@ export class DeckDetail {
       else stars.push('empty');
     }
     return stars;
+  }
+
+  formatTimeAgo(dateStr: string): string {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const days = Math.floor(diff / 86400000);
+    if (days === 0) return 'Hôm nay';
+    if (days === 1) return '1 ngày trước';
+    if (days < 7) return `${days} ngày trước`;
+    if (days < 30) return `${Math.floor(days / 7)} tuần trước`;
+    return `${Math.floor(days / 30)} tháng trước`;
+  }
+
+  getInitial(name: string): string {
+    return name ? name.charAt(0).toUpperCase() : '?';
   }
 }

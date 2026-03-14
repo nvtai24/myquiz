@@ -1,18 +1,22 @@
 <div class="library-page">
-  <h1 class="page-title">Your Library</h1>
+  <h1 class="page-title">Thư viện của bạn</h1>
 
   <!-- Tabs & Search -->
   <div class="tabs-container">
     <div class="tabs">
-      <button class="tab" [class.active]="activeTab() === 'all'" (click)="setTab('all')">All Decks</button>
-      <button class="tab" [class.active]="activeTab() === 'created'" (click)="setTab('created')">Created by you</button>
-      <button class="tab" [class.active]="activeTab() === 'studying'" (click)="setTab('studying')">Studying</button>
-      <button class="tab" [class.active]="activeTab() === 'folders'" (click)="setTab('folders')">Folders</button>
+      <button class="tab" [class.active]="activeTab() === 'all'" (click)="setTab('all')">Tất cả</button>
+      <button class="tab" [class.active]="activeTab() === 'created'" (click)="setTab('created')">Đã tạo</button>
+      <button class="tab" [class.active]="activeTab() === 'studying'" (click)="setTab('studying')">Đang học</button>
     </div>
-    
+
     <div class="search-bar">
       <span class="material-symbols-outlined search-icon">search</span>
-      <input type="text" placeholder="Search decks..." [ngModel]="searchQuery()" (ngModelChange)="onSearchChange($event)" />
+      <input type="text" placeholder="Tìm theo tên, mô tả, tag..." [ngModel]="searchQuery()" (ngModelChange)="onSearchChange($event)" />
+      @if (searchQuery()) {
+        <button class="clear-search-btn" (click)="onSearchChange('')">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+      }
     </div>
   </div>
 
@@ -21,65 +25,131 @@
     <div class="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 text-[13px] font-medium px-4 py-3 rounded-xl mb-4">
       <span class="material-symbols-outlined text-[18px]">error</span>
       {{ errorMessage() }}
-      <button class="ml-auto text-red-500 hover:text-red-700 bg-transparent border-none cursor-pointer text-[13px] font-bold" (click)="loadDecks()">Retry</button>
+      <button class="ml-auto text-red-500 hover:text-red-700 bg-transparent border-none cursor-pointer text-[13px] font-bold" (click)="loadDecks()">Thử lại</button>
     </div>
   }
 
   <div class="library-content">
     <!-- Filters Sidebar -->
     <aside class="filters-panel">
-      <h3 class="filters-title">FILTERS</h3>
+      <div class="filters-header">
+        <h3 class="filters-title">BỘ LỌC</h3>
+        @if (hasActiveFilters) {
+          <button class="clear-all-link" (click)="clearFilters()">Xóa tất cả</button>
+        }
+      </div>
 
+      <!-- Sort By -->
       <div class="filter-group">
-        <h4 class="filter-label">Sort By</h4>
-        
+        <h4 class="filter-label">Sắp xếp</h4>
         <div class="custom-select-wrapper">
           <div class="custom-select-header" (click)="toggleSort()">
             <span class="custom-select-value">
-              {{ sortBy() === 'recent' ? 'Most Recent' : 'Most Terms' }}
+              {{ sortBy() === 'recent' ? 'Mới nhất' : sortBy() === 'terms' ? 'Nhiều câu nhất' : sortBy() === 'rating' ? 'Cao nhất' : 'A → Z' }}
             </span>
             <span class="material-symbols-outlined dropdown-icon" [class.open]="isSortOpen()">expand_more</span>
           </div>
-          
           @if (isSortOpen()) {
             <ul class="custom-select-list">
-              <li [class.selected]="sortBy() === 'recent'" (click)="setSort('recent')">Most Recent</li>
-              <li [class.selected]="sortBy() === 'terms'" (click)="setSort('terms')">Most Terms</li>
+              <li [class.selected]="sortBy() === 'recent'" (click)="setSort('recent')">Mới nhất</li>
+              <li [class.selected]="sortBy() === 'terms'" (click)="setSort('terms')">Nhiều câu nhất</li>
+              <li [class.selected]="sortBy() === 'rating'" (click)="setSort('rating')">Đánh giá cao nhất</li>
+              <li [class.selected]="sortBy() === 'alpha'" (click)="setSort('alpha')">A → Z</li>
             </ul>
           }
         </div>
       </div>
 
-      <button class="clear-btn" (click)="clearFilters()">Clear All Filters</button>
+      <!-- Visibility Filter -->
+      <div class="filter-group">
+        <h4 class="filter-label">Hiển thị</h4>
+        <div class="radio-group">
+          <button class="radio-btn" [class.active]="selectedVisibility() === 'all'" (click)="setVisibility('all')">
+            <span class="material-symbols-outlined">layers</span>
+            Tất cả
+          </button>
+          <button class="radio-btn" [class.active]="selectedVisibility() === 'Public'" (click)="setVisibility('Public')">
+            <span class="material-symbols-outlined">public</span>
+            Công khai
+          </button>
+          <button class="radio-btn" [class.active]="selectedVisibility() === 'Private'" (click)="setVisibility('Private')">
+            <span class="material-symbols-outlined">lock</span>
+            Riêng tư
+          </button>
+          <button class="radio-btn" [class.active]="selectedVisibility() === 'Shared'" (click)="setVisibility('Shared')">
+            <span class="material-symbols-outlined">group</span>
+            Được chia sẻ
+          </button>
+          </div>
+      </div>
+
+      <!-- Tags Filter -->
+      @if (allTags().length > 0) {
+        <div class="filter-group">
+          <h4 class="filter-label">Tags</h4>
+          <div class="tags-filter-list">
+            @for (tag of allTags(); track tag) {
+              <button class="tag-filter-btn" [class.active]="selectedTags().includes(tag)" (click)="toggleTag(tag)">
+                <span class="material-symbols-outlined">label</span>
+                {{ tag }}
+                @if (selectedTags().includes(tag)) {
+                  <span class="material-symbols-outlined check-icon">check</span>
+                }
+              </button>
+            }
+          </div>
+        </div>
+      }
     </aside>
 
-    <!-- Main Content Area -->
+    <!-- Main Content -->
     <div class="main-content">
+      <!-- Active filters summary -->
+      @if (hasActiveFilters) {
+        <div class="active-filters-bar">
+          <span class="material-symbols-outlined text-[#4255FF]">filter_list</span>
+          <span class="text-[13px] font-semibold text-gray-600">
+            {{ filteredSets.length }} kết quả
+          </span>
+          @for (tag of selectedTags(); track tag) {
+            <span class="active-filter-chip">
+              <span class="material-symbols-outlined">label</span>
+              {{ tag }}
+              <button (click)="toggleTag(tag)"><span class="material-symbols-outlined">close</span></button>
+            </span>
+          }
+          @if (selectedVisibility() !== 'all') {
+            <span class="active-filter-chip">
+              <span class="material-symbols-outlined">public</span>
+              {{ selectedVisibility() }}
+              <button (click)="setVisibility('all')"><span class="material-symbols-outlined">close</span></button>
+            </span>
+          }
+        </div>
+      }
+
       <!-- Loading State -->
       @if (loading()) {
         <div class="flex flex-col items-center justify-center py-20 text-gray-400">
           <span class="material-symbols-outlined text-[48px] animate-spin mb-4">progress_activity</span>
-          <p class="text-[15px] font-medium">Loading your decks...</p>
+          <p class="text-[15px] font-medium">Đang tải bộ thẻ...</p>
         </div>
       }
 
-      <!-- Quiz Grid -->
       @if (!loading()) {
         <div class="quiz-grid">
           @for (deck of paginatedSets; track deck.id; let i = $index) {
             <div class="quiz-card" [routerLink]="['/deck', deck.id]">
               <div class="quiz-img" [style.background-color]="getDeckColor(i)">
-                <span class="terms-badge">{{ deck.questionCount }} TERMS</span>
+                <span class="terms-badge">{{ deck.questionCount }} CÂU</span>
                 <span class="material-symbols-outlined quiz-icon">{{ getDeckIcon(i) }}</span>
               </div>
               <div class="quiz-info">
                 <div class="quiz-badges">
                   <span class="visibility-badge" [class.private]="deck.visibility === 'Private'">
-                    <span class="material-symbols-outlined">{{ deck.visibility === 'Private' ? 'lock' : 'public' }}</span>
+                    <span class="material-symbols-outlined">{{ deck.visibility === 'Private' ? 'lock' : deck.visibility === 'Shared' ? 'group' : 'public' }}</span>
                     {{ deck.visibility }}
                   </span>
-                  <span class="status-badge" [class.draft]="deck.status === 'Draft'">{{ deck.status }}</span>
-                  
                   @for (tag of deck.tags | slice:0:2; track tag) {
                     <span class="tag-badge">{{ tag }}</span>
                   }
@@ -90,11 +160,21 @@
 
                 <h3 class="quiz-title">{{ deck.name }}</h3>
                 <p class="quiz-desc" [title]="deck.description">{{ deck.description }}</p>
-                <p class="quiz-date">Created on {{ deck.createdAt | date:'MMM d, yyyy' }}</p>
+
+                <!-- Rating -->
+                @if (deck.totalRatings) {
+                  <div class="deck-rating">
+                    <span class="material-symbols-outlined star-icon">star</span>
+                    <span class="rating-val">{{ (deck.averageRating ?? 0).toFixed(1) }}</span>
+                    <span class="rating-count">({{ deck.totalRatings }})</span>
+                  </div>
+                }
+
+                <p class="quiz-date">{{ deck.createdAt | date:'dd/MM/yyyy' }}</p>
 
                 <div class="quiz-footer">
-                  <span class="text-[12px] text-gray-400 font-medium">{{ deck.questionCount }} questions</span>
-                  <button class="study-btn" (click)="$event.stopPropagation()" [routerLink]="['/learn', deck.id]">Study</button>
+                  <span class="text-[12px] text-gray-400 font-medium">{{ deck.questionCount }} câu hỏi</span>
+                  <button class="study-btn" (click)="$event.stopPropagation()" [routerLink]="['/learn', deck.id]">Học ngay</button>
                 </div>
               </div>
             </div>
@@ -103,11 +183,15 @@
           @if (filteredSets.length === 0 && !loading()) {
             <div class="empty-state">
               <span class="material-symbols-outlined empty-icon">search_off</span>
-              <p>No decks found. Create your first deck!</p>
-              <a routerLink="/add-deck" class="mt-3 inline-flex items-center gap-1.5 px-5 py-2.5 bg-[#4255FF] text-white text-[13px] font-bold rounded-lg no-underline hover:bg-[#3345e0] transition-colors">
-                <span class="material-symbols-outlined text-[18px]">add</span>
-                Create Deck
-              </a>
+              <p>Không tìm thấy bộ thẻ nào.</p>
+              @if (hasActiveFilters) {
+                <button class="mt-3 text-[13px] font-bold text-[#4255FF] bg-transparent border-none cursor-pointer" (click)="clearFilters()">Xóa bộ lọc</button>
+              } @else {
+                <a routerLink="/add-deck" class="mt-3 inline-flex items-center gap-1.5 px-5 py-2.5 bg-[#4255FF] text-white text-[13px] font-bold rounded-lg no-underline hover:bg-[#3345e0] transition-colors">
+                  <span class="material-symbols-outlined text-[18px]">add</span>
+                  Tạo bộ thẻ
+                </a>
+              }
             </div>
           }
         </div>
@@ -118,11 +202,9 @@
             <button class="page-btn" [disabled]="currentPage() === 1" (click)="changePage(currentPage() - 1)">
               <span class="material-symbols-outlined">chevron_left</span>
             </button>
-            
             <div class="page-info">
-              Page <span class="current-page">{{ currentPage() }}</span> of {{ totalPages }}
+              Trang <span class="current-page">{{ currentPage() }}</span> / {{ totalPages }}
             </div>
-            
             <button class="page-btn" [disabled]="currentPage() === totalPages" (click)="changePage(currentPage() + 1)">
               <span class="material-symbols-outlined">chevron_right</span>
             </button>

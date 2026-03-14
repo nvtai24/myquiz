@@ -26,8 +26,62 @@ export interface DeckSummary {
   status: DeckStatus;
   tags: string[];
   questionCount: number;
+  thumbnailUrl?: string;
+  averageRating?: number;
+  totalRatings?: number;
   createdAt: string;
   updatedAt: string | null;
+}
+
+// ── Question (GET /api/Decks/{id}) ──
+
+export interface QuestionResponse {
+  id: number;
+  content: string;
+  type: QuestionType;
+  hint: string;
+  explanation: string;
+  options: string[];
+  correctAnswers: string[];
+}
+
+// ── Deck Detail (GET /api/Decks/{id}) ──
+
+export interface DeckDetailResponse extends DeckSummary {
+  questions: QuestionResponse[];
+  documents: DeckDocumentResponse[];
+}
+
+export interface DeckDocumentResponse {
+  id: string;
+  fileName: string;
+  fileUrl: string;
+  contentType: string;
+  createdAt: string;
+}
+
+// ── Deck Rating ──
+
+export interface DeckRatingResponse {
+  id: string;
+  deckId: string;
+  userId: string;
+  userName: string;
+  userEmail: string;
+  rating: number;
+  comment: string | null;
+  createdAt: string;
+}
+
+export interface DeckRatingSummaryResponse {
+  averageRating: number;
+  totalRatings: number;
+  ratings: DeckRatingResponse[];
+}
+
+export interface CreateDeckRatingRequest {
+  rating: number;
+  comment?: string;
 }
 
 // ── Create Deck Request (POST /api/Decks) ──

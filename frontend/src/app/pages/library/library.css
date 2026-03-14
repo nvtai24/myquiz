@@ -100,6 +100,18 @@
   color: #9ca3af;
 }
 
+.clear-search-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9ca3af;
+  display: flex;
+  padding: 0;
+  flex-shrink: 0;
+}
+.clear-search-btn .material-symbols-outlined { font-size: 18px; }
+.clear-search-btn:hover { color: #ef4444; }
+
 /* Library Content Layout */
 .library-content {
   display: flex;
@@ -120,13 +132,31 @@
   top: 80px;
 }
 
+.filters-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+
 .filters-title {
   font-size: 0.75rem;
   font-weight: 700;
   color: #6b7280;
   letter-spacing: 0.06em;
-  margin: 0 0 16px;
+  margin: 0;
 }
+
+.clear-all-link {
+  background: none;
+  border: none;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #4255FF;
+  cursor: pointer;
+  padding: 0;
+}
+.clear-all-link:hover { text-decoration: underline; }
 
 .filter-group {
   margin-bottom: 20px;
@@ -273,10 +303,68 @@
   cursor: pointer;
   transition: background 0.15s;
 }
+.clear-btn:hover { background: #f3f4f6; }
 
-.clear-btn:hover {
-  background: #f3f4f6;
+/* Radio Group (Visibility Filter) */
+.radio-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
+
+.radio-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1.5px solid transparent;
+  background: transparent;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
+}
+.radio-btn .material-symbols-outlined { font-size: 16px; }
+.radio-btn:hover { background: #f3f4f6; color: #1e1e2f; }
+.radio-btn.active {
+  background: #eef0ff;
+  border-color: #c7d2fe;
+  color: #4255FF;
+}
+
+/* Tags Filter */
+.tags-filter-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 180px;
+  overflow-y: auto;
+}
+
+.tag-filter-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  padding: 7px 10px;
+  border-radius: 8px;
+  border: 1.5px solid transparent;
+  background: transparent;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #6b7280;
+  cursor: pointer;
+  transition: all 0.15s;
+  text-align: left;
+}
+.tag-filter-btn .material-symbols-outlined { font-size: 14px; }
+.tag-filter-btn .check-icon { font-size: 14px; margin-left: auto; color: #4255FF; }
+.tag-filter-btn:hover { background: #f3f4f6; color: #1e1e2f; }
+.tag-filter-btn.active { background: #eef0ff; border-color: #c7d2fe; color: #4255FF; }
 
 /* Main Content & Grid */
 .main-content {
@@ -426,6 +514,65 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin-top: auto;
+}
+
+/* Deck Rating in card */
+.deck-rating {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  margin-bottom: 4px;
+}
+.star-icon {
+  font-size: 15px;
+  color: #f59e0b;
+}
+.deck-rating .rating-val {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #1e1e2f;
+}
+.deck-rating .rating-count {
+  font-size: 0.72rem;
+  color: #9ca3af;
+}
+
+/* Active Filters Bar */
+.active-filters-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  padding: 10px 14px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 12px;
+  margin-bottom: 16px;
+}
+
+.active-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #eef0ff;
+  border: 1px solid #c7d2fe;
+  color: #4255FF;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 9999px;
+}
+.active-filter-chip .material-symbols-outlined { font-size: 13px; }
+.active-filter-chip button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #4255FF;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  line-height: 1;
 }
 
 .quiz-rating {

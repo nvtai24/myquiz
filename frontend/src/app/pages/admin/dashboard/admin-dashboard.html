@@ -1,0 +1,96 @@
+<div class="p-8">
+  <!-- Header -->
+  <div class="mb-8">
+    <h1 class="text-2xl font-black text-gray-900 m-0">Dashboard</h1>
+    <p class="text-gray-400 text-[13px] font-medium mt-1">Tổng quan hệ thống QuizMate</p>
+  </div>
+
+  <!-- Stat Cards -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
+    @for (card of statCards(); track card.label) {
+      <div class="bg-white rounded-2xl p-5 shadow-sm border border-gray-100 flex items-center gap-4 hover:shadow-md transition-shadow">
+        <div class="w-12 h-12 rounded-xl flex items-center justify-center shrink-0" [style.background-color]="card.bg">
+          <span class="material-symbols-outlined text-[24px]" [style.color]="card.color">{{ card.icon }}</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <p class="text-[11px] font-bold text-gray-400 uppercase tracking-wider m-0">{{ card.label }}</p>
+          <p class="text-[28px] font-black text-gray-900 m-0 leading-none mt-1">
+            @if (loadingDecks() || loadingPlans()) {
+              <span class="inline-block w-16 h-7 bg-gray-100 rounded-lg animate-pulse"></span>
+            } @else {
+              {{ card.value }}
+            }
+          </p>
+        </div>
+        @if (card.change) {
+          <span class="text-[11px] font-bold text-green-600 bg-green-50 border border-green-100 px-2 py-0.5 rounded-full whitespace-nowrap">{{ card.change }}</span>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Content Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Recent Decks -->
+    <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+      <div class="flex items-center justify-between px-6 py-4 border-b border-gray-50">
+        <h3 class="font-black text-gray-900 text-[15px] m-0">Bộ thẻ gần đây</h3>
+        <a routerLink="/admin/decks" class="text-[12px] font-bold text-indigo-500 no-underline hover:text-indigo-700 transition-colors">Xem tất cả →</a>
+      </div>
+
+      @if (loadingDecks()) {
+        <div class="p-6 space-y-3">
+          @for (s of [1,2,3,4,5]; track s) {
+            <div class="h-12 bg-gray-50 rounded-xl animate-pulse"></div>
+          }
+        </div>
+      } @else if (recentDecks().length === 0) {
+        <div class="p-10 text-center text-gray-400">
+          <span class="material-symbols-outlined text-[40px] block mb-2">style</span>
+          Chưa có bộ thẻ nào
+        </div>
+      } @else {
+        <div class="divide-y divide-gray-50">
+          @for (deck of recentDecks(); track deck.id; let i = $index) {
+            <div class="flex items-center gap-4 px-6 py-3.5">
+              <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0" [style.background-color]="getColor(i)">
+                <span class="material-symbols-outlined text-white text-[18px]">{{ getIcon(i) }}</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-bold text-gray-900 text-[13px] truncate m-0">{{ deck.name }}</p>
+                <p class="text-gray-400 text-[11px] m-0">{{ deck.questionCount }} câu hỏi · {{ deck.createdAt | date:'dd/MM/yyyy' }}</p>
+              </div>
+              <span class="text-[10px] font-bold px-2 py-1 rounded-full"
+                [class]="deck.visibility === 'Public' ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-gray-50 text-gray-500 border border-gray-200'">
+                {{ deck.visibility }}
+              </span>
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Quick Links -->
+    <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+      <h3 class="font-black text-gray-900 text-[15px] m-0 mb-5">Điều hướng nhanh</h3>
+      <div class="space-y-3">
+        @for (item of [
+          {label: 'Quản lý người dùng', icon: 'group', path: '/admin/users', color: '#4255FF', bg: '#eef0ff'},
+          {label: 'Gói đăng ký', icon: 'credit_card', path: '/admin/plans', color: '#7c3aed', bg: '#f5f3ff'},
+          {label: 'Quản lý Decks', icon: 'style', path: '/admin/decks', color: '#059669', bg: '#ecfdf5'}
+        ]; track item.label) {
+          <a [routerLink]="item.path"
+            class="flex items-center gap-3 px-4 py-3 rounded-xl no-underline border border-transparent hover:border-gray-200 hover:bg-gray-50 transition-all group">
+            <div class="w-9 h-9 rounded-lg flex items-center justify-center" [style.background-color]="item.bg">
+              <span class="material-symbols-outlined text-[18px]" [style.color]="item.color">{{ item.icon }}</span>
+            </div>
+            <span class="font-semibold text-gray-700 text-[13px] group-hover:text-gray-900">{{ item.label }}</span>
+            <span class="material-symbols-outlined text-gray-300 text-[18px] ml-auto group-hover:text-gray-500">chevron_right</span>
+          </a>
+        }
+      </div>
+    </div>
+
+  </div>
+</div>

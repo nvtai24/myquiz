@@ -1,5 +1,27 @@
+@if (loading()) {
+  <div class="flex items-center justify-center min-h-[65vh]">
+    <div class="flex flex-col items-center gap-4 text-gray-400">
+      <span class="material-symbols-outlined text-[48px] animate-spin">progress_activity</span>
+      <p class="font-medium">Đang tải bộ thẻ...</p>
+    </div>
+  </div>
+}
+
+@if (error()) {
+  <div class="flex items-center justify-center min-h-[65vh]">
+    <div class="flex flex-col items-center gap-4 text-red-500">
+      <span class="material-symbols-outlined text-[48px]">error</span>
+      <p class="font-medium">{{ error() }}</p>
+      <div class="flex gap-3">
+        <button class="px-5 py-2.5 bg-[#4255FF] text-white rounded-xl font-bold border-none cursor-pointer" (click)="loadDeck()">Thử lại</button>
+        <button class="px-5 py-2.5 bg-white text-gray-500 rounded-xl font-bold border border-gray-200 cursor-pointer" (click)="goBackToDeck()">Quay lại</button>
+      </div>
+    </div>
+  </div>
+}
+
 <!-- ===== COMPLETE SCREEN ===== -->
-@if (showCompleteScreen()) {
+@if (!loading() && !error() && showCompleteScreen()) {
 <div class="flex items-center justify-center min-h-[65vh] animate-[fadeIn_0.4s_ease]">
   <div class="bg-white border border-gray-200 rounded-[28px] p-12 text-center max-w-[480px] w-full shadow-[0_8px_40px_rgba(0,0,0,0.06)] relative overflow-hidden before:content-[''] before:absolute before:top-0 before:left-0 before:right-0 before:h-[5px] before:bg-gradient-to-r before:from-green-600 before:to-emerald-400">
     <div class="flex justify-center gap-4 mb-2">
@@ -8,31 +30,35 @@
       <span class="text-2xl animate-[float_2s_ease-in-out_infinite_0.6s]">🏆</span>
     </div>
     <div class="text-[4rem] mb-3 animate-[bounceIn_0.6s_ease]">🎉</div>
-    <h1 class="text-[1.75rem] font-extrabold text-gray-900 m-0 mb-1.5 leading-tight">Amazing Work!</h1>
+    <h1 class="text-[1.75rem] font-extrabold text-gray-900 m-0 mb-1.5 leading-tight">Hoàn thành!</h1>
     <p class="text-[0.95rem] text-gray-500 m-0 mb-8 leading-relaxed">
-      You've mastered all <strong class="text-green-600 font-bold">{{ totalCards }} cards</strong> in this deck!
+      Bạn đã thành thạo <strong class="text-green-600 font-bold">{{ totalCards }} thẻ</strong> trong bộ này!
     </p>
 
     <div class="flex justify-center gap-4 mb-8">
       <div class="flex flex-col items-center gap-1 p-5 rounded-2xl bg-green-50 text-green-600 min-w-[120px]">
         <span class="material-symbols-outlined text-[28px]">check_circle</span>
         <span class="text-2xl font-extrabold">{{ totalCards }}</span>
-        <span class="text-[11px] font-semibold opacity-70 tracking-wider uppercase">Mastered</span>
+        <span class="text-[11px] font-semibold opacity-70 tracking-wider uppercase">Thành thạo</span>
       </div>
       <div class="flex flex-col items-center gap-1 p-5 rounded-2xl bg-[#eef0ff] text-[#4255FF] min-w-[120px]">
         <span class="material-symbols-outlined text-[28px]">style</span>
         <span class="text-2xl font-extrabold">100%</span>
-        <span class="text-[11px] font-semibold opacity-70 tracking-wider uppercase">Complete</span>
+        <span class="text-[11px] font-semibold opacity-70 tracking-wider uppercase">Hoàn thành</span>
       </div>
     </div>
 
     <div class="flex justify-center gap-3">
-      <button class="flex items-center gap-1.5 px-7 py-3 rounded-xl font-bold text-[0.9rem] cursor-pointer transition-all bg-white border-2 border-gray-200 text-gray-500 hover:border-[#4255FF] hover:text-[#4255FF]" (click)="resetProgress()">
+      <button class="flex items-center gap-1.5 px-6 py-3 rounded-xl font-bold text-[0.9rem] cursor-pointer transition-all bg-white border-2 border-gray-200 text-gray-500 hover:border-[#4255FF] hover:text-[#4255FF]" (click)="resetProgress()">
         <span class="material-symbols-outlined text-[20px]">replay</span>
-        Study Again
+        Học lại
       </button>
-      <button class="flex items-center gap-1.5 px-7 py-3 rounded-xl font-bold text-[0.9rem] cursor-pointer transition-all bg-gradient-to-br from-[#4255FF] to-indigo-500 text-white border-none shadow-[0_4px_16px_rgba(66,85,255,0.3)] hover:translate-y-[-2px] hover:shadow-[0_6px_24px_rgba(66,85,255,0.4)]" (click)="goBackToDeck()">
-        Back to Deck
+      <button class="flex items-center gap-1.5 px-6 py-3 rounded-xl font-bold text-[0.9rem] cursor-pointer transition-all bg-gradient-to-r from-amber-400 to-amber-500 text-white border-none shadow-md hover:-translate-y-0.5" (click)="goToQuiz()">
+        <span class="material-symbols-outlined text-[20px]">quiz</span>
+        Làm Quiz
+      </button>
+      <button class="flex items-center gap-1.5 px-6 py-3 rounded-xl font-bold text-[0.9rem] cursor-pointer transition-all bg-gradient-to-br from-[#4255FF] to-indigo-500 text-white border-none shadow-[0_4px_16px_rgba(66,85,255,0.3)] hover:-translate-y-0.5" (click)="goBackToDeck()">
+        Deck
         <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
       </button>
     </div>
@@ -40,8 +66,9 @@
 </div>
 }
 
+
 <!-- ===== LEARN / FLASHCARD MODE ===== -->
-@if (!showCompleteScreen()) {
+@if (!loading() && !error() && !showCompleteScreen()) {
 <div class="flex flex-col items-center gap-0 outline-none animate-[fadeIn_0.3s_ease]" (keydown)="handleKeydown($event)" tabindex="0">
   <!-- Header -->
   <div class="w-full flex items-center gap-4 mb-3">
@@ -49,7 +76,7 @@
       <span class="material-symbols-outlined text-[22px]">arrow_back</span>
     </button>
     <div class="flex-1">
-      <h2 class="text-[1.15rem] font-bold text-gray-900 m-0">{{ deckTitle }}</h2>
+      <h2 class="text-[1.15rem] font-bold text-gray-900 m-0">{{ deckTitle() }}</h2>
     </div>
     <div class="flex gap-1.5">
       <div class="flex items-center gap-1 px-3 py-1.5 rounded-full text-[12px] font-bold bg-green-50 text-green-600 border border-green-200">
@@ -98,7 +125,7 @@
             <span class="material-symbols-outlined text-[16px]">visibility</span>
           </div>
           <div class="flex items-center justify-center flex-1 py-6">
-            <h2 class="text-[2.2rem] font-extrabold text-gray-900 text-center m-0 leading-tight tracking-tight">{{ currentCard().term }}</h2>
+            <h2 class="text-[2.2rem] font-extrabold text-gray-900 text-center m-0 leading-tight tracking-tight">{{ getCardFront(currentCard()) }}</h2>
           </div>
         </div>
         <!-- Back -->
@@ -107,7 +134,7 @@
             <span class="material-symbols-outlined text-[16px]">menu_book</span>
           </div>
           <div class="flex items-center justify-center flex-1 py-6">
-            <p class="text-[1.15rem] text-white/95 text-center m-0 leading-relaxed font-medium max-w-[520px]">{{ currentCard().definition }}</p>
+            <p class="text-[1.15rem] text-white/95 text-center m-0 leading-relaxed font-medium max-w-[520px]">{{ getCardBack(currentCard()) }}</p>
           </div>
         </div>
       </div>
@@ -136,7 +163,7 @@
   <!-- Navigation: dots (few cards) or compact (many cards) -->
   @if (useDots) {
     <div class="flex gap-2 items-center justify-center flex-wrap my-3 mb-2">
-      @for (card of cards; track card.id; let i = $index) {
+      @for (card of cards(); track card.id; let i = $index) {
         <button
           class="w-2.5 h-2.5 rounded-full border-2 cursor-pointer transition-all p-0"
           [class]="i === currentIndex() ? 'bg-[#4255FF] border-[#4255FF] scale-[1.4] shadow-[0_0_10px_rgba(66,85,255,0.35)]' : 
@@ -182,11 +209,11 @@
           (click)="goToCard(i)"
         >
           <div class="flex-[0_0_35%] py-5 px-6 flex items-center">
-            <span class="text-[0.92rem] font-bold text-gray-900 leading-snug">{{ card.term }}</span>
+            <span class="text-[0.92rem] font-bold text-gray-900 leading-snug">{{ getCardFront(card) }}</span>
           </div>
           <div class="w-[2px] bg-gray-50 shrink-0"></div>
           <div class="flex-1 py-5 px-6 flex items-center min-w-0">
-            <span class="text-[0.88rem] text-slate-600 leading-relaxed">{{ card.definition }}</span>
+            <span class="text-[0.88rem] text-slate-600 leading-relaxed">{{ getCardBack(card) }}</span>
           </div>
           <div class="flex items-center px-4 shrink-0">
             @if (getCardStatus(i) === 'mastered') {

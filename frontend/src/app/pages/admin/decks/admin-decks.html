@@ -1,0 +1,123 @@
+<div class="p-8">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="text-2xl font-black text-gray-900 m-0">Quản lý Bộ thẻ</h1>
+      <p class="text-gray-400 text-[13px] font-medium mt-1">Tổng quan tất cả bộ thẻ trong hệ thống</p>
+    </div>
+    <button (click)="loadDecks()" class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-xl font-bold text-[13px] cursor-pointer hover:bg-gray-50 transition-all">
+      <span class="material-symbols-outlined text-[16px]">refresh</span>
+      Làm mới
+    </button>
+  </div>
+
+  <!-- Error -->
+  @if (error()) {
+    <div class="mb-5 flex items-center gap-2 px-4 py-3 bg-red-50 border border-red-200 text-red-700 rounded-xl font-semibold text-[13px]">
+      <span class="material-symbols-outlined text-[18px]">error</span>
+      {{ error() }}
+    </div>
+  }
+
+  <!-- Search + Filter -->
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-6 flex flex-wrap items-center gap-3">
+    <div class="flex items-center gap-2 flex-1 min-w-[200px] bg-gray-50 border border-gray-200 rounded-xl px-3 py-2">
+      <span class="material-symbols-outlined text-gray-400 text-[18px]">search</span>
+      <input type="text" placeholder="Tìm tên bộ thẻ..." class="flex-1 border-none bg-transparent outline-none text-[13px] text-gray-700"
+        [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event); currentPage.set(1)" />
+    </div>
+    <select class="px-3 py-2 border border-gray-200 rounded-xl text-[13px] text-gray-700 bg-white outline-none focus:border-indigo-400"
+      [ngModel]="filterVisibility()" (ngModelChange)="filterVisibility.set($any($event)); currentPage.set(1)">
+      <option value="All">Tất cả loại</option>
+      <option value="Public">Công khai</option>
+      <option value="Private">Riêng tư</option>
+      <option value="Shared">Chia sẻ</option>
+    </select>
+    <span class="text-[12px] font-bold text-gray-400">{{ filteredDecks().length }} kết quả</span>
+  </div>
+
+  <!-- Table -->
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+    @if (loading()) {
+      <div class="p-6 space-y-3">
+        @for (s of [1,2,3,4,5,6]; track s) {
+          <div class="h-14 bg-gray-50 rounded-xl animate-pulse"></div>
+        }
+      </div>
+    } @else if (pagedDecks().length === 0) {
+      <div class="p-12 text-center text-gray-400">
+        <span class="material-symbols-outlined text-[48px] block mb-3">style</span>
+        <p class="font-semibold">Không tìm thấy bộ thẻ nào</p>
+      </div>
+    } @else {
+      <table class="w-full text-left">
+        <thead>
+          <tr class="border-b border-gray-50 bg-gray-50/50">
+            <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest">Bộ thẻ</th>
+            <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest">Câu hỏi</th>
+            <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest">Loại</th>
+            <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest">Đánh giá</th>
+            <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest">Ngày tạo</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (deck of pagedDecks(); track deck.id; let i = $index) {
+            <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+              <td class="px-6 py-4">
+                <div class="flex items-center gap-3">
+                  <div class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0" [style.background-color]="getColor(i)">
+                    <span class="material-symbols-outlined text-white text-[16px]">{{ getIcon(i) }}</span>
+                  </div>
+                  <div>
+                    <p class="font-bold text-gray-900 text-[13px] m-0 max-w-[250px] truncate">{{ deck.name }}</p>
+                    @if (deck.description) {
+                      <p class="text-gray-400 text-[11px] m-0 truncate max-w-[250px]">{{ deck.description }}</p>
+                    }
+                  </div>
+                </div>
+              </td>
+              <td class="px-6 py-4">
+                <span class="flex items-center gap-1 text-[13px] text-gray-700 font-semibold">
+                  <span class="material-symbols-outlined text-indigo-400 text-[15px]">help_outline</span>
+                  {{ deck.questionCount }}
+                </span>
+              </td>
+              <td class="px-6 py-4">
+                <span class="text-[11px] font-bold border px-2.5 py-1 rounded-full" [class]="getVisibilityStyle(deck.visibility)">
+                  {{ deck.visibility }}
+                </span>
+              </td>
+              <td class="px-6 py-4">
+                @if (deck.averageRating) {
+                  <span class="flex items-center gap-1 text-[13px] font-bold text-amber-600">
+                    <span class="material-symbols-outlined text-[15px]" style="font-variation-settings:'FILL' 1">star</span>
+                    {{ deck.averageRating | number:'1.1-1' }}
+                    <span class="text-gray-400 font-normal">({{ deck.totalRatings }})</span>
+                  </span>
+                } @else {
+                  <span class="text-gray-300 text-[12px]">—</span>
+                }
+              </td>
+              <td class="px-6 py-4 text-[12px] text-gray-400 font-medium">
+                {{ deck.createdAt | date:'dd/MM/yyyy' }}
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+
+      <!-- Pagination -->
+      <div class="flex items-center justify-between px-6 py-4 border-t border-gray-50">
+        <p class="text-[12px] text-gray-400 font-medium">
+          Trang {{ currentPage() }} / {{ totalPages() }} · {{ filteredDecks().length }} bộ thẻ
+        </p>
+        <div class="flex gap-2">
+          <button (click)="prevPage()" [disabled]="currentPage() === 1"
+            class="px-3 py-1.5 text-[13px] font-bold border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">Trước</button>
+          <button (click)="nextPage()" [disabled]="currentPage() === totalPages()"
+            class="px-3 py-1.5 text-[13px] font-bold bg-indigo-600 text-white border-none rounded-lg cursor-pointer hover:bg-indigo-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">Tiếp</button>
+        </div>
+      </div>
+    }
+  </div>
+</div>

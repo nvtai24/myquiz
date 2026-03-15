@@ -320,6 +320,14 @@
   margin: 4px 8px;
 }
 
+.dropdown-item.admin-link {
+  color: #4255FF;
+}
+
+.dropdown-item.admin-link .material-symbols-outlined {
+  color: #4255FF;
+}
+
 /* FAB */
 .fab {
   position: fixed;

@@ -1,3 +1,23 @@
+<!-- Loading / Error states -->
+@if (quizState() === 'loading') {
+  <div class="flex items-center justify-center min-h-[65vh]">
+    <div class="flex flex-col items-center gap-4 text-gray-400">
+      <span class="material-symbols-outlined text-[48px] animate-spin">progress_activity</span>
+      <p class="font-medium">Đang tải bộ câu hỏi...</p>
+    </div>
+  </div>
+}
+
+@if (quizState() === 'error') {
+  <div class="flex items-center justify-center min-h-[65vh]">
+    <div class="flex flex-col items-center gap-4 text-red-500">
+      <span class="material-symbols-outlined text-[48px]">error</span>
+      <p class="font-medium">{{ apiError() }}</p>
+      <button class="px-5 py-2.5 bg-[#4255FF] text-white rounded-xl font-bold border-none cursor-pointer" (click)="loadDeck()">Thử lại</button>
+    </div>
+  </div>
+}
+
 <!-- ===== SETUP SCREEN ===== -->
 @if (quizState() === 'setup') {
 <div class="max-w-[1100px] mx-auto py-12 px-6 sm:px-8 animate-[fadeIn_0.5s_ease]">
@@ -6,7 +26,7 @@
       <span class="material-symbols-outlined text-[32px]">quiz</span>
     </div>
     <h1 class="text-3xl font-black text-gray-900 m-1 tracking-tight">Quiz Mode</h1>
-    <p class="text-[15px] text-gray-500 font-medium">Configure your quiz for <strong class="text-[#4255FF]">{{ deckTitle }}</strong></p>
+    <p class="text-[15px] text-gray-500 font-medium">Configure your quiz for <strong class="text-[#4255FF]">{{ deckTitle() }}</strong></p>
   </div>
 
   <div class="flex flex-col lg:flex-row gap-10 items-start">
@@ -200,7 +220,7 @@
     <!-- Progress Header -->
     <div class="flex items-end justify-between mb-4">
       <div class="flex flex-col">
-        <span class="text-[10px] font-black uppercase tracking-widest text-[#4255FF] mb-1.5 opacity-60">{{ deckTitle }}</span>
+        <span class="text-[10px] font-black uppercase tracking-widest text-[#4255FF] mb-1.5 opacity-60">{{ deckTitle() }}</span>
         <h2 class="text-xl font-black text-gray-900 m-0">Question {{ currentIndex() + 1 }} of {{ totalQuestions }}</h2>
       </div>
       <div class="flex items-center gap-4">

@@ -1,0 +1,101 @@
+<div class="p-8">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <h1 class="text-2xl font-black text-gray-900 m-0">Quản lý người dùng</h1>
+      <p class="text-gray-400 text-[13px] font-medium mt-1">
+        Hiển thị {{ filteredUsers().length }} người dùng
+        <span class="ml-1 text-amber-600 font-semibold">(Dữ liệu demo – API chưa có admin user list)</span>
+      </p>
+    </div>
+    <div class="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-xl text-amber-700 text-[12px] font-semibold">
+      <span class="material-symbols-outlined text-[16px]">info</span>
+      Mock Data
+    </div>
+  </div>
+
+  <!-- Search + Filters -->
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-6 flex flex-wrap items-center gap-3">
+    <div class="flex items-center gap-2 flex-1 min-w-[200px] bg-gray-50 border border-gray-200 rounded-xl px-3 py-2">
+      <span class="material-symbols-outlined text-gray-400 text-[18px]">search</span>
+      <input type="text" placeholder="Tìm tên hoặc email..." class="flex-1 border-none bg-transparent outline-none text-[13px] text-gray-700"
+        [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event); currentPage.set(1)" />
+    </div>
+    <select class="px-3 py-2 border border-gray-200 rounded-xl text-[13px] text-gray-700 bg-white outline-none focus:border-indigo-400"
+      [ngModel]="filterRole()" (ngModelChange)="filterRole.set($event); currentPage.set(1)">
+      <option value="All">Tất cả vai trò</option>
+      <option value="Admin">Admin</option>
+      <option value="User">User</option>
+    </select>
+    <select class="px-3 py-2 border border-gray-200 rounded-xl text-[13px] text-gray-700 bg-white outline-none focus:border-indigo-400"
+      [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event); currentPage.set(1)">
+      <option value="All">Tất cả trạng thái</option>
+      <option value="Active">Kích hoạt</option>
+      <option value="Banned">Bị khóa</option>
+    </select>
+  </div>
+
+  <!-- Table -->
+  <div class="bg-white rounded-2xl border border-gray-100 shadow-sm overflow-hidden">
+    <table class="w-full text-left">
+      <thead>
+        <tr class="border-b border-gray-50 bg-gray-50/50">
+          <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest">Người dùng</th>
+          <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest">Vai trò</th>
+          <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest">Ngày tham gia</th>
+          <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest">Trạng thái</th>
+          <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest">Hành động</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (user of pagedUsers(); track user.id) {
+          <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-full flex items-center justify-center text-white text-[13px] font-black shrink-0"
+                  [style.background-color]="getAvatarColor(user.id)">
+                  {{ user.avatar }}
+                </div>
+                <div>
+                  <p class="font-bold text-gray-900 text-[13px] m-0">{{ user.name }}</p>
+                  <p class="text-gray-400 text-[11px] m-0">{{ user.email }}</p>
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <span class="text-[11px] font-bold border px-2.5 py-1 rounded-full" [class]="getRoleColor(user.role)">{{ user.role }}</span>
+            </td>
+            <td class="px-6 py-4 text-[13px] text-gray-500 font-medium">{{ user.joinedDate }}</td>
+            <td class="px-6 py-4">
+              <span class="flex items-center gap-1.5 text-[12px] font-bold"
+                [class]="user.status === 'Active' ? 'text-green-600' : 'text-red-500'">
+                <span class="w-1.5 h-1.5 rounded-full" [class]="user.status === 'Active' ? 'bg-green-500' : 'bg-red-400'"></span>
+                {{ user.status === 'Active' ? 'Kích hoạt' : 'Bị khóa' }}
+              </span>
+            </td>
+            <td class="px-6 py-4">
+              <button (click)="toggleBan(user)"
+                class="text-[12px] font-bold border rounded-lg px-3 py-1.5 cursor-pointer transition-all"
+                [class]="user.status === 'Active' ? 'border-red-200 text-red-600 hover:bg-red-50' : 'border-green-200 text-green-600 hover:bg-green-50'">
+                {{ user.status === 'Active' ? 'Khóa TK' : 'Mở khóa' }}
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+
+    <!-- Pagination -->
+    <div class="flex items-center justify-between px-6 py-4 border-t border-gray-50">
+      <p class="text-[12px] text-gray-400 font-medium">
+        Trang {{ currentPage() }} / {{ totalPages() }} · {{ filteredUsers().length }} người dùng
+      </p>
+      <div class="flex gap-2">
+        <button (click)="prevPage()" [disabled]="currentPage() === 1"
+          class="px-3 py-1.5 text-[13px] font-bold border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">Trước</button>
+        <button (click)="nextPage()" [disabled]="currentPage() === totalPages()"
+          class="px-3 py-1.5 text-[13px] font-bold bg-indigo-600 text-white border-none rounded-lg cursor-pointer hover:bg-indigo-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">Tiếp</button>
+      </div>
+    </div>
+  </div>
+</div>

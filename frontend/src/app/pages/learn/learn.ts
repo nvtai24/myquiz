@@ -1,24 +1,28 @@
-import { Component, signal, computed } from '@angular/core';
+import { Component, OnInit, OnDestroy, signal, computed, inject } from '@angular/core';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
-
-interface Flashcard {
-  id: number;
-  term: string;
-  definition: string;
-}
+import { CommonModule } from '@angular/common';
+import { DeckService } from '../../services/deck.service';
+import { DeckDetailResponse, QuestionResponse } from '../../models/deck.models';
 
 type CardStatus = 'new' | 'learning' | 'mastered';
 
 @Component({
   selector: 'app-learn',
   standalone: true,
-  imports: [RouterModule],
+  imports: [RouterModule, CommonModule],
   templateUrl: './learn.html',
   styleUrl: './learn.css',
 })
-export class Learn {
-  deckTitle = 'Mathematics Basics';
+export class Learn implements OnInit {
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+  private deckService = inject(DeckService);
+
   deckId = '';
+  deckTitle = signal('');
+  cards = signal<QuestionResponse[]>([]);
+  loading = signal(true);
+  error = signal<string | null>(null);
 
   isFlipped = signal(false);
   currentIndex = signal(0);
@@ -28,38 +32,43 @@ export class Learn {
   showCompleteScreen = signal(false);
   showAllTerms = signal(false);
 
-  // Max dots to show before switching to compact nav
   readonly MAX_DOTS = 12;
-  // Terms to show before "Show more"
   readonly TERMS_PAGE_SIZE = 10;
 
-  cards: Flashcard[] = [
-    { id: 1, term: 'Pythagorean Theorem', definition: 'A fundamental relation in Euclidean geometry: a² + b² = c², where c is the hypotenuse of a right triangle and a, b are the other two sides.' },
-    { id: 2, term: 'Prime Number', definition: 'A natural number greater than 1 that has no positive divisors other than 1 and itself. Examples: 2, 3, 5, 7, 11, 13...' },
-    { id: 3, term: 'Golden Ratio (φ)', definition: 'Approximately 1.61803. Two quantities are in the golden ratio if their ratio equals the ratio of their sum to the larger quantity. Found throughout nature and art.' },
-    { id: 4, term: 'Quadratic Formula', definition: 'x = (-b ± √(b²-4ac)) / 2a — Used to find the solutions of any quadratic equation ax² + bx + c = 0.' },
-    { id: 5, term: 'Fibonacci Sequence', definition: 'A sequence where each number is the sum of the two preceding ones: 0, 1, 1, 2, 3, 5, 8, 13, 21, 34, 55...' },
-    { id: 6, term: 'Euler\'s Number (e)', definition: 'The mathematical constant e ≈ 2.71828. It is the base of the natural logarithm and appears in compound interest, probability, and calculus.' },
-    { id: 7, term: 'Derivative', definition: 'The instantaneous rate of change of a function. For f(x) = xⁿ, the derivative f\'(x) = nxⁿ⁻¹ (power rule).' },
-    { id: 8, term: 'Integral', definition: 'The reverse of differentiation. An integral calculates the area under a curve. ∫xⁿ dx = xⁿ⁺¹/(n+1) + C.' },
-  ];
-
-  constructor(private router: Router, private route: ActivatedRoute) {
+  ngOnInit(): void {
     this.route.params.subscribe(params => {
       this.deckId = params['id'] || '';
+      if (this.deckId) {
+        this.loadDeck();
+      }
     });
-    this.cardStatuses.set(new Array(this.cards.length).fill('new'));
   }
 
-  get totalCards() { return this.cards.length; }
+  loadDeck() {
+    this.loading.set(true);
+    this.error.set(null);
+    this.deckService.getDeckById(this.deckId).subscribe({
+      next: (res) => {
+        const deck: DeckDetailResponse = res.data;
+        this.deckTitle.set(deck.name);
+        this.cards.set(deck.questions || []);
+        this.cardStatuses.set(new Array(deck.questions.length).fill('new'));
+        this.loading.set(false);
+      },
+      error: (err) => {
+        this.error.set(err?.error?.message ?? 'Không thể tải bộ thẻ.');
+        this.loading.set(false);
+      }
+    });
+  }
 
+  get totalCards() { return this.cards().length; }
   get useDots(): boolean { return this.totalCards <= this.MAX_DOTS; }
 
-  get visibleTerms(): Flashcard[] {
-    if (this.showAllTerms() || this.totalCards <= this.TERMS_PAGE_SIZE) {
-      return this.cards;
-    }
-    return this.cards.slice(0, this.TERMS_PAGE_SIZE);
+  get visibleTerms(): QuestionResponse[] {
+    const all = this.cards();
+    if (this.showAllTerms() || all.length <= this.TERMS_PAGE_SIZE) return all;
+    return all.slice(0, this.TERMS_PAGE_SIZE);
   }
 
   get hasMoreTerms(): boolean {
@@ -70,16 +79,15 @@ export class Learn {
     return this.totalCards - this.TERMS_PAGE_SIZE;
   }
 
-  toggleShowAll() {
-    this.showAllTerms.update(v => !v);
-  }
+  toggleShowAll() { this.showAllTerms.update(v => !v); }
 
-  currentCard = computed(() => this.cards[this.currentIndex()]);
+  currentCard = computed(() => this.cards()[this.currentIndex()]);
 
   progress = computed(() => {
     const statuses = this.cardStatuses();
+    if (statuses.length === 0) return 0;
     const mastered = statuses.filter(s => s === 'mastered').length;
-    return Math.round((mastered / this.totalCards) * 100);
+    return Math.round((mastered / statuses.length) * 100);
   });
 
   masteredCount = computed(() => this.cardStatuses().filter(s => s === 'mastered').length);
@@ -97,17 +105,12 @@ export class Learn {
       updated[this.currentIndex()] = status;
       return updated;
     });
-
-    // Auto advance after marking
     setTimeout(() => {
       if (this.currentIndex() < this.totalCards - 1) {
         this.goNext();
       } else {
-        // Check if all mastered
         const allMastered = this.cardStatuses().every(s => s === 'mastered');
-        if (allMastered) {
-          this.showCompleteScreen.set(true);
-        }
+        if (allMastered) this.showCompleteScreen.set(true);
       }
     }, 300);
   }
@@ -153,10 +156,14 @@ export class Learn {
   }
 
   resetProgress() {
-    this.cardStatuses.set(new Array(this.cards.length).fill('new'));
+    this.cardStatuses.set(new Array(this.totalCards).fill('new'));
     this.currentIndex.set(0);
     this.isFlipped.set(false);
     this.showCompleteScreen.set(false);
+  }
+
+  goToQuiz() {
+    this.router.navigate(['/quiz', this.deckId]);
   }
 
   goBackToDeck() {
@@ -177,5 +184,16 @@ export class Learn {
         this.goPrev();
         break;
     }
+  }
+
+  /** Get front content of a card (question text) */
+  getCardFront(q: QuestionResponse): string {
+    return q.content;
+  }
+
+  /** Get back content (correct answers + explanation) */
+  getCardBack(q: QuestionResponse): string {
+    const answers = q.correctAnswers?.join(', ') ?? '';
+    return answers || q.explanation || '';
   }
 }

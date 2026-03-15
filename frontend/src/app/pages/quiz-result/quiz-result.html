@@ -15,10 +15,10 @@
         <circle cx="60" cy="60" r="52" class="ring-bg" />
         <circle cx="60" cy="60" r="52" class="ring-fill"
           [style.stroke-dasharray]="326.7"
-          [style.stroke-dashoffset]="326.7 - (326.7 * score / 100)" />
+          [style.stroke-dashoffset]="326.7 - (326.7 * score() / 100)" />
       </svg>
       <div class="ring-text">
-        <span class="ring-percent">{{ score }}%</span>
+        <span class="ring-percent">{{ score() }}%</span>
         <span class="ring-label">SCORE</span>
       </div>
     </div>
@@ -27,34 +27,29 @@
       <p class="performance-text">{{ performanceText }}</p>
       <div class="stars-row">
         @for (s of [1,2,3,4,5]; track s) {
-          <span class="material-symbols-outlined" [class.star-filled]="s <= 4" [class.star-empty]="s > 4">star</span>
+          <span class="material-symbols-outlined" [class.star-filled]="s <= starsCount" [class.star-empty]="s > starsCount">star</span>
         }
       </div>
-      <p class="correct-summary">{{ totalCorrect }} out of {{ totalQuestions }} correct</p>
+      <p class="correct-summary">{{ totalCorrect() }} / {{ totalQuestions() }} câu đúng</p>
     </div>
   </div>
 
   <!-- Stats Row -->
   <div class="stats-row">
     <div class="result-stat">
-      <span class="stat-title">CORRECT</span>
+      <span class="stat-title">ĐÚNG</span>
       <span class="material-symbols-outlined stat-icon green">check_circle</span>
-      <span class="stat-val green">{{ totalCorrect }}</span>
+      <span class="stat-val green">{{ totalCorrect() < 10 ? '0' + totalCorrect() : totalCorrect() }}</span>
     </div>
     <div class="result-stat">
-      <span class="stat-title">INCORRECT</span>
+      <span class="stat-title">SAI</span>
       <span class="material-symbols-outlined stat-icon red">cancel</span>
-      <span class="stat-val red">{{ totalIncorrect < 10 ? '0' + totalIncorrect : totalIncorrect }}</span>
+      <span class="stat-val red">{{ totalIncorrect() < 10 ? '0' + totalIncorrect() : totalIncorrect() }}</span>
     </div>
     <div class="result-stat">
-      <span class="stat-title">TIME</span>
+      <span class="stat-title">THỜI GIAN</span>
       <span class="material-symbols-outlined stat-icon blue">schedule</span>
-      <span class="stat-val">{{ timeTaken }}</span>
-    </div>
-    <div class="result-stat">
-      <span class="stat-title">HINTS USED</span>
-      <span class="material-symbols-outlined stat-icon orange">lightbulb</span>
-      <span class="stat-val orange">{{ hintsUsed < 10 ? '0' + hintsUsed : hintsUsed }}</span>
+      <span class="stat-val">{{ timeTaken() }}</span>
     </div>
   </div>
 
@@ -119,9 +114,16 @@
 
   <!-- CTA Buttons -->
   <div class="result-cta">
-    <button class="cta-retry" routerLink="/quiz">Retake Quiz</button>
+    <button class="cta-learn" (click)="goToLearn()">
+      <span class="material-symbols-outlined">style</span>
+      Học lại
+    </button>
+    <button class="cta-retry" (click)="goToQuiz()">
+      <span class="material-symbols-outlined">quiz</span>
+      Làm Quiz lại
+    </button>
     <button class="cta-dashboard" routerLink="/dashboard">
-      Back to Dashboard
+      Dashboard
       <span class="material-symbols-outlined">arrow_forward</span>
     </button>
   </div>

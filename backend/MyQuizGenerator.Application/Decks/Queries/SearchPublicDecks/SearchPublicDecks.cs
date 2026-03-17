@@ -1,13 +1,14 @@
 using MediatR;
+using MyQuizGenerator.Application.Common.DTOs;
 using MyQuizGenerator.Application.Common.Interfaces;
 using MyQuizGenerator.Application.Common.Interfaces.Repositories;
 using MyQuizGenerator.Application.Decks.DTOs;
 
 namespace MyQuizGenerator.Application.Decks.Queries.SearchPublicDecks;
 
-public record SearchPublicDecksQuery(string? SearchTerm) : IRequest<List<SharedDeckResponse>>;
+public record SearchPublicDecksQuery(string? SearchTerm, int Page = 1, int Size = 10) : IRequest<PagedResult<SharedDeckResponse>>;
 
-public class SearchPublicDecksQueryHandler : IRequestHandler<SearchPublicDecksQuery, List<SharedDeckResponse>>
+public class SearchPublicDecksQueryHandler : IRequestHandler<SearchPublicDecksQuery, PagedResult<SharedDeckResponse>>
 {
     private readonly IDeckRepository _deckRepository;
     private readonly IUserService _userService;
@@ -18,17 +19,17 @@ public class SearchPublicDecksQueryHandler : IRequestHandler<SearchPublicDecksQu
         _userService = userService;
     }
 
-    public async Task<List<SharedDeckResponse>> Handle(SearchPublicDecksQuery request, CancellationToken cancellationToken)
+    public async Task<PagedResult<SharedDeckResponse>> Handle(SearchPublicDecksQuery request, CancellationToken cancellationToken)
     {
-        var decks = await _deckRepository.SearchPublicDecksAsync(request.SearchTerm, cancellationToken);
+        var (decks, totalCount) = await _deckRepository.SearchPublicDecksAsync(request.SearchTerm, request.Page, request.Size, cancellationToken);
 
-        var result = new List<SharedDeckResponse>();
+        var items = new List<SharedDeckResponse>();
 
         foreach (var d in decks)
         {
             var ownerInfo = await _userService.GetUserInfoAsync(d.OwnerId);
 
-            result.Add(new SharedDeckResponse
+            items.Add(new SharedDeckResponse
             {
                 Id = d.Id,
                 Name = d.Name,
@@ -46,6 +47,6 @@ public class SearchPublicDecksQueryHandler : IRequestHandler<SearchPublicDecksQu
             });
         }
 
-        return result;
+        return new PagedResult<SharedDeckResponse>(items, request.Page, request.Size, totalCount);
     }
 }

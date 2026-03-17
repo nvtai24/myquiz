@@ -1,13 +1,14 @@
 using MediatR;
+using MyQuizGenerator.Application.Common.DTOs;
 using MyQuizGenerator.Application.Common.Interfaces;
 using MyQuizGenerator.Application.Common.Interfaces.Repositories;
 using MyQuizGenerator.Application.Decks.DTOs;
 
 namespace MyQuizGenerator.Application.Decks.Queries.GetSharedDecks;
 
-public record GetSharedDecksQuery(string UserId) : IRequest<List<SharedDeckResponse>>;
+public record GetSharedDecksQuery(string UserId, int Page = 1, int Size = 10) : IRequest<PagedResult<SharedDeckResponse>>;
 
-public class GetSharedDecksQueryHandler : IRequestHandler<GetSharedDecksQuery, List<SharedDeckResponse>>
+public class GetSharedDecksQueryHandler : IRequestHandler<GetSharedDecksQuery, PagedResult<SharedDeckResponse>>
 {
     private readonly IDeckRepository _deckRepository;
     private readonly IUserService _userService;
@@ -18,17 +19,17 @@ public class GetSharedDecksQueryHandler : IRequestHandler<GetSharedDecksQuery, L
         _userService = userService;
     }
 
-    public async Task<List<SharedDeckResponse>> Handle(GetSharedDecksQuery request, CancellationToken cancellationToken)
+    public async Task<PagedResult<SharedDeckResponse>> Handle(GetSharedDecksQuery request, CancellationToken cancellationToken)
     {
-        var decks = await _deckRepository.GetSharedDecksAsync(request.UserId, cancellationToken);
+        var (decks, totalCount) = await _deckRepository.GetSharedDecksAsync(request.UserId, request.Page, request.Size, cancellationToken);
 
-        var result = new List<SharedDeckResponse>();
+        var items = new List<SharedDeckResponse>();
 
         foreach (var d in decks)
         {
             var ownerInfo = await _userService.GetUserInfoAsync(d.OwnerId);
 
-            result.Add(new SharedDeckResponse
+            items.Add(new SharedDeckResponse
             {
                 Id = d.Id,
                 Name = d.Name,
@@ -46,6 +47,6 @@ public class GetSharedDecksQueryHandler : IRequestHandler<GetSharedDecksQuery, L
             });
         }
 
-        return result;
+        return new PagedResult<SharedDeckResponse>(items, request.Page, request.Size, totalCount);
     }
 }

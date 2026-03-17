@@ -11,15 +11,23 @@ public class DeckRepository : Repository<Guid, Deck>, IDeckRepository
     {
     }
 
-    public async Task<List<Deck>> GetDecksByUserIdAsync(string userId, CancellationToken cancellationToken = default)
+    public async Task<(List<Deck> Items, int TotalCount)> GetDecksByUserIdAsync(string userId, int page, int size, CancellationToken cancellationToken = default)
     {
-        return await _context.Decks
+        var query = _context.Decks
             .AsNoTracking()
-            .Where(d => d.OwnerId == userId)
+            .Where(d => d.OwnerId == userId);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
             .Include(d => d.Questions)
             .Include(d => d.DeckRatings)
             .OrderByDescending(d => d.CreatedAt)
+            .Skip((page - 1) * size)
+            .Take(size)
             .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
     }
 
     public async Task<Deck?> GetDeckByIdWithQuestionsAsync(Guid id, CancellationToken cancellationToken = default)
@@ -53,34 +61,58 @@ public class DeckRepository : Repository<Guid, Deck>, IDeckRepository
         await _context.DeckMembers.AddAsync(deckMember, cancellationToken);
     }
 
-    public async Task<List<Deck>> GetSharedDecksAsync(string userId, CancellationToken cancellationToken = default)
+    public async Task<(List<Deck> Items, int TotalCount)> GetSharedDecksAsync(string userId, int page, int size, CancellationToken cancellationToken = default)
     {
-        return await _context.Decks
+        var query = _context.Decks
             .AsNoTracking()
-            .Where(d => d.DeckMembers.Any(dm => dm.UserId == userId))
+            .Where(d => d.DeckMembers.Any(dm => dm.UserId == userId));
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
             .Include(d => d.Questions)
             .Include(d => d.DeckRatings)
             .OrderByDescending(d => d.CreatedAt)
+            .Skip((page - 1) * size)
+            .Take(size)
             .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
     }
 
-    public async Task<List<Deck>> GetAttemptedDecksAsync(string userId, CancellationToken cancellationToken = default)
+    public async Task<(List<Deck> Items, int TotalCount)> GetAttemptedDecksAsync(string userId, int page, int size, CancellationToken cancellationToken = default)
     {
-        return await _context.QuizAttempts
+        var baseQuery = _context.QuizAttempts
             .AsNoTracking()
             .Where(qa => qa.UserId == userId)
             .GroupBy(qa => qa.DeckId)
-            .Select(g => new { DeckId = g.Key, LatestAttempt = g.Max(qa => qa.StartedAt) })
+            .Select(g => new { DeckId = g.Key, LatestAttempt = g.Max(qa => qa.StartedAt) });
+
+        var totalCount = await baseQuery.CountAsync(cancellationToken);
+
+        var deckIds = await baseQuery
             .OrderByDescending(x => x.LatestAttempt)
-            .Join(
-                _context.Decks.AsNoTracking().Include(d => d.Questions).Include(d => d.DeckRatings),
-                attempt => attempt.DeckId,
-                deck => deck.Id,
-                (attempt, deck) => deck)
+            .Skip((page - 1) * size)
+            .Take(size)
+            .Select(x => x.DeckId)
             .ToListAsync(cancellationToken);
+
+        var items = await _context.Decks
+            .AsNoTracking()
+            .Where(d => deckIds.Contains(d.Id))
+            .Include(d => d.Questions)
+            .Include(d => d.DeckRatings)
+            .ToListAsync(cancellationToken);
+
+        // Preserve the order from deckIds
+        var orderedItems = deckIds
+            .Select(id => items.First(d => d.Id == id))
+            .ToList();
+
+        return (orderedItems, totalCount);
     }
 
-    public async Task<List<Deck>> SearchPublicDecksAsync(string? searchTerm, CancellationToken cancellationToken = default)
+    public async Task<(List<Deck> Items, int TotalCount)> SearchPublicDecksAsync(string? searchTerm, int page, int size, CancellationToken cancellationToken = default)
     {
         var query = _context.Decks
             .AsNoTracking()
@@ -95,10 +127,16 @@ public class DeckRepository : Repository<Guid, Deck>, IDeckRepository
                 d.Tags.Any(t => t.ToLower().Contains(term)));
         }
 
-        return await query
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
             .Include(d => d.Questions)
             .Include(d => d.DeckRatings)
             .OrderByDescending(d => d.CreatedAt)
+            .Skip((page - 1) * size)
+            .Take(size)
             .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
     }
 }

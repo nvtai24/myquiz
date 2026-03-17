@@ -108,11 +108,13 @@ public class DecksController : BaseApiController
     }
 
     /// <summary>
-    /// Gets a list of decks for the current user.
+    /// Gets a paginated list of decks for the current user.
     /// </summary>
-    /// <returns>List of deck summaries.</returns>
+    /// <param name="page">Page number (default: 1).</param>
+    /// <param name="size">Page size (default: 10).</param>
+    /// <returns>Paginated list of deck summaries.</returns>
     [HttpGet]
-    public async Task<IActionResult> GetUserDecks()
+    public async Task<IActionResult> GetUserDecks([FromQuery] int page = 1, [FromQuery] int size = 10)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
@@ -120,17 +122,19 @@ public class DecksController : BaseApiController
             return ApiUnauthorized();
         }
 
-        var query = new UserDecks.GetUserDecksQuery(userId);
+        var query = new UserDecks.GetUserDecksQuery(userId, page, size);
         var result = await _mediator.Send(query);
-        return ApiOk(result);
+        return ApiPaged(result.Items, result.Page, result.Size, result.TotalRecords);
     }
 
     /// <summary>
-    /// Gets a list of decks shared with the current user.
+    /// Gets a paginated list of decks shared with the current user.
     /// </summary>
-    /// <returns>List of deck summaries shared with the user.</returns>
+    /// <param name="page">Page number (default: 1).</param>
+    /// <param name="size">Page size (default: 10).</param>
+    /// <returns>Paginated list of shared deck summaries.</returns>
     [HttpGet("shared")]
-    public async Task<IActionResult> GetSharedDecks()
+    public async Task<IActionResult> GetSharedDecks([FromQuery] int page = 1, [FromQuery] int size = 10)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
@@ -138,17 +142,19 @@ public class DecksController : BaseApiController
             return ApiUnauthorized();
         }
 
-        var query = new SharedDecks.GetSharedDecksQuery(userId);
+        var query = new SharedDecks.GetSharedDecksQuery(userId, page, size);
         var result = await _mediator.Send(query);
-        return ApiOk(result);
+        return ApiPaged(result.Items, result.Page, result.Size, result.TotalRecords);
     }
 
     /// <summary>
-    /// Gets a list of decks the current user has attempted, sorted by most recent attempt.
+    /// Gets a paginated list of decks the current user has attempted, sorted by most recent attempt.
     /// </summary>
-    /// <returns>List of deck summaries the user has attempted.</returns>
+    /// <param name="page">Page number (default: 1).</param>
+    /// <param name="size">Page size (default: 10).</param>
+    /// <returns>Paginated list of attempted deck summaries.</returns>
     [HttpGet("attempted")]
-    public async Task<IActionResult> GetAttemptedDecks()
+    public async Task<IActionResult> GetAttemptedDecks([FromQuery] int page = 1, [FromQuery] int size = 10)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (string.IsNullOrEmpty(userId))
@@ -156,23 +162,25 @@ public class DecksController : BaseApiController
             return ApiUnauthorized();
         }
 
-        var query = new AttemptedDecks.GetAttemptedDecksQuery(userId);
+        var query = new AttemptedDecks.GetAttemptedDecksQuery(userId, page, size);
         var result = await _mediator.Send(query);
-        return ApiOk(result);
+        return ApiPaged(result.Items, result.Page, result.Size, result.TotalRecords);
     }
 
     /// <summary>
     /// Searches all public decks by keyword (matches name, description, and tags).
     /// </summary>
     /// <param name="searchTerm">Optional search keyword.</param>
-    /// <returns>List of matching public decks.</returns>
+    /// <param name="page">Page number (default: 1).</param>
+    /// <param name="size">Page size (default: 10).</param>
+    /// <returns>Paginated list of matching public decks.</returns>
     [AllowAnonymous]
     [HttpGet("search")]
-    public async Task<IActionResult> SearchPublicDecks([FromQuery] string? searchTerm)
+    public async Task<IActionResult> SearchPublicDecks([FromQuery] string? searchTerm, [FromQuery] int page = 1, [FromQuery] int size = 10)
     {
-        var query = new SearchDecks.SearchPublicDecksQuery(searchTerm);
+        var query = new SearchDecks.SearchPublicDecksQuery(searchTerm, page, size);
         var result = await _mediator.Send(query);
-        return ApiOk(result);
+        return ApiPaged(result.Items, result.Page, result.Size, result.TotalRecords);
     }
 
     /// <summary>

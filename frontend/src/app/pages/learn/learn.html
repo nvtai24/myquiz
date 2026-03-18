@@ -2,7 +2,7 @@
   <div class="flex items-center justify-center min-h-[65vh]">
     <div class="flex flex-col items-center gap-4 text-gray-400">
       <span class="material-symbols-outlined text-[48px] animate-spin">progress_activity</span>
-      <p class="font-medium">Đang tải bộ thẻ...</p>
+      <p class="font-medium">Loading study set...</p>
     </div>
   </div>
 }
@@ -13,8 +13,8 @@
       <span class="material-symbols-outlined text-[48px]">error</span>
       <p class="font-medium">{{ error() }}</p>
       <div class="flex gap-3">
-        <button class="px-5 py-2.5 bg-[#4255FF] text-white rounded-xl font-bold border-none cursor-pointer" (click)="loadDeck()">Thử lại</button>
-        <button class="px-5 py-2.5 bg-white text-gray-500 rounded-xl font-bold border border-gray-200 cursor-pointer" (click)="goBackToDeck()">Quay lại</button>
+        <button class="px-5 py-2.5 bg-[#4255FF] text-white rounded-xl font-bold border-none cursor-pointer" (click)="loadDeck()">Try again</button>
+        <button class="px-5 py-2.5 bg-white text-gray-500 rounded-xl font-bold border border-gray-200 cursor-pointer" (click)="goBackToDeck()">Back</button>
       </div>
     </div>
   </div>
@@ -30,32 +30,32 @@
       <span class="text-2xl animate-[float_2s_ease-in-out_infinite_0.6s]">🏆</span>
     </div>
     <div class="text-[4rem] mb-3 animate-[bounceIn_0.6s_ease]">🎉</div>
-    <h1 class="text-[1.75rem] font-extrabold text-gray-900 m-0 mb-1.5 leading-tight">Hoàn thành!</h1>
+    <h1 class="text-[1.75rem] font-extrabold text-gray-900 m-0 mb-1.5 leading-tight">Mastered!</h1>
     <p class="text-[0.95rem] text-gray-500 m-0 mb-8 leading-relaxed">
-      Bạn đã thành thạo <strong class="text-green-600 font-bold">{{ totalCards }} thẻ</strong> trong bộ này!
+      You've mastered <strong class="text-green-600 font-bold">{{ totalCards }} cards</strong> in this set!
     </p>
 
     <div class="flex justify-center gap-4 mb-8">
       <div class="flex flex-col items-center gap-1 p-5 rounded-2xl bg-green-50 text-green-600 min-w-[120px]">
         <span class="material-symbols-outlined text-[28px]">check_circle</span>
         <span class="text-2xl font-extrabold">{{ totalCards }}</span>
-        <span class="text-[11px] font-semibold opacity-70 tracking-wider uppercase">Thành thạo</span>
+        <span class="text-[11px] font-semibold opacity-70 tracking-wider uppercase">Mastered</span>
       </div>
       <div class="flex flex-col items-center gap-1 p-5 rounded-2xl bg-[#eef0ff] text-[#4255FF] min-w-[120px]">
         <span class="material-symbols-outlined text-[28px]">style</span>
         <span class="text-2xl font-extrabold">100%</span>
-        <span class="text-[11px] font-semibold opacity-70 tracking-wider uppercase">Hoàn thành</span>
+        <span class="text-[11px] font-semibold opacity-70 tracking-wider uppercase">Progress</span>
       </div>
     </div>
 
     <div class="flex justify-center gap-3">
       <button class="flex items-center gap-1.5 px-6 py-3 rounded-xl font-bold text-[0.9rem] cursor-pointer transition-all bg-white border-2 border-gray-200 text-gray-500 hover:border-[#4255FF] hover:text-[#4255FF]" (click)="resetProgress()">
         <span class="material-symbols-outlined text-[20px]">replay</span>
-        Học lại
+        Keep Learning
       </button>
       <button class="flex items-center gap-1.5 px-6 py-3 rounded-xl font-bold text-[0.9rem] cursor-pointer transition-all bg-gradient-to-r from-amber-400 to-amber-500 text-white border-none shadow-md hover:-translate-y-0.5" (click)="goToQuiz()">
         <span class="material-symbols-outlined text-[20px]">quiz</span>
-        Làm Quiz
+        Take Quiz
       </button>
       <button class="flex items-center gap-1.5 px-6 py-3 rounded-xl font-bold text-[0.9rem] cursor-pointer transition-all bg-gradient-to-br from-[#4255FF] to-indigo-500 text-white border-none shadow-[0_4px_16px_rgba(66,85,255,0.3)] hover:-translate-y-0.5" (click)="goBackToDeck()">
         Deck

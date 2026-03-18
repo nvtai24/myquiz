@@ -286,24 +286,39 @@ export class Quiz implements OnInit, OnDestroy {
       totalQuestions: this.totalQuestions,
       correctAnswers: correct,
       timeTaken: this.formattedTime,
-      questions: this.questions.map((q, i) => ({
-        number: i + 1,
-        text: q.text,
-        type: q.type,
-        answer: this.selectedAnswers()[i],
-        correctAnswer: q.type === 'multiple_choice'
-          ? q.options[q.correctOption]?.text
-          : q.type === 'true_false' ? (q.correctBool ? 'True' : 'False')
-          : q.correctText,
-        isCorrect: this.getQuestionStatus(i) === 'answered'
-          ? (() => {
-            const ans2 = this.selectedAnswers()[i];
-            if (q.type === 'multiple_choice') return ans2 === q.correctOption;
-            if (q.type === 'true_false') return ans2 === q.correctBool;
-            return String(ans2 ?? '').toLowerCase().trim() === q.correctText.toLowerCase().trim();
-          })()
-          : false
-      }))
+      questions: this.questions.map((q, i) => {
+        const ans = this.selectedAnswers()[i];
+        let userAnswerText: string;
+        let correctAnswerText: string;
+        let isCorrect = false;
+
+        if (q.type === 'multiple_choice') {
+          userAnswerText = typeof ans === 'number' ? (q.options[ans]?.text ?? '--') : '--';
+          correctAnswerText = q.options[q.correctOption]?.text ?? '--';
+          isCorrect = ans === q.correctOption;
+        } else if (q.type === 'true_false') {
+          userAnswerText = ans === true ? 'True' : ans === false ? 'False' : '--';
+          correctAnswerText = q.correctBool ? 'True' : 'False';
+          isCorrect = ans === q.correctBool;
+        } else {
+          userAnswerText = String(ans ?? '--');
+          correctAnswerText = q.correctText;
+          isCorrect = String(ans ?? '').toLowerCase().trim() === q.correctText.toLowerCase().trim();
+        }
+
+        return {
+          number: i + 1,
+          text: q.text,
+          type: q.type,
+          userAnswer: userAnswerText,
+          correctAnswer: correctAnswerText,
+          isCorrect,
+          explanation: q.hint || '',
+          options: q.options.map(opt => opt.text),
+          correctOptionIndex: q.correctOption,
+          userSelectedIndex: typeof ans === 'number' ? ans : null,
+        };
+      })
     };
 
     this.router.navigate(['/quiz-result', this.deckId], { state });

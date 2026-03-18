@@ -20,6 +20,11 @@
         <span class="nav-label">Your library</span>
       </a>
       <div class="sidebar-divider"></div>
+      <a class="nav-item" routerLink="/history" routerLinkActive="active">
+        <span class="material-symbols-outlined">history</span>
+        <span class="nav-label">Quiz History</span>
+      </a>
+      <div class="sidebar-divider"></div>
       <a class="nav-item" routerLink="/subscription" routerLinkActive="active">
         <span class="material-symbols-outlined">credit_card</span>
         <span class="nav-label">Subscription</span>
@@ -61,10 +66,12 @@
                 <span class="material-symbols-outlined">settings</span>
                 Settings
               </a>
-              <a class="dropdown-item admin-link" routerLink="/admin/dashboard">
-                <span class="material-symbols-outlined">admin_panel_settings</span>
-                Admin Panel
-              </a>
+              @if (currentUser()?.roles?.includes('Admin')) {
+                <a class="dropdown-item admin-link" routerLink="/admin/dashboard">
+                  <span class="material-symbols-outlined">admin_panel_settings</span>
+                  Admin Panel
+                </a>
+              }
               <div class="dropdown-divider"></div>
               <button class="dropdown-item logout" (click)="logout()">
                 <span class="material-symbols-outlined">logout</span>

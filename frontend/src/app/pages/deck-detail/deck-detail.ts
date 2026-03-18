@@ -1,9 +1,19 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DeckService } from '../../services/deck.service';
 import { AuthService } from '../../services/auth.service';
+
+interface QuizAttemptSummary {
+  id: string;
+  score: number;
+  totalCorrect: number;
+  totalQuestions: number;
+  timeTaken: string;
+  date: string;
+}
 import {
   DeckDetailResponse,
   DeckRatingSummaryResponse,
@@ -22,6 +32,7 @@ export class DeckDetail implements OnInit {
   private router = inject(Router);
   private deckService = inject(DeckService);
   private authService = inject(AuthService);
+  private platformId = inject(PLATFORM_ID);
 
   // State
   deck = signal<DeckDetailResponse | null>(null);
@@ -35,6 +46,9 @@ export class DeckDetail implements OnInit {
   showAllTerms = signal(false);
   filterText = signal('');
 
+  // Quiz history
+  quizHistory = signal<QuizAttemptSummary[]>([]);
+
   // Rating form
   myRating = signal(0);
   myComment = signal('');
@@ -43,7 +57,45 @@ export class DeckDetail implements OnInit {
   ratingSuccess = signal(false);
   ratingError = signal<string | null>(null);
 
+  // Invite modal
+  isInviteModalOpen = signal(false);
+  inviteEmail = signal('');
+  isInviting = signal(false);
+  inviteSuccess = signal<string | null>(null);
+  inviteError = signal<string | null>(null);
+
   isLoggedIn = computed(() => this.authService.isLoggedIn());
+
+  openInviteModal() {
+    this.isInviteModalOpen.set(true);
+    this.inviteEmail.set('');
+    this.inviteSuccess.set(null);
+    this.inviteError.set(null);
+  }
+
+  closeInviteModal() {
+    this.isInviteModalOpen.set(false);
+  }
+
+  sendInvite() {
+    if (!this.inviteEmail().trim() || this.isInviting()) return;
+    this.isInviting.set(true);
+    this.inviteSuccess.set(null);
+    this.inviteError.set(null);
+
+    this.deckService.invite(this.deckId, this.inviteEmail().trim()).subscribe({
+      next: (res) => {
+        this.isInviting.set(false);
+        this.inviteSuccess.set('Đã gửi lời mời thành công!');
+        this.inviteEmail.set('');
+        setTimeout(() => this.closeInviteModal(), 2000);
+      },
+      error: (err) => {
+        this.isInviting.set(false);
+        this.inviteError.set(err?.error?.message ?? 'Đã xảy ra lỗi khi gửi lời mời.');
+      }
+    });
+  }
 
   studyModes = [
     { key: 'learn', label: 'Learn', icon: 'auto_stories', desc: 'Lộ trình học cá nhân hóa', gradient: 'linear-gradient(135deg, #f093fb, #f5576c)' },
@@ -60,6 +112,10 @@ export class DeckDetail implements OnInit {
 
     this.deckService.getDeckById(id).subscribe({
       next: (res) => {
+        if (res.data?.status === 'Draft') {
+          this.router.navigate(['/edit-deck', id]);
+          return;
+        }
         this.deck.set(res.data);
         this.loadingDeck.set(false);
       },
@@ -76,6 +132,26 @@ export class DeckDetail implements OnInit {
       },
       error: () => this.loadingRatings.set(false)
     });
+
+    this.loadQuizHistory(id);
+  }
+
+  private loadQuizHistory(deckId: string) {
+    if (!isPlatformBrowser(this.platformId)) return;
+    const key = `quiz_history_${deckId}`;
+    const data: QuizAttemptSummary[] = JSON.parse(localStorage.getItem(key) ?? '[]');
+    this.quizHistory.set(data.slice(0, 5)); // Show last 5
+  }
+
+  formatHistoryDate(dateStr: string): string {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  }
+
+  getScoreColor(score: number): string {
+    if (score >= 80) return '#16a34a';
+    if (score >= 50) return '#d97706';
+    return '#ef4444';
   }
 
   get deckId(): string {

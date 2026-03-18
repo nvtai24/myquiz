@@ -1,22 +1,22 @@
 @if (loadingDeck()) {
-  <div class="max-w-[1100px] mx-auto py-20 px-6 flex justify-center">
+  <div class="max-w-[1400px] mx-auto py-20 px-6 flex justify-center">
     <div class="flex flex-col items-center gap-4 text-gray-400">
       <span class="material-symbols-outlined text-[48px] animate-spin">progress_activity</span>
-      <p class="font-medium">Đang tải bộ thẻ...</p>
+      <p class="font-medium">Loading study set...</p>
     </div>
   </div>
 } @else if (deckError()) {
-  <div class="max-w-[1100px] mx-auto py-20 px-6 flex justify-center">
+  <div class="max-w-[1400px] mx-auto py-20 px-6 flex justify-center">
     <div class="flex flex-col items-center gap-4 text-red-500">
       <span class="material-symbols-outlined text-[48px]">error</span>
       <p class="font-medium">{{ deckError() }}</p>
       <a routerLink="/library" class="px-6 py-2 bg-[#4255FF] text-white rounded-xl font-bold no-underline">
-        Quay lại Library
+        Back to Library
       </a>
     </div>
   </div>
 } @else if (deck()) {
-<div class="max-w-[1100px] mx-auto py-6 pb-20 px-6 sm:px-8">
+<div class="max-w-[1400px] mx-auto py-6 pb-20 px-6 sm:px-8">
   <!-- Breadcrumb -->
   <div class="flex items-center gap-2.5 mb-8">
     <a routerLink="/library" class="flex items-center gap-1.5 text-gray-400 font-bold no-underline transition-colors hover:text-[#4255FF]">
@@ -31,12 +31,11 @@
   <div class="bg-white border border-gray-200 rounded-[28px] overflow-hidden shadow-sm mb-10 transition-shadow hover:shadow-md">
     <div class="flex flex-col lg:flex-row p-8 gap-8 items-start border-b border-gray-100">
       <!-- Thumbnail / Icon -->
-      <div class="w-24 h-24 lg:w-40 lg:h-40 rounded-[22px] bg-gradient-to-br from-[#4255FF] to-indigo-500 shrink-0 relative flex items-center justify-center text-white shadow-lg lg:rounded-[28px] overflow-hidden">
+      <div class="w-24 h-24 lg:w-40 lg:h-40 rounded-[22px] shrink-0 relative flex items-center justify-center lg:rounded-[28px] overflow-hidden border border-gray-100">
         @if (deck()!.thumbnailUrl) {
           <img [src]="deck()!.thumbnailUrl" alt="Thumbnail" class="w-full h-full object-cover" />
         } @else {
-          <span class="material-symbols-outlined text-[48px] lg:text-[64px] relative z-10 drop-shadow-md">style</span>
-          <div class="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.2)_0%,rgba(255,255,255,0)_100%)]"></div>
+          <img src="/images/default-deck.png" alt="Default Thumbnail" class="w-full h-full object-cover" />
         }
       </div>
       <div class="flex-1 min-w-0">
@@ -46,6 +45,12 @@
             <span class="material-symbols-outlined text-[16px] leading-none">public</span>
             {{ deck()!.visibility }}
           </span>
+          @if (deck()!.status !== 'Draft') {
+            <span class="inline-flex items-center gap-1 px-3 py-1 bg-emerald-50 rounded-full text-[12px] font-extrabold text-emerald-600 border border-emerald-200">
+              <span class="material-symbols-outlined text-[16px] leading-none">check_circle</span>
+              Published
+            </span>
+          }
         </div>
         <p class="text-[17px] text-gray-500 leading-relaxed max-w-[700px] m-0 mb-4 font-medium">{{ deck()!.description }}</p>
 
@@ -70,17 +75,19 @@
               }
             </div>
             <span class="text-[14px] font-bold text-gray-700">{{ (deck()!.averageRating ?? 0).toFixed(1) }}</span>
-            <span class="text-[13px] text-gray-400">({{ deck()!.totalRatings }} đánh giá)</span>
+            <span class="text-[13px] text-gray-400">({{ deck()!.totalRatings }} reviews)</span>
           </div>
         }
       </div>
       <div class="flex gap-2.5 lg:flex-col shrink-0">
-        <button class="w-11 h-11 rounded-xl bg-gray-50 border border-transparent text-gray-500 flex items-center justify-center cursor-pointer transition-all hover:bg-indigo-50 hover:text-[#4255FF] hover:border-indigo-100" title="Share">
-          <span class="material-symbols-outlined text-[22px]">share</span>
+        <button (click)="openInviteModal()" class="w-11 h-11 rounded-xl bg-gray-50 border border-transparent text-gray-500 flex items-center justify-center cursor-pointer transition-all hover:bg-indigo-50 hover:text-[#4255FF] hover:border-indigo-100" title="Invite">
+          <span class="material-symbols-outlined text-[22px]">person_add</span>
         </button>
-        <button class="w-11 h-11 rounded-xl bg-gray-50 border border-transparent text-gray-500 flex items-center justify-center cursor-pointer transition-all hover:bg-indigo-50 hover:text-[#4255FF] hover:border-indigo-100" title="Edit">
-          <span class="material-symbols-outlined text-[22px]">edit</span>
-        </button>
+        @if (deck()!.status === 'Draft') {
+          <button [routerLink]="['/edit-deck', deck()!.id]" class="w-11 h-11 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center cursor-pointer transition-all hover:bg-amber-100 hover:text-amber-700 hover:border-amber-300" title="Edit Draft">
+            <span class="material-symbols-outlined text-[22px]">edit</span>
+          </button>
+        }
         <button class="w-11 h-11 rounded-xl bg-gray-50 border border-transparent text-gray-500 flex items-center justify-center cursor-pointer transition-all hover:bg-indigo-50 hover:text-amber-500 hover:border-indigo-100" title="Bookmark">
           <span class="material-symbols-outlined text-[22px]">bookmark</span>
         </button>
@@ -95,7 +102,7 @@
         </div>
         <div class="flex flex-col">
           <span class="text-xl font-black text-gray-900 leading-none">{{ deck()!.questionCount }}</span>
-          <span class="text-[11px] font-bold text-gray-400 tracking-wider uppercase mt-1">Câu hỏi</span>
+          <span class="text-[11px] font-bold text-gray-400 tracking-wider uppercase mt-1">Questions</span>
         </div>
       </div>
       <div class="flex items-center gap-4 p-6 border-r border-b md:border-b-0 border-gray-100/10">
@@ -104,7 +111,7 @@
         </div>
         <div class="flex flex-col">
           <span class="text-xl font-black text-gray-900 leading-none">{{ (deck()!.averageRating ?? 0).toFixed(1) }}<small class="text-[13px] opacity-70 ml-0.5">/5</small></span>
-          <span class="text-[11px] font-bold text-gray-400 tracking-wider uppercase mt-1">Đánh giá TB</span>
+          <span class="text-[11px] font-bold text-gray-400 tracking-wider uppercase mt-1">Avg Rating</span>
         </div>
       </div>
       <div class="flex items-center gap-4 p-6 border-r border-gray-100/10">
@@ -113,7 +120,7 @@
         </div>
         <div class="flex flex-col">
           <span class="text-xl font-black text-gray-900 leading-none">{{ deck()!.totalRatings ?? 0 }}</span>
-          <span class="text-[11px] font-bold text-gray-400 tracking-wider uppercase mt-1">Đánh giá</span>
+          <span class="text-[11px] font-bold text-gray-400 tracking-wider uppercase mt-1">Ratings</span>
         </div>
       </div>
       <div class="flex items-center gap-4 p-6 border-gray-100/10">
@@ -122,7 +129,7 @@
         </div>
         <div class="flex flex-col">
           <span class="text-xl font-black text-gray-900 leading-none text-[14px]" style="font-size:0.9rem">{{ deck()!.createdAt | date:'dd/MM/yyyy' }}</span>
-          <span class="text-[11px] font-bold text-gray-400 tracking-wider uppercase mt-1">Ngày tạo</span>
+          <span class="text-[11px] font-bold text-gray-400 tracking-wider uppercase mt-1">Created on</span>
         </div>
       </div>
     </div>
@@ -133,11 +140,11 @@
     <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
       <h2 class="flex items-center gap-3 text-xl font-black text-gray-900 m-0">
         <span class="material-symbols-outlined text-[28px] text-[#4255FF]">school</span>
-        Chế độ học
+        Study Modes
       </h2>
       <button class="flex items-center gap-2 px-7 py-3 bg-[#4255FF] border-none rounded-xl text-white font-black text-[15px] cursor-pointer transition-all shadow-[0_4px_14px_rgba(66,85,255,0.3)] hover:translate-y-[-2px] hover:shadow-[0_8px_20px_rgba(66,85,255,0.4)]" (click)="startStudy()">
         <span class="material-symbols-outlined text-[22px]">play_arrow</span>
-        Bắt đầu {{ studyMode() === 'learn' ? 'Học' : 'Quiz' }}
+        Start {{ studyMode() === 'learn' ? 'Learning' : 'Quiz' }}
       </button>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -161,6 +168,53 @@
     </div>
   </section>
 
+  <!-- Quiz History -->
+  @if (quizHistory().length > 0) {
+    <section class="mb-10">
+      <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+        <h2 class="flex items-center gap-3 text-xl font-black text-gray-900 m-0">
+          <span class="material-symbols-outlined text-[28px] text-[#4255FF]">history</span>
+          Quiz History
+        </h2>
+        <span class="text-[13px] font-bold text-gray-400">{{ quizHistory().length }} recent attempts</span>
+      </div>
+      <div class="flex flex-col gap-3">
+        @for (attempt of quizHistory(); track attempt.id; let i = $index) {
+          <div class="flex items-center gap-5 p-5 bg-white border rounded-2xl transition-all hover:shadow-sm"
+            [class]="i === 0 ? 'border-[#4255FF]/20 bg-indigo-50/20' : 'border-gray-100'">
+            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+              [style.background]="i === 0 ? '#4255FF' : '#f3f4f6'">
+              @if (i === 0) {
+                <span class="material-symbols-outlined text-white text-[20px]">emoji_events</span>
+              } @else {
+                <span class="text-[13px] font-black text-gray-400">#{{ i + 1 }}</span>
+              }
+            </div>
+            <div class="flex-1 flex flex-col gap-1">
+              <span class="text-[14px] font-bold text-gray-900">{{ formatHistoryDate(attempt.date) }}</span>
+              <div class="flex items-center gap-3 text-[12px] font-medium text-gray-400">
+                <span class="flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[14px]">schedule</span>
+                  {{ attempt.timeTaken }}
+                </span>
+                <span>{{ attempt.totalCorrect }}/{{ attempt.totalQuestions }} correct</span>
+              </div>
+            </div>
+            <div class="flex flex-col items-end gap-1 shrink-0">
+              <span class="text-xl font-black" [style.color]="getScoreColor(attempt.score)">{{ attempt.score }}%</span>
+              <div class="flex gap-0.5">
+                @for (s of [1,2,3,4,5]; track s) {
+                  <span class="material-symbols-outlined text-[12px]"
+                    [class]="s <= (attempt.score >= 90 ? 5 : attempt.score >= 75 ? 4 : attempt.score >= 60 ? 3 : attempt.score >= 40 ? 2 : 1) ? 'text-amber-400' : 'text-gray-200'">star</span>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </section>
+  }
+
   <!-- Terms & Reviews Layout -->
   <div class="flex flex-col lg:flex-row gap-10 items-start">
     <!-- Terms List -->
@@ -168,11 +222,11 @@
       <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
         <h2 class="flex items-center gap-3 text-xl font-black text-gray-900 m-0">
           <span class="material-symbols-outlined text-[28px] text-[#4255FF]">list_alt</span>
-          Câu hỏi ({{ deck()!.questionCount }})
+          Questions ({{ deck()!.questionCount }})
         </h2>
         <div class="relative flex-1 max-w-[280px]">
           <span class="absolute left-3.5 top-1/2 -translate-y-1/2 material-symbols-outlined text-[20px] text-gray-300">search</span>
-          <input type="text" placeholder="Tìm câu hỏi..." class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-[14px] font-semibold text-gray-900 outline-none transition-all placeholder-gray-400 focus:bg-white focus:border-[#4255FF] focus:shadow-sm" (input)="onFilterInput($event)" />
+          <input type="text" placeholder="Search questions..." class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-[14px] font-semibold text-gray-900 outline-none transition-all placeholder-gray-400 focus:bg-white focus:border-[#4255FF] focus:shadow-sm" (input)="onFilterInput($event)" />
         </div>
       </div>
       <div class="flex flex-col gap-3">
@@ -197,7 +251,7 @@
                 @if (q.explanation) {
                   <p class="text-[14px] font-medium text-gray-500 leading-relaxed break-words m-0">{{ q.explanation }}</p>
                 } @else {
-                  <p class="text-[13px] italic text-gray-300 m-0">Không có giải thích</p>
+                  <p class="text-[13px] italic text-gray-300 m-0">No explanation available</p>
                 }
                 @if (q.hint) {
                   <p class="text-[12px] text-amber-500 font-semibold mt-1.5 m-0">
@@ -213,7 +267,7 @@
       @if (totalFilteredTerms > 4) {
         <button class="w-full flex items-center justify-center gap-2 py-4 mt-4 bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl text-gray-500 font-bold text-[14px] cursor-pointer transition-all hover:bg-indigo-50 hover:border-[#4255FF] hover:text-[#4255FF]" (click)="toggleTerms()">
           <span class="material-symbols-outlined text-[22px]">{{ showAllTerms() ? 'expand_less' : 'expand_more' }}</span>
-          {{ showAllTerms() ? 'Thu gọn' : 'Xem tất cả ' + totalFilteredTerms + ' câu hỏi' }}
+          {{ showAllTerms() ? 'Collapse' : 'See all ' + totalFilteredTerms + ' questions' }}
         </button>
       }
     </section>
@@ -222,7 +276,7 @@
     <aside class="w-full lg:w-[340px] sticky top-8 flex flex-col gap-6 shrink-0">
       <!-- Rating Summary -->
       <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-        <h3 class="text-[15px] font-black text-gray-900 m-0 mb-5 uppercase tracking-wider">Đánh giá & Nhận xét</h3>
+        <h3 class="text-[15px] font-black text-gray-900 m-0 mb-5 uppercase tracking-wider">Ratings & Reviews</h3>
         @if (loadingRatings()) {
           <div class="flex justify-center py-6 text-gray-400">
             <span class="material-symbols-outlined text-[32px] animate-spin">progress_activity</span>
@@ -238,7 +292,7 @@
                   <span class="material-symbols-outlined text-[18px]" [class]="s === 'empty' ? 'text-gray-200' : 'text-amber-400'">star</span>
                 }
               </div>
-              <span class="text-[12px] font-extrabold text-gray-400 uppercase tracking-wide">{{ ratingSummary()?.totalRatings ?? 0 }} đánh giá</span>
+              <span class="text-[12px] font-extrabold text-gray-400 uppercase tracking-wide">{{ ratingSummary()?.totalRatings ?? 0 }} reviews</span>
             </div>
           </div>
           <div class="flex flex-col gap-2.5 mb-1">
@@ -259,12 +313,12 @@
       <!-- Submit Rating -->
       @if (isLoggedIn()) {
         <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-          <h3 class="text-[15px] font-black text-gray-900 m-0 mb-4 uppercase tracking-wider">Gửi đánh giá của bạn</h3>
+          <h3 class="text-[15px] font-black text-gray-900 m-0 mb-4 uppercase tracking-wider">Submit your rating</h3>
 
           @if (ratingSuccess()) {
             <div class="flex items-center gap-2 bg-green-50 text-green-700 px-4 py-3 rounded-xl text-[13px] font-bold mb-4">
               <span class="material-symbols-outlined text-[18px]">check_circle</span>
-              Đánh giá đã được gửi!
+              Rating submitted!
             </div>
           }
           @if (ratingError()) {
@@ -292,7 +346,7 @@
           <textarea
             class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-[14px] font-medium text-gray-900 resize-none outline-none transition-all placeholder-gray-400 focus:bg-white focus:border-[#4255FF] mb-4"
             rows="3"
-            placeholder="Nhận xét của bạn (không bắt buộc)..."
+            placeholder="Your comment (optional)..."
             [ngModel]="myComment()"
             (ngModelChange)="myComment.set($event)">
           </textarea>
@@ -303,10 +357,10 @@
             (click)="submitRating()">
             @if (submittingRating()) {
               <span class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
-              Đang gửi...
+              Sending...
             } @else {
               <span class="material-symbols-outlined text-[18px]">send</span>
-              Gửi đánh giá
+              Submit Rating
             }
           </button>
         </div>
@@ -315,7 +369,7 @@
       <!-- Reviews List -->
       @if ((ratingSummary()?.ratings?.length ?? 0) > 0) {
         <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-          <h3 class="text-[15px] font-black text-gray-900 m-0 mb-5 uppercase tracking-wider">Nhận xét gần đây</h3>
+          <h3 class="text-[15px] font-black text-gray-900 m-0 mb-5 uppercase tracking-wider">Recent Reviews</h3>
           <div class="flex flex-col gap-5">
             @for (rev of (ratingSummary()!.ratings | slice:0:5); track rev.id) {
               <div class="flex flex-col gap-2.5 pb-5 border-b border-gray-50 last:pb-0 last:border-0">
@@ -345,4 +399,51 @@
     </aside>
   </div>
 </div>
+}
+
+<!-- Invite Modal -->
+@if (isInviteModalOpen()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl relative animate-in zoom-in-95 duration-200">
+      <button class="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-50 text-gray-500 flex items-center justify-center cursor-pointer hover:bg-gray-100 hover:text-gray-900 border-none" (click)="closeInviteModal()">
+        <span class="material-symbols-outlined text-[18px]">close</span>
+      </button>
+
+       <h3 class="text-xl font-black text-gray-900 mt-0 mb-1">Invite friends</h3>
+       <p class="text-[13px] text-gray-500 font-medium mb-5">Enter the email of the friend you want to invite to this study set.</p>
+
+      @if (inviteSuccess()) {
+        <div class="flex items-center gap-2 p-3 bg-green-50 text-green-700 text-[13px] font-bold rounded-xl mb-4">
+          <span class="material-symbols-outlined text-[18px]">check_circle</span>
+          {{ inviteSuccess() }}
+        </div>
+      }
+
+      @if (inviteError()) {
+        <div class="flex items-center gap-2 p-3 bg-red-50 text-red-700 text-[13px] font-bold rounded-xl mb-4">
+          <span class="material-symbols-outlined text-[18px]">error</span>
+          {{ inviteError() }}
+        </div>
+      }
+
+      <div class="flex flex-col gap-2 mb-6">
+        <label class="text-[11px] font-black text-gray-500 uppercase tracking-widest">Recipient Email</label>
+        <div class="relative flex items-center">
+          <span class="material-symbols-outlined absolute left-3 text-gray-400 text-[20px]">mail</span>
+          <input type="email" class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-[14px] font-medium text-gray-900 outline-none focus:border-[#4255FF] focus:ring-2 focus:ring-[#4255FF]/20 transition-all placeholder-gray-400" placeholder="nguyenvana@example.com" [ngModel]="inviteEmail()" (ngModelChange)="inviteEmail.set($event)" (keydown.enter)="sendInvite()" />
+        </div>
+      </div>
+
+      <div class="flex gap-3 justify-end">
+        <button class="px-5 py-2.5 rounded-xl bg-gray-100 text-gray-600 font-bold text-[13px] border-none cursor-pointer hover:bg-gray-200 transition-colors" (click)="closeInviteModal()">Cancel</button>
+        <button class="px-5 py-2.5 rounded-xl bg-[#4255FF] text-white font-bold text-[13px] border-none cursor-pointer flex items-center justify-center gap-2 hover:bg-[#3345e0] transition-colors disabled:opacity-50 disabled:cursor-not-allowed w-28" [disabled]="!inviteEmail().trim() || isInviting()" (click)="sendInvite()">
+          @if (isInviting()) {
+            <span class="material-symbols-outlined animate-spin text-[16px]">progress_activity</span>
+          } @else {
+            Send Invite
+          }
+        </button>
+      </div>
+    </div>
+  </div>
 }

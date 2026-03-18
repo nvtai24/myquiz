@@ -1,0 +1,13 @@
+:host {
+  display: block;
+  min-height: calc(100vh - 80px); /* Height minus main layout navbar */
+  background-color: #f9fafb;
+}
+
+/* Base tailwind elements are handled by classes, just add specifics if needed */
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;  
+  overflow: hidden;
+}

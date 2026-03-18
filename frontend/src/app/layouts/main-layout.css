@@ -185,7 +185,7 @@
 .navbar-left {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   gap: 24px;
   flex: 1;
 }

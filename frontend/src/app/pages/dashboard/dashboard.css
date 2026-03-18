@@ -1,9 +1,9 @@
 /* ===== Dashboard Host ===== */
 :host {
   display: block;
-  max-width: 1100px;
+  max-width: 1400px;
   margin: 0 auto;
-  padding: 32px 24px 80px;
+  padding: 24px 24px 80px;
 }
 
 /* Greeting */
@@ -307,7 +307,7 @@
 }
 
 /* Responsive */
-@media (max-width: 1100px) {
+@media (max-width: 1400px) {
   .course-grid {
     grid-template-columns: repeat(2, 1fr);
   }

@@ -1,4 +1,4 @@
-<div class="max-w-[1100px] mx-auto pb-20 pt-8" style="font-family: 'Inter', sans-serif;">
+<div class="max-w-[1400px] mx-auto pb-20 pt-6 px-6" style="font-family: 'Inter', sans-serif;">
   <!-- Hero Top Bar -->
   <div class="sticky top-0 z-10 flex items-center justify-between pb-5 mb-5 bg-transparent pt-2">
     <div class="flex items-center gap-3.5">
@@ -6,8 +6,12 @@
         <span class="material-symbols-outlined">arrow_back</span>
       </button>
       <div class="flex flex-col">
-        <h1 class="text-xl font-extrabold text-[#141118] m-0 leading-tight tracking-[-0.01em]">Create a new study set</h1>
-        <p class="text-[13px] text-[#726388] mt-1 mb-0 font-medium">Build your flashcards manually or let AI do the heavy lifting</p>
+        <h1 class="text-xl font-extrabold text-[#141118] m-0 leading-tight tracking-[-0.01em]">
+          {{ isEditMode() ? 'Edit study set' : 'Create study set' }}
+        </h1>
+        <p class="text-[13px] text-[#726388] mt-1 mb-0 font-medium">
+          {{ isEditMode() ? 'Update the content of your draft cards' : 'Build your own study set quickly' }}
+        </p>
       </div>
     </div>
     <div class="flex items-center gap-3">
@@ -29,16 +33,16 @@
           Saving...
         } @else {
           <span class="material-symbols-outlined text-[17px]">save</span>
-          Save Draft
+          Save draft
         }
       </button>
       <button class="flex items-center gap-1.5 bg-gradient-to-r from-[#7C3AED] to-[#4255FF] border-none text-[13px] font-bold text-white cursor-pointer px-6 py-2.5 rounded-xl transition-all hover:shadow-[0_4px_16px_rgba(66,85,255,0.35)] hover:-translate-y-[1px] disabled:opacity-60 disabled:cursor-not-allowed" (click)="create()" [disabled]="creating()">
         @if (creating()) {
           <span class="material-symbols-outlined text-[17px] animate-spin">progress_activity</span>
-          Creating...
+          Publishing...
         } @else {
           <span class="material-symbols-outlined text-[17px]">publish</span>
-          Create Set
+          Publish & Learn
         }
       </button>
     </div>
@@ -144,6 +148,27 @@
           <h3 class="text-xl font-bold text-[#141118] m-0">AI Card Generator</h3>
           <p class="text-[13.5px] text-[#726388] mt-1 mb-0 font-medium">Upload study material or paste text — AI will create flashcards instantly</p>
         </div>
+        
+        <div class="ml-auto text-right">
+          @if (aiLimitLoading()) {
+            <span class="text-[13px] text-gray-400 font-medium flex items-center gap-1">
+              <span class="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
+              Checking limit...
+            </span>
+          } @else if (aiUsageMax() > 0) {
+            <div class="bg-purple-50 px-3 py-1.5 rounded-lg border border-purple-100 flex flex-col items-end">
+              <span class="text-[11px] font-bold text-purple-600 uppercase">Daily Usage Limit</span>
+              <span class="text-[15px] font-black text-purple-900 leading-none mt-0.5">
+                {{ aiUsageCount() }}<span class="text-purple-400 text-[13px] font-bold">/{{ aiUsageMax() }}</span>
+              </span>
+            </div>
+          } @else {
+            <div class="bg-green-50 px-3 py-1.5 rounded-lg border border-green-100 flex flex-col items-end">
+              <span class="text-[11px] font-bold text-green-600 uppercase">Daily Usage Limit</span>
+              <span class="text-[15px] font-black text-green-900 leading-none mt-0.5">Unlimited</span>
+            </div>
+          }
+        </div>
       </div>
 
       <!-- Source Tabs -->
@@ -205,15 +230,26 @@
         ></textarea>
       }
       <!-- Generate Button -->
-      <button class="w-full mt-6 py-4 rounded-xl bg-gradient-to-r from-purple-600 to-[#4255FF] text-white font-bold text-[15px] border-none cursor-pointer flex justify-center items-center gap-2.5 transition-all shadow-md hover:shadow-lg hover:opacity-95 disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none" [disabled]="aiGenerating()" (click)="generateWithAi()">
-        @if (aiGenerating()) {
-          <span class="material-symbols-outlined animate-spin text-[22px]">progress_activity</span>
-          Generating your cards...
-        } @else {
-          <span class="material-symbols-outlined text-[22px]">auto_awesome</span>
-          Generate Cards with AI
-        }
-      </button>
+      @if (aiUsageMax() > 0 && aiUsageCount() >= aiUsageMax()) {
+        <div class="w-full mt-6 py-3 px-4 rounded-xl bg-red-50 border border-red-200 text-red-700 flex items-center gap-3">
+          <span class="material-symbols-outlined text-[24px]">block</span>
+          <div class="flex flex-col">
+            <span class="text-[14px] font-bold">Limit Reached</span>
+            <span class="text-[12px] font-medium mt-0.5">You have reached your daily limit of {{ aiUsageMax() }} requests. Upgrade your plan or try again tomorrow.</span>
+          </div>
+          <a routerLink="/subscription" class="ml-auto px-4 py-2 bg-red-600 text-white text-[12px] font-bold rounded-lg cursor-pointer no-underline hover:bg-red-700">Upgrade Plan</a>
+        </div>
+      } @else {
+        <button class="w-full mt-6 py-4 rounded-xl bg-gradient-to-r from-purple-600 to-[#4255FF] text-white font-bold text-[15px] border-none cursor-pointer flex justify-center items-center gap-2.5 transition-all shadow-md hover:shadow-lg hover:opacity-95 disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none" [disabled]="aiGenerating()" (click)="generateWithAi()">
+          @if (aiGenerating()) {
+            <span class="material-symbols-outlined animate-spin text-[22px]">progress_activity</span>
+            Generating your cards...
+          } @else {
+            <span class="material-symbols-outlined text-[22px]">auto_awesome</span>
+            Generate Cards with AI
+          }
+        </button>
+      }
     </div>
   }
 

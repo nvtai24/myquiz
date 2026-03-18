@@ -135,7 +135,7 @@
 /* Stats */
 .stats-row {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  grid-template-columns: repeat(3, 1fr);
   gap: 14px;
   margin-bottom: 24px;
 }
@@ -165,7 +165,6 @@
 .stat-icon.green { color: #16a34a; }
 .stat-icon.red { color: #ef4444; }
 .stat-icon.blue { color: #4255FF; }
-.stat-icon.orange { color: #f59e0b; }
 
 .stat-val {
   font-size: 1.75rem;
@@ -175,7 +174,6 @@
 
 .stat-val.green { color: #16a34a; }
 .stat-val.red { color: #ef4444; }
-.stat-val.orange { color: #f59e0b; }
 
 /* Section Cards */
 .section-card {
@@ -222,44 +220,6 @@
   cursor: pointer;
 }
 
-/* Category bars */
-.category-row {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 14px;
-}
-
-.cat-name {
-  width: 180px;
-  font-size: 0.85rem;
-  font-weight: 500;
-  color: #374151;
-  flex-shrink: 0;
-}
-
-.cat-bar-track {
-  flex: 1;
-  height: 10px;
-  background: #f0f0f0;
-  border-radius: 9999px;
-  overflow: hidden;
-}
-
-.cat-bar-fill {
-  height: 100%;
-  border-radius: 9999px;
-  transition: width 0.5s ease;
-}
-
-.cat-score {
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: #1e1e2f;
-  width: 40px;
-  text-align: right;
-}
-
 /* Question Review */
 .review-item {
   border: 1px solid #e5e7eb;
@@ -271,6 +231,10 @@
 
 .review-item.incorrect {
   border-color: #fecaca;
+}
+
+.review-item.correct-item {
+  border-color: #bbf7d0;
 }
 
 .review-row {
@@ -306,31 +270,217 @@
   display: block;
 }
 
-.review-answer {
+.review-answer-summary {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 4px;
   font-size: 0.78rem;
+  flex-wrap: wrap;
+}
+
+.answer-label {
   color: #9ca3af;
 }
 
-.correct-answer {
-  color: #16a34a;
+.answer-divider {
+  color: #d1d5db;
 }
+
+.text-green-600 { color: #16a34a; }
+.text-red-500 { color: #ef4444; }
 
 .expand-icon {
   font-size: 22px;
   color: #9ca3af;
+  flex-shrink: 0;
 }
 
-.review-explanation {
-  display: flex;
-  gap: 12px;
+/* Review Detail (expanded) */
+.review-detail {
   padding: 14px 18px;
   background: #f8fafc;
   border-top: 1px solid #e5e7eb;
 }
 
+/* Options Grid for MC */
+.options-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.option-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  border: 2px solid transparent;
+  transition: all 0.15s;
+}
+
+.option-correct {
+  background: #f0fdf4;
+  border-color: #86efac;
+}
+
+.option-user-wrong {
+  background: #fef2f2;
+  border-color: #fca5a5;
+}
+
+.option-neutral {
+  background: #f9fafb;
+  border-color: #f3f4f6;
+}
+
+.option-label {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+  background: #e5e7eb;
+  color: #6b7280;
+}
+
+.label-correct {
+  background: #16a34a;
+  color: #fff;
+}
+
+.label-wrong {
+  background: #ef4444;
+  color: #fff;
+}
+
+.option-text {
+  flex: 1;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #374151;
+}
+
+.option-icon {
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.option-icon.correct {
+  color: #16a34a;
+}
+
+.option-icon.wrong {
+  color: #ef4444;
+}
+
+/* True/False options */
+.tf-options {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.tf-option {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 2px solid #f3f4f6;
+  background: #f9fafb;
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: #374151;
+}
+
+.tf-option.option-correct {
+  background: #f0fdf4;
+  border-color: #86efac;
+  color: #16a34a;
+}
+
+.tf-option.option-user-wrong {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #ef4444;
+}
+
+.tf-user-tag {
+  margin-left: auto;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 2px 8px;
+  border-radius: 6px;
+  background: rgba(0,0,0,0.06);
+}
+
+/* Fill blank result */
+.fill-result {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.fill-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.fill-label {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #9ca3af;
+  min-width: 100px;
+}
+
+.fill-value {
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 6px 14px;
+  border-radius: 10px;
+  border: 2px solid #e5e7eb;
+  background: #f9fafb;
+}
+
+.fill-correct {
+  background: #f0fdf4;
+  border-color: #86efac;
+  color: #16a34a;
+}
+
+.fill-wrong {
+  background: #fef2f2;
+  border-color: #fca5a5;
+  color: #ef4444;
+  text-decoration: line-through;
+}
+
+/* Explanation */
+.review-explanation {
+  display: flex;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #fffbeb;
+  border-radius: 12px;
+  border: 1px solid #fde68a;
+  margin-top: 8px;
+}
+
 .explain-icon {
   font-size: 20px;
-  color: #4255FF;
+  color: #d97706;
   flex-shrink: 0;
   margin-top: 2px;
 }
@@ -340,6 +490,88 @@
   color: #6b7280;
   margin: 4px 0 0;
   line-height: 1.5;
+}
+
+/* History */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 16px;
+  border-radius: 12px;
+  border: 1px solid #f3f4f6;
+  background: #f9fafb;
+  transition: all 0.15s;
+}
+
+.history-item.history-current {
+  background: #f0f1ff;
+  border-color: #c7d2fe;
+}
+
+.history-item:hover {
+  background: #f0f1ff;
+}
+
+.history-rank {
+  width: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.history-number {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #9ca3af;
+}
+
+.history-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.history-date {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #374151;
+}
+
+.history-time {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #9ca3af;
+}
+
+.history-score {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.history-score-val {
+  font-size: 1.1rem;
+  font-weight: 700;
+}
+
+.history-score-detail {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: #9ca3af;
 }
 
 /* CTA */
@@ -408,6 +640,6 @@
 @media (max-width: 700px) {
   .score-card { flex-direction: column; text-align: center; }
   .stats-row { grid-template-columns: repeat(2, 1fr); }
-  .cat-name { width: 120px; }
   .result-cta { flex-direction: column; }
+  .tf-options { flex-direction: column; }
 }

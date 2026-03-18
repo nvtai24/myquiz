@@ -64,7 +64,7 @@ export class Library implements OnInit {
       next: (res) => {
         this.loading.set(false);
         if (res.success) {
-          this.allDecks.set(res.data);
+          this.allDecks.set(res.data || []);
         } else {
           this.errorMessage.set(res.message || 'Không thể tải bộ thẻ');
         }
@@ -77,15 +77,15 @@ export class Library implements OnInit {
   }
 
   get filteredSets(): DeckSummary[] {
-    let decks = this.allDecks();
+    let decks = this.allDecks() || [];
 
     // Search by name/description/tags
     if (this.searchQuery()) {
       const q = this.searchQuery().toLowerCase();
       decks = decks.filter(s =>
-        s.name.toLowerCase().includes(q) ||
-        s.description?.toLowerCase().includes(q) ||
-        s.tags?.some(t => t.toLowerCase().includes(q))
+        s?.name?.toLowerCase().includes(q) ||
+        s?.description?.toLowerCase().includes(q) ||
+        s?.tags?.some(t => t.toLowerCase().includes(q))
       );
     }
 

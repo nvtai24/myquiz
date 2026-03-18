@@ -2,10 +2,12 @@
   <!-- Header -->
   <div class="result-header">
     <h1 class="result-title">Quiz Complete! 🎉</h1>
-    <div class="perfect-badge">
-      <span class="material-symbols-outlined badge-icon">emoji_events</span>
-      <span>PERFECT STREAK!</span>
-    </div>
+    @if (score() >= 90) {
+      <div class="perfect-badge">
+        <span class="material-symbols-outlined badge-icon">emoji_events</span>
+        <span>PERFECT STREAK!</span>
+      </div>
+    }
   </div>
 
   <!-- Score Card -->
@@ -15,10 +17,11 @@
         <circle cx="60" cy="60" r="52" class="ring-bg" />
         <circle cx="60" cy="60" r="52" class="ring-fill"
           [style.stroke-dasharray]="326.7"
-          [style.stroke-dashoffset]="326.7 - (326.7 * score() / 100)" />
+          [style.stroke-dashoffset]="326.7 - (326.7 * score() / 100)"
+          [style.stroke]="score() >= 70 ? '#16a34a' : score() >= 40 ? '#d97706' : '#ef4444'" />
       </svg>
       <div class="ring-text">
-        <span class="ring-percent">{{ score() }}%</span>
+        <span class="ring-percent" [style.color]="score() >= 70 ? '#16a34a' : score() >= 40 ? '#d97706' : '#ef4444'">{{ score() }}%</span>
         <span class="ring-label">SCORE</span>
       </div>
     </div>
@@ -30,44 +33,27 @@
           <span class="material-symbols-outlined" [class.star-filled]="s <= starsCount" [class.star-empty]="s > starsCount">star</span>
         }
       </div>
-      <p class="correct-summary">{{ totalCorrect() }} / {{ totalQuestions() }} câu đúng</p>
+      <p class="correct-summary">{{ totalCorrect() }} / {{ totalQuestions() }} correct · {{ timeTaken() }}</p>
     </div>
   </div>
 
   <!-- Stats Row -->
   <div class="stats-row">
     <div class="result-stat">
-      <span class="stat-title">ĐÚNG</span>
+      <span class="stat-title">CORRECT</span>
       <span class="material-symbols-outlined stat-icon green">check_circle</span>
       <span class="stat-val green">{{ totalCorrect() < 10 ? '0' + totalCorrect() : totalCorrect() }}</span>
     </div>
     <div class="result-stat">
-      <span class="stat-title">SAI</span>
+      <span class="stat-title">WRONG</span>
       <span class="material-symbols-outlined stat-icon red">cancel</span>
       <span class="stat-val red">{{ totalIncorrect() < 10 ? '0' + totalIncorrect() : totalIncorrect() }}</span>
     </div>
     <div class="result-stat">
-      <span class="stat-title">THỜI GIAN</span>
+      <span class="stat-title">TIME</span>
       <span class="material-symbols-outlined stat-icon blue">schedule</span>
       <span class="stat-val">{{ timeTaken() }}</span>
     </div>
-  </div>
-
-  <!-- Performance by Category -->
-  <div class="section-card">
-    <h3 class="section-heading">
-      <span class="material-symbols-outlined">bar_chart</span>
-      Performance by Category
-    </h3>
-    @for (cat of categories; track cat.name) {
-      <div class="category-row">
-        <span class="cat-name">{{ cat.name }}</span>
-        <div class="cat-bar-track">
-          <div class="cat-bar-fill" [style.width]="cat.score + '%'" [style.background]="cat.color"></div>
-        </div>
-        <span class="cat-score">{{ cat.score }}%</span>
-      </div>
-    }
   </div>
 
   <!-- Question Review -->
@@ -75,52 +61,174 @@
     <div class="section-heading-row">
       <h3 class="section-heading">
         <span class="material-symbols-outlined">rate_review</span>
-        Question Review
+        Review Questions
       </h3>
-      <button class="expand-all-btn" (click)="expandAll()">Expand All</button>
+      <button class="expand-all-btn" (click)="expandAll()">
+        {{ expandedQuestion() === -1 ? 'Collapse' : 'Expand All' }}
+      </button>
     </div>
 
     @for (q of questions; track q.number) {
-      <div class="review-item" [class.incorrect]="!q.isCorrect">
+      <div class="review-item" [class.incorrect]="!q.isCorrect" [class.correct-item]="q.isCorrect">
         <div class="review-row" (click)="toggleQuestion(q.number)">
           <span class="material-symbols-outlined review-status" [class.correct]="q.isCorrect" [class.wrong]="!q.isCorrect">
             {{ q.isCorrect ? 'check_circle' : 'cancel' }}
           </span>
           <div class="review-content">
             <span class="review-q">{{ q.number }}. {{ q.text }}</span>
-            <span class="review-answer">
-              Your answer: <strong>{{ q.answer }}</strong>
-              @if (!q.isCorrect && q.correct) {
-                 · Correct: <strong class="correct-answer">{{ q.correct }}</strong>
+            <div class="review-answer-summary">
+              <span class="answer-label">Your answer:</span>
+              <strong [class.text-green-600]="q.isCorrect" [class.text-red-500]="!q.isCorrect">{{ q.userAnswer }}</strong>
+              @if (!q.isCorrect) {
+                <span class="answer-divider">·</span>
+                <span class="answer-label">Answer:</span>
+                <strong class="text-green-600">{{ q.correctAnswer }}</strong>
               }
-            </span>
+            </div>
           </div>
           <span class="material-symbols-outlined expand-icon">
-            {{ expandedQuestion() === q.number || expandedQuestion() === -1 ? 'expand_less' : 'expand_more' }}
+            {{ isExpanded(q.number) ? 'expand_less' : 'expand_more' }}
           </span>
         </div>
-        @if ((expandedQuestion() === q.number || expandedQuestion() === -1) && q.explanation) {
-          <div class="review-explanation">
-            <span class="material-symbols-outlined explain-icon">school</span>
-            <div>
-              <strong>Explanation</strong>
-              <p>{{ q.explanation }}</p>
-            </div>
+
+        <!-- Expanded Detail -->
+        @if (isExpanded(q.number)) {
+          <div class="review-detail">
+            <!-- Multiple Choice: show all options -->
+            @if (q.type === 'multiple_choice' && q.options && q.options.length > 0) {
+              <div class="options-grid">
+                @for (opt of q.options; track opt; let j = $index) {
+                  <div class="option-item"
+                    [class.option-correct]="j === q.correctOptionIndex"
+                    [class.option-user-wrong]="j === q.userSelectedIndex && j !== q.correctOptionIndex"
+                    [class.option-neutral]="j !== q.correctOptionIndex && j !== q.userSelectedIndex">
+                    <span class="option-label"
+                      [class.label-correct]="j === q.correctOptionIndex"
+                      [class.label-wrong]="j === q.userSelectedIndex && j !== q.correctOptionIndex"
+                    >{{ getOptionLabel(j) }}</span>
+                    <span class="option-text">{{ opt }}</span>
+                    @if (j === q.correctOptionIndex) {
+                      <span class="material-symbols-outlined option-icon correct">check_circle</span>
+                    }
+                    @if (j === q.userSelectedIndex && j !== q.correctOptionIndex) {
+                      <span class="material-symbols-outlined option-icon wrong">cancel</span>
+                    }
+                    @if (j === q.userSelectedIndex && j === q.correctOptionIndex) {
+                      <span class="material-symbols-outlined option-icon correct">verified</span>
+                    }
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- True/False -->
+            @if (q.type === 'true_false') {
+              <div class="tf-options">
+                <div class="tf-option"
+                  [class.option-correct]="q.correctAnswer === 'True'"
+                  [class.option-user-wrong]="q.userAnswer === 'True' && q.correctAnswer !== 'True'">
+                  <span class="material-symbols-outlined" style="font-size:20px"
+                    [class.text-green-600]="q.correctAnswer === 'True'"
+                    [class.text-red-500]="q.userAnswer === 'True' && q.correctAnswer !== 'True'"
+                  >check_circle</span>
+                  <span>True</span>
+                  @if (q.userAnswer === 'True') {
+                    <span class="tf-user-tag">You chose</span>
+                  }
+                </div>
+                <div class="tf-option"
+                  [class.option-correct]="q.correctAnswer === 'False'"
+                  [class.option-user-wrong]="q.userAnswer === 'False' && q.correctAnswer !== 'False'">
+                  <span class="material-symbols-outlined" style="font-size:20px"
+                    [class.text-green-600]="q.correctAnswer === 'False'"
+                    [class.text-red-500]="q.userAnswer === 'False' && q.correctAnswer !== 'False'"
+                  >cancel</span>
+                  <span>False</span>
+                  @if (q.userAnswer === 'False') {
+                    <span class="tf-user-tag">You chose</span>
+                  }
+                </div>
+              </div>
+            }
+
+            <!-- Fill blank -->
+            @if (q.type === 'fill_blank') {
+              <div class="fill-result">
+                <div class="fill-row">
+                  <span class="fill-label">Bạn trả lời:</span>
+                  <span class="fill-value" [class.fill-wrong]="!q.isCorrect" [class.fill-correct]="q.isCorrect">{{ q.userAnswer }}</span>
+                </div>
+                @if (!q.isCorrect) {
+                  <div class="fill-row">
+                    <span class="fill-label">Correct answer:</span>
+                    <span class="fill-value fill-correct">{{ q.correctAnswer }}</span>
+                  </div>
+                }
+              </div>
+            }
+
+            <!-- Explanation -->
+            @if (q.explanation) {
+              <div class="review-explanation">
+                <span class="material-symbols-outlined explain-icon">lightbulb</span>
+                <div>
+                  <strong>Tip</strong>
+                  <p>{{ q.explanation }}</p>
+                </div>
+              </div>
+            }
           </div>
         }
       </div>
     }
   </div>
 
+  <!-- Quiz History -->
+  @if (pastAttempts().length > 1) {
+    <div class="section-card">
+      <div class="section-heading-row">
+        <h3 class="section-heading">
+          <span class="material-symbols-outlined">history</span>
+          Recent History
+        </h3>
+      </div>
+
+        <div class="history-list mt-4">
+          @for (attempt of pastAttempts(); track attempt.id; let i = $index) {
+            <div class="history-item" [class.history-current]="i === 0">
+              <div class="history-rank">
+                @if (i === 0) {
+                  <span class="material-symbols-outlined text-[#4255FF]" style="font-size:20px">radio_button_checked</span>
+                } @else {
+                  <span class="history-number">{{ i + 1 }}</span>
+                }
+              </div>
+              <div class="history-info">
+                <span class="history-date">{{ formatDate(attempt.date) }}</span>
+                <span class="history-time">
+                  <span class="material-symbols-outlined" style="font-size:14px">schedule</span>
+                  {{ attempt.timeTaken }}
+                </span>
+              </div>
+              <div class="history-score">
+                <span class="history-score-val" [style.color]="getScoreColor(attempt.score)">{{ attempt.score }}%</span>
+                <span class="history-score-detail">{{ attempt.totalCorrect }}/{{ attempt.totalQuestions }} correct</span>
+              </div>
+            </div>
+          }
+        </div>
+    </div>
+  }
+
   <!-- CTA Buttons -->
   <div class="result-cta">
     <button class="cta-learn" (click)="goToLearn()">
       <span class="material-symbols-outlined">style</span>
-      Học lại
+      Learn Again
     </button>
     <button class="cta-retry" (click)="goToQuiz()">
       <span class="material-symbols-outlined">quiz</span>
-      Làm Quiz lại
+      Retry Quiz
     </button>
     <button class="cta-dashboard" routerLink="/dashboard">
       Dashboard

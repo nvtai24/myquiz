@@ -1,10 +1,10 @@
 :host {
   display: block;
-  padding: 32px 32px 80px;
+  padding: 24px 24px 80px;
 }
 
 .library-page {
-  max-width: 1100px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
@@ -375,7 +375,7 @@
 
 .quiz-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 20px;
   align-content: start;
 }
@@ -460,9 +460,34 @@
   background: #dcfce7;
   color: #16a34a;
 }
+.status-badge .material-symbols-outlined {
+  font-size: 13px;
+}
 .status-badge.draft {
   background: #fef3c7;
   color: #d97706;
+}
+.status-badge.published {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+/* Draft badge on image */
+.draft-badge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(217, 119, 6, 0.9);
+  color: #fff;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  letter-spacing: 0.04em;
+  backdrop-filter: blur(4px);
 }
 
 /* Card Tags */
@@ -613,6 +638,28 @@
   background: #3345dd;
 }
 
+/* Edit button for draft decks */
+.edit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: #fff;
+  color: #d97706;
+  border: 2px solid #fbbf24;
+  border-radius: 9999px;
+  padding: 6px 16px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+
+.edit-btn:hover {
+  background: #fef3c7;
+  border-color: #d97706;
+  color: #92400e;
+}
+
 /* Empty state */
 .empty-state {
   grid-column: 1 / -1;
@@ -627,7 +674,7 @@
 }
 
 /* Responsive */
-@media (max-width: 1100px) {
+@media (max-width: 1400px) {
   .quiz-grid {
     grid-template-columns: repeat(2, 1fr);
   }

@@ -11,6 +11,7 @@ import { AuthService } from '../services/auth.service';
 })
 export class MainLayout {
   private authService = inject(AuthService);
+  currentUser = this.authService.currentUser;
   sidebarCollapsed = signal(true);
   profileMenuOpen = signal(false);
 

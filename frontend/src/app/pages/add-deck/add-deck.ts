@@ -1,7 +1,8 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { Router } from '@angular/router';
+import { Router, ActivatedRoute } from '@angular/router';
 import { DeckService } from '../../services/deck.service';
+import { PaymentService } from '../../services/payment.service';
 import { CreateDeckRequest, CreateQuestionRequest, GeneratedDeck, GeneratedQuestion, QuestionType } from '../../models/deck.models';
 
 interface Card {
@@ -25,7 +26,7 @@ interface Card {
   templateUrl: './add-deck.html',
   styleUrl: './add-deck.css',
 })
-export class AddDeck {
+export class AddDeck implements OnInit {
   title = signal('');
   description = signal('');
   visibility = signal<'public' | 'private'>('public');
@@ -33,8 +34,12 @@ export class AddDeck {
   coverFile = signal<File | null>(null);
   savingDraft = signal(false);
   creating = signal(false);
-  errorMessage = signal<string | null>(null);
+    errorMessage = signal<string | null>(null);
   successMessage = signal<string | null>(null);
+
+  isEditMode = signal(false);
+  editingId = signal<string | null>(null);
+  loadingDeck = signal(false);
 
   /* ── Creation mode ── */
   mode = signal<'manual' | 'ai'>('manual');
@@ -51,6 +56,10 @@ export class AddDeck {
   aiGenerating = signal(false);
   aiGenerated = signal(false); // true if cards came from AI
 
+  aiUsageCount = signal<number>(0);
+  aiUsageMax = signal<number>(0); // 0 means no active plan or infinite (but we have limits typically). Wait, Free plan may have 0. If 0, UI might say "Buy plan".
+  aiLimitLoading = signal<boolean>(false);
+
   private nextId = 3;
   cards = signal<Card[]>([
     { id: 1, type: 'multiple-choice', term: '', options: ['', '', '', ''], correctAnswers: [0] },
@@ -61,8 +70,92 @@ export class AddDeck {
   grabIndex = signal<number | null>(null); // which card's handle is being held
 
   private deckService = inject(DeckService);
+  private paymentService = inject(PaymentService);
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private route: ActivatedRoute) {}
+
+  ngOnInit() {
+    this.route.paramMap.subscribe(params => {
+      const id = params.get('id');
+      if (id) {
+        this.isEditMode.set(true);
+        this.editingId.set(id);
+        this.loadDeck(id);
+      }
+    });
+    this.loadSubscriptionLimits();
+  }
+
+  private loadSubscriptionLimits() {
+    this.aiLimitLoading.set(true);
+    this.paymentService.getMySubscription().subscribe({
+      next: (sub) => {
+        this.aiLimitLoading.set(false);
+        if (sub && !sub.isExpired) {
+          this.aiUsageMax.set(sub.dailyGenerateLimit);
+          this.aiUsageCount.set(sub.currentGenerateCount || 0);
+        } else {
+          // No active plan
+          this.aiUsageMax.set(0); 
+          this.aiUsageCount.set(0); 
+        }
+      },
+      error: () => {
+        this.aiLimitLoading.set(false);
+      }
+    });
+  }
+
+  private loadDeck(id: string) {
+    this.loadingDeck.set(true);
+    this.deckService.getDeckById(id).subscribe({
+      next: (res) => {
+        this.loadingDeck.set(false);
+        if (res.success && res.data) {
+          const deck = res.data;
+          this.title.set(deck.name);
+          this.description.set(deck.description || '');
+          this.visibility.set(deck.visibility === 'Private' ? 'private' : 'public');
+          this.coverImage.set(deck.thumbnailUrl || null);
+
+          if (deck.questions && deck.questions.length > 0) {
+            const mapped: Card[] = deck.questions.map(q => {
+              const cardType = this.mapQuestionTypeToCardType(q.type);
+              const card: Card = {
+                id: this.nextId++,
+                type: cardType,
+                term: q.content,
+                hint: q.hint || undefined,
+                explanation: q.explanation || undefined,
+                showExtra: !!(q.hint || q.explanation)
+              };
+
+              if (cardType === 'multiple-choice') {
+                card.options = q.options?.length ? [...q.options] : ['', '', '', ''];
+                card.correctAnswers = q.correctAnswers?.map(ans => card.options!.indexOf(ans)).filter(i => i >= 0) || [0];
+                if (card.correctAnswers.length === 0) card.correctAnswers = [0];
+              } else if (cardType === 'true-false') {
+                const correctStr = (q.correctAnswers?.[0] || 'true').toLowerCase();
+                card.isTrue = correctStr !== 'false';
+              } else if (cardType === 'fill-blank') {
+                card.blankAnswer = q.correctAnswers?.[0] || '';
+              }
+              return card;
+            });
+            this.cards.set(mapped);
+          }
+        } else {
+          this.showError('Could not load deck details');
+          this.router.navigate(['/library']);
+        }
+      },
+      error: () => {
+        this.loadingDeck.set(false);
+        this.showError('Error loading deck');
+        this.router.navigate(['/library']);
+      }
+    });
+  }
 
   toggleVisibility() {
     this.visibility.update(v => v === 'public' ? 'private' : 'public');
@@ -243,23 +336,15 @@ export class AddDeck {
   }
 
   get canSaveDraft(): boolean {
-    return !!this.title().trim() && !!this.coverFile();
+    return !!this.title().trim();
   }
 
   saveDraft() {
     if (this.savingDraft()) return;
     this.errorMessage.set(null);
 
-    if (!this.title().trim() && !this.coverFile()) {
-      this.showError('Title and Cover Image are required to save as draft');
-      return;
-    }
     if (!this.title().trim()) {
-      this.showError('Title is required to save as draft');
-      return;
-    }
-    if (!this.coverFile()) {
-      this.showError('Cover Image is required to save as draft');
+      this.showError('A title is required to save a draft');
       return;
     }
 
@@ -277,7 +362,11 @@ export class AddDeck {
       questions,
     };
 
-    this.deckService.createDeck(request, this.coverFile() ?? undefined).subscribe({
+    const action = this.isEditMode() && this.editingId() 
+      ? this.deckService.updateDeck(this.editingId()!, request, this.coverFile() ?? undefined)
+      : this.deckService.createDeck(request, this.coverFile() ?? undefined);
+
+    action.subscribe({
       next: (res) => {
         this.savingDraft.set(false);
         if (res.success) {
@@ -296,7 +385,12 @@ export class AddDeck {
   create() {
     if (this.creating()) return;
     if (!this.title().trim()) {
-      this.showError('Title is required');
+      this.showError('Title is required to publish');
+      return;
+    }
+
+    if (!this.coverImage()) {
+      this.showError('A cover image is required to publish this study set');
       return;
     }
 
@@ -309,13 +403,17 @@ export class AddDeck {
       name: this.title().trim(),
       description: this.description().trim(),
       visibility: this.visibility() === 'public' ? 'Public' : 'Private',
-      status: 'Draft',
+      status: 'Published',
       source: this.aiGenerated() ? 'AiGenerated' : 'Manual',
       tags: [],
       questions,
     };
 
-    this.deckService.createDeck(request, this.coverFile() ?? undefined).subscribe({
+    const action = this.isEditMode() && this.editingId()
+      ? this.deckService.updateDeck(this.editingId()!, request, this.coverFile() ?? undefined)
+      : this.deckService.createDeck(request, this.coverFile() ?? undefined);
+
+    action.subscribe({
       next: (res) => {
         this.creating.set(false);
         if (res.success) {
@@ -466,6 +564,10 @@ export class AddDeck {
         if (!res.success || !res.data) {
           this.showError(res.message || 'AI generation failed');
           return;
+        }
+        // Increment usage count locally to reflect the success
+        if (this.aiUsageMax() > 0) {
+          this.aiUsageCount.update(c => c + 1);
         }
         this.applyGeneratedDeck(res.data);
       },

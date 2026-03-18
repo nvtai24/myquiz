@@ -35,6 +35,7 @@ public class SearchPublicDecksQueryHandler : IRequestHandler<SearchPublicDecksQu
                 Name = d.Name,
                 Description = d.Description,
                 Visibility = d.Visibility,
+                Status = d.Status,
                 Tags = d.Tags,
                 QuestionCount = d.Questions.Count,
                 ThumbnailUrl = d.ThumbnailUrl,

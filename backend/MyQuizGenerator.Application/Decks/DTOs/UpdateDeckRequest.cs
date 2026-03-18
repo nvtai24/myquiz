@@ -10,6 +10,8 @@ public class UpdateDeckRequest
 
     public string Description { get; set; } = string.Empty;
 
+    public DeckStatus Status { get; set; } = DeckStatus.Draft;
+
     public DeckVisibility Visibility { get; set; } = DeckVisibility.Public;
 
     public string[] Tags { get; set; } = Array.Empty<string>();

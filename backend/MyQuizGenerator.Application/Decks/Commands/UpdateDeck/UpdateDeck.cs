@@ -45,6 +45,7 @@ public class UpdateDeckCommandHandler : IRequestHandler<UpdateDeckCommand>
 
         deck.Name = request.Request.Name;
         deck.Description = request.Request.Description;
+        deck.Status = request.Request.Status;
         deck.Visibility = request.Request.Visibility;
         deck.Tags = request.Request.Tags;
         deck.UpdatedAt = DateTime.UtcNow;

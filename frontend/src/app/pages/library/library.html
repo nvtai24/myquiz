@@ -139,12 +139,18 @@
       @if (!loading()) {
         <div class="quiz-grid">
           @for (deck of paginatedSets; track deck.id; let i = $index) {
-            <div class="quiz-card" [routerLink]="deck.status === 'Draft' ? ['/edit-deck', deck.id] : ['/deck', deck.id]">
+            <div class="quiz-card" [routerLink]="['/deck', deck.id]">
                <div class="quiz-img relative overflow-hidden flex items-center justify-center">
                  @if (deck.thumbnailUrl) {
                    <img [src]="deck.thumbnailUrl" [alt]="deck.name" class="absolute inset-0 w-full h-full object-cover" />
                  } @else {
                    <img src="/images/default-deck.png" alt="Flashcards" class="absolute inset-0 w-full h-full object-cover" />
+                 }
+                 @if (deck.status === 'Published') {
+                   <span class="draft-badge z-10" style="background-color: #eef0ff; color: #4255FF;">
+                     <span class="material-symbols-outlined" style="font-size:14px">public</span>
+                     Published
+                   </span>
                  }
                  @if (deck.status === 'Draft') {
                    <span class="draft-badge z-10">
@@ -184,14 +190,15 @@
 
                  <div class="quiz-footer">
                    <span class="text-[12px] text-gray-400 font-medium">{{ deck.questionCount }} questions</span>
-                   @if (deck.status === 'Draft') {
-                     <button class="edit-btn" (click)="$event.stopPropagation()" [routerLink]="['/edit-deck', deck.id]">
-                       <span class="material-symbols-outlined" style="font-size:16px">edit</span>
-                       Edit
-                     </button>
-                   } @else {
-                     <button class="study-btn" (click)="$event.stopPropagation()" [routerLink]="['/deck', deck.id]">Study</button>
-                   }
+                   <div style="display: flex; gap: 8px;">
+                       @if (deck.visibility !== 'Shared') {
+                         <button class="edit-published-btn" (click)="$event.stopPropagation()" [routerLink]="['/edit-deck', deck.id]">
+                           <span class="material-symbols-outlined" style="font-size:16px; margin-right:2px; vertical-align: middle;">edit</span>
+                           Edit
+                         </button>
+                       }
+                       <button class="study-btn" (click)="$event.stopPropagation()" [routerLink]="['/deck', deck.id]">Study</button>
+                   </div>
                  </div>
               </div>
             </div>

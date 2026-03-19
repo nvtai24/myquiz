@@ -1,7 +1,7 @@
 // ── Enums (match backend string serialization) ──
 
 export type DeckVisibility = 'Public' | 'Private' | 'Shared';
-export type DeckStatus = 'Draft' | 'Published' | 'Archived';
+export type DeckStatus = 'Draft' | 'Published';
 export type DeckSource = 'AiGenerated' | 'Manual';
 export type QuestionType = 'MultipleChoice' | 'TrueFalse' | 'FillInTheBlank';
 

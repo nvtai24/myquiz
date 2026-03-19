@@ -112,10 +112,6 @@ export class DeckDetail implements OnInit {
 
     this.deckService.getDeckById(id).subscribe({
       next: (res) => {
-        if (res.data?.status === 'Draft') {
-          this.router.navigate(['/edit-deck', id]);
-          return;
-        }
         this.deck.set(res.data);
         this.loadingDeck.set(false);
       },

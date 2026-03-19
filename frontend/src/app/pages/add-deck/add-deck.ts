@@ -118,6 +118,12 @@ export class AddDeck implements OnInit {
           this.visibility.set(deck.visibility === 'Private' ? 'private' : 'public');
           this.coverImage.set(deck.thumbnailUrl || null);
 
+          if (deck.visibility === 'Shared') {
+            this.showError('You cannot edit a shared study set');
+            this.router.navigate(['/library']);
+            return;
+          }
+
           if (deck.questions && deck.questions.length > 0) {
             const mapped: Card[] = deck.questions.map(q => {
               const cardType = this.mapQuestionTypeToCardType(q.type);

@@ -38,9 +38,13 @@ export class DeckService {
     const formData = new FormData();
     formData.append('name', request.name);
     formData.append('description', request.description);
-    formData.append('visibility', request.visibility);
-    formData.append('status', request.status);
-    formData.append('source', request.source);
+    const visibilityMap: Record<string, string> = { 'Public': '0', 'Private': '1', 'Shared': '2' };
+    const statusMap: Record<string, string> = { 'Draft': '0', 'Published': '1' };
+    const sourceMap: Record<string, string> = { 'Manual': '0', 'AiGenerated': '1' };
+
+    formData.append('visibility', visibilityMap[request.visibility] || '0');
+    formData.append('status', statusMap[request.status] || '0');
+    formData.append('source', sourceMap[request.source] || '0');
 
     request.tags.forEach((tag, i) => {
       formData.append(`tags[${i}]`, tag);
@@ -64,9 +68,15 @@ export class DeckService {
     const formData = new FormData();
     formData.append('name', request.name);
     formData.append('description', request.description);
-    formData.append('visibility', request.visibility);
-    formData.append('status', request.status);
-    formData.append('source', request.source);
+    
+    // Map enums to their exact integer representations to ensure flawless backend binding
+    const visibilityMap: Record<string, string> = { 'Public': '0', 'Private': '1', 'Shared': '2' };
+    const statusMap: Record<string, string> = { 'Draft': '0', 'Published': '1' };
+    const sourceMap: Record<string, string> = { 'Manual': '0', 'AiGenerated': '1' };
+
+    formData.append('visibility', visibilityMap[request.visibility] || '0');
+    formData.append('status', statusMap[request.status] || '0');
+    formData.append('source', sourceMap[request.source] || '0');
 
     request.tags.forEach((tag, i) => {
       formData.append(`tags[${i}]`, tag);

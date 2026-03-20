@@ -109,25 +109,25 @@ public class HandleSepayWebhookCommandHandler : IRequestHandler<HandleSepayWebho
         }
 
         // Find existing active subscription for this user
-        var existingSubscription = await _userSubscriptionRepository.GetQueryable()
-            .Where(usp => usp.UserId == transaction.UserId)
-            .OrderByDescending(usp => usp.EndDate)
-            .FirstOrDefaultAsync(cancellationToken);
+        // var existingSubscription = await _userSubscriptionRepository.GetQueryable()
+        //     .Where(usp => usp.UserId == transaction.UserId)
+        //     .OrderByDescending(usp => usp.EndDate)
+        //     .FirstOrDefaultAsync(cancellationToken);
 
-        var startDate = DateTime.UtcNow;
+        // var startDate = DateTime.UtcNow;
 
         // If user has an active subscription, extend from its end date
-        if (existingSubscription != null && existingSubscription.EndDate > DateTime.UtcNow)
-        {
-            startDate = existingSubscription.EndDate;
-        }
+        // if (existingSubscription != null && existingSubscription.EndDate > DateTime.UtcNow)
+        // {
+        //     startDate = existingSubscription.EndDate;
+        // }
 
         var newSubscription = new UserSubscriptionPlan
         {
             UserId = transaction.UserId,
             SubscriptionPlanId = plan.Id,
-            StartDate = startDate,
-            EndDate = startDate.AddDays(plan.Duration)
+            StartDate = DateTime.UtcNow,
+            EndDate = DateTime.UtcNow.AddDays(plan.Duration)
         };
 
         await _userSubscriptionRepository.AddAsync(newSubscription, cancellationToken);

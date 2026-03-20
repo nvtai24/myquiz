@@ -21,8 +21,9 @@ public class GetUserSubscriptionQueryHandler : IRequestHandler<GetUserSubscripti
     {
         var subscription = await _userSubscriptionRepository.GetQueryable()
             .Include(usp => usp.SubscriptionPlan)
-            .Where(usp => usp.UserId == query.UserId)
-            .OrderByDescending(usp => usp.EndDate)
+            .Where(usp => usp.UserId == query.UserId && usp.EndDate > DateTime.UtcNow)
+            .OrderByDescending(usp => usp.SubscriptionPlan.Order)
+            .ThenByDescending(usp => usp.EndDate)
             .FirstOrDefaultAsync(cancellationToken);
 
         if (subscription == null)

@@ -16,17 +16,20 @@ public class CreatePaymentOrderCommandHandler : IRequestHandler<CreatePaymentOrd
 {
     private readonly ISubscriptionPlanRepository _subscriptionPlanRepository;
     private readonly IRepository<Guid, PaymentTransaction> _paymentRepository;
+    private readonly IRepository<Guid, UserSubscriptionPlan> _userSubscriptionRepository;
     private readonly IUnitOfWork _unitOfWork;
     private readonly ILogger<CreatePaymentOrderCommandHandler> _logger;
 
     public CreatePaymentOrderCommandHandler(
         ISubscriptionPlanRepository subscriptionPlanRepository,
         IRepository<Guid, PaymentTransaction> paymentRepository,
+        IRepository<Guid, UserSubscriptionPlan> userSubscriptionRepository,
         IUnitOfWork unitOfWork,
         ILogger<CreatePaymentOrderCommandHandler> logger)
     {
         _subscriptionPlanRepository = subscriptionPlanRepository;
         _paymentRepository = paymentRepository;
+        _userSubscriptionRepository = userSubscriptionRepository;
         _unitOfWork = unitOfWork;
         _logger = logger;
     }
@@ -43,6 +46,20 @@ public class CreatePaymentOrderCommandHandler : IRequestHandler<CreatePaymentOrd
         if (plan.Price <= 0)
         {
             throw new BadRequestException("This plan is free and does not require payment.");
+        }
+
+        // Check if user has an active subscription with a higher or equal tier
+        var currentActiveSubscription = await _userSubscriptionRepository.GetQueryable()
+            .Include(usp => usp.SubscriptionPlan)
+            .Where(usp => usp.UserId == command.UserId && usp.EndDate > DateTime.UtcNow)
+            .OrderByDescending(usp => usp.SubscriptionPlan.Order)
+            .FirstOrDefaultAsync(cancellationToken);
+
+        if (currentActiveSubscription != null && plan.Order <= currentActiveSubscription.SubscriptionPlan.Order)
+        {
+            throw new BadRequestException(
+                $"You are currently on a higher or equal plan '{currentActiveSubscription.SubscriptionPlan.Name}'. " +
+                $"Downgrading is not allowed while your current plan is still active (expires {currentActiveSubscription.EndDate:yyyy-MM-dd}).");
         }
 
         // Check for existing pending, non-expired transaction with same user, plan, and amount

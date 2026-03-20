@@ -3,6 +3,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Configuration;
 using MyQuizGenerator.Application.Common.Interfaces;
 using MyQuizGenerator.Application.Auth.DTOs;
+using MyQuizGenerator.Application.Admin.DTOs;
 using MyQuizGenerator.Domain.Constants;
 using Google.Apis.Auth;
 using MyQuizGenerator.Infrastructure.Settings;
@@ -365,4 +366,93 @@ public class AuthService : IAuthService
             // Don't fail registration if plan assignment fails
         }
     }
+
+    public async Task<(List<AdminUserResponse> Users, int TotalCount)> GetUsersAsync(
+        int page, int pageSize, string? search)
+    {
+        var query = _userManager.Users.AsQueryable();
+
+        if (!string.IsNullOrWhiteSpace(search))
+        {
+            var searchLower = search.ToLower();
+            query = query.Where(u =>
+                (u.Email != null && u.Email.ToLower().Contains(searchLower)) ||
+                (u.FirstName != null && u.FirstName.ToLower().Contains(searchLower)) ||
+                (u.LastName != null && u.LastName.ToLower().Contains(searchLower)));
+        }
+
+        var totalCount = query.Count();
+
+        var users = query
+            .OrderByDescending(u => u.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+
+        var result = new List<AdminUserResponse>();
+        foreach (var user in users)
+        {
+            var roles = await _userManager.GetRolesAsync(user);
+            result.Add(new AdminUserResponse
+            {
+                Id = user.Id,
+                Email = user.Email ?? string.Empty,
+                FirstName = user.FirstName,
+                LastName = user.LastName,
+                FullName = user.FullName,
+                Roles = roles.ToList(),
+                EmailConfirmed = user.EmailConfirmed,
+                IsBanned = user.LockoutEnd != null && user.LockoutEnd > DateTimeOffset.UtcNow,
+                CreatedAt = user.CreatedAt
+            });
+        }
+
+        return (result, totalCount);
+    }
+
+    public async Task BanUserAsync(string userId, bool isBanned)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            throw new Application.Common.Exceptions.NotFoundException("User", userId);
+        }
+
+        if (isBanned)
+        {
+            await _userManager.SetLockoutEnabledAsync(user, true);
+            await _userManager.SetLockoutEndDateAsync(user, DateTimeOffset.MaxValue);
+            _logger.LogInformation("User banned: {UserId}", userId);
+        }
+        else
+        {
+            await _userManager.SetLockoutEndDateAsync(user, null);
+            _logger.LogInformation("User unbanned: {UserId}", userId);
+        }
+    }
+
+    public async Task AssignRoleAsync(string userId, string role)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            throw new Application.Common.Exceptions.NotFoundException("User", userId);
+        }
+
+        var currentRoles = await _userManager.GetRolesAsync(user);
+        if (currentRoles.Any())
+        {
+            await _userManager.RemoveFromRolesAsync(user, currentRoles);
+        }
+
+        var result = await _userManager.AddToRoleAsync(user, role);
+        if (!result.Succeeded)
+        {
+            var errors = result.Errors.Select(e => e.Description).ToList();
+            throw new Application.Common.Exceptions.ValidationException(errors);
+        }
+
+        _logger.LogInformation("Role '{Role}' assigned to user: {UserId}", role, userId);
+    }
 }
+

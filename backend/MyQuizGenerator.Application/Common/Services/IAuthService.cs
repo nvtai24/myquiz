@@ -1,4 +1,5 @@
 using MyQuizGenerator.Application.Auth.DTOs;
+using MyQuizGenerator.Application.Admin.DTOs;
 
 namespace MyQuizGenerator.Application.Common.Interfaces;
 
@@ -79,4 +80,20 @@ public interface IAuthService
     /// </summary>
     Task<(string UserId, string Email, string? FirstName, string? LastName, bool IsNewUser)>
         GoogleLoginAsync(string idToken);
+
+    /// <summary>
+    /// Gets a paginated list of users with optional search filter.
+    /// </summary>
+    Task<(List<AdminUserResponse> Users, int TotalCount)> GetUsersAsync(int page, int pageSize, string? search);
+
+    /// <summary>
+    /// Bans or unbans a user by setting lockout.
+    /// </summary>
+    Task BanUserAsync(string userId, bool isBanned);
+
+    /// <summary>
+    /// Assigns a role to a user, replacing existing roles.
+    /// </summary>
+    Task AssignRoleAsync(string userId, string role);
 }
+

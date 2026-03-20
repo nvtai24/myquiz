@@ -2,7 +2,7 @@
   <header class="landing-header">
     <div class="header-left">
       <div class="logo">
-        <img src="images/logo.png" alt="MyQuiz" style="height: 32px; width: auto;">
+        <img src="images/logo.png" alt="MyQuiz" style="height: 40px; width: auto;">
       </div>
     </div>
     <div class="search-wrap">
@@ -25,89 +25,225 @@
     <a routerLink="/register" class="teacher-link">I'm a teacher</a>
 
     <div class="carousel-container">
-      <button class="nav-arrow left-arrow">
+      <button class="nav-arrow left-arrow" (click)="scrollLeft()">
         <span class="material-symbols-outlined">chevron_left</span>
       </button>
 
-      <div class="modes-track">
-        <!-- Học / Learn -->
-        <div class="mode-card bg-learn">
-          <h3 class="mc-title text-dark">Learn</h3>
+      <div class="carousel-wrapper">
+        <div class="modes-track" #modesTrack>
+        <!-- Study Guides -->
+        <a routerLink="/register" class="mode-card bg-guides">
+          <h3 class="mc-title text-dark">Study guides</h3>
           <div class="mc-graphic">
-            <div class="mg-learn">
-              <div class="mgl-content">
-                <span class="mgl-text">la pintura</span>
-                <div class="mgl-img">🎨</div>
+            <div class="card-content guides-content">
+              <div class="guides-header">
+                <h4>Greek art</h4>
+                <div class="guides-icons">
+                  <span>🎨</span>
+                  <div class="guides-line"></div>
+                  <span class="material-symbols-outlined">person</span>
+                  <div class="guides-line long"></div>
+                </div>
               </div>
-              <div class="mgl-input">Enter answer</div>
+              <div class="guides-tabs">
+                <span class="tab active">Notes</span>
+                <span class="tab">Quick reference</span>
+              </div>
+              <div class="guides-section">
+                <span class="section-label">Key dates</span>
+              </div>
+              <div class="guides-table">
+                <div class="table-row">
+                  <span>Dark Age of Greece</span>
+                  <span>Collapse of Mycenaean pal...</span>
+                </div>
+                <div class="table-row">
+                  <span>Geometric Period</span>
+                  <span>Revival of Greek art, reintrod...</span>
+                </div>
+              </div>
             </div>
           </div>
-        </div>
+        </a>
 
-        <!-- Thẻ ghi nhớ / Flashcards -->
-        <div class="mode-card bg-flash">
+        <!-- Study Groups -->
+        <a routerLink="/register" class="mode-card bg-groups">
+          <h3 class="mc-title text-dark">Study groups</h3>
+          <div class="mc-graphic">
+            <div class="card-content groups-content">
+              <div class="groups-header">
+                <span class="groups-label">My study group</span>
+                <div class="groups-avatars">
+                  <span class="material-symbols-outlined">group</span>
+                  <div class="avatar-stack">
+                    <span>👩</span>
+                    <span>👨</span>
+                    <span class="more">+6</span>
+                  </div>
+                  <span class="material-symbols-outlined">expand_more</span>
+                </div>
+              </div>
+              <div class="groups-title">Chem 1A</div>
+              <div class="groups-tools">
+                <span class="material-symbols-outlined">folder</span>
+                <span class="material-symbols-outlined">sync</span>
+                <span class="material-symbols-outlined">description</span>
+                <span class="material-symbols-outlined">apps</span>
+                <span class="material-symbols-outlined">settings</span>
+                <span class="material-symbols-outlined">smart_display</span>
+              </div>
+              <div class="groups-item">Electrons</div>
+              <div class="groups-footer">
+                <span class="track-label">Track progress</span>
+                <div class="toggle on"></div>
+              </div>
+              <div class="groups-members">
+                <span>👩‍🎓</span>
+                <span>👨‍💻</span>
+                <span>👩‍🏫</span>
+                <span>👨</span>
+              </div>
+            </div>
+          </div>
+        </a>
+
+        <!-- Flashcards -->
+        <a routerLink="/register" class="mode-card bg-flash">
           <h3 class="mc-title text-white">Flashcards</h3>
           <div class="mc-graphic">
-            <div class="mg-flash">
-              <div class="mgf-bg"></div>
-              <div class="mgf-card">
-                <div class="mgf-text">superior<br>vena cava</div>
-                <div class="mgf-icon">🫀</div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Kiểm tra / Test -->
-        <div class="mode-card bg-test">
-          <h3 class="mc-title text-dark">Test</h3>
-          <div class="mc-graphic">
-            <div class="mg-test">
-              <div class="mgt-time">Time: 6 mins</div>
-              <div class="mgt-stats">
-                <div class="mgt-circle">
-                  <div class="mgtc-inner">75%</div>
+            <div class="flash-cards">
+              <div class="flash-card back"></div>
+              <div class="flash-card front">
+                <div class="flash-text">
+                  <span class="korean">여보세요?</span>
+                  <span class="english">hello</span>
+                  <span class="context">(on a call)</span>
                 </div>
-                <div class="mgt-bars">
-                  <div class="mgt-bar green">
-                    <span class="material-symbols-outlined check">check</span> 9
-                  </div>
-                  <div class="mgt-bar red">
-                    <span class="material-symbols-outlined cross">close</span> 3
-                  </div>
+                <div class="flash-img">👩‍💼</div>
+              </div>
+            </div>
+          </div>
+        </a>
+
+        <!-- Practice Tests -->
+        <a routerLink="/register" class="mode-card bg-tests">
+          <h3 class="mc-title text-dark">Practice tests</h3>
+          <div class="mc-graphic">
+            <div class="card-content tests-content">
+              <div class="tests-stats">
+                <div class="stat">
+                  <span class="stat-label">Score</span>
+                  <span class="stat-value">84%</span>
+                </div>
+                <div class="stat">
+                  <span class="stat-label">Results</span>
+                  <span class="stat-value">76/90</span>
+                </div>
+                <div class="stat">
+                  <span class="stat-label">Total time</span>
+                  <span class="stat-value">70m</span>
                 </div>
               </div>
-              <div class="mgt-lines">
-                <div class="mgt-line"></div>
-                <div class="mgt-line short"></div>
+              <div class="tests-question">
+                <span class="q-num">1.</span>
+                <div class="q-line"></div>
+              </div>
+              <div class="tests-options">
+                <div class="option wrong">
+                  <span class="material-symbols-outlined">close</span>
+                  <span class="material-symbols-outlined">radio_button_checked</span>
+                  <span>A.</span>
+                  <div class="option-bar red"></div>
+                </div>
+                <div class="option">
+                  <span class="material-symbols-outlined">radio_button_unchecked</span>
+                  <span>B.</span>
+                  <div class="option-line"></div>
+                </div>
+                <div class="option correct">
+                  <span class="material-symbols-outlined">check</span>
+                  <span class="material-symbols-outlined">radio_button_unchecked</span>
+                  <span>C.</span>
+                  <div class="option-bar green"></div>
+                </div>
+                <div class="option">
+                  <span class="material-symbols-outlined">radio_button_unchecked</span>
+                  <span>D.</span>
+                  <div class="option-line"></div>
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        </a>
 
-        <!-- Ghép thẻ / Match -->
-        <div class="mode-card bg-match">
-          <h3 class="mc-title text-dark">Match</h3>
+        <!-- AI Generate -->
+        <a routerLink="/register" class="mode-card bg-ai">
+          <h3 class="mc-title text-white">AI Generate</h3>
           <div class="mc-graphic">
-            <div class="mg-match">
-              <div class="mgm-cell"><div class="mgm-icon org">🫁</div></div>
-              <div class="mgm-cell"><div class="mgm-line"></div></div>
-              <div class="mgm-cell active">
-                <span class="material-symbols-outlined mc-tick">check</span>
-                <div class="mgm-img">🫁</div>
+            <div class="card-content ai-content">
+              <div class="ai-icon">
+                <span class="material-symbols-outlined">auto_awesome</span>
               </div>
-              <div class="mgm-cell"><div class="mgm-line"></div></div>
-              <div class="mgm-cell active">
-                <span class="material-symbols-outlined mc-tick">check</span>
-                lungs
+              <p class="ai-text">Create flashcards instantly with AI</p>
+              <div class="ai-cards">
+                <div class="ai-card"></div>
+                <div class="ai-card"></div>
+                <div class="ai-card"></div>
               </div>
-              <div class="mgm-cell"><div class="mgm-line"></div></div>
             </div>
           </div>
+        </a>
+
+        <!-- Library -->
+        <a routerLink="/register" class="mode-card bg-library">
+          <h3 class="mc-title text-dark">Your library</h3>
+          <div class="mc-graphic">
+            <div class="card-content library-content">
+              <div class="library-folder">
+                <span class="material-symbols-outlined">folder</span>
+                <span>My Decks</span>
+              </div>
+              <div class="library-items">
+                <div class="library-item">
+                  <span class="material-symbols-outlined">style</span>
+                  <span>Biology 101</span>
+                </div>
+                <div class="library-item">
+                  <span class="material-symbols-outlined">style</span>
+                  <span>Chemistry</span>
+                </div>
+                <div class="library-item">
+                  <span class="material-symbols-outlined">style</span>
+                  <span>History</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </a>
+
+        <!-- Progress -->
+        <a routerLink="/register" class="mode-card bg-progress">
+          <h3 class="mc-title text-white">Your progress</h3>
+          <div class="mc-graphic">
+            <div class="card-content progress-content">
+              <div class="progress-chart">
+                <div class="chart-bar" style="height: 40%"></div>
+                <div class="chart-bar" style="height: 65%"></div>
+                <div class="chart-bar" style="height: 85%"></div>
+                <div class="chart-bar" style="height: 50%"></div>
+                <div class="chart-bar" style="height: 95%"></div>
+              </div>
+              <div class="progress-streak">
+                <span class="material-symbols-outlined fire">local_fire_department</span>
+                <span>7 day streak!</span>
+              </div>
+            </div>
+          </div>
+        </a>
         </div>
       </div>
 
-      <button class="nav-arrow right-arrow">
+      <button class="nav-arrow right-arrow" (click)="scrollRight()">
         <span class="material-symbols-outlined">chevron_right</span>
       </button>
     </div>

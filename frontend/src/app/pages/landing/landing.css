@@ -23,6 +23,11 @@
   padding: 12px 32px;
   background: #fff;
   box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
 }
 
 .header-left {
@@ -136,7 +141,7 @@
 /* Section */
 .study-modes-section {
   text-align: center;
-  padding: 80px 24px 120px;
+  padding: 140px 24px 120px; /* Added extra top padding for fixed header */
   margin: 0 auto;
   overflow: hidden;
 }

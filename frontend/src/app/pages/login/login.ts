@@ -22,7 +22,34 @@ export class Login implements OnInit, AfterViewInit, OnDestroy {
 
   @ViewChild('googleBtnContainer') googleBtnContainer!: ElementRef<HTMLDivElement>;
 
-  ngOnInit() {}
+  private readonly REMEMBER_KEY = 'myquiz_remember_email';
+
+  ngOnInit() {
+    this.loadRememberedEmail();
+  }
+
+  private loadRememberedEmail() {
+    if (isPlatformBrowser(this.platformId)) {
+      const savedEmail = localStorage.getItem(this.REMEMBER_KEY);
+      if (savedEmail) {
+        this.loginForm.patchValue({
+          email: savedEmail,
+          rememberMe: true
+        });
+      }
+    }
+  }
+
+  private saveOrClearRememberedEmail() {
+    if (isPlatformBrowser(this.platformId)) {
+      const { email, rememberMe } = this.loginForm.getRawValue();
+      if (rememberMe) {
+        localStorage.setItem(this.REMEMBER_KEY, email);
+      } else {
+        localStorage.removeItem(this.REMEMBER_KEY);
+      }
+    }
+  }
 
   ngAfterViewInit() {
     if (isPlatformBrowser(this.platformId) && this.googleBtnContainer) {
@@ -70,6 +97,7 @@ export class Login implements OnInit, AfterViewInit, OnDestroy {
       nonNullable: true,
       validators: [Validators.required, Validators.minLength(6)]
     }),
+    rememberMe: new FormControl(false, { nonNullable: true }),
   });
 
   togglePassword() {
@@ -101,10 +129,11 @@ export class Login implements OnInit, AfterViewInit, OnDestroy {
 
     const rawValue = this.loginForm.getRawValue();
 
-    this.authService.login(rawValue)
+    this.authService.login({ email: rawValue.email, password: rawValue.password })
       .pipe(finalize(() => this.isLoading.set(false)))
       .subscribe({
         next: () => {
+          this.saveOrClearRememberedEmail();
           this.router.navigate(['/dashboard']);
         },
         error: (err) => {

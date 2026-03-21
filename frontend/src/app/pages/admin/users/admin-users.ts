@@ -2,6 +2,7 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService, AdminUser } from '../../../services/admin.service';
+import Swal from 'sweetalert2';
 
 @Component({
   selector: 'app-admin-users',
@@ -100,36 +101,57 @@ export class AdminUsers implements OnInit {
 
   toggleBan(user: AdminUser) {
     const newStatus = !user.isBanned;
-    if (confirm(`Bạn có chắc chắn muốn ${newStatus ? 'khóa' : 'mở khóa'} tài khoản ${user.email}?`)) {
-      this.adminService.updateUserBanStatus(user.id, newStatus).subscribe({
-        next: (res) => {
-          if (res.success) {
-            this.users.update(users => users.map(u => 
-              u.id === user.id ? { ...u, isBanned: newStatus } : u
-            ));
-          }
-        },
-        error: (err) => alert('Có lỗi xảy ra: ' + err.message)
-      });
-    }
+    
+    Swal.fire({
+      title: 'Xác nhận',
+      text: `Bạn có chắc chắn muốn ${newStatus ? 'khóa' : 'mở khóa'} tài khoản ${user.email}?`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#4f46e5',
+      cancelButtonColor: '#9ca3af',
+      confirmButtonText: 'Đồng ý',
+      cancelButtonText: 'Hủy bỏ'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.adminService.updateUserBanStatus(user.id, newStatus).subscribe({
+          next: () => {
+            Swal.fire('Thành công', `Đã ${newStatus ? 'khóa' : 'mở khóa'} tài khoản thành công!`, 'success');
+            this.loadUsers();
+          },
+          error: (err: any) => Swal.fire('Lỗi', 'Có lỗi xảy ra: ' + err.message, 'error')
+        });
+      }
+    });
   }
 
   changeRole(user: AdminUser, newRole: string) {
-    if (confirm(`Bạn có chắc chắn muốn phân quyền ${newRole} cho tài khoản ${user.email}?`)) {
-      this.adminService.assignUserRole(user.id, newRole).subscribe({
-        next: (res) => {
-          if (res.success) {
-            this.users.update(users => users.map(u => 
-              u.id === user.id ? { ...u, roles: [newRole] } : u
-            ));
+    if (newRole === this.getRoleName(user.roles)) return;
+    
+    Swal.fire({
+      title: 'Thay đổi quyền',
+      text: `Bạn có chắc chắn muốn phân quyền ${newRole} cho tài khoản ${user.email}?`,
+      icon: 'question',
+      showCancelButton: true,
+      confirmButtonColor: '#4f46e5',
+      cancelButtonColor: '#9ca3af',
+      confirmButtonText: 'Cập nhật',
+      cancelButtonText: 'Hủy bỏ'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.adminService.assignUserRole(user.id, newRole).subscribe({
+          next: () => {
+            Swal.fire('Thành công', `Đã phân quyền ${newRole} thành công!`, 'success');
+            this.loadUsers();
+          },
+          error: (err: any) => {
+            Swal.fire('Lỗi', 'Có lỗi xảy ra: ' + err.message, 'error');
+            this.loadUsers(); // revert
           }
-        },
-        error: (err) => alert('Có lỗi xảy ra: ' + err.message)
-      });
-    } else {
-      // Force UI refresh to revert the select element visual state
-      this.users.update(u => [...u]);
-    }
+        });
+      } else {
+        this.loadUsers(); // revert selection if cancelled
+      }
+    });
   }
 
   getRoleColor(roles: string[] | undefined) {

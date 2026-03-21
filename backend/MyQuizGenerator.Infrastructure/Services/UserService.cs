@@ -40,4 +40,9 @@ public class UserService : IUserService
             
         return await query.Select(u => u.Id).ToListAsync();
     }
+
+    public async Task<int> GetNewUsersCountAsync(DateTime startDate, DateTime endDate)
+    {
+        return await _userManager.Users.CountAsync(u => u.CreatedAt >= startDate && u.CreatedAt <= endDate);
+    }
 }

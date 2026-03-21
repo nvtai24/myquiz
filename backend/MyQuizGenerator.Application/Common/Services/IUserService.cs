@@ -4,6 +4,7 @@ public interface IUserService
 {
     Task<UserInfo?> GetUserInfoAsync(string userId);
     Task<List<string>> SearchUserIdsAsync(string searchTerm);
+    Task<int> GetNewUsersCountAsync(DateTime startDate, DateTime endDate);
 }
 
 public class UserInfo

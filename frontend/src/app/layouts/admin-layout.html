@@ -52,19 +52,29 @@
   <div class="flex-1 flex flex-col overflow-hidden">
     <!-- Top bar -->
     <header class="bg-white border-b border-gray-200 px-8 py-3.5 flex items-center justify-between shrink-0">
-      <div>
-        <h1 class="text-[15px] font-black text-gray-900 m-0">Admin Panel</h1>
-        <p class="text-[11px] text-gray-400 font-medium m-0">MyQuiz System Administration</p>
+      
+
+      <div class="flex items-center">
+        <!-- Back to App button moved to Top Bar -->
+        <button
+          (click)="goToApp()"
+          class="flex items-center gap-2 px-3 py-1.5 rounded-lg text-gray-600 text-[12px] font-bold hover:bg-gray-100 transition-all border border-gray-200 bg-white cursor-pointer shadow-sm hover:shadow"
+        >
+          <span class="material-symbols-outlined text-[16px]">home</span>
+          Back to App
+        </button>
       </div>
-      <div class="flex items-center gap-3">
+
+      <div>
+        <!-- Enlarged System Status -->
         @if (isSystemOnline()) {
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 border border-green-200 text-green-700 text-[11px] font-bold rounded-full">
-            <span class="w-1.5 h-1.5 rounded-full bg-green-600 animate-pulse"></span>
-            System Online
+          <span class="inline-flex items-center gap-2 px-4 py-1.5 bg-green-50 border border-green-200 text-green-700 text-[12px] font-bold rounded-full shadow-sm">
+            <span class="w-2.5 h-2.5 rounded-full bg-green-600 animate-pulse"></span>
+            System Online 
           </span>
         } @else {
-          <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 border border-red-200 text-red-700 text-[11px] font-bold rounded-full">
-            <span class="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></span>
+          <span class="inline-flex items-center gap-2 px-4 py-1.5 bg-red-50 border border-red-200 text-red-700 text-[12px] font-bold rounded-full shadow-sm">
+            <span class="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse"></span>
             System Offline
           </span>
         }

@@ -68,18 +68,18 @@
   <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-6">
     <!-- Revenue Bar Chart -->
     <div class="xl:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col min-h-[300px]">
-      <div class="flex justify-between items-start mb-8">
+      <div class="flex justify-between items-start mb-6">
         <div>
           <h3 class="font-black text-gray-900 text-[16px] m-0 mb-1">Doanh thu</h3>
-          <p class="text-[12px] text-gray-400 font-medium m-0">Biểu đồ Bar Chart thuần CSS</p>
+          <p class="text-[12px] text-gray-400 font-medium m-0">Powered by Chart.js (Interactive)</p>
         </div>
         <div class="flex items-center gap-1 bg-gray-50 border border-gray-100 p-1 rounded-xl">
-          <button (click)="chartPeriod.set('7days')"
+          <button (click)="switchPeriod('7days')"
             class="px-3 py-1.5 text-[12px] font-bold rounded-lg transition-all border-none cursor-pointer"
             [class]="chartPeriod() === '7days' ? 'bg-white text-indigo-600 shadow-sm' : 'bg-transparent text-gray-500 hover:text-gray-700'">
             7 ngày
           </button>
-          <button (click)="chartPeriod.set('30days')"
+          <button (click)="switchPeriod('30days')"
             class="px-3 py-1.5 text-[12px] font-bold rounded-lg transition-all border-none cursor-pointer"
             [class]="chartPeriod() === '30days' ? 'bg-white text-indigo-600 shadow-sm' : 'bg-transparent text-gray-500 hover:text-gray-700'">
             30 ngày
@@ -87,41 +87,8 @@
         </div>
       </div>
       
-      <div class="flex-1 flex items-end justify-between h-full relative"
-           [ngClass]="chartPeriod() === '7days' ? 'gap-2' : 'gap-[2px]'">
-        <!-- Render grid lines behind -->
-        <div class="absolute inset-0 flex flex-col justify-between pointer-events-none pb-6">
-          <div class="border-b border-gray-50 border-dashed w-full flex-1"></div>
-          <div class="border-b border-gray-50 border-dashed w-full flex-1"></div>
-          <div class="border-b border-gray-50 border-dashed w-full flex-1"></div>
-          <div class="border-b border-gray-50 border-dashed w-full flex-1"></div>
-          <div class="w-full flex-1"></div> <!-- Bottom empty row -->
-        </div>
-
-        @for (item of chartData(); track item.date; let i = $index) {
-          <div class="flex-1 flex flex-col items-center justify-end h-full group cursor-pointer relative z-10 w-full">
-            <!-- Tooltip -->
-            <div class="opacity-0 group-hover:opacity-100 transition-all duration-300 absolute -top-8 bg-gray-900 text-white text-[10px] font-bold py-1 px-2.5 rounded-lg whitespace-nowrap pointer-events-none shadow-lg transform -translate-y-2 group-hover:-translate-y-0 z-50">
-              {{ item.date }}: {{ item.amount | number:'1.0-0' }}đ
-              <div class="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-gray-900 rotate-45"></div>
-            </div>
-            
-            <!-- Bar Container  -->
-            <div class="w-full bg-gray-50 rounded-lg relative overflow-hidden flex items-end h-[200px]"
-                 [ngClass]="chartPeriod() === '7days' ? 'max-w-[48px]' : 'rounded-sm'">
-              <div class="w-full transition-all duration-1000 ease-out" 
-                   [ngClass]="[item.amount > 0 ? 'bg-indigo-500 group-hover:bg-indigo-600' : 'bg-transparent', chartPeriod() === '7days' ? 'rounded-lg' : 'rounded-sm']"
-                   [style.height]="getBarHeight(item.amount)">
-              </div>
-            </div>
-            
-            <div class="h-6 w-full relative mt-2 flex justify-center">
-              @if (chartPeriod() === '7days' || i % 5 === 0 || i === 29) {
-                <span class="text-[9px] sm:text-[11px] font-bold text-gray-400 absolute top-0 whitespace-nowrap">{{ item.date }}</span>
-              }
-            </div>
-          </div>
-        }
+      <div class="flex-1 w-full relative min-h-[220px]">
+        <canvas #revenueChartCanvas></canvas>
       </div>
     </div>
 
@@ -129,18 +96,18 @@
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col min-h-[300px]">
       <div>
         <h3 class="font-black text-gray-900 text-[16px] m-0 mb-1">Cơ cấu gói đăng ký</h3>
-        <p class="text-[12px] text-gray-400 font-medium m-0 mb-8">Tỷ lệ người dùng đang sử dụng AI</p>
+        <p class="text-[12px] text-gray-400 font-medium m-0 mb-6">Tỷ lệ người dùng đang sử dụng AI</p>
       </div>
 
-      <div class="flex-1 flex flex-col items-center justify-center -mt-4">
-        <!-- Donut Chart -->
-        <div class="relative w-44 h-44 flex items-center justify-center mb-8">
-          <div class="absolute inset-0 rounded-full transition-all duration-1000" [style.background]="getPieChartStyle()"></div>
+      <div class="flex-1 flex flex-col items-center justify-center -mt-2">
+        <!-- Donut Chart Canvas Wrapper -->
+        <div class="relative w-full max-w-[180px] aspect-square flex items-center justify-center mb-6">
+          <canvas #planChartCanvas></canvas>
           
-          <!-- Inner circle to create Donut effect -->
-          <div class="absolute inset-4 bg-white rounded-full flex flex-col items-center justify-center shadow-inner z-10">
-            <span class="text-[26px] font-black text-gray-900 leading-none">{{ planTotalUsers() }}</span>
-            <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-1">Users</span>
+          <!-- Inner Label overlay -->
+          <div class="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+            <span class="text-[26px] font-black text-gray-900 leading-none mt-1">{{ planTotalUsers() }}</span>
+            <span class="text-[9px] font-black text-gray-400 uppercase tracking-widest mt-0.5">Users</span>
           </div>
         </div>
 
@@ -149,12 +116,12 @@
           @for (plan of planDist(); track plan.planName) {
             <div class="flex justify-between items-center group">
               <span class="text-[13px] font-bold text-gray-700 flex items-center gap-2 group-hover:text-gray-900 transition-colors">
-                <span class="w-3 h-3 rounded-full shadow-sm" [class]="plan.bg"></span>
+                <span class="w-3 h-3 rounded-full shadow-sm" [style.background-color]="plan.hex"></span>
                 {{ plan.planName }}
               </span>
-              <div class="text-right">
+              <div class="text-right flex items-center gap-2">
                 <span class="text-[13px] font-black text-gray-900">{{ plan.userCount }}</span>
-                <span class="text-gray-400 font-medium font-mono text-[11px] w-10 inline-block text-right">{{ plan.width }}%</span>
+                <span class="text-gray-400 font-medium font-mono text-[11px] w-8 inline-block text-right">{{ plan.width }}%</span>
               </div>
             </div>
           }

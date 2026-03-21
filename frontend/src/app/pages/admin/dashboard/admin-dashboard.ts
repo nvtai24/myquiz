@@ -1,7 +1,10 @@
-import { Component, OnInit, inject, signal, computed } from '@angular/core';
+import { Component, OnInit, inject, signal, computed, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AdminService, AdminPayment } from '../../../services/admin.service';
+import { Chart, registerables } from 'chart.js';
+
+Chart.register(...registerables);
 
 @Component({
   selector: 'app-admin-dashboard',
@@ -9,8 +12,14 @@ import { AdminService, AdminPayment } from '../../../services/admin.service';
   imports: [CommonModule, RouterModule],
   templateUrl: './admin-dashboard.html'
 })
-export class AdminDashboard implements OnInit {
+export class AdminDashboard implements OnInit, AfterViewInit, OnDestroy {
   private adminService = inject(AdminService);
+
+  @ViewChild('revenueChartCanvas') revenueChartCanvas!: ElementRef;
+  @ViewChild('planChartCanvas') planChartCanvas!: ElementRef;
+
+  revenueChartInstance: Chart | null = null;
+  planChartInstance: Chart | null = null;
 
   // MOCK: Overview Stats
   totalRevenue = signal(15400000);
@@ -51,12 +60,26 @@ export class AdminDashboard implements OnInit {
     { planName: 'Premium', userCount: 80, color: '#f59e0b', bg: 'bg-amber-500', width: 10, hex: '#f59e0b' },
   ]);
 
-  // REAL: Recent Transactions (Sử dụng tái lập API vừa code)
+  planTotalUsers() {
+    return this.planDist().reduce((sum, p) => sum + p.userCount, 0);
+  }
+
+  // REAL: Recent Transactions
   recentPayments = signal<AdminPayment[]>([]);
   loadingPayments = signal(true);
 
   ngOnInit() {
     this.fetchRecentPayments();
+  }
+
+  ngAfterViewInit() {
+    this.initRevenueChart();
+    this.initPlanChart();
+  }
+
+  ngOnDestroy() {
+    if (this.revenueChartInstance) this.revenueChartInstance.destroy();
+    if (this.planChartInstance) this.planChartInstance.destroy();
   }
 
   fetchRecentPayments() {
@@ -71,28 +94,116 @@ export class AdminDashboard implements OnInit {
     });
   }
 
-  // Utils for UI
-  getBarHeight(amount: number) {
-    const max = Math.max(...this.chartData().map(d => d.amount));
-    if (max === 0) return '0%';
-    return `${(amount / max) * 100}%`;
+  switchPeriod(period: '7days' | '30days') {
+    this.chartPeriod.set(period);
+    this.updateRevenueChart();
   }
 
-  planTotalUsers() {
-    return this.planDist().reduce((sum, p) => sum + p.userCount, 0);
-  }
-
-  getPieChartStyle() {
-    const plans = this.planDist();
-    let gradients: string[] = [];
-    let currentPercent = 0;
+  initRevenueChart() {
+    if (!this.revenueChartCanvas) return;
+    const ctx = this.revenueChartCanvas.nativeElement.getContext('2d');
     
-    for (const plan of plans) {
-      const nextPercent = currentPercent + plan.width;
-      gradients.push(`${plan.hex} ${currentPercent}% ${nextPercent}%`);
-      currentPercent = nextPercent;
+    this.revenueChartInstance = new Chart(ctx, {
+      type: 'bar',
+      data: this.getRevenueChartData(),
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1f2937',
+            titleFont: { size: 13, family: 'Inter' },
+            bodyFont: { size: 14, weight: 'bold', family: 'Inter' },
+            padding: 12,
+            cornerRadius: 8,
+            displayColors: false,
+            callbacks: {
+              label: (context) => context.raw?.toLocaleString() + ' VNĐ'
+            }
+          }
+        },
+        scales: {
+          y: { 
+            beginAtZero: true, 
+            grid: { color: '#f3f4f6' },
+            border: { display: false },
+            ticks: { color: '#9ca3af', font: { size: 11 }, callback: (val) => (Number(val) / 1000) + 'k' }
+          },
+          x: { 
+            grid: { display: false },
+            border: { display: false },
+            ticks: { 
+              color: '#9ca3af', 
+              font: { size: 11 },
+              maxTicksLimit: this.chartPeriod() === '7days' ? 7 : 10
+            }
+          }
+        }
+      }
+    });
+  }
+
+  updateRevenueChart() {
+    if (this.revenueChartInstance) {
+      this.revenueChartInstance.data = this.getRevenueChartData();
+      if (this.revenueChartInstance.options.scales?.['x']?.ticks) {
+         this.revenueChartInstance.options.scales['x'].ticks.maxTicksLimit = this.chartPeriod() === '7days' ? 7 : 10;
+      }
+      this.revenueChartInstance.update();
     }
-    return `conic-gradient(${gradients.join(', ')})`;
+  }
+
+  getRevenueChartData() {
+    const data = this.chartData();
+    return {
+      labels: data.map(d => d.date),
+      datasets: [{
+        label: 'Doanh thu',
+        data: data.map(d => d.amount),
+        backgroundColor: '#6366f1',
+        hoverBackgroundColor: '#4f46e5',
+        borderRadius: 4,
+        barPercentage: this.chartPeriod() === '7days' ? 0.5 : 0.8
+      }]
+    };
+  }
+
+  initPlanChart() {
+    if (!this.planChartCanvas) return;
+    const ctx = this.planChartCanvas.nativeElement.getContext('2d');
+    const data = this.planDist();
+
+    this.planChartInstance = new Chart(ctx, {
+      type: 'doughnut',
+      data: {
+        labels: data.map(d => d.planName),
+        datasets: [{
+          data: data.map(d => d.userCount),
+          backgroundColor: data.map(d => d.hex),
+          borderWidth: 0,
+          hoverOffset: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: '75%',
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: '#1f2937',
+            bodyFont: { size: 13, weight: 'bold', family: 'Inter' },
+            padding: 10,
+            cornerRadius: 8,
+            displayColors: true,
+            callbacks: {
+              label: (context) => ` ${context.label}: ${context.raw} users`
+            }
+          }
+        }
+      }
+    });
   }
 
   getStatusColor(status: string | undefined) {

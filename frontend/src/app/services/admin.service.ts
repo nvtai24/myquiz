@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { catchError, map } from 'rxjs';
 
 export interface AdminSubscriptionPlan {
   id: string;
@@ -56,5 +57,13 @@ export class AdminService {
   /** GET /api/Decks — get all public decks for admin overview */
   getAllDecks(): Observable<{ success: boolean; data: AdminDeckSummary[] }> {
     return this.http.get<{ success: boolean; data: AdminDeckSummary[] }>('/api/Decks');
+  }
+
+  /** GET /api/ping — check if backend is online */
+  checkSystemStatus(): Observable<boolean> {
+    return this.http.get<{ success: boolean; statusCode: number }>('/api/ping').pipe(
+      map(res => res.success && res.statusCode === 200),
+      catchError(() => of(false))
+    );
   }
 }

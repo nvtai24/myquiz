@@ -3,7 +3,7 @@
   <aside class="w-60 min-w-[240px] bg-[#0f0a1e] flex flex-col shadow-2xl transition-all duration-300">
     <!-- Logo -->
     <div class="flex items-center gap-3 px-5 py-5 border-b border-white/5">
-      <img src="images/logo.png" alt="MyQuiz" class="h-9 w-auto drop-shadow-lg">
+      <img src="images/logo.png" alt="MyQuiz" style="height: 40px" class="h-9 w-auto drop-shadow-lg">
       <span class="px-2 py-0.5 rounded-md bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-[10px] font-black tracking-widest uppercase shadow-sm mt-0.5">Admin</span>
     </div>
 
@@ -57,10 +57,17 @@
         <p class="text-[11px] text-gray-400 font-medium m-0">Quản trị hệ thống MyQuiz</p>
       </div>
       <div class="flex items-center gap-3">
-        <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 border border-green-200 text-green-700 text-[11px] font-bold rounded-full">
-          <span class="w-1.5 h-1.5 rounded-full bg-green-500"></span>
-          System Online
-        </span>
+        @if (isSystemOnline()) {
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-green-50 border border-green-200 text-green-700 text-[11px] font-bold rounded-full">
+            <span class="w-1.5 h-1.5 rounded-full bg-green-600 animate-pulse"></span>
+            System Online
+          </span>
+        } @else {
+          <span class="inline-flex items-center gap-1.5 px-3 py-1 bg-red-50 border border-red-200 text-red-700 text-[11px] font-bold rounded-full">
+            <span class="w-1.5 h-1.5 rounded-full bg-red-600 animate-pulse"></span>
+            System Offline
+          </span>
+        }
       </div>
     </header>
 

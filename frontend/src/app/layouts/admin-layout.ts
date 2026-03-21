@@ -1,6 +1,7 @@
-import { Component, inject, signal, computed } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, OnDestroy } from '@angular/core';
 import { Router, RouterModule, RouterOutlet } from '@angular/router';
 import { AuthService } from '../services/auth.service';
+import { AdminService } from '../services/admin.service';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -9,12 +10,15 @@ import { CommonModule } from '@angular/common';
   imports: [RouterModule, RouterOutlet, CommonModule],
   templateUrl: './admin-layout.html',
 })
-export class AdminLayout {
+export class AdminLayout implements OnInit, OnDestroy {
   private auth = inject(AuthService);
   private router = inject(Router);
+  private adminService = inject(AdminService);
+  private pingInterval: any;
 
   sidebarOpen = signal(true);
   user = computed(() => this.auth.currentUser());
+  isSystemOnline = signal<boolean>(false);
 
   navItems = [
     { label: 'Dashboard', icon: 'grid_view', path: '/admin/dashboard' },
@@ -29,5 +33,23 @@ export class AdminLayout {
 
   goToApp() {
     this.router.navigate(['/dashboard']);
+  }
+
+  ngOnInit() {
+    this.checkStatus();
+    this.pingInterval = setInterval(() => this.checkStatus(), 60000); // Check every 60 seconds
+  }
+
+  ngOnDestroy() {
+    if (this.pingInterval) {
+      clearInterval(this.pingInterval);
+    }
+  }
+
+  private checkStatus() {
+    this.adminService.checkSystemStatus().subscribe({
+      next: (isOnline) => this.isSystemOnline.set(isOnline),
+      error: () => this.isSystemOnline.set(false)
+    });
   }
 }

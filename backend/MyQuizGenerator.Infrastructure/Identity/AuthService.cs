@@ -123,6 +123,7 @@ public class AuthService : IAuthService
             Email = user.Email!,
             FirstName = user.FirstName,
             LastName = user.LastName,
+            AvatarUrl = user.AvatarUrl,
             Roles = roles.ToList()
         };
     }
@@ -239,6 +240,7 @@ public class AuthService : IAuthService
             Email = user.Email!,
             FirstName = user.FirstName,
             LastName = user.LastName,
+            AvatarUrl = user.AvatarUrl,
             Roles = roles.ToList()
         };
     }
@@ -426,6 +428,7 @@ public class AuthService : IAuthService
                 FirstName = user.FirstName,
                 LastName = user.LastName,
                 FullName = user.FullName,
+                AvatarUrl = user.AvatarUrl,
                 Roles = roles.ToList(),
                 EmailConfirmed = user.EmailConfirmed,
                 IsBanned = user.LockoutEnd != null && user.LockoutEnd > DateTimeOffset.UtcNow,

@@ -21,9 +21,8 @@ export class AdminPlans implements OnInit {
   // Edit modal
   editingPlan = signal<AdminSubscriptionPlan | null>(null);
   editForm = signal<UpdatePlanRequest>({
-    name: '', price: 0, billingCycle: 'monthly', features: [], isActive: true
+    name: '', description: '', dailyGenerateLimit: 0, numDeckLimit: 0, price: 0, duration: 30, isActive: true, order: 1
   });
-  newFeature = signal('');
   showCreateModal = signal(false);
 
   ngOnInit(): void { this.loadPlans(); }
@@ -32,7 +31,7 @@ export class AdminPlans implements OnInit {
     this.loading.set(true);
     this.adminService.getSubscriptionPlans().subscribe({
       next: (res) => {
-        this.plans.set(res.data ?? []);
+        this.plans.set((res.data ?? []).sort((a, b) => a.order - b.order));
         this.loading.set(false);
       },
       error: (err) => {
@@ -46,10 +45,13 @@ export class AdminPlans implements OnInit {
     this.editingPlan.set(plan);
     this.editForm.set({
       name: plan.name,
+      description: plan.description,
+      dailyGenerateLimit: plan.dailyGenerateLimit,
+      numDeckLimit: plan.numDeckLimit,
       price: plan.price,
-      billingCycle: plan.billingCycle,
-      features: [...(plan.features ?? [])],
+      duration: plan.duration,
       isActive: plan.isActive,
+      order: plan.order
     });
     this.successMsg.set(null);
   }
@@ -57,21 +59,50 @@ export class AdminPlans implements OnInit {
   closeModal() {
     this.editingPlan.set(null);
     this.showCreateModal.set(false);
-    this.newFeature.set('');
   }
 
-  addFeature() {
-    const f = this.newFeature().trim();
-    if (!f) return;
-    this.editForm.update(form => ({ ...form, features: [...form.features, f] }));
-    this.newFeature.set('');
+  getDurationText(days: number) {
+    if (days === 0) return 'Vĩnh viễn';
+    if (days === 30) return 'Tháng';
+    if (days === 365) return 'Năm';
+    return `${days} ngày`;
   }
 
-  removeFeature(i: number) {
-    this.editForm.update(form => ({
-      ...form,
-      features: form.features.filter((_, idx) => idx !== i)
-    }));
+  toggleActive(plan: AdminSubscriptionPlan) {
+    const newStatus = !plan.isActive;
+    if (confirm(`Bạn có chắc chắn muốn ${newStatus ? 'kích hoạt' : 'tạm dừng'} gói ${plan.name}?`)) {
+      const updateReq: UpdatePlanRequest = {
+        name: plan.name,
+        description: plan.description,
+        dailyGenerateLimit: plan.dailyGenerateLimit,
+        numDeckLimit: plan.numDeckLimit,
+        price: plan.price,
+        duration: plan.duration,
+        isActive: newStatus,
+        order: plan.order
+      };
+      
+      this.adminService.updateSubscriptionPlan(plan.id, updateReq).subscribe({
+        next: () => {
+          this.plans.update(plans => plans.map(p => 
+            p.id === plan.id ? { ...p, isActive: newStatus } : p
+          ));
+        },
+        error: (err) => alert('Có lỗi xảy ra: ' + err.message)
+      });
+    }
+  }
+
+  deletePlan(plan: AdminSubscriptionPlan) {
+    if (confirm(`Bạn có chắc chắn muốn xóa gói ${plan.name} vĩnh viễn không? Hành động này không thể hoàn tác.`)) {
+      this.adminService.deleteSubscriptionPlan(plan.id).subscribe({
+        next: () => {
+          this.plans.update(plans => plans.filter(p => p.id !== plan.id));
+          this.successMsg.set('Đã xoá gói thành công!');
+        },
+        error: (err) => alert('Có lỗi xảy ra khi xóa: ' + err.message)
+      });
+    }
   }
 
   savePlan() {
@@ -109,7 +140,7 @@ export class AdminPlans implements OnInit {
 
   openCreate() {
     this.editingPlan.set(null);
-    this.editForm.set({ name: '', price: 0, billingCycle: 'monthly', features: [], isActive: true });
+    this.editForm.set({ name: '', description: '', dailyGenerateLimit: 0, numDeckLimit: 0, price: 0, duration: 30, isActive: true, order: 1 });
     this.showCreateModal.set(true);
   }
 }

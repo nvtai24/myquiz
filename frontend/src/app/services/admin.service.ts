@@ -6,20 +6,26 @@ import { catchError, map } from 'rxjs';
 export interface AdminSubscriptionPlan {
   id: string;
   name: string;
+  description: string;
+  dailyGenerateLimit: number;
+  numDeckLimit: number;
   price: number;
-  billingCycle: string;
-  features: string[];
-  activeUsers?: number;
+  duration: number;
   isActive: boolean;
-  isDefault: boolean;
+  order: number;
+  createdAt?: string;
+  updatedAt?: string | null;
 }
 
 export interface UpdatePlanRequest {
   name: string;
+  description: string;
+  dailyGenerateLimit: number;
+  numDeckLimit: number;
   price: number;
-  billingCycle: string;
-  features: string[];
+  duration: number;
   isActive: boolean;
+  order: number;
 }
 
 export interface CreatePlanRequest extends UpdatePlanRequest {}
@@ -81,6 +87,11 @@ export class AdminService {
   /** PUT /api/subscription-plans/:id — Admin only */
   updateSubscriptionPlan(id: string, req: UpdatePlanRequest): Observable<any> {
     return this.http.put<any>(`/api/subscription-plans/${id}`, req);
+  }
+
+  /** DELETE /api/subscription-plans/:id — Admin only */
+  deleteSubscriptionPlan(id: string): Observable<any> {
+    return this.http.delete<any>(`/api/subscription-plans/${id}`);
   }
 
   /** GET /api/Decks — get all public decks for admin overview */

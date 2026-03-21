@@ -50,10 +50,14 @@
           <tr class="border-b border-gray-50 hover:bg-gray-50/50 transition-colors">
             <td class="px-6 py-4">
               <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-full flex items-center justify-center text-white text-[13px] font-black shrink-0"
-                  [style.background-color]="getAvatarColor(user.id)">
-                  {{ getAvatarInitial(user) }}
-                </div>
+                @if (user.avatarUrl) {
+                  <img [src]="user.avatarUrl" alt="Avatar" class="w-9 h-9 rounded-full object-cover shrink-0" />
+                } @else {
+                  <div class="w-9 h-9 rounded-full flex items-center justify-center text-white text-[13px] font-black shrink-0"
+                    [style.background-color]="getAvatarColor(user.id)">
+                    {{ getAvatarInitial(user) }}
+                  </div>
+                }
                 <div>
                   <p class="font-bold text-gray-900 text-[13px] m-0">{{ user.fullName || (user.firstName + ' ' + user.lastName) }}</p>
                   <p class="text-gray-400 text-[11px] m-0">{{ user.email }}</p>

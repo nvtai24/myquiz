@@ -101,6 +101,7 @@ export interface AdminUser {
   emailConfirmed: boolean;
   isBanned: boolean;
   createdAt: string;
+  avatarUrl?: string | null;
 }
 
 export interface AdminUsersResponse {

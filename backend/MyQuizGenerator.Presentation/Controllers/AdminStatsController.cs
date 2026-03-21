@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyQuizGenerator.Application.Admin.Queries.GetStatsSummary;
 using MyQuizGenerator.Application.Admin.Queries.GetRevenueChart;
+using MyQuizGenerator.Application.Admin.Queries.GetPlanDistribution;
 
 namespace MyQuizGenerator.Presentation.Controllers;
 
@@ -31,6 +32,17 @@ public class AdminStatsController : BaseApiController
     public async Task<IActionResult> GetRevenueChart([FromQuery] int days = 7)
     {
         var query = new GetRevenueChartQuery(days);
+        var result = await Mediator.Send(query);
+        return ApiOk(result);
+    }
+
+    /// <summary>
+    /// Gets plan distribution (users per plan).
+    /// </summary>
+    [HttpGet("plan-distribution")]
+    public async Task<IActionResult> GetPlanDistribution()
+    {
+        var query = new GetPlanDistributionQuery();
         var result = await Mediator.Send(query);
         return ApiOk(result);
     }

@@ -16,22 +16,22 @@ import {
 })
 export class DeckService {
   private http = inject(HttpClient);
-  private apiUrl = '/api/Decks';
+  private endpoint = '/api/Decks';
 
   getUserDecks(): Observable<ApiResponse<DeckSummary[]>> {
-    return this.http.get<ApiResponse<DeckSummary[]>>(this.apiUrl);
+    return this.http.get<ApiResponse<DeckSummary[]>>(this.endpoint);
   }
 
   getDeckById(id: string): Observable<ApiResponse<DeckDetailResponse>> {
-    return this.http.get<ApiResponse<DeckDetailResponse>>(`${this.apiUrl}/${id}`);
+    return this.http.get<ApiResponse<DeckDetailResponse>>(`${this.endpoint}/${id}`);
   }
 
   getRatings(deckId: string): Observable<ApiResponse<DeckRatingSummaryResponse>> {
-    return this.http.get<ApiResponse<DeckRatingSummaryResponse>>(`${this.apiUrl}/${deckId}/ratings`);
+    return this.http.get<ApiResponse<DeckRatingSummaryResponse>>(`${this.endpoint}/${deckId}/ratings`);
   }
 
   submitRating(deckId: string, request: CreateDeckRatingRequest): Observable<ApiResponse<string>> {
-    return this.http.post<ApiResponse<string>>(`${this.apiUrl}/${deckId}/ratings`, request);
+    return this.http.post<ApiResponse<string>>(`${this.endpoint}/${deckId}/ratings`, request);
   }
 
   createDeck(request: CreateDeckRequest, file?: File): Observable<ApiResponse<string>> {
@@ -61,7 +61,7 @@ export class DeckService {
 
     if (file) formData.append('thumbnail', file, file.name);
 
-    return this.http.post<ApiResponse<string>>(this.apiUrl, formData);
+    return this.http.post<ApiResponse<string>>(this.endpoint, formData);
   }
 
   updateDeck(id: string, request: CreateDeckRequest, file?: File): Observable<ApiResponse<string>> {
@@ -93,20 +93,20 @@ export class DeckService {
 
     if (file) formData.append('thumbnail', file, file.name);
 
-    return this.http.put<ApiResponse<string>>(`${this.apiUrl}/${id}`, formData);
+    return this.http.put<ApiResponse<string>>(`${this.endpoint}/${id}`, formData);
   }
 
   generateDeck(file: File): Observable<ApiResponse<GeneratedDeck>> {
     const formData = new FormData();
     formData.append('file', file, file.name);
-    return this.http.post<ApiResponse<GeneratedDeck>>(`${this.apiUrl}/generate`, formData);
+    return this.http.post<ApiResponse<GeneratedDeck>>(`${this.endpoint}/generate`, formData);
   }
 
   invite(id: string, email: string): Observable<ApiResponse<string>> {
-    return this.http.post<ApiResponse<string>>(`${this.apiUrl}/${id}/invite`, { email });
+    return this.http.post<ApiResponse<string>>(`${this.endpoint}/${id}/invite`, { email });
   }
 
   acceptInvite(token: string): Observable<ApiResponse<string>> {
-    return this.http.post<ApiResponse<string>>(`${this.apiUrl}/invite/accept?token=${token}`, {});
+    return this.http.post<ApiResponse<string>>(`${this.endpoint}/invite/accept?token=${token}`, {});
   }
 }

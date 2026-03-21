@@ -12,7 +12,7 @@ export class AuthService {
     private http = inject(HttpClient);
     private router = inject(Router);
     private platformId = inject(PLATFORM_ID);
-    private apiUrl = '/api/Auth';
+    private endpoint = '/api/Auth';
 
     currentUser = signal<User | null>(null);
     constructor() {
@@ -20,7 +20,7 @@ export class AuthService {
      }
 
     login(credentials: LoginRequest): Observable<LoginResponse> {
-     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, credentials).pipe(
+     return this.http.post<LoginResponse>(`${this.endpoint}/login`, credentials).pipe(
         tap(response => {
             if (response.success) {
              this.setSession(response);
@@ -30,19 +30,19 @@ export class AuthService {
     } 
 
     register(data: RegisterRequest): Observable<RegisterResponse> {
-        return this.http.post<RegisterResponse>(`${this.apiUrl}/register`, data);
+        return this.http.post<RegisterResponse>(`${this.endpoint}/register`, data);
     }
 
     confirmEmail(data: ConfirmEmailRequest): Observable<ConfirmEmailResponse> {
-        return this.http.post<ConfirmEmailResponse>(`${this.apiUrl}/confirm-email`, data);
+        return this.http.post<ConfirmEmailResponse>(`${this.endpoint}/confirm-email`, data);
     }
 
     forgotPassword(data: ForgotPasswordRequest): Observable<ForgotPasswordResponse> {
-        return this.http.post<ForgotPasswordResponse>(`${this.apiUrl}/forgot-password`, data);
+        return this.http.post<ForgotPasswordResponse>(`${this.endpoint}/forgot-password`, data);
     }
 
     resetPassword(data: ResetPasswordRequest): Observable<ResetPasswordResponse> {
-        return this.http.post<ResetPasswordResponse>(`${this.apiUrl}/reset-password`, data);
+        return this.http.post<ResetPasswordResponse>(`${this.endpoint}/reset-password`, data);
     }
 
     private setSession(authResult: LoginResponse) {
@@ -54,7 +54,7 @@ export class AuthService {
     logout(): void {
      if (!isPlatformBrowser(this.platformId)) return;
 
-     this.http.post(`${this.apiUrl}/logout`, {}).subscribe({
+     this.http.post(`${this.endpoint}/logout`, {}).subscribe({
        complete: () => {
          this.clearSession();
        },
@@ -76,7 +76,7 @@ export class AuthService {
         return throwError(() => new Error('Not a browser environment'));
       }
       return this.http.post<{ success: boolean; data: { expiresAt: string } }>(
-        `${this.apiUrl}/refresh-token`,
+        `${this.endpoint}/refresh-token`,
         {}
       );
     }
@@ -105,7 +105,7 @@ export class AuthService {
   }
 } 
  loginWithGoogle(idToken: string): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/google-login`, { idToken }).pipe(
+    return this.http.post<LoginResponse>(`${this.endpoint}/google-login`, { idToken }).pipe(
       tap(response => {
         if (response.success) {
           this.setSession(response);

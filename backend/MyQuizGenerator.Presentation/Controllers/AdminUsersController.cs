@@ -15,15 +15,17 @@ namespace MyQuizGenerator.Presentation.Controllers;
 public class AdminUsersController : BaseApiController
 {
     /// <summary>
-    /// Gets a paginated list of users with optional search.
+    /// Gets a paginated list of users with optional search and filters.
     /// </summary>
     [HttpGet]
     public async Task<IActionResult> GetUsers(
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 10,
-        [FromQuery] string? search = null)
+        [FromQuery] string? search = null,
+        [FromQuery] string? role = null,
+        [FromQuery] bool? isBanned = null)
     {
-        var query = new GetUsersQuery(page, pageSize, search);
+        var query = new GetUsersQuery(page, pageSize, search, role, isBanned);
         var (users, totalCount) = await Mediator.Send(query);
         return ApiPaged(users, page, pageSize, totalCount);
     }

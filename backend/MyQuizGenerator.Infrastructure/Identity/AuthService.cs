@@ -374,7 +374,7 @@ public class AuthService : IAuthService
     }
 
     public async Task<(List<AdminUserResponse> Users, int TotalCount)> GetUsersAsync(
-        int page, int pageSize, string? search)
+        int page, int pageSize, string? search, string? role = null, bool? isBanned = null)
     {
         var query = _userManager.Users.AsQueryable();
 
@@ -385,6 +385,26 @@ public class AuthService : IAuthService
                 (u.Email != null && u.Email.ToLower().Contains(searchLower)) ||
                 (u.FirstName != null && u.FirstName.ToLower().Contains(searchLower)) ||
                 (u.LastName != null && u.LastName.ToLower().Contains(searchLower)));
+        }
+
+        if (isBanned.HasValue)
+        {
+            var now = DateTimeOffset.UtcNow;
+            if (isBanned.Value)
+            {
+                query = query.Where(u => u.LockoutEnd != null && u.LockoutEnd > now);
+            }
+            else
+            {
+                query = query.Where(u => u.LockoutEnd == null || u.LockoutEnd <= now);
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(role) && role != "All")
+        {
+            var usersInRole = await _userManager.GetUsersInRoleAsync(role);
+            var userIds = usersInRole.Select(u => u.Id).ToList();
+            query = query.Where(u => userIds.Contains(u.Id));
         }
 
         var totalCount = query.Count();

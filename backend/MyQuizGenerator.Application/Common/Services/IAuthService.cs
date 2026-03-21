@@ -82,9 +82,9 @@ public interface IAuthService
         GoogleLoginAsync(string idToken);
 
     /// <summary>
-    /// Gets a paginated list of users with optional search filter.
+    /// Gets a paginated list of users with optional search filter and role/status filters.
     /// </summary>
-    Task<(List<AdminUserResponse> Users, int TotalCount)> GetUsersAsync(int page, int pageSize, string? search);
+    Task<(List<AdminUserResponse> Users, int TotalCount)> GetUsersAsync(int page, int pageSize, string? search, string? role = null, bool? isBanned = null);
 
     /// <summary>
     /// Bans or unbans a user by setting lockout.

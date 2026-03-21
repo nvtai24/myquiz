@@ -4,7 +4,7 @@ using MyQuizGenerator.Application.Common.Interfaces;
 
 namespace MyQuizGenerator.Application.Admin.Queries.GetUsers;
 
-public record GetUsersQuery(int Page = 1, int PageSize = 10, string? Search = null)
+public record GetUsersQuery(int Page = 1, int PageSize = 10, string? Search = null, string? Role = null, bool? IsBanned = null)
     : IRequest<(List<AdminUserResponse> Users, int TotalCount)>;
 
 public class GetUsersQueryHandler
@@ -20,6 +20,6 @@ public class GetUsersQueryHandler
     public async Task<(List<AdminUserResponse> Users, int TotalCount)> Handle(
         GetUsersQuery request, CancellationToken cancellationToken)
     {
-        return await _authService.GetUsersAsync(request.Page, request.PageSize, request.Search);
+        return await _authService.GetUsersAsync(request.Page, request.PageSize, request.Search, request.Role, request.IsBanned);
     }
 }

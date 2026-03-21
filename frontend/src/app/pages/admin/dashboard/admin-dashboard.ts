@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal, computed, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { AdminService, AdminPayment } from '../../../services/admin.service';
+import { AdminService, AdminPayment, RevenueData, PlanDistData } from '../../../services/admin.service';
 import { Chart, registerables } from 'chart.js';
 
 Chart.register(...registerables);
@@ -21,65 +21,99 @@ export class AdminDashboard implements OnInit, AfterViewInit, OnDestroy {
   revenueChartInstance: Chart | null = null;
   planChartInstance: Chart | null = null;
 
-  // MOCK: Overview Stats
-  totalRevenue = signal(15400000);
-  monthlyRevenue = signal(3200000);
-  revenueGrowth = signal(12.5);
-  newUsers = signal(145);
-  userGrowth = signal(8.2);
+  // Overview Stats
+  totalRevenue = signal(0);
+  monthlyRevenue = signal(0);
+  revenueGrowth = signal(0);
+  newUsers = signal(0);
+  userGrowth = signal(0);
 
-  // MOCK: Revenue Chart
+  // Revenue Chart
   chartPeriod = signal<'7days' | '30days'>('7days');
+  chartData = signal<RevenueData[]>([]);
 
-  chartData7Days = signal([
-    { date: '15/03', amount: 300000 },
-    { date: '16/03', amount: 500000 },
-    { date: '17/03', amount: 200000 },
-    { date: '18/03', amount: 800000 },
-    { date: '19/03', amount: 0 },
-    { date: '20/03', amount: 450000 },
-    { date: '21/03', amount: 950000 },
-  ]);
-
-  chartData30Days = signal(
-    Array.from({ length: 30 }).map((_, i) => {
-      const d = new Date(2026, 2, 21 - 29 + i);
+  // Plan Distribution
+  planDistApiData = signal<PlanDistData[]>([]);
+  
+  planDist = computed(() => {
+    const apiData = this.planDistApiData();
+    const total = apiData.reduce((sum, item) => sum + item.userCount, 0);
+    const colors = ['#6366f1', '#e5e7eb', '#f59e0b', '#10b981', '#3b82f6'];
+    
+    return apiData.map((item, index) => {
+      const percentage = total > 0 ? (item.userCount / total) * 100 : 0;
       return {
-        date: `${d.getDate().toString().padStart(2, '0')}/${(d.getMonth() + 1).toString().padStart(2, '0')}`,
-        amount: Math.floor(Math.random() * 1200000)
+        planName: item.planName,
+        userCount: item.userCount,
+        width: Math.round(percentage),
+        hex: colors[index % colors.length]
       };
-    })
-  );
-
-  chartData = computed(() => this.chartPeriod() === '7days' ? this.chartData7Days() : this.chartData30Days());
-
-  // MOCK: Plan Distribution
-  planDist = signal([
-    { planName: 'Free', userCount: 450, color: '#9ca3af', bg: 'bg-gray-200', width: 60, hex: '#e5e7eb' },
-    { planName: 'Pro', userCount: 220, color: '#4f46e5', bg: 'bg-indigo-500', width: 30, hex: '#6366f1' },
-    { planName: 'Premium', userCount: 80, color: '#f59e0b', bg: 'bg-amber-500', width: 10, hex: '#f59e0b' },
-  ]);
+    });
+  });
 
   planTotalUsers() {
     return this.planDist().reduce((sum, p) => sum + p.userCount, 0);
   }
 
-  // REAL: Recent Transactions
+  // Recent Transactions
   recentPayments = signal<AdminPayment[]>([]);
   loadingPayments = signal(true);
 
   ngOnInit() {
+    this.fetchSummary();
     this.fetchRecentPayments();
   }
 
   ngAfterViewInit() {
-    this.initRevenueChart();
-    this.initPlanChart();
+    // Need to initialize API data before drawing, so we fetch after view init as well for charts
+    this.fetchRevenueChart(true);
+    this.fetchPlanDist();
   }
 
   ngOnDestroy() {
     if (this.revenueChartInstance) this.revenueChartInstance.destroy();
     if (this.planChartInstance) this.planChartInstance.destroy();
+  }
+
+  fetchSummary() {
+    this.adminService.getSummaryStats().subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          this.totalRevenue.set(res.data.totalRevenue);
+          this.monthlyRevenue.set(res.data.monthlyRevenue);
+          this.revenueGrowth.set(res.data.revenueGrowth);
+          this.newUsers.set(res.data.newUsers);
+          this.userGrowth.set(res.data.userGrowth);
+        }
+      }
+    });
+  }
+
+  fetchRevenueChart(isInit: boolean = false) {
+    const days = this.chartPeriod() === '7days' ? 7 : 30;
+    this.adminService.getRevenueChart(days).subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          this.chartData.set(res.data);
+          if (isInit) {
+            this.initRevenueChart();
+          } else {
+            this.updateRevenueChart();
+          }
+        }
+      }
+    });
+  }
+
+  fetchPlanDist() {
+    this.adminService.getPlanDistribution().subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          this.planDistApiData.set(res.data);
+          this.initPlanChart();
+        }
+      }
+    });
   }
 
   fetchRecentPayments() {
@@ -95,13 +129,15 @@ export class AdminDashboard implements OnInit, AfterViewInit, OnDestroy {
   }
 
   switchPeriod(period: '7days' | '30days') {
+    if (this.chartPeriod() === period) return;
     this.chartPeriod.set(period);
-    this.updateRevenueChart();
+    this.fetchRevenueChart(false);
   }
 
   initRevenueChart() {
     if (!this.revenueChartCanvas) return;
     const ctx = this.revenueChartCanvas.nativeElement.getContext('2d');
+    if (this.revenueChartInstance) this.revenueChartInstance.destroy();
     
     this.revenueChartInstance = new Chart(ctx, {
       type: 'bar',
@@ -173,6 +209,7 @@ export class AdminDashboard implements OnInit, AfterViewInit, OnDestroy {
     if (!this.planChartCanvas) return;
     const ctx = this.planChartCanvas.nativeElement.getContext('2d');
     const data = this.planDist();
+    if (this.planChartInstance) this.planChartInstance.destroy();
 
     this.planChartInstance = new Chart(ctx, {
       type: 'doughnut',

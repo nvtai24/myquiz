@@ -72,6 +72,25 @@ export interface AdminPaymentsResponse {
   data: AdminPayment[];
 }
 
+export interface OverviewStats {
+  totalRevenue: number;
+  monthlyRevenue: number;
+  revenueGrowth: number;
+  newUsers: number;
+  userGrowth: number;
+}
+
+export interface RevenueData {
+  date: string;
+  amount: number;
+}
+
+export interface PlanDistData {
+  planName: string;
+  userCount: number;
+  percentage?: number;
+}
+
 export interface AdminUser {
   id: string;
   email: string;
@@ -162,5 +181,19 @@ export class AdminService {
     if (toDate) params = params.set('toDate', toDate);
 
     return this.http.get<AdminPaymentsResponse>('/api/admin/payments', { params });
+  }
+
+  // --- DASHBOARD CHARTS & ANALYTICS ---
+
+  getSummaryStats(): Observable<{ success: boolean; data: OverviewStats }> {
+    return this.http.get<{ success: boolean; data: OverviewStats }>('/api/admin/stats/summary');
+  }
+
+  getRevenueChart(days: number): Observable<{ success: boolean; data: RevenueData[] }> {
+    return this.http.get<{ success: boolean; data: RevenueData[] }>(`/api/admin/stats/revenue-chart?days=${days}`);
+  }
+
+  getPlanDistribution(): Observable<{ success: boolean; data: PlanDistData[] }> {
+    return this.http.get<{ success: boolean; data: PlanDistData[] }>('/api/admin/stats/plan-distribution');
   }
 }

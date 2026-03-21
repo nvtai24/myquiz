@@ -327,6 +327,12 @@ public class AuthService : IAuthService
             return (user.Id, user.Email!, user.FirstName, user.LastName, true);
         }
 
+        if (await _userManager.IsLockedOutAsync(user))
+        {
+            _logger.LogWarning("Google login failed - account locked: {Email}", email);
+            throw new Application.Common.Exceptions.UnauthorizedException("Account is temporarily locked.");
+        }
+
         _logger.LogInformation("Existing user logged in via Google: {Email}", email);
         return (user.Id, user.Email!, user.FirstName, user.LastName, false);
     }

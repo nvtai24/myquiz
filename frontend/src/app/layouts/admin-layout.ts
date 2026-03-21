@@ -22,9 +22,9 @@ export class AdminLayout implements OnInit, OnDestroy {
 
   navItems = [
     { label: 'Dashboard', icon: 'grid_view', path: '/admin/dashboard' },
-    { label: 'Quản lý người dùng', icon: 'group', path: '/admin/users' },
-    { label: 'Gói đăng ký', icon: 'credit_card', path: '/admin/plans' },
-    { label: 'Lịch sử giao dịch', icon: 'receipt_long', path: '/admin/transactions' },
+    { label: 'User Management', icon: 'group', path: '/admin/users' },
+    { label: 'Subscription Plans', icon: 'credit_card', path: '/admin/plans' },
+    { label: 'Transaction History', icon: 'receipt_long', path: '/admin/transactions' },
     // { label: 'Bộ thẻ (Decks)', icon: 'style', path: '/admin/decks' },
   ];
 

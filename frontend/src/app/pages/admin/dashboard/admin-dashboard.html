@@ -1,7 +1,7 @@
 <div class="p-8">
   <!-- <div class="mb-8 flex justify-between items-end">
     <div>
-      <h1 class="text-2xl font-black text-gray-900 m-0">Tổng quan hệ thống</h1>
+      <h1 class="text-2xl font-black text-gray-900 m-0">System Overview</h1>
       <p class="text-gray-500 text-[13px] font-bold mt-1 inline-block">
         MyQuiz Dashboard Analytics
       </p>
@@ -15,10 +15,10 @@
       <div class="flex justify-between items-start mb-2">
         <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest m-0 flex items-center gap-1.5">
           <span class="material-symbols-outlined text-[16px] text-indigo-500">account_balance_wallet</span>
-          Tổng doanh thu
+          Total Revenue
         </p>
       </div>
-      <p class="text-[28px] font-black text-gray-900 m-0 leading-none mt-1">{{ totalRevenue() | number:'1.0-0' }}đ</p>
+      <p class="text-[28px] font-black text-gray-900 m-0 leading-none mt-1">{{ totalRevenue() | number:'1.0-0' }} VND</p>
     </div>
 
     <!-- Monthly Revenue -->
@@ -26,7 +26,7 @@
       <div class="flex justify-between items-start mb-2">
         <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest m-0 flex items-center gap-1.5">
           <span class="material-symbols-outlined text-[16px] text-green-500">payments</span>
-          Doanh thu tháng này
+          Monthly Revenue
         </p>
         <span class="text-[10px] font-black bg-green-50 border border-green-200 px-2 py-0.5 rounded-full flex items-center gap-0.5"
               [class]="revenueGrowth() >= 0 ? 'text-green-700 bg-green-50 border-green-200' : 'text-red-700 bg-red-50 border-red-200'">
@@ -34,7 +34,7 @@
           {{ revenueGrowth() >= 0 ? '+' : '' }}{{ revenueGrowth() }}%
         </span>
       </div>
-      <p class="text-[28px] font-black text-gray-900 m-0 leading-none mt-1">{{ monthlyRevenue() | number:'1.0-0' }}đ</p>
+      <p class="text-[28px] font-black text-gray-900 m-0 leading-none mt-1">{{ monthlyRevenue() | number:'1.0-0' }} VND</p>
     </div>
 
     <!-- New Users -->
@@ -42,7 +42,7 @@
       <div class="flex justify-between items-start mb-2">
         <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest m-0 flex items-center gap-1.5">
           <span class="material-symbols-outlined text-[16px] text-blue-500">group_add</span>
-          Người dùng mới (Tháng)
+          New Users (Month)
         </p>
         <span class="text-[10px] font-black pointer-events-none px-2 py-0.5 rounded-full flex items-center gap-0.5"
               [class]="userGrowth() >= 0 ? 'text-blue-700 bg-blue-50 border border-blue-200' : 'text-red-700 bg-red-50 border border-red-200'">
@@ -62,7 +62,7 @@
         </p>
       </div>
       <p class="text-[22px] font-black m-0 leading-tight mt-1">Hello Admin!</p>
-      <p class="text-[12px] font-medium opacity-80 mt-1">Hôm nay hệ thống hoạt động thế nào?</p>
+      <p class="text-[12px] font-medium opacity-80 mt-1">How is the system performing today?</p>
     </div>
   </div>
 
@@ -72,19 +72,19 @@
     <div class="xl:col-span-2 bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col min-h-[300px]">
       <div class="flex justify-between items-start mb-6">
         <div>
-          <h3 class="font-black text-gray-900 text-[16px] m-0 mb-1">Doanh thu</h3>
-          <p class="text-[12px] text-gray-400 font-medium m-0">Tự động cập nhật theo thời gian thực</p>
+          <h3 class="font-black text-gray-900 text-[16px] m-0 mb-1">Revenue</h3>
+          <p class="text-[12px] text-gray-400 font-medium m-0">Real-time automatic updates</p>
         </div>
         <div class="flex items-center gap-1 bg-gray-50 border border-gray-100 p-1 rounded-xl">
           <button (click)="switchPeriod('7days')"
             class="px-3 py-1.5 text-[12px] font-bold rounded-lg transition-all border-none cursor-pointer"
             [class]="chartPeriod() === '7days' ? 'bg-white text-indigo-600 shadow-sm' : 'bg-transparent text-gray-500 hover:text-gray-700'">
-            7 ngày
+            7 Days
           </button>
           <button (click)="switchPeriod('30days')"
             class="px-3 py-1.5 text-[12px] font-bold rounded-lg transition-all border-none cursor-pointer"
             [class]="chartPeriod() === '30days' ? 'bg-white text-indigo-600 shadow-sm' : 'bg-transparent text-gray-500 hover:text-gray-700'">
-            30 ngày
+            30 Days
           </button>
         </div>
       </div>
@@ -97,8 +97,8 @@
     <!-- Plan Distribution -->
     <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 flex flex-col min-h-[300px]">
       <div>
-        <h3 class="font-black text-gray-900 text-[16px] m-0 mb-1">Cơ cấu gói đăng ký</h3>
-        <p class="text-[12px] text-gray-400 font-medium m-0 mb-6">Tỷ lệ người dùng đang sử dụng AI</p>
+        <h3 class="font-black text-gray-900 text-[16px] m-0 mb-1">Plan Distribution</h3>
+        <p class="text-[12px] text-gray-400 font-medium m-0 mb-6">Subscription split across user base</p>
       </div>
 
       <div class="flex-1 flex flex-col items-center justify-center -mt-2">
@@ -138,21 +138,21 @@
       <div>
         <h3 class="font-black text-gray-900 text-[15px] m-0 flex items-center gap-2">
           <span class="material-symbols-outlined text-indigo-500">receipt_long</span>
-          Giao dịch thanh toán gần đây
+          Recent Transactions
         </h3>
-        <p class="text-[11px] font-bold text-green-600 m-0 mt-1">Cập nhật lúc {{ recentPayments().length > 0 ? (recentPayments()[0].createdAt | date:'HH:mm:ss dd/MM') : 'Gần đây' }}</p>
+        <p class="text-[11px] font-bold text-green-600 m-0 mt-1">Updated at {{ recentPayments().length > 0 ? (recentPayments()[0].createdAt | date:'HH:mm:ss dd/MM') : 'Recently' }}</p>
       </div>
-      <a routerLink="/admin/transactions" class="text-[12px] font-bold text-indigo-500 no-underline hover:text-indigo-700 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors border border-indigo-100 bg-white shadow-sm">Xem tất cả →</a>
+      <a routerLink="/admin/transactions" class="text-[12px] font-bold text-indigo-500 no-underline hover:text-indigo-700 hover:bg-indigo-50 px-3 py-1.5 rounded-lg transition-colors border border-indigo-100 bg-white shadow-sm">View All →</a>
     </div>
 
     <table class="w-full text-left whitespace-nowrap">
       <thead>
         <tr class="border-b border-gray-50 bg-white">
-          <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest bg-white">Mã giao dịch</th>
-          <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest bg-white">Người dùng</th>
-          <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest bg-white">Số tiền (VNĐ)</th>
-          <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest bg-white">Ngày</th>
-          <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest bg-white text-right">Trạng thái</th>
+          <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest bg-white">Order Code</th>
+          <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest bg-white">User</th>
+          <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest bg-white">Amount (VND)</th>
+          <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest bg-white">Date</th>
+          <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest bg-white text-right">Status</th>
         </tr>
       </thead>
       <tbody class="bg-gray-50/20">
@@ -173,7 +173,7 @@
               </div>
             </td>
             <td class="px-6 py-4">
-              <span class="text-[14px] font-black text-gray-900">{{ payment.amount | number:'1.0-0' }}đ</span>
+              <span class="text-[14px] font-black text-gray-900">{{ payment.amount | number:'1.0-0' }} VND</span>
             </td>
             <td class="px-6 py-4">
               <span class="text-[12px] font-bold text-gray-500">{{ payment.createdAt | date:'dd/MM HH:mm' }}</span>
@@ -188,7 +188,7 @@
 
         @if (recentPayments().length === 0 && !loadingPayments()) {
           <tr>
-            <td colspan="5" class="px-6 py-12 text-center text-gray-400 font-medium bg-white">Chưa có giao dịch thanh toán nào gần đây.</td>
+            <td colspan="5" class="px-6 py-12 text-center text-gray-400 font-medium bg-white">No recent payment transactions found.</td>
           </tr>
         }
         @if (loadingPayments()) {
@@ -196,7 +196,7 @@
             <td colspan="5" class="px-6 py-10 bg-white">
               <div class="flex justify-center items-center gap-2 text-indigo-500 text-[13px] font-bold">
                 <span class="material-symbols-outlined animate-spin">progress_activity</span>
-                Đang tải dữ liệu thực tế từ hệ thống...
+                Loading real-time data...
               </div>
             </td>
           </tr>

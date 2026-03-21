@@ -38,7 +38,7 @@ export class AdminDashboard implements OnInit, AfterViewInit, OnDestroy {
   planDist = computed(() => {
     const apiData = this.planDistApiData();
     const total = apiData.reduce((sum, item) => sum + item.userCount, 0);
-    // Sử dụng dải màu tương phản mạnh: Indigo, Rose, Amber, Emerald, Sky Blue
+    // Use high-contrast color palette: Indigo, Rose, Amber, Emerald, Sky Blue
     const colors = ['#4f46e5', '#f43f5e', '#f59e0b', '#10b981', '#0ea5e9'];
     
     return apiData.map((item, index) => {
@@ -156,7 +156,7 @@ export class AdminDashboard implements OnInit, AfterViewInit, OnDestroy {
             cornerRadius: 8,
             displayColors: false,
             callbacks: {
-              label: (context) => context.raw?.toLocaleString() + ' VNĐ'
+              label: (context) => context.raw?.toLocaleString() + ' VND'
             }
           }
         },
@@ -196,7 +196,7 @@ export class AdminDashboard implements OnInit, AfterViewInit, OnDestroy {
     return {
       labels: data.map(d => d.date),
       datasets: [{
-        label: 'Doanh thu',
+        label: 'Revenue',
         data: data.map(d => d.amount),
         backgroundColor: '#6366f1',
         hoverBackgroundColor: '#4f46e5',

@@ -36,7 +36,7 @@ export class AdminPlans implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        this.error.set(err?.error?.message ?? 'Không thể tải gói dịch vụ');
+        this.error.set(err?.error?.message ?? 'Could not load subscription plans');
         this.loading.set(false);
       }
     });
@@ -63,33 +63,33 @@ export class AdminPlans implements OnInit {
   }
 
   getDurationText(days: number) {
-    if (days === 0) return 'Vĩnh viễn';
-    if (days === 30) return 'Tháng';
-    if (days === 365) return 'Năm';
-    return `${days} ngày`;
+    if (days === 0) return 'Lifetime';
+    if (days === 30) return 'Month';
+    if (days === 365) return 'Year';
+    return `${days} days`;
   }
 
   toggleActive(plan: AdminSubscriptionPlan) {
     const newStatus = !plan.isActive;
     
     Swal.fire({
-      title: 'Đổi trạng thái',
-      text: `Bạn có chắc chắn muốn ${newStatus ? 'kích hoạt' : 'tạm dừng'} gói ${plan.name}?`,
+      title: 'Update Status',
+      text: `Are you sure you want to ${newStatus ? 'activate' : 'deactivate'} plan ${plan.name}?`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#4f46e5',
       cancelButtonColor: '#9ca3af',
-      confirmButtonText: 'Đồng ý',
-      cancelButtonText: 'Hủy bỏ'
+      confirmButtonText: 'Confirm',
+      cancelButtonText: 'Cancel'
     }).then((result) => {
       if (result.isConfirmed) {
         const updateParams: UpdatePlanRequest = { ...plan, isActive: newStatus };
         this.adminService.updateSubscriptionPlan(plan.id, updateParams).subscribe({
           next: () => {
-            Swal.fire('Thành công', `Gói ${plan.name} đã được ${newStatus ? 'kích hoạt' : 'tạm dừng'}.`, 'success');
+            Swal.fire('Success', `Plan ${plan.name} has been ${newStatus ? 'activated' : 'deactivated'}.`, 'success');
             this.loadPlans();
           },
-          error: (err: any) => Swal.fire('Lỗi', 'Có lỗi xảy ra: ' + err.message, 'error')
+          error: (err: any) => Swal.fire('Error', 'An error occurred: ' + err.message, 'error')
         });
       }
     });
@@ -97,22 +97,22 @@ export class AdminPlans implements OnInit {
 
   deletePlan(plan: AdminSubscriptionPlan) {
     Swal.fire({
-      title: 'Xóa vĩnh viễn?',
-      text: `Bạn có chắc chắn muốn xóa gói ${plan.name} vĩnh viễn không? Hành động này không thể hoàn tác.`,
+      title: 'Delete Permanently?',
+      text: `Are you sure you want to delete plan ${plan.name} permanently? This action cannot be undone.`,
       icon: 'error',
       showCancelButton: true,
       confirmButtonColor: '#ef4444',
       cancelButtonColor: '#9ca3af',
-      confirmButtonText: 'Xóa ngay',
-      cancelButtonText: 'Hủy bỏ'
+      confirmButtonText: 'Delete Now',
+      cancelButtonText: 'Cancel'
     }).then((result) => {
       if (result.isConfirmed) {
         this.adminService.deleteSubscriptionPlan(plan.id).subscribe({
           next: () => {
             this.plans.update(plans => plans.filter(p => p.id !== plan.id));
-            Swal.fire('Thành công', `Đã xóa gói ${plan.name} thành công!`, 'success');
+            Swal.fire('Success', `Plan ${plan.name} deleted successfully!`, 'success');
           },
-          error: (err: any) => Swal.fire('Lỗi', 'Có lỗi xảy ra khi xóa: ' + err.message, 'error')
+          error: (err: any) => Swal.fire('Error', 'An error occurred during deletion: ' + err.message, 'error')
         });
       }
     });
@@ -125,13 +125,13 @@ export class AdminPlans implements OnInit {
     this.adminService.updateSubscriptionPlan(plan.id, this.editForm()).subscribe({
       next: () => {
         this.saving.set(false);
-        this.successMsg.set('Cập nhật thành công!');
+        this.successMsg.set('Updated successfully!');
         this.closeModal();
         this.loadPlans();
       },
       error: (err) => {
         this.saving.set(false);
-        this.error.set(err?.error?.message ?? 'Lỗi khi cập nhật');
+        this.error.set(err?.error?.message ?? 'Error updating plan');
       }
     });
   }
@@ -146,7 +146,7 @@ export class AdminPlans implements OnInit {
       },
       error: (err) => {
         this.saving.set(false);
-        this.error.set(err?.error?.message ?? 'Lỗi khi tạo gói');
+        this.error.set(err?.error?.message ?? 'Error creating plan');
       }
     });
   }

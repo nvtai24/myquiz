@@ -30,7 +30,7 @@ export class AdminDecks implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        this.error.set(err?.error?.message ?? 'Không thể tải danh sách bộ thẻ');
+        this.error.set(err?.error?.message ?? 'Could not load decks list');
         this.loading.set(false);
       }
     });

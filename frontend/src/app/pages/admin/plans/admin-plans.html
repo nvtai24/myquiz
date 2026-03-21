@@ -2,15 +2,15 @@
   <!-- Header -->
   <!-- <div class="flex items-center justify-between mb-8">
     <div>
-      <h1 class="text-2xl font-black text-gray-900 m-0">Gói đăng ký</h1>
-      <p class="text-gray-400 text-[13px] font-medium mt-1">Quản lý các gói dịch vụ và tính năng</p>
+      <h1 class="text-2xl font-black text-gray-900 m-0">Subscription Plans</h1>
+      <p class="text-gray-400 text-[13px] font-medium mt-1">Manage service plans and features</p>
     </div>
     <button
       (click)="openCreate()"
       class="flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-[13px] border-none cursor-pointer transition-all shadow-lg shadow-indigo-200"
     >
       <span class="material-symbols-outlined text-[18px]">add</span>
-      Tạo gói mới
+      Create New Plan
     </button>
   </div> -->
 
@@ -59,26 +59,26 @@
               </div>
             </div>
             <div class="flex items-end gap-1">
-              <span class="text-3xl font-black text-gray-900">{{ plan.price | number:'1.0-0' }}đ</span>
+              <span class="text-3xl font-black text-gray-900">{{ plan.price | number:'1.0-0' }} VND</span>
               <span class="text-gray-400 font-medium text-[13px] mb-1 pl-1"> / {{ getDurationText(plan.duration) }}</span>
             </div>
           </div>
 
           <!-- Features -->
           <div class="px-6 py-4 flex-1">
-            <p class="text-[11px] font-black text-gray-400 uppercase tracking-wider mb-3">Thông tin gói</p>
+            <p class="text-[11px] font-black text-gray-400 uppercase tracking-wider mb-3">Plan Details</p>
             <ul class="space-y-3 list-none p-0 m-0">
               <li class="flex items-start gap-2 text-[13px] text-gray-700 font-medium">
                 <span class="material-symbols-outlined text-[16px] text-indigo-500 shrink-0">info</span>
-                {{ plan.description || 'Không có mô tả' }}
+                {{ plan.description || 'No description provided' }}
               </li>
               <li class="flex items-center gap-2 text-[13px] text-gray-700 font-medium">
                 <span class="material-symbols-outlined text-[16px] text-indigo-500 shrink-0">auto_awesome</span>
-                Gen AI: {{ plan.dailyGenerateLimit === 0 ? 'Không giới hạn' : (plan.dailyGenerateLimit + ' lần/ngày') }}
+                Gen AI limit: {{ plan.dailyGenerateLimit === 0 ? 'Unlimited' : (plan.dailyGenerateLimit + ' times/day') }}
               </li>
               <li class="flex items-center gap-2 text-[13px] text-gray-700 font-medium">
                 <span class="material-symbols-outlined text-[16px] text-indigo-500 shrink-0">library_books</span>
-                Sở hữu: {{ plan.numDeckLimit === 0 ? 'Không giới hạn' : (plan.numDeckLimit + ' thẻ (người tạo)') }}
+                Deck limit: {{ plan.numDeckLimit === 0 ? 'Unlimited' : (plan.numDeckLimit + ' decks (creator)') }}
               </li>
             </ul>
           </div>
@@ -89,12 +89,12 @@
               (click)="openEdit(plan)"
               class="flex-1 py-2.5 border-2 border-indigo-500 text-indigo-600 hover:bg-indigo-50 rounded-xl font-bold text-[13px] cursor-pointer transition-all"
             >
-              Chỉnh sửa
+              Edit Plan
             </button>
             <button
               (click)="deletePlan(plan)"
               class="px-3 py-2 border-2 border-red-200 text-red-500 hover:bg-red-50 hover:border-red-500 rounded-xl font-bold cursor-pointer transition-all bg-white flex items-center justify-center"
-              title="Xóa gói"
+              title="Delete Plan"
             >
               <span class="material-symbols-outlined text-[18px]">delete</span>
             </button>
@@ -108,8 +108,8 @@
         <div class="w-14 h-14 rounded-[16px] bg-indigo-100 text-indigo-600 flex items-center justify-center mb-4 group-hover:bg-indigo-600 group-hover:text-white group-hover:rotate-90 transition-all duration-300 shadow-sm">
           <span class="material-symbols-outlined text-[28px]">add</span>
         </div>
-        <span class="font-black text-gray-700 text-[16px] group-hover:text-indigo-700 transition-colors">Tạo gói dịch vụ mới</span>
-        <span class="text-[13px] text-gray-400 font-medium mt-1.5 text-center px-4 leading-relaxed group-hover:text-gray-500 transition-colors">Thiết lập mức giá và giới hạn lượt dùng AI cho khách hàng</span>
+        <span class="font-black text-gray-700 text-[16px] group-hover:text-indigo-700 transition-colors">Create New Plan</span>
+        <span class="text-[13px] text-gray-400 font-medium mt-1.5 text-center px-4 leading-relaxed group-hover:text-gray-500 transition-colors">Configure pricing and daily AI generation limits for customers</span>
       </button>
     </div>
   }
@@ -120,7 +120,7 @@
       <div class="bg-white rounded-2xl w-full max-w-[560px] shadow-2xl" (click)="$event.stopPropagation()">
         <div class="px-6 py-5 border-b border-gray-100 flex items-center justify-between">
           <h3 class="font-black text-gray-900 text-[16px] m-0">
-            {{ editingPlan() ? 'Chỉnh sửa: ' + editingPlan()!['name'] : 'Tạo gói mới' }}
+            {{ editingPlan() ? 'Edit: ' + editingPlan()!['name'] : 'Create New Plan' }}
           </h3>
           <button (click)="closeModal()" class="text-gray-400 hover:text-gray-600 bg-transparent border-none cursor-pointer">
             <span class="material-symbols-outlined">close</span>
@@ -130,42 +130,42 @@
         <div class="px-6 py-5 space-y-4">
           <div class="grid grid-cols-2 gap-3">
              <div class="col-span-1">
-                <label class="block text-[11px] font-bold text-indigo-600 uppercase tracking-wider mb-1.5">Tên gói</label>
+                <label class="block text-[11px] font-bold text-indigo-600 uppercase tracking-wider mb-1.5">Plan Name</label>
                 <input type="text" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-[13px] outline-none focus:border-indigo-400 transition-colors"
                   [ngModel]="editForm().name" (ngModelChange)="editForm.update(f => ({...f, name: $event}))" />
              </div>
              <div class="col-span-1">
-               <label class="block text-[11px] font-bold text-indigo-600 uppercase tracking-wider mb-1.5">Order (Sắp xếp)</label>
+               <label class="block text-[11px] font-bold text-indigo-600 uppercase tracking-wider mb-1.5">Order (Sort Index)</label>
                <input type="number" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-[13px] outline-none focus:border-indigo-400"
                  [ngModel]="editForm().order" (ngModelChange)="editForm.update(f => ({...f, order: +$event}))" />
              </div>
           </div>
           <div>
-            <label class="block text-[11px] font-bold text-indigo-600 uppercase tracking-wider mb-1.5">Description (Mô tả)</label>
+            <label class="block text-[11px] font-bold text-indigo-600 uppercase tracking-wider mb-1.5">Description</label>
             <textarea rows="2" class="w-full px-3 py-2 border border-gray-200 rounded-xl text-[13px] outline-none focus:border-indigo-400 transition-colors"
               [ngModel]="editForm().description" (ngModelChange)="editForm.update(f => ({...f, description: $event}))"></textarea>
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-[11px] font-bold text-indigo-600 uppercase tracking-wider mb-1.5">Giá (VNĐ)</label>
+              <label class="block text-[11px] font-bold text-indigo-600 uppercase tracking-wider mb-1.5">Price (VNĐ)</label>
               <input type="number" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-[13px] outline-none focus:border-indigo-400"
                 [ngModel]="editForm().price" (ngModelChange)="editForm.update(f => ({...f, price: +$event}))" />
             </div>
             <div>
-              <label class="block text-[11px] font-bold text-indigo-600 uppercase tracking-wider mb-1.5">Chu kỳ (thời hạn ngày)</label>
+              <label class="block text-[11px] font-bold text-indigo-600 uppercase tracking-wider mb-1.5">Duration (Days)</label>
               <input type="number" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-[13px] outline-none focus:border-indigo-400 bg-white"
                 [ngModel]="editForm().duration" (ngModelChange)="editForm.update(f => ({...f, duration: +$event}))" />
-                <span class="text-[10px] text-gray-400 mt-1 block">30=Tháng, 365=Năm, 0=Vĩnh viễn</span>
+                <span class="text-[10px] text-gray-400 mt-1 block">30=Month, 365=Year, 0=Lifetime</span>
             </div>
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-[11px] font-bold text-indigo-600 uppercase tracking-wider mb-1.5">Limit Tạo bài AI (/ngày)</label>
+              <label class="block text-[11px] font-bold text-indigo-600 uppercase tracking-wider mb-1.5">Daily AI Limit</label>
               <input type="number" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-[13px] outline-none focus:border-indigo-400"
                 [ngModel]="editForm().dailyGenerateLimit" (ngModelChange)="editForm.update(f => ({...f, dailyGenerateLimit: +$event}))" />
             </div>
             <div>
-              <label class="block text-[11px] font-bold text-indigo-600 uppercase tracking-wider mb-1.5">Limit Số Bộ thẻ</label>
+              <label class="block text-[11px] font-bold text-indigo-600 uppercase tracking-wider mb-1.5">Max Decks Limit</label>
               <input type="number" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-[13px] outline-none focus:border-indigo-400 bg-white"
                 [ngModel]="editForm().numDeckLimit" (ngModelChange)="editForm.update(f => ({...f, numDeckLimit: +$event}))" />
             </div>
@@ -174,16 +174,16 @@
           <label class="flex items-center gap-2 cursor-pointer mt-4">
             <input type="checkbox" class="w-4 h-4 accent-indigo-500"
               [ngModel]="editForm().isActive" (ngModelChange)="editForm.update(f => ({...f, isActive: $event}))" />
-            <span class="text-[13px] font-semibold text-gray-700">Kích hoạt gói ngay lập tức</span>
+            <span class="text-[13px] font-semibold text-gray-700">Activate this plan immediately</span>
           </label>
         </div>
 
         <div class="px-6 pb-6 flex gap-3 justify-end border-t border-gray-50 pt-4">
-          <button (click)="closeModal()" class="px-5 py-2.5 text-gray-500 font-bold text-[13px] bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition-colors">Hủy</button>
+          <button (click)="closeModal()" class="px-5 py-2.5 text-gray-500 font-bold text-[13px] bg-gray-50 border border-gray-200 rounded-xl cursor-pointer hover:bg-gray-100 transition-colors">Cancel</button>
           <button (click)="editingPlan() ? savePlan() : createPlan()" [disabled]="saving()"
             class="flex items-center gap-2 px-6 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-[13px] rounded-xl cursor-pointer transition-all border-none disabled:opacity-50">
             @if (saving()) { <span class="material-symbols-outlined text-[16px] animate-spin">progress_activity</span> }
-            {{ saving() ? 'Đang lưu...' : (editingPlan() ? 'Lưu thay đổi' : 'Tạo gói') }}
+            {{ saving() ? 'Saving...' : (editingPlan() ? 'Save Changes' : 'Create Plan') }}
           </button>
         </div>
       </div>

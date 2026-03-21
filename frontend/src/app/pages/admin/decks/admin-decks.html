@@ -2,12 +2,12 @@
   <!-- Header -->
   <div class="flex items-center justify-between mb-8">
     <div>
-      <h1 class="text-2xl font-black text-gray-900 m-0">Quản lý Bộ thẻ</h1>
-      <p class="text-gray-400 text-[13px] font-medium mt-1">Tổng quan tất cả bộ thẻ trong hệ thống</p>
+      <h1 class="text-2xl font-black text-gray-900 m-0">Decks Management</h1>
+      <p class="text-gray-400 text-[13px] font-medium mt-1">Overview of all decks in the system</p>
     </div>
     <button (click)="loadDecks()" class="flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 text-gray-600 rounded-xl font-bold text-[13px] cursor-pointer hover:bg-gray-50 transition-all">
       <span class="material-symbols-outlined text-[16px]">refresh</span>
-      Làm mới
+      Refresh
     </button>
   </div>
 
@@ -23,17 +23,17 @@
   <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-6 flex flex-wrap items-center gap-3">
     <div class="flex items-center gap-2 flex-1 min-w-[200px] bg-gray-50 border border-gray-200 rounded-xl px-3 py-2">
       <span class="material-symbols-outlined text-gray-400 text-[18px]">search</span>
-      <input type="text" placeholder="Tìm tên bộ thẻ..." class="flex-1 border-none bg-transparent outline-none text-[13px] text-gray-700"
+      <input type="text" placeholder="Search deck name..." class="flex-1 border-none bg-transparent outline-none text-[13px] text-gray-700"
         [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event); currentPage.set(1)" />
     </div>
     <select class="px-3 py-2 border border-gray-200 rounded-xl text-[13px] text-gray-700 bg-white outline-none focus:border-indigo-400"
       [ngModel]="filterVisibility()" (ngModelChange)="filterVisibility.set($any($event)); currentPage.set(1)">
-      <option value="All">Tất cả loại</option>
-      <option value="Public">Công khai</option>
-      <option value="Private">Riêng tư</option>
-      <option value="Shared">Chia sẻ</option>
+      <option value="All">All Types</option>
+      <option value="Public">Public</option>
+      <option value="Private">Private</option>
+      <option value="Shared">Shared</option>
     </select>
-    <span class="text-[12px] font-bold text-gray-400">{{ filteredDecks().length }} kết quả</span>
+    <span class="text-[12px] font-bold text-gray-400">{{ filteredDecks().length }} results</span>
   </div>
 
   <!-- Table -->
@@ -47,17 +47,17 @@
     } @else if (pagedDecks().length === 0) {
       <div class="p-12 text-center text-gray-400">
         <span class="material-symbols-outlined text-[48px] block mb-3">style</span>
-        <p class="font-semibold">Không tìm thấy bộ thẻ nào</p>
+        <p class="font-semibold">No decks found</p>
       </div>
     } @else {
       <table class="w-full text-left">
         <thead>
           <tr class="border-b border-gray-50 bg-gray-50/50">
-            <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest">Bộ thẻ</th>
-            <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest">Câu hỏi</th>
-            <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest">Loại</th>
-            <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest">Đánh giá</th>
-            <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest">Ngày tạo</th>
+            <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest">Deck</th>
+            <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest">Questions</th>
+            <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest">Visibility</th>
+            <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest">Rating</th>
+            <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest">Created Date</th>
           </tr>
         </thead>
         <tbody>
@@ -109,13 +109,13 @@
       <!-- Pagination -->
       <div class="flex items-center justify-between px-6 py-4 border-t border-gray-50">
         <p class="text-[12px] text-gray-400 font-medium">
-          Trang {{ currentPage() }} / {{ totalPages() }} · {{ filteredDecks().length }} bộ thẻ
+          Page {{ currentPage() }} / {{ totalPages() }} · {{ filteredDecks().length }} decks
         </p>
         <div class="flex gap-2">
           <button (click)="prevPage()" [disabled]="currentPage() === 1"
-            class="px-3 py-1.5 text-[13px] font-bold border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">Trước</button>
+            class="px-3 py-1.5 text-[13px] font-bold border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">Previous</button>
           <button (click)="nextPage()" [disabled]="currentPage() === totalPages()"
-            class="px-3 py-1.5 text-[13px] font-bold bg-indigo-600 text-white border-none rounded-lg cursor-pointer hover:bg-indigo-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">Tiếp</button>
+            class="px-3 py-1.5 text-[13px] font-bold bg-indigo-600 text-white border-none rounded-lg cursor-pointer hover:bg-indigo-700 disabled:opacity-30 disabled:cursor-not-allowed transition-colors">Next</button>
         </div>
       </div>
     }

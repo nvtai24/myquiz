@@ -103,22 +103,22 @@ export class AdminUsers implements OnInit {
     const newStatus = !user.isBanned;
     
     Swal.fire({
-      title: 'Xác nhận',
-      text: `Bạn có chắc chắn muốn ${newStatus ? 'khóa' : 'mở khóa'} tài khoản ${user.email}?`,
+      title: 'Confirm Action',
+      text: `Are you sure you want to ${newStatus ? 'ban' : 'unban'} user ${user.email}?`,
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#4f46e5',
       cancelButtonColor: '#9ca3af',
-      confirmButtonText: 'Đồng ý',
-      cancelButtonText: 'Hủy bỏ'
+      confirmButtonText: 'Yes, proceed',
+      cancelButtonText: 'Cancel'
     }).then((result) => {
       if (result.isConfirmed) {
         this.adminService.updateUserBanStatus(user.id, newStatus).subscribe({
           next: () => {
-            Swal.fire('Thành công', `Đã ${newStatus ? 'khóa' : 'mở khóa'} tài khoản thành công!`, 'success');
+            Swal.fire('Success', `User has been ${newStatus ? 'banned' : 'unbanned'} successfully!`, 'success');
             this.loadUsers();
           },
-          error: (err: any) => Swal.fire('Lỗi', 'Có lỗi xảy ra: ' + err.message, 'error')
+          error: (err: any) => Swal.fire('Error', 'An error occurred: ' + err.message, 'error')
         });
       }
     });
@@ -128,23 +128,23 @@ export class AdminUsers implements OnInit {
     if (newRole === this.getRoleName(user.roles)) return;
     
     Swal.fire({
-      title: 'Thay đổi quyền',
-      text: `Bạn có chắc chắn muốn phân quyền ${newRole} cho tài khoản ${user.email}?`,
+      title: 'Change Permissions',
+      text: `Are you sure you want to assign ${newRole} role to account ${user.email}?`,
       icon: 'question',
       showCancelButton: true,
       confirmButtonColor: '#4f46e5',
       cancelButtonColor: '#9ca3af',
-      confirmButtonText: 'Cập nhật',
-      cancelButtonText: 'Hủy bỏ'
+      confirmButtonText: 'Update Role',
+      cancelButtonText: 'Cancel'
     }).then((result) => {
       if (result.isConfirmed) {
         this.adminService.assignUserRole(user.id, newRole).subscribe({
           next: () => {
-            Swal.fire('Thành công', `Đã phân quyền ${newRole} thành công!`, 'success');
+            Swal.fire('Success', `User role updated to ${newRole} successfully!`, 'success');
             this.loadUsers();
           },
           error: (err: any) => {
-            Swal.fire('Lỗi', 'Có lỗi xảy ra: ' + err.message, 'error');
+            Swal.fire('Error', 'An error occurred: ' + err.message, 'error');
             this.loadUsers(); // revert
           }
         });

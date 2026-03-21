@@ -2,9 +2,9 @@
   <!-- Header -->
   <!-- <div class="flex items-center justify-between mb-8">
     <div>
-      <h1 class="text-2xl font-black text-gray-900 m-0">Quản lý người dùng</h1>
+      <h1 class="text-2xl font-black text-gray-900 m-0">User Management</h1>
       <p class="text-gray-400 text-[13px] font-medium mt-1">
-        Hiển thị {{ users().length }} / {{ totalUsers() }} người dùng
+        Showing {{ users().length }} / {{ totalUsers() }} users
       </p>
     </div>
   </div> -->
@@ -13,23 +13,23 @@
   <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-6 flex flex-wrap items-center gap-3">
     <div class="flex items-center gap-2 flex-1 min-w-[300px] bg-gray-50 border border-gray-200 rounded-xl px-3 py-2">
       <span class="material-symbols-outlined text-gray-400 text-[18px]">search</span>
-      <input type="text" placeholder="Tìm tên hoặc email..." class="flex-1 border-none bg-transparent outline-none text-[13px] text-gray-700"
+      <input type="text" placeholder="Search by name or email..." class="flex-1 border-none bg-transparent outline-none text-[13px] text-gray-700"
         [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)" (keyup.enter)="onSearch()" />
-      <button (click)="onSearch()" class="px-3 py-1 bg-indigo-100 text-indigo-700 font-bold rounded-lg hover:bg-indigo-200 transition-colors border-none cursor-pointer">Tìm kiếm</button>
+      <button (click)="onSearch()" class="px-3 py-1 bg-indigo-100 text-indigo-700 font-bold rounded-lg hover:bg-indigo-200 transition-colors border-none cursor-pointer">Search</button>
     </div>
     
     <select class="px-3 py-2 border border-gray-200 rounded-xl text-[13px] font-medium text-gray-700 bg-white outline-none focus:border-indigo-400"
       [ngModel]="filterRole()" (ngModelChange)="filterRole.set($event); onFilterChange()">
-      <option value="All">Tất cả vai trò</option>
+      <option value="All">All Roles</option>
       <option value="Admin">Admin</option>
       <option value="User">User</option>
     </select>
     
     <select class="px-3 py-2 border border-gray-200 rounded-xl text-[13px] font-medium text-gray-700 bg-white outline-none focus:border-indigo-400"
       [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event); onFilterChange()">
-      <option value="All">Tất cả trạng thái</option>
-      <option value="Active">Kích hoạt</option>
-      <option value="Banned">Bị khóa</option>
+      <option value="All">All Status</option>
+      <option value="Active">Active</option>
+      <option value="Banned">Banned</option>
     </select>
   </div>
 
@@ -38,11 +38,11 @@
     <table class="w-full text-left">
       <thead>
         <tr class="border-b border-gray-50 bg-gray-50/50">
-          <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest">Người dùng</th>
-          <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest">Vai trò</th>
-          <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest">Ngày tham gia</th>
-          <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest">Trạng thái</th>
-          <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest">Hành động</th>
+          <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest">User</th>
+          <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest">Role</th>
+          <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest">Joined Date</th>
+          <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest">Status</th>
+          <th class="px-6 py-3.5 text-[11px] font-black text-gray-400 uppercase tracking-widest">Action</th>
         </tr>
       </thead>
       <tbody>
@@ -74,7 +74,7 @@
               <span class="flex items-center gap-1.5 text-[12px] font-bold"
                 [class]="!user.isBanned ? 'text-green-600' : 'text-red-500'">
                 <span class="w-1.5 h-1.5 rounded-full" [class]="!user.isBanned ? 'bg-green-500' : 'bg-red-400'"></span>
-                {{ !user.isBanned ? 'Kích hoạt' : 'Bị khóa' }}
+                {{ !user.isBanned ? 'Active' : 'Banned' }}
               </span>
             </td>
             <td class="px-6 py-4">
@@ -82,7 +82,7 @@
                 [disabled]="getRoleName(user.roles) === 'Admin'"
                 class="text-[12px] font-bold border rounded-lg px-3 py-1.5 cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 [class]="!user.isBanned ? 'border-red-200 text-red-600 hover:bg-red-50' : 'border-green-200 text-green-600 hover:bg-green-50'">
-                {{ !user.isBanned ? 'Khóa TK' : 'Mở khóa' }}
+                {{ !user.isBanned ? 'Ban' : 'Unban' }}
               </button>
             </td>
           </tr>
@@ -90,7 +90,7 @@
 
         @if (users().length === 0) {
           <tr>
-            <td colspan="5" class="px-6 py-12 text-center text-gray-400 font-medium">Không tìm thấy người dùng nào</td>
+            <td colspan="5" class="px-6 py-12 text-center text-gray-400 font-medium">No users found</td>
           </tr>
         }
       </tbody>
@@ -99,7 +99,7 @@
     <!-- Pagination -->
     <div class="flex items-center justify-between px-6 py-4 border-t border-gray-50">
       <p class="text-[12px] text-gray-400 font-medium">
-        Trang {{ currentPage() }} / {{ totalPages() }} · Tổng {{ totalUsers() }} người dùng
+        Page {{ currentPage() }} / {{ totalPages() }} · Total {{ totalUsers() }} users
       </p>
       <div class="flex gap-1.5 items-center">
         <!-- Nút Trở Lại -->

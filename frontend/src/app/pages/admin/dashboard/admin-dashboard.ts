@@ -38,7 +38,8 @@ export class AdminDashboard implements OnInit, AfterViewInit, OnDestroy {
   planDist = computed(() => {
     const apiData = this.planDistApiData();
     const total = apiData.reduce((sum, item) => sum + item.userCount, 0);
-    const colors = ['#6366f1', '#e5e7eb', '#f59e0b', '#10b981', '#3b82f6'];
+    // Sử dụng dải màu tương phản mạnh: Indigo, Rose, Amber, Emerald, Sky Blue
+    const colors = ['#4f46e5', '#f43f5e', '#f59e0b', '#10b981', '#0ea5e9'];
     
     return apiData.map((item, index) => {
       const percentage = total > 0 ? (item.userCount / total) * 100 : 0;

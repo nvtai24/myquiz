@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using MyQuizGenerator.Application.SubscriptionPlans.DTOs;
 using CreatePlan = MyQuizGenerator.Application.SubscriptionPlans.Commands.CreateSubscriptionPlan;
 using UpdatePlan = MyQuizGenerator.Application.SubscriptionPlans.Commands.UpdateSubscriptionPlan;
+using DeletePlan = MyQuizGenerator.Application.SubscriptionPlans.Commands.DeleteSubscriptionPlan;
 using GetPlans = MyQuizGenerator.Application.SubscriptionPlans.Queries.GetSubscriptionPlans;
 using GetActivePlans = MyQuizGenerator.Application.SubscriptionPlans.Queries.GetActiveSubscriptionPlans;
 
@@ -72,5 +73,19 @@ public class SubscriptionPlansController : BaseApiController
         var command = new UpdatePlan.UpdateSubscriptionPlanCommand(id, request);
         var result = await _mediator.Send(command);
         return ApiOk(result, "Subscription plan updated successfully");
+    }
+
+    /// <summary>
+    /// Deletes a subscription plan.
+    /// </summary>
+    /// <param name="id">The subscription plan ID.</param>
+    /// <returns>A response indicating success.</returns>
+    [HttpDelete("{id}")]
+    [Authorize(Roles = "Admin")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        var command = new DeletePlan.DeleteSubscriptionPlanCommand(id);
+        await _mediator.Send(command);
+        return ApiOk("Subscription plan deleted successfully");
     }
 }

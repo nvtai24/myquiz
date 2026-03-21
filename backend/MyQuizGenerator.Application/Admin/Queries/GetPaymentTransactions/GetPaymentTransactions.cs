@@ -11,7 +11,9 @@ public record GetPaymentTransactionsQuery(
     int Page = 1,
     int PageSize = 10,
     string? Search = null,
-    PaymentStatus? Status = null)
+    PaymentStatus? Status = null,
+    DateTime? FromDate = null,
+    DateTime? ToDate = null)
     : IRequest<(List<AdminPaymentTransactionResponse> Transactions, int TotalCount)>;
 
 public class GetPaymentTransactionsQueryHandler
@@ -41,14 +43,28 @@ public class GetPaymentTransactionsQueryHandler
             query = query.Where(p => p.Status == request.Status.Value);
         }
 
-        // Search by order code or content
+        // Filter by created time
+        if (request.FromDate.HasValue)
+        {
+            query = query.Where(p => p.CreatedAt >= request.FromDate.Value);
+        }
+
+        if (request.ToDate.HasValue)
+        {
+            query = query.Where(p => p.CreatedAt <= request.ToDate.Value);
+        }
+
+        // Search by order code, content, userid or mapped user details
         if (!string.IsNullOrWhiteSpace(request.Search))
         {
             var searchLower = request.Search.ToLower();
+            var matchingUserIds = await _userService.SearchUserIdsAsync(searchLower);
+
             query = query.Where(p =>
                 p.OrderCode.ToLower().Contains(searchLower) ||
                 p.Content.ToLower().Contains(searchLower) ||
-                p.UserId.ToLower().Contains(searchLower));
+                p.UserId.ToLower().Contains(searchLower) ||
+                matchingUserIds.Contains(p.UserId));
         }
 
         var totalCount = await query.CountAsync(cancellationToken);

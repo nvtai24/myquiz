@@ -3,6 +3,7 @@ namespace MyQuizGenerator.Application.Common.Interfaces;
 public interface IUserService
 {
     Task<UserInfo?> GetUserInfoAsync(string userId);
+    Task<List<string>> SearchUserIdsAsync(string searchTerm);
 }
 
 public class UserInfo

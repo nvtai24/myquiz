@@ -20,9 +20,11 @@ public class AdminPaymentsController : BaseApiController
         [FromQuery] int page = 1,
         [FromQuery] int pageSize = 10,
         [FromQuery] string? search = null,
-        [FromQuery] PaymentStatus? status = null)
+        [FromQuery] PaymentStatus? status = null,
+        [FromQuery] DateTime? fromDate = null,
+        [FromQuery] DateTime? toDate = null)
     {
-        var query = new GetPaymentTransactionsQuery(page, pageSize, search, status);
+        var query = new GetPaymentTransactionsQuery(page, pageSize, search, status, fromDate, toDate);
         var (transactions, totalCount) = await Mediator.Send(query);
         return ApiPaged(transactions, page, pageSize, totalCount);
     }

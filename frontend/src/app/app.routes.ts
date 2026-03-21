@@ -30,6 +30,7 @@ export const routes: Routes = [
       { path: 'users', loadComponent: () => import('./pages/admin/users/admin-users').then(m => m.AdminUsers) },
       { path: 'plans', loadComponent: () => import('./pages/admin/plans/admin-plans').then(m => m.AdminPlans) },
       { path: 'decks', loadComponent: () => import('./pages/admin/decks/admin-decks').then(m => m.AdminDecks) },
+      { path: 'transactions', loadComponent: () => import('./pages/admin/transactions/admin-transactions').then(m => m.AdminTransactions) },
     ]
   },
 

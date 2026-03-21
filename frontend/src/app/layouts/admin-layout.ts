@@ -16,8 +16,12 @@ export class AdminLayout implements OnInit, OnDestroy {
   private adminService = inject(AdminService);
   private pingInterval: any;
 
-  sidebarOpen = signal(true);
+  sidebarCollapsed = signal(false);
   user = computed(() => this.auth.currentUser());
+
+  toggleSidebar() {
+    this.sidebarCollapsed.update(v => !v);
+  }
   isSystemOnline = signal<boolean>(false);
 
   navItems = [

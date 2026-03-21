@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { AdminService, AdminUser } from '../../../services/admin.service';
@@ -19,6 +19,29 @@ export class AdminUsers implements OnInit {
   users = signal<AdminUser[]>([]);
   totalUsers = signal(0);
   totalPages = signal(0);
+
+  pagesList = computed(() => {
+    const total = this.totalPages();
+    const current = this.currentPage();
+    if (total <= 1) return [1];
+
+    let start = Math.max(1, current - 2);
+    let end = Math.min(total, current + 2);
+    
+    if (end - start < 4) {
+      if (start === 1) {
+        end = Math.min(total, 5);
+      } else if (end === total) {
+        start = Math.max(1, total - 4);
+      }
+    }
+
+    const pages = [];
+    for (let i = start; i <= end; i++) {
+      pages.push(i);
+    }
+    return pages;
+  });
 
   ngOnInit() {
     this.loadUsers();
@@ -52,6 +75,13 @@ export class AdminUsers implements OnInit {
   nextPage() {
     if (this.currentPage() < this.totalPages()) {
       this.currentPage.update(p => p + 1);
+      this.loadUsers();
+    }
+  }
+
+  goToPage(p: number) {
+    if (p >= 1 && p <= this.totalPages() && p !== this.currentPage()) {
+      this.currentPage.set(p);
       this.loadUsers();
     }
   }

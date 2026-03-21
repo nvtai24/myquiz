@@ -1,5 +1,5 @@
 export const environment = {
   production: false,
   apiUrl: 'https://be.myquiz.fun',
-  googleClientId: '312793671437-3k2kfqtbn9f3ai63o1f9dj3l14qdah87.apps.googleusercontent.com'
+  googleClientId: '725294510426-h2tpulq6s0736t1s76il9rt5sda715dc.apps.googleusercontent.com'
 };

@@ -13,6 +13,8 @@ export class AdminUsers implements OnInit {
   private adminService = inject(AdminService);
 
   searchQuery = signal('');
+  filterRole = signal<'All' | 'Admin' | 'User'>('All');
+  filterStatus = signal<'All' | 'Active' | 'Banned'>('All');
   currentPage = signal(1);
   pageSize = signal(10);
   
@@ -48,7 +50,12 @@ export class AdminUsers implements OnInit {
   }
 
   loadUsers() {
-    this.adminService.getUsers(this.currentPage(), this.pageSize(), this.searchQuery()).subscribe({
+    let roleParam = this.filterRole() === 'All' ? undefined : this.filterRole();
+    let isBannedParam: boolean | undefined = undefined;
+    if (this.filterStatus() === 'Active') isBannedParam = false;
+    else if (this.filterStatus() === 'Banned') isBannedParam = true;
+
+    this.adminService.getUsers(this.currentPage(), this.pageSize(), this.searchQuery(), roleParam, isBannedParam).subscribe({
       next: (res) => {
         if (res.success && res.data) {
           this.users.set(res.data);
@@ -58,6 +65,11 @@ export class AdminUsers implements OnInit {
       },
       error: (err) => console.error('Error fetching users:', err)
     });
+  }
+
+  onFilterChange() {
+    this.currentPage.set(1);
+    this.loadUsers();
   }
 
   onSearch() {

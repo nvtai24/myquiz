@@ -97,11 +97,13 @@ export class AdminService {
   }
 
   /** GET /api/admin/users — Get paginated list of users */
-  getUsers(page?: number, pageSize?: number, search?: string): Observable<AdminUsersResponse> {
+  getUsers(page?: number, pageSize?: number, search?: string, role?: string, isBanned?: boolean | null): Observable<AdminUsersResponse> {
     let params = new HttpParams();
     if (page != null) params = params.set('page', page.toString());
     if (pageSize != null) params = params.set('pageSize', pageSize.toString());
     if (search) params = params.set('search', search);
+    if (role && role !== 'All') params = params.set('role', role);
+    if (isBanned != null) params = params.set('isBanned', isBanned.toString());
 
     return this.http.get<AdminUsersResponse>('/api/admin/users', { params });
   }

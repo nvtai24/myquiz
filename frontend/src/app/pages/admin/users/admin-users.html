@@ -9,7 +9,7 @@
     </div>
   </div> -->
 
-  <!-- Search -->
+  <!-- Search + Filters -->
   <div class="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-6 flex flex-wrap items-center gap-3">
     <div class="flex items-center gap-2 flex-1 min-w-[300px] bg-gray-50 border border-gray-200 rounded-xl px-3 py-2">
       <span class="material-symbols-outlined text-gray-400 text-[18px]">search</span>
@@ -17,6 +17,20 @@
         [ngModel]="searchQuery()" (ngModelChange)="searchQuery.set($event)" (keyup.enter)="onSearch()" />
       <button (click)="onSearch()" class="px-3 py-1 bg-indigo-100 text-indigo-700 font-bold rounded-lg hover:bg-indigo-200 transition-colors border-none cursor-pointer">Tìm kiếm</button>
     </div>
+    
+    <select class="px-3 py-2 border border-gray-200 rounded-xl text-[13px] font-medium text-gray-700 bg-white outline-none focus:border-indigo-400"
+      [ngModel]="filterRole()" (ngModelChange)="filterRole.set($event); onFilterChange()">
+      <option value="All">Tất cả vai trò</option>
+      <option value="Admin">Admin</option>
+      <option value="User">User</option>
+    </select>
+    
+    <select class="px-3 py-2 border border-gray-200 rounded-xl text-[13px] font-medium text-gray-700 bg-white outline-none focus:border-indigo-400"
+      [ngModel]="filterStatus()" (ngModelChange)="filterStatus.set($event); onFilterChange()">
+      <option value="All">Tất cả trạng thái</option>
+      <option value="Active">Kích hoạt</option>
+      <option value="Banned">Bị khóa</option>
+    </select>
   </div>
 
   <!-- Table -->

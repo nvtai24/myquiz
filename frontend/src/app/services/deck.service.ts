@@ -1,14 +1,14 @@
 import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { ApiResponse } from '../models/api.models';
 import {
-  ApiResponse,
   CreateDeckRequest,
   CreateDeckRatingRequest,
   DeckDetailResponse,
   DeckRatingSummaryResponse,
-  DeckSummary,
-  GeneratedDeck
+  DeckSummaryResponse,
+  GeneratedDeckResponse
 } from '../models/deck.models';
 
 @Injectable({
@@ -18,8 +18,8 @@ export class DeckService {
   private http = inject(HttpClient);
   private endpoint = '/api/Decks';
 
-  getUserDecks(): Observable<ApiResponse<DeckSummary[]>> {
-    return this.http.get<ApiResponse<DeckSummary[]>>(this.endpoint);
+  getUserDecks(): Observable<ApiResponse<DeckSummaryResponse[]>> {
+    return this.http.get<ApiResponse<DeckSummaryResponse[]>>(this.endpoint);
   }
 
   getDeckById(id: string): Observable<ApiResponse<DeckDetailResponse>> {
@@ -96,10 +96,10 @@ export class DeckService {
     return this.http.put<ApiResponse<string>>(`${this.endpoint}/${id}`, formData);
   }
 
-  generateDeck(file: File): Observable<ApiResponse<GeneratedDeck>> {
+  generateDeck(file: File): Observable<ApiResponse<GeneratedDeckResponse>> {
     const formData = new FormData();
     formData.append('file', file, file.name);
-    return this.http.post<ApiResponse<GeneratedDeck>>(`${this.endpoint}/generate`, formData);
+    return this.http.post<ApiResponse<GeneratedDeckResponse>>(`${this.endpoint}/generate`, formData);
   }
 
   invite(id: string, email: string): Observable<ApiResponse<string>> {

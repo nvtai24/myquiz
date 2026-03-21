@@ -1,7 +1,8 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AdminService, AdminSubscriptionPlan, UpdatePlanRequest } from '../../../services/admin.service';
+import { AdminService } from '../../../services/admin.service';
+import { AdminSubscriptionPlanResponse, UpdatePlanRequest } from '../../../models/admin.models';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -13,14 +14,14 @@ import Swal from 'sweetalert2';
 export class AdminPlans implements OnInit {
   private adminService = inject(AdminService);
 
-  plans = signal<AdminSubscriptionPlan[]>([]);
+  plans = signal<AdminSubscriptionPlanResponse[]>([]);
   loading = signal(true);
   error = signal<string | null>(null);
   saving = signal(false);
   successMsg = signal<string | null>(null);
 
   // Edit modal
-  editingPlan = signal<AdminSubscriptionPlan | null>(null);
+  editingPlan = signal<AdminSubscriptionPlanResponse | null>(null);
   editForm = signal<UpdatePlanRequest>({
     name: '', description: '', dailyGenerateLimit: 0, numDeckLimit: 0, price: 0, duration: 30, isActive: true, order: 1
   });
@@ -42,7 +43,7 @@ export class AdminPlans implements OnInit {
     });
   }
 
-  openEdit(plan: AdminSubscriptionPlan) {
+  openEdit(plan: AdminSubscriptionPlanResponse) {
     this.editingPlan.set(plan);
     this.editForm.set({
       name: plan.name,
@@ -69,7 +70,7 @@ export class AdminPlans implements OnInit {
     return `${days} days`;
   }
 
-  toggleActive(plan: AdminSubscriptionPlan) {
+  toggleActive(plan: AdminSubscriptionPlanResponse) {
     const newStatus = !plan.isActive;
     
     Swal.fire({
@@ -95,7 +96,7 @@ export class AdminPlans implements OnInit {
     });
   }
 
-  deletePlan(plan: AdminSubscriptionPlan) {
+  deletePlan(plan: AdminSubscriptionPlanResponse) {
     Swal.fire({
       title: 'Delete Permanently?',
       text: `Are you sure you want to delete plan ${plan.name} permanently? This action cannot be undone.`,

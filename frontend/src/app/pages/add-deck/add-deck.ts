@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { DeckService } from '../../services/deck.service';
 import { PaymentService } from '../../services/payment.service';
-import { CreateDeckRequest, CreateQuestionRequest, GeneratedDeck, GeneratedQuestion, QuestionType } from '../../models/deck.models';
+import { CreateDeckRequest, CreateQuestionRequest, GeneratedDeckResponse, GeneratedQuestionResponse, QuestionType } from '../../models/deck.models';
 
 interface Card {
   id: number;
@@ -575,7 +575,7 @@ export class AddDeck implements OnInit {
         if (this.aiUsageMax() > 0) {
           this.aiUsageCount.update(c => c + 1);
         }
-        this.applyGeneratedDeck(res.data);
+        this.applyGeneratedDeckResponse(res.data);
       },
       error: (err) => {
         this.aiGenerating.set(false);
@@ -584,7 +584,7 @@ export class AddDeck implements OnInit {
     });
   }
 
-  private applyGeneratedDeck(deck: GeneratedDeck) {
+  private applyGeneratedDeckResponse(deck: GeneratedDeckResponse) {
     // Auto-fill title/description only if user hasn't typed anything yet
     if (!this.title().trim() && deck.name) {
       this.title.set(deck.name);
@@ -593,8 +593,8 @@ export class AddDeck implements OnInit {
       this.description.set(deck.description);
     }
 
-    // Map GeneratedQuestion[] → Card[]
-    const mapped: Card[] = deck.questions.map((q: GeneratedQuestion) => {
+    // Map GeneratedQuestionResponse[] → Card[]
+    const mapped: Card[] = deck.questions.map((q: GeneratedQuestionResponse) => {
       const cardType = this.mapQuestionTypeToCardType(q.type);
       const card: Card = {
         id: this.nextId++,

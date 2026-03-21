@@ -2,155 +2,50 @@ import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs';
+import { ApiResponse, PagedResponse } from '../models/api.models';
+import { AdminSubscriptionPlanResponse, UpdatePlanRequest, CreatePlanRequest, AdminDeckSummaryResponse, AdminPaymentResponse, OverviewStatsResponse, RevenueChartResponse, PlanDistributionResponse, AdminUserResponse } from '../models/admin.models';
 
-export interface AdminSubscriptionPlan {
-  id: string;
-  name: string;
-  description: string;
-  dailyGenerateLimit: number;
-  numDeckLimit: number;
-  price: number;
-  duration: number;
-  isActive: boolean;
-  order: number;
-  createdAt?: string;
-  updatedAt?: string | null;
-}
 
-export interface UpdatePlanRequest {
-  name: string;
-  description: string;
-  dailyGenerateLimit: number;
-  numDeckLimit: number;
-  price: number;
-  duration: number;
-  isActive: boolean;
-  order: number;
-}
-
-export interface CreatePlanRequest extends UpdatePlanRequest {}
-
-export interface AdminDeckSummary {
-  id: string;
-  name: string;
-  description?: string;
-  questionCount: number;
-  visibility: string;
-  createdAt: string;
-  averageRating?: number;
-  totalRatings?: number;
-}
-
-export interface PaginationMeta {
-  currentPage: number;
-  pageSize: number;
-  totalRecords: number;
-  totalPages: number;
-  hasPrevious: boolean;
-  hasNext: boolean;
-}
-
-export interface AdminPayment {
-  id: string;
-  userId: string;
-  userEmail: string;
-  userFullName: string;
-  planName: string;
-  orderCode: string;
-  amount: number;
-  status: string;
-  content: string;
-  createdAt: string;
-  completedAt: string | null;
-}
-
-export interface AdminPaymentsResponse {
-  success: boolean;
-  statusCode: number;
-  message: string;
-  pagination: PaginationMeta;
-  data: AdminPayment[];
-}
-
-export interface OverviewStats {
-  totalRevenue: number;
-  monthlyRevenue: number;
-  revenueGrowth: number;
-  newUsers: number;
-  userGrowth: number;
-}
-
-export interface RevenueData {
-  date: string;
-  amount: number;
-}
-
-export interface PlanDistData {
-  planName: string;
-  userCount: number;
-  percentage?: number;
-}
-
-export interface AdminUser {
-  id: string;
-  email: string;
-  firstName: string;
-  lastName: string;
-  fullName: string;
-  roles: string[];
-  emailConfirmed: boolean;
-  isBanned: boolean;
-  createdAt: string;
-  avatarUrl?: string | null;
-}
-
-export interface AdminUsersResponse {
-  success: boolean;
-  statusCode: number;
-  message: string;
-  pagination: PaginationMeta;
-  data: AdminUser[];
-}
 
 @Injectable({ providedIn: 'root' })
 export class AdminService {
   private http = inject(HttpClient);
 
   /** GET /api/subscription-plans/admin — Admin only */
-  getSubscriptionPlans(): Observable<{ success: boolean; data: AdminSubscriptionPlan[] }> {
-    return this.http.get<{ success: boolean; data: AdminSubscriptionPlan[] }>('/api/subscription-plans/admin');
+  getSubscriptionPlans(): Observable<ApiResponse<AdminSubscriptionPlanResponse[]>> {
+    return this.http.get<ApiResponse<AdminSubscriptionPlanResponse[]>>('/api/subscription-plans/admin');
   }
 
   /** POST /api/subscription-plans — Admin only */
-  createSubscriptionPlan(req: CreatePlanRequest): Observable<any> {
-    return this.http.post<any>('/api/subscription-plans', req);
+  createSubscriptionPlan(req: CreatePlanRequest): Observable<ApiResponse<void>> {
+    return this.http.post<ApiResponse<void>>('/api/subscription-plans', req);
   }
 
   /** PUT /api/subscription-plans/:id — Admin only */
-  updateSubscriptionPlan(id: string, req: UpdatePlanRequest): Observable<any> {
-    return this.http.put<any>(`/api/subscription-plans/${id}`, req);
+  updateSubscriptionPlan(id: string, req: UpdatePlanRequest): Observable<ApiResponse<void>> {
+    return this.http.put<ApiResponse<void>>(`/api/subscription-plans/${id}`, req);
   }
 
   /** DELETE /api/subscription-plans/:id — Admin only */
-  deleteSubscriptionPlan(id: string): Observable<any> {
-    return this.http.delete<any>(`/api/subscription-plans/${id}`);
+  deleteSubscriptionPlan(id: string): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(`/api/subscription-plans/${id}`);
   }
 
   /** GET /api/Decks — get all public decks for admin overview */
-  getAllDecks(): Observable<{ success: boolean; data: AdminDeckSummary[] }> {
-    return this.http.get<{ success: boolean; data: AdminDeckSummary[] }>('/api/Decks');
+  getAllDecks(): Observable<ApiResponse<AdminDeckSummaryResponse[]>> {
+    return this.http.get<ApiResponse<AdminDeckSummaryResponse[]>>('/api/Decks');
   }
 
   /** GET /api/ping — check if backend is online */
   checkSystemStatus(): Observable<boolean> {
-    return this.http.get<{ success: boolean; statusCode: number }>('/api/ping').pipe(
+    return this.http.get<ApiResponse<void>>('/api/ping').pipe(
       map(res => res.success && res.statusCode === 200),
       catchError(() => of(false))
     );
   }
 
   /** GET /api/admin/users — Get paginated list of users */
-  getUsers(page?: number, pageSize?: number, search?: string, role?: string, isBanned?: boolean | null): Observable<AdminUsersResponse> {
+  getUsers(page?: number, pageSize?: number, search?: string, role?: string, isBanned?: boolean | null): Observable<PagedResponse<AdminUserResponse>> {
     let params = new HttpParams();
     if (page != null) params = params.set('page', page.toString());
     if (pageSize != null) params = params.set('pageSize', pageSize.toString());
@@ -158,21 +53,21 @@ export class AdminService {
     if (role && role !== 'All') params = params.set('role', role);
     if (isBanned != null) params = params.set('isBanned', isBanned.toString());
 
-    return this.http.get<AdminUsersResponse>('/api/admin/users', { params });
+    return this.http.get<PagedResponse<AdminUserResponse>>('/api/admin/users', { params });
   }
 
   /** PUT /api/admin/users/{userId}/ban — Ban or unban a user */
-  updateUserBanStatus(userId: string, isBanned: boolean): Observable<any> {
-    return this.http.put(`/api/admin/users/${userId}/ban`, { isBanned });
+  updateUserBanStatus(userId: string, isBanned: boolean): Observable<ApiResponse<void>> {
+    return this.http.put<ApiResponse<void>>(`/api/admin/users/${userId}/ban`, { isBanned });
   }
 
   /** PUT /api/admin/users/{userId}/role — Assign role */
-  assignUserRole(userId: string, role: string): Observable<any> {
-    return this.http.put(`/api/admin/users/${userId}/role`, { role });
+  assignUserRole(userId: string, role: string): Observable<ApiResponse<void>> {
+    return this.http.put<ApiResponse<void>>(`/api/admin/users/${userId}/role`, { role });
   }
 
   /** GET /api/admin/payments — Get paginated list of payments */
-  getPayments(page?: number, pageSize?: number, search?: string, status?: string, fromDate?: string, toDate?: string): Observable<AdminPaymentsResponse> {
+  getPayments(page?: number, pageSize?: number, search?: string, status?: string, fromDate?: string, toDate?: string): Observable<PagedResponse<AdminPaymentResponse>> {
     let params = new HttpParams();
     if (page != null) params = params.set('page', page.toString());
     if (pageSize != null) params = params.set('pageSize', pageSize.toString());
@@ -181,20 +76,20 @@ export class AdminService {
     if (fromDate) params = params.set('fromDate', fromDate);
     if (toDate) params = params.set('toDate', toDate);
 
-    return this.http.get<AdminPaymentsResponse>('/api/admin/payments', { params });
+    return this.http.get<PagedResponse<AdminPaymentResponse>>('/api/admin/payments', { params });
   }
 
   // --- DASHBOARD CHARTS & ANALYTICS ---
 
-  getSummaryStats(): Observable<{ success: boolean; data: OverviewStats }> {
-    return this.http.get<{ success: boolean; data: OverviewStats }>('/api/admin/stats/summary');
+  getSummaryStats(): Observable<ApiResponse<OverviewStatsResponse>> {
+    return this.http.get<ApiResponse<OverviewStatsResponse>>('/api/admin/stats/summary');
   }
 
-  getRevenueChart(days: number): Observable<{ success: boolean; data: RevenueData[] }> {
-    return this.http.get<{ success: boolean; data: RevenueData[] }>(`/api/admin/stats/revenue-chart?days=${days}`);
+  getRevenueChart(days: number): Observable<ApiResponse<RevenueChartResponse[]>> {
+    return this.http.get<ApiResponse<RevenueChartResponse[]>>(`/api/admin/stats/revenue-chart?days=${days}`);
   }
 
-  getPlanDistribution(): Observable<{ success: boolean; data: PlanDistData[] }> {
-    return this.http.get<{ success: boolean; data: PlanDistData[] }>('/api/admin/stats/plan-distribution');
+  getPlanDistribution(): Observable<ApiResponse<PlanDistributionResponse[]>> {
+    return this.http.get<ApiResponse<PlanDistributionResponse[]>>('/api/admin/stats/plan-distribution');
   }
 }

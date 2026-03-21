@@ -69,8 +69,8 @@ export class Quiz implements OnInit, OnDestroy {
     this.apiError.set(null);
     this.deckService.getDeckById(this.deckId).subscribe({
       next: (res) => {
-        this.deckTitle.set(res.data.name);
-        this.allQuestions = this.convertToQuizQuestions(res.data.questions || []);
+        this.deckTitle.set(res.data!.name);
+        this.allQuestions = this.convertToQuizQuestions(res.data!.questions || []);
         this.quizState.set('setup');
       },
       error: (err) => {

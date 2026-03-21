@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { DeckService } from '../../services/deck.service';
-import { DeckSummary, DeckSource, DeckVisibility } from '../../models/deck.models';
+import { DeckSummaryResponse, DeckSource, DeckVisibility } from '../../models/deck.models';
 
 const DECK_COLORS = ['#7c3aed', '#4255FF', '#059669', '#64748b', '#dc2626', '#d97706', '#0891b2'];
 const DECK_ICONS = ['style', 'code', 'api', 'webhook', 'school', 'menu_book', 'quiz'];
@@ -34,7 +34,7 @@ export class Library implements OnInit {
   itemsPerPage = signal(6);
 
   // Data
-  allDecks = signal<DeckSummary[]>([]);
+  allDecks = signal<DeckSummaryResponse[]>([]);
   loading = signal(false);
   errorMessage = signal('');
 
@@ -76,7 +76,7 @@ export class Library implements OnInit {
     });
   }
 
-  get filteredSets(): DeckSummary[] {
+  get filteredSets(): DeckSummaryResponse[] {
     let decks = this.allDecks() || [];
 
     // Search by name/description/tags
@@ -89,7 +89,7 @@ export class Library implements OnInit {
       );
     }
 
-    // Filter by visibility (used as source proxy since DeckSummary has visibility)
+    // Filter by visibility (used as source proxy since DeckSummaryResponse has visibility)
     if (this.selectedVisibility() !== 'all') {
       decks = decks.filter(d => d.visibility === this.selectedVisibility());
     }
@@ -118,7 +118,7 @@ export class Library implements OnInit {
     return Math.ceil(this.filteredSets.length / this.itemsPerPage());
   }
 
-  get paginatedSets(): DeckSummary[] {
+  get paginatedSets(): DeckSummaryResponse[] {
     const start = (this.currentPage() - 1) * this.itemsPerPage();
     return this.filteredSets.slice(start, start + this.itemsPerPage());
   }

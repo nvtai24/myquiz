@@ -1,7 +1,8 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AdminService, AdminPayment } from '../../../services/admin.service';
+import { AdminService } from '../../../services/admin.service';
+import { AdminPaymentResponse } from '../../../models/admin.models';
 
 @Component({
   selector: 'app-admin-transactions',
@@ -19,7 +20,7 @@ export class AdminTransactions implements OnInit {
   currentPage = signal(1);
   pageSize = signal(10);
   
-  payments = signal<AdminPayment[]>([]);
+  payments = signal<AdminPaymentResponse[]>([]);
   totalPayments = signal(0);
   totalPages = signal(0);
 
@@ -100,9 +101,9 @@ export class AdminTransactions implements OnInit {
     }
   }
 
-  selectedPayment = signal<AdminPayment | null>(null);
+  selectedPayment = signal<AdminPaymentResponse | null>(null);
 
-  openPaymentDetails(payment: AdminPayment) {
+  openPaymentDetails(payment: AdminPaymentResponse) {
     this.selectedPayment.set(payment);
   }
 

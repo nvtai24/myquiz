@@ -1,7 +1,8 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AdminService, AdminDeckSummary } from '../../../services/admin.service';
+import { AdminService } from '../../../services/admin.service';
+import { AdminDeckSummaryResponse } from '../../../models/admin.models';
 
 @Component({
   selector: 'app-admin-decks',
@@ -12,7 +13,7 @@ import { AdminService, AdminDeckSummary } from '../../../services/admin.service'
 export class AdminDecks implements OnInit {
   private adminService = inject(AdminService);
 
-  decks = signal<AdminDeckSummary[]>([]);
+  decks = signal<AdminDeckSummaryResponse[]>([]);
   loading = signal(true);
   error = signal<string | null>(null);
   searchQuery = signal('');

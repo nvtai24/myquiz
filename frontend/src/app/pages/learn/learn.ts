@@ -49,7 +49,7 @@ export class Learn implements OnInit {
     this.error.set(null);
     this.deckService.getDeckById(this.deckId).subscribe({
       next: (res) => {
-        const deck: DeckDetailResponse = res.data;
+        const deck = res.data!;
         this.deckTitle.set(deck.name);
         this.cards.set(deck.questions || []);
         this.cardStatuses.set(new Array(deck.questions.length).fill('new'));

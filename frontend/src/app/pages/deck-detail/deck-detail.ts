@@ -112,7 +112,7 @@ export class DeckDetail implements OnInit {
 
     this.deckService.getDeckById(id).subscribe({
       next: (res) => {
-        this.deck.set(res.data);
+        this.deck.set(res.data ?? null);
         this.loadingDeck.set(false);
       },
       error: (err) => {
@@ -123,7 +123,7 @@ export class DeckDetail implements OnInit {
 
     this.deckService.getRatings(id).subscribe({
       next: (res) => {
-        this.ratingSummary.set(res.data);
+        this.ratingSummary.set(res.data ?? null);
         this.loadingRatings.set(false);
       },
       error: () => this.loadingRatings.set(false)
@@ -224,7 +224,7 @@ export class DeckDetail implements OnInit {
         this.ratingSuccess.set(true);
         // Reload ratings
         this.deckService.getRatings(this.deckId).subscribe(res => {
-          this.ratingSummary.set(res.data);
+          this.ratingSummary.set(res.data ?? null);
         });
         setTimeout(() => this.ratingSuccess.set(false), 3000);
       },

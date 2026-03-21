@@ -1,24 +1,13 @@
-// ── Enums (match backend string serialization) ──
+// ── Enums ──
 
 export type DeckVisibility = 'Public' | 'Private' | 'Shared';
 export type DeckStatus = 'Draft' | 'Published';
 export type DeckSource = 'AiGenerated' | 'Manual';
 export type QuestionType = 'MultipleChoice' | 'TrueFalse' | 'FillInTheBlank';
 
-// ── API Response wrapper ──
+// ── Response DTOs ──
 
-export interface ApiResponse<T> {
-  success: boolean;
-  statusCode: number;
-  message: string;
-  data: T;
-  errors: string[] | null;
-  timestamp: string;
-}
-
-// ── Deck Summary (GET /api/Decks) ──
-
-export interface DeckSummary {
+export interface DeckSummaryResponse {
   id: string;
   name: string;
   description: string;
@@ -33,8 +22,6 @@ export interface DeckSummary {
   updatedAt: string | null;
 }
 
-// ── Question (GET /api/Decks/{id}) ──
-
 export interface QuestionResponse {
   id: number;
   content: string;
@@ -45,13 +32,6 @@ export interface QuestionResponse {
   correctAnswers: string[];
 }
 
-// ── Deck Detail (GET /api/Decks/{id}) ──
-
-export interface DeckDetailResponse extends DeckSummary {
-  questions: QuestionResponse[];
-  documents: DeckDocumentResponse[];
-}
-
 export interface DeckDocumentResponse {
   id: string;
   fileName: string;
@@ -60,7 +40,10 @@ export interface DeckDocumentResponse {
   createdAt: string;
 }
 
-// ── Deck Rating ──
+export interface DeckDetailResponse extends DeckSummaryResponse {
+  questions: QuestionResponse[];
+  documents: DeckDocumentResponse[];
+}
 
 export interface DeckRatingResponse {
   id: string;
@@ -79,12 +62,23 @@ export interface DeckRatingSummaryResponse {
   ratings: DeckRatingResponse[];
 }
 
-export interface CreateDeckRatingRequest {
-  rating: number;
-  comment?: string;
+export interface GeneratedQuestionResponse {
+  content: string;
+  type: QuestionType;
+  hint: string;
+  explanation: string;
+  options: string[];
+  correctAnswers: string[];
 }
 
-// ── Create Deck Request (POST /api/Decks) ──
+export interface GeneratedDeckResponse {
+  name: string;
+  description: string;
+  tags: string[];
+  questions: GeneratedQuestionResponse[];
+}
+
+// ── Request DTOs ──
 
 export interface CreateQuestionRequest {
   content: string;
@@ -105,20 +99,7 @@ export interface CreateDeckRequest {
   questions: CreateQuestionRequest[];
 }
 
-// ── AI Generate Response (POST /api/Decks/generate) ──
-
-export interface GeneratedQuestion {
-  content: string;
-  type: QuestionType;
-  hint: string;
-  explanation: string;
-  options: string[];
-  correctAnswers: string[];
-}
-
-export interface GeneratedDeck {
-  name: string;
-  description: string;
-  tags: string[];
-  questions: GeneratedQuestion[];
+export interface CreateDeckRatingRequest {
+  rating: number;
+  comment?: string;
 }

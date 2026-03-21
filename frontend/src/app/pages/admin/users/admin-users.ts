@@ -1,7 +1,8 @@
 import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { AdminService, AdminUser } from '../../../services/admin.service';
+import { AdminService } from '../../../services/admin.service';
+import { AdminUserResponse } from '../../../models/admin.models';
 import Swal from 'sweetalert2';
 
 @Component({
@@ -19,7 +20,7 @@ export class AdminUsers implements OnInit {
   currentPage = signal(1);
   pageSize = signal(10);
   
-  users = signal<AdminUser[]>([]);
+  users = signal<AdminUserResponse[]>([]);
   totalUsers = signal(0);
   totalPages = signal(0);
 
@@ -99,7 +100,7 @@ export class AdminUsers implements OnInit {
     }
   }
 
-  toggleBan(user: AdminUser) {
+  toggleBan(user: AdminUserResponse) {
     const newStatus = !user.isBanned;
     
     Swal.fire({
@@ -124,7 +125,7 @@ export class AdminUsers implements OnInit {
     });
   }
 
-  changeRole(user: AdminUser, newRole: string) {
+  changeRole(user: AdminUserResponse, newRole: string) {
     if (newRole === this.getRoleName(user.roles)) return;
     
     Swal.fire({
@@ -173,7 +174,7 @@ export class AdminUsers implements OnInit {
     return this.AVATAR_COLORS[Math.abs(hash) % this.AVATAR_COLORS.length];
   }
 
-  getAvatarInitial(user: AdminUser) {
+  getAvatarInitial(user: AdminUserResponse) {
     return user.firstName ? user.firstName.charAt(0).toUpperCase() : (user.email ? user.email.charAt(0).toUpperCase() : '?');
   }
 }

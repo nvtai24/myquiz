@@ -1,7 +1,8 @@
 import { Component, OnInit, inject, signal, computed, ViewChild, ElementRef, AfterViewInit, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { AdminService, AdminPayment, RevenueData, PlanDistData } from '../../../services/admin.service';
+import { AdminService } from '../../../services/admin.service';
+import { AdminPaymentResponse, RevenueChartResponse, PlanDistributionResponse } from '../../../models/admin.models';
 import { Chart, registerables } from 'chart.js';
 
 Chart.register(...registerables);
@@ -30,10 +31,10 @@ export class AdminDashboard implements OnInit, AfterViewInit, OnDestroy {
 
   // Revenue Chart
   chartPeriod = signal<'7days' | '30days'>('7days');
-  chartData = signal<RevenueData[]>([]);
+  chartData = signal<RevenueChartResponse[]>([]);
 
   // Plan Distribution
-  planDistApiData = signal<PlanDistData[]>([]);
+  planDistApiData = signal<PlanDistributionResponse[]>([]);
   
   planDist = computed(() => {
     const apiData = this.planDistApiData();
@@ -57,7 +58,7 @@ export class AdminDashboard implements OnInit, AfterViewInit, OnDestroy {
   }
 
   // Recent Transactions
-  recentPayments = signal<AdminPayment[]>([]);
+  recentPayments = signal<AdminPaymentResponse[]>([]);
   loadingPayments = signal(true);
 
   ngOnInit() {

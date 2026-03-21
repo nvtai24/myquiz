@@ -2,7 +2,9 @@
   "permissions": {
     "allow": [
       "Bash(ng build:*)",
-      "Bash(git:*)"
+      "Bash(git:*)",
+      "Bash(npx tsc:*)",
+      "Bash(npx ng build:*)"
     ]
   }
 }

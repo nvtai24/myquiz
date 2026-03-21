@@ -2,12 +2,12 @@ import { inject, Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { map } from 'rxjs/operators';
+import { ApiResponse } from '../models/api.models';
 import {
   SubscriptionPlanResponse,
   UserSubscriptionResponse,
   CreatePaymentOrderRequest,
-  PaymentOrderResponse,
-  ApiResponse
+  PaymentOrderResponse
 } from '../models/payment.models';
 
 @Injectable({
@@ -20,7 +20,7 @@ export class PaymentService {
   getSubscriptionPlans(): Observable<SubscriptionPlanResponse[]> {
     return this.http
       .get<ApiResponse<SubscriptionPlanResponse[]>>(`${this.baseUrl}/subscription-plans`)
-      .pipe(map(res => res.data));
+      .pipe(map(res => res.data!));
   }
 
   getMySubscription(): Observable<UserSubscriptionResponse | null> {
@@ -33,6 +33,6 @@ export class PaymentService {
     const body: CreatePaymentOrderRequest = { subscriptionPlanId: planId };
     return this.http
       .post<ApiResponse<PaymentOrderResponse>>(`${this.baseUrl}/payments/create-order`, body)
-      .pipe(map(res => res.data));
+      .pipe(map(res => res.data!));
   }
 }

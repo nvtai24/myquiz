@@ -24,7 +24,8 @@ export class AdminLayout implements OnInit, OnDestroy {
     { label: 'Dashboard', icon: 'grid_view', path: '/admin/dashboard' },
     { label: 'Quản lý người dùng', icon: 'group', path: '/admin/users' },
     { label: 'Gói đăng ký', icon: 'credit_card', path: '/admin/plans' },
-    { label: 'Bộ thẻ (Decks)', icon: 'style', path: '/admin/decks' },
+    { label: 'Lịch sử giao dịch', icon: 'receipt_long', path: '/admin/transactions' },
+    // { label: 'Bộ thẻ (Decks)', icon: 'style', path: '/admin/decks' },
   ];
 
   logout() {

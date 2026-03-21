@@ -1,5 +1,5 @@
 import { Injectable, inject } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs';
 
@@ -35,6 +35,35 @@ export interface AdminDeckSummary {
   totalRatings?: number;
 }
 
+export interface PaginationMeta {
+  currentPage: number;
+  pageSize: number;
+  totalRecords: number;
+  totalPages: number;
+  hasPrevious: boolean;
+  hasNext: boolean;
+}
+
+export interface AdminUser {
+  id: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  fullName: string;
+  roles: string[];
+  emailConfirmed: boolean;
+  isBanned: boolean;
+  createdAt: string;
+}
+
+export interface AdminUsersResponse {
+  success: boolean;
+  statusCode: number;
+  message: string;
+  pagination: PaginationMeta;
+  data: AdminUser[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class AdminService {
   private http = inject(HttpClient);
@@ -65,5 +94,25 @@ export class AdminService {
       map(res => res.success && res.statusCode === 200),
       catchError(() => of(false))
     );
+  }
+
+  /** GET /api/admin/users — Get paginated list of users */
+  getUsers(page?: number, pageSize?: number, search?: string): Observable<AdminUsersResponse> {
+    let params = new HttpParams();
+    if (page != null) params = params.set('page', page.toString());
+    if (pageSize != null) params = params.set('pageSize', pageSize.toString());
+    if (search) params = params.set('search', search);
+
+    return this.http.get<AdminUsersResponse>('/api/admin/users', { params });
+  }
+
+  /** PUT /api/admin/users/{userId}/ban — Ban or unban a user */
+  updateUserBanStatus(userId: string, isBanned: boolean): Observable<any> {
+    return this.http.put(`/api/admin/users/${userId}/ban`, { isBanned });
+  }
+
+  /** PUT /api/admin/users/{userId}/role — Assign role */
+  assignUserRole(userId: string, role: string): Observable<any> {
+    return this.http.put(`/api/admin/users/${userId}/role`, { role });
   }
 }

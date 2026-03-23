@@ -1,25 +1,26 @@
 @if (loadingDeck()) {
-  <div class="max-w-[1400px] mx-auto py-20 px-6 flex justify-center">
-    <div class="flex flex-col items-center gap-4 text-gray-400">
-      <span class="material-symbols-outlined text-[48px] animate-spin">progress_activity</span>
-      <p class="font-medium">Loading study set...</p>
-    </div>
+<div class="max-w-[1400px] mx-auto py-20 px-6 flex justify-center">
+  <div class="flex flex-col items-center gap-4 text-gray-400">
+    <span class="material-symbols-outlined text-[48px] animate-spin">progress_activity</span>
+    <p class="font-medium">Loading study set...</p>
   </div>
+</div>
 } @else if (deckError()) {
-  <div class="max-w-[1400px] mx-auto py-20 px-6 flex justify-center">
-    <div class="flex flex-col items-center gap-4 text-red-500">
-      <span class="material-symbols-outlined text-[48px]">error</span>
-      <p class="font-medium">{{ deckError() }}</p>
-      <a routerLink="/library" class="px-6 py-2 bg-[#4255FF] text-white rounded-xl font-bold no-underline">
-        Back to Library
-      </a>
-    </div>
+<div class="max-w-[1400px] mx-auto py-20 px-6 flex justify-center">
+  <div class="flex flex-col items-center gap-4 text-red-500">
+    <span class="material-symbols-outlined text-[48px]">error</span>
+    <p class="font-medium">{{ deckError() }}</p>
+    <a routerLink="/library" class="px-6 py-2 bg-[#4255FF] text-white rounded-xl font-bold no-underline">
+      Back to Library
+    </a>
   </div>
+</div>
 } @else if (deck()) {
 <div class="max-w-[1400px] mx-auto py-6 pb-20 px-6 sm:px-8">
   <!-- Breadcrumb -->
   <div class="flex items-center gap-2.5 mb-8">
-    <a routerLink="/library" class="flex items-center gap-1.5 text-gray-400 font-bold no-underline transition-colors hover:text-[#4255FF]">
+    <a routerLink="/library"
+      class="flex items-center gap-1.5 text-gray-400 font-bold no-underline transition-colors hover:text-[#4255FF]">
       <span class="material-symbols-outlined text-[20px]">arrow_back</span>
       Library
     </a>
@@ -28,67 +29,81 @@
   </div>
 
   <!-- Hero Card -->
-  <div class="bg-white border border-gray-200 rounded-[28px] overflow-hidden shadow-sm mb-10 transition-shadow hover:shadow-md">
+  <div
+    class="bg-white border border-gray-200 rounded-[28px] overflow-hidden shadow-sm mb-10 transition-shadow hover:shadow-md">
     <div class="flex flex-col lg:flex-row p-8 gap-8 items-start border-b border-gray-100">
       <!-- Thumbnail / Icon -->
-      <div class="w-24 h-24 lg:w-40 lg:h-40 rounded-[22px] shrink-0 relative flex items-center justify-center lg:rounded-[28px] overflow-hidden border border-gray-100">
+      <div
+        class="w-24 h-24 lg:w-40 lg:h-40 rounded-[22px] shrink-0 relative flex items-center justify-center lg:rounded-[28px] overflow-hidden border border-gray-100">
         @if (deck()!.thumbnailUrl) {
-          <img [src]="deck()!.thumbnailUrl" alt="Thumbnail" class="w-full h-full object-cover" />
+        <img [src]="deck()!.thumbnailUrl" alt="Thumbnail" class="w-full h-full object-cover" />
         } @else {
-          <img src="/images/thumbnail_default.png" alt="Default Thumbnail" class="w-full h-full object-cover" />
+        <img src="/images/thumbnail_default.png" alt="Default Thumbnail" class="w-full h-full object-cover" />
         }
       </div>
       <div class="flex-1 min-w-0">
         <div class="flex flex-wrap items-center gap-3 mb-3">
-          <h1 class="text-2xl lg:text-[2.2rem] font-black text-gray-900 m-0 leading-tight tracking-tight">{{ deck()!.name }}</h1>
-          <span class="inline-flex items-center gap-1 px-3 py-1 bg-green-50 rounded-full text-[12px] font-extrabold text-green-600 border border-green-200">
+          <h1 class="text-2xl lg:text-[2.2rem] font-black text-gray-900 m-0 leading-tight tracking-tight">{{
+            deck()!.name }}</h1>
+          <span
+            class="inline-flex items-center gap-1 px-3 py-1 bg-green-50 rounded-full text-[12px] font-extrabold text-green-600 border border-green-200">
             <span class="material-symbols-outlined text-[16px] leading-none">public</span>
             {{ deck()!.visibility }}
           </span>
           @if (deck()!.status !== 'Draft') {
-            <span class="inline-flex items-center gap-1 px-3 py-1 bg-emerald-50 rounded-full text-[12px] font-extrabold text-emerald-600 border border-emerald-200">
-              <span class="material-symbols-outlined text-[16px] leading-none">check_circle</span>
-              Published
-            </span>
+          <span
+            class="inline-flex items-center gap-1 px-3 py-1 bg-emerald-50 rounded-full text-[12px] font-extrabold text-emerald-600 border border-emerald-200">
+            <span class="material-symbols-outlined text-[16px] leading-none">check_circle</span>
+            Published
+          </span>
           }
         </div>
-        <p class="text-[17px] text-gray-500 leading-relaxed max-w-[700px] m-0 mb-4 font-medium">{{ deck()!.description }}</p>
+        <p class="text-[17px] text-gray-500 leading-relaxed max-w-[700px] m-0 mb-4 font-medium">{{ deck()!.description
+          }}</p>
 
         <!-- Tags -->
         @if (deck()!.tags.length > 0) {
-          <div class="flex flex-wrap gap-2 mb-4">
-            @for (tag of deck()!.tags; track tag) {
-              <span class="inline-flex items-center gap-1 px-3 py-1 bg-indigo-50 text-[#4255FF] rounded-full text-[12px] font-bold">
-                <span class="material-symbols-outlined text-[14px]">label</span>
-                {{ tag }}
-              </span>
-            }
-          </div>
+        <div class="flex flex-wrap gap-2 mb-4">
+          @for (tag of deck()!.tags; track tag) {
+          <span
+            class="inline-flex items-center gap-1 px-3 py-1 bg-indigo-50 text-[#4255FF] rounded-full text-[12px] font-bold">
+            <span class="material-symbols-outlined text-[14px]">label</span>
+            {{ tag }}
+          </span>
+          }
+        </div>
         }
 
         <!-- Rating summary inline -->
         @if (deck()!.totalRatings) {
-          <div class="flex items-center gap-2 mb-2">
-            <div class="flex gap-0.5">
-              @for (s of getStarArray(deck()!.averageRating ?? 0); track $index) {
-                <span class="material-symbols-outlined text-[16px]" [class]="s === 'empty' ? 'text-gray-200' : 'text-amber-400'">star</span>
-              }
-            </div>
-            <span class="text-[14px] font-bold text-gray-700">{{ (deck()!.averageRating ?? 0).toFixed(1) }}</span>
-            <span class="text-[13px] text-gray-400">({{ deck()!.totalRatings }} reviews)</span>
+        <div class="flex items-center gap-2 mb-2">
+          <div class="flex gap-0.5">
+            @for (s of getStarArray(deck()!.averageRating ?? 0); track $index) {
+            <span class="material-symbols-outlined text-[16px]"
+              [class]="s === 'empty' ? 'text-gray-200' : 'text-amber-400'">star</span>
+            }
           </div>
+          <span class="text-[14px] font-bold text-gray-700">{{ (deck()!.averageRating ?? 0).toFixed(1) }}</span>
+          <span class="text-[13px] text-gray-400">({{ deck()!.totalRatings }} reviews)</span>
+        </div>
         }
       </div>
       <div class="flex gap-2.5 lg:flex-col shrink-0">
-        <button (click)="openInviteModal()" class="w-11 h-11 rounded-xl bg-gray-50 border border-transparent text-gray-500 flex items-center justify-center cursor-pointer transition-all hover:bg-indigo-50 hover:text-[#4255FF] hover:border-indigo-100" title="Invite">
+        <button (click)="openInviteModal()"
+          class="w-11 h-11 rounded-xl bg-gray-50 border border-transparent text-gray-500 flex items-center justify-center cursor-pointer transition-all hover:bg-indigo-50 hover:text-[#4255FF] hover:border-indigo-100"
+          title="Invite">
           <span class="material-symbols-outlined text-[22px]">person_add</span>
         </button>
         @if (deck()!.visibility === 'Public' || deck()!.visibility === 'Private') {
-          <button [routerLink]="['/edit-deck', deck()!.id]" class="w-11 h-11 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center cursor-pointer transition-all hover:bg-amber-100 hover:text-amber-700 hover:border-amber-300" title="Edit Deck">
-            <span class="material-symbols-outlined text-[22px]">edit</span>
-          </button>
+        <button [routerLink]="['/edit-deck', deck()!.id]"
+          class="w-11 h-11 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 flex items-center justify-center cursor-pointer transition-all hover:bg-amber-100 hover:text-amber-700 hover:border-amber-300"
+          title="Edit Deck">
+          <span class="material-symbols-outlined text-[22px]">edit</span>
+        </button>
         }
-        <button class="w-11 h-11 rounded-xl bg-gray-50 border border-transparent text-gray-500 flex items-center justify-center cursor-pointer transition-all hover:bg-indigo-50 hover:text-amber-500 hover:border-indigo-100" title="Bookmark">
+        <button
+          class="w-11 h-11 rounded-xl bg-gray-50 border border-transparent text-gray-500 flex items-center justify-center cursor-pointer transition-all hover:bg-indigo-50 hover:text-amber-500 hover:border-indigo-100"
+          title="Bookmark">
           <span class="material-symbols-outlined text-[22px]">bookmark</span>
         </button>
       </div>
@@ -110,7 +125,8 @@
           <span class="material-symbols-outlined text-[26px]">star</span>
         </div>
         <div class="flex flex-col">
-          <span class="text-xl font-black text-gray-900 leading-none">{{ (deck()!.averageRating ?? 0).toFixed(1) }}<small class="text-[13px] opacity-70 ml-0.5">/5</small></span>
+          <span class="text-xl font-black text-gray-900 leading-none">{{ (deck()!.averageRating ?? 0).toFixed(1)
+            }}<small class="text-[13px] opacity-70 ml-0.5">/5</small></span>
           <span class="text-[11px] font-bold text-gray-400 tracking-wider uppercase mt-1">Avg Rating</span>
         </div>
       </div>
@@ -128,7 +144,8 @@
           <span class="material-symbols-outlined text-[26px]">schedule</span>
         </div>
         <div class="flex flex-col">
-          <span class="text-xl font-black text-gray-900 leading-none text-[14px]" style="font-size:0.9rem">{{ deck()!.createdAt | date:'dd/MM/yyyy' }}</span>
+          <span class="text-xl font-black text-gray-900 leading-none text-[14px]" style="font-size:0.9rem">{{
+            deck()!.createdAt | date:'dd/MM/yyyy' }}</span>
           <span class="text-[11px] font-bold text-gray-400 tracking-wider uppercase mt-1">Created on</span>
         </div>
       </div>
@@ -142,77 +159,76 @@
         <span class="material-symbols-outlined text-[28px] text-[#4255FF]">school</span>
         Study Modes
       </h2>
-      <button class="flex items-center gap-2 px-7 py-3 bg-[#4255FF] border-none rounded-xl text-white font-black text-[15px] cursor-pointer transition-all shadow-[0_4px_14px_rgba(66,85,255,0.3)] hover:translate-y-[-2px] hover:shadow-[0_8px_20px_rgba(66,85,255,0.4)]" (click)="startStudy()">
+      <button
+        class="flex items-center gap-2 px-7 py-3 bg-[#4255FF] border-none rounded-xl text-white font-black text-[15px] cursor-pointer transition-all shadow-[0_4px_14px_rgba(66,85,255,0.3)] hover:translate-y-[-2px] hover:shadow-[0_8px_20px_rgba(66,85,255,0.4)]"
+        (click)="startStudy()">
         <span class="material-symbols-outlined text-[22px]">play_arrow</span>
         Start {{ studyMode() === 'learn' ? 'Learning' : 'Quiz' }}
       </button>
     </div>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       @for (mode of studyModes; track mode.key) {
-        <button
-          class="flex items-center gap-5 p-6 bg-white border-2 rounded-2xl cursor-pointer transition-all text-left group"
-          [class]="studyMode() === mode.key ? 'border-[#4255FF] bg-indigo-50/40 shadow-sm -translate-y-[1px]' : 'border-gray-100 hover:border-gray-200 hover:shadow-xs'"
-          (click)="selectMode(mode.key)">
-          <div class="w-14 h-14 rounded-2xl flex items-center justify-center text-white shrink-0 shadow-md group-hover:scale-110 transition-transform" [style.background]="mode.gradient">
-            <span class="material-symbols-outlined text-[32px]">{{ mode.icon }}</span>
-          </div>
-          <div class="flex-1">
-            <span class="block text-[15px] font-black text-gray-900 mb-0.5 uppercase tracking-wide">{{ mode.label }}</span>
-            <span class="block text-[12px] font-medium text-gray-500 leading-tight">{{ mode.desc }}</span>
-          </div>
-          @if (studyMode() === mode.key) {
-            <span class="material-symbols-outlined text-[#4255FF] text-[24px]">check_circle</span>
-          }
-        </button>
+      <button
+        class="flex items-center gap-5 p-6 bg-white border-2 rounded-2xl cursor-pointer transition-all text-left group"
+        [class]="studyMode() === mode.key ? 'border-[#4255FF] bg-indigo-50/40 shadow-sm -translate-y-[1px]' : 'border-gray-100 hover:border-gray-200 hover:shadow-xs'"
+        (click)="selectMode(mode.key)">
+        <div
+          class="w-14 h-14 rounded-2xl flex items-center justify-center text-white shrink-0 shadow-md group-hover:scale-110 transition-transform"
+          [style.background]="mode.gradient">
+          <span class="material-symbols-outlined text-[32px]">{{ mode.icon }}</span>
+        </div>
+        <div class="flex-1">
+          <span class="block text-[15px] font-black text-gray-900 mb-0.5 uppercase tracking-wide">{{ mode.label
+            }}</span>
+          <span class="block text-[12px] font-medium text-gray-500 leading-tight">{{ mode.desc }}</span>
+        </div>
+        @if (studyMode() === mode.key) {
+        <span class="material-symbols-outlined text-[#4255FF] text-[24px]">check_circle</span>
+        }
+      </button>
       }
     </div>
   </section>
 
   <!-- Quiz History -->
   @if (quizHistory().length > 0) {
-    <section class="mb-10">
-      <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
-        <h2 class="flex items-center gap-3 text-xl font-black text-gray-900 m-0">
-          <span class="material-symbols-outlined text-[28px] text-[#4255FF]">history</span>
-          Quiz History
-        </h2>
-        <span class="text-[13px] font-bold text-gray-400">{{ quizHistory().length }} recent attempts</span>
-      </div>
-      <div class="flex flex-col gap-3">
-        @for (attempt of quizHistory(); track attempt.id; let i = $index) {
-          <div class="flex items-center gap-5 p-5 bg-white border rounded-2xl transition-all hover:shadow-sm"
-            [class]="i === 0 ? 'border-[#4255FF]/20 bg-indigo-50/20' : 'border-gray-100'">
-            <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
-              [style.background]="i === 0 ? '#4255FF' : '#f3f4f6'">
-              @if (i === 0) {
-                <span class="material-symbols-outlined text-white text-[20px]">emoji_events</span>
-              } @else {
-                <span class="text-[13px] font-black text-gray-400">#{{ i + 1 }}</span>
-              }
-            </div>
-            <div class="flex-1 flex flex-col gap-1">
-              <span class="text-[14px] font-bold text-gray-900">{{ formatHistoryDate(attempt.date) }}</span>
-              <div class="flex items-center gap-3 text-[12px] font-medium text-gray-400">
-                <span class="flex items-center gap-1">
-                  <span class="material-symbols-outlined text-[14px]">schedule</span>
-                  {{ attempt.timeTaken }}
-                </span>
-                <span>{{ attempt.totalCorrect }}/{{ attempt.totalQuestions }} correct</span>
-              </div>
-            </div>
-            <div class="flex flex-col items-end gap-1 shrink-0">
-              <span class="text-xl font-black" [style.color]="getScoreColor(attempt.score)">{{ attempt.score }}%</span>
-              <div class="flex gap-0.5">
-                @for (s of [1,2,3,4,5]; track s) {
-                  <span class="material-symbols-outlined text-[12px]"
-                    [class]="s <= (attempt.score >= 90 ? 5 : attempt.score >= 75 ? 4 : attempt.score >= 60 ? 3 : attempt.score >= 40 ? 2 : 1) ? 'text-amber-400' : 'text-gray-200'">star</span>
-                }
-              </div>
-            </div>
+  <section class="mb-10">
+    <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+      <h2 class="flex items-center gap-3 text-xl font-black text-gray-900 m-0">
+        <span class="material-symbols-outlined text-[28px] text-[#4255FF]">history</span>
+        Quiz History
+      </h2>
+      <span class="text-[13px] font-bold text-gray-400">{{ quizHistory().length }} recent attempts</span>
+    </div>
+    <div class="flex flex-col gap-3">
+      @for (attempt of quizHistory(); track attempt.id; let i = $index) {
+      <div class="flex items-center gap-5 p-5 bg-white border rounded-2xl transition-all hover:shadow-sm"
+        [class]="i === 0 ? 'border-[#4255FF]/20 bg-indigo-50/20' : 'border-gray-100'">
+        <div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0"
+          [style.background]="i === 0 ? '#4255FF' : '#f3f4f6'">
+          @if (i === 0) {
+          <span class="material-symbols-outlined text-white text-[20px]">emoji_events</span>
+          } @else {
+          <span class="text-[13px] font-black text-gray-400">#{{ i + 1 }}</span>
+          }
+        </div>
+        <div class="flex-1 flex flex-col gap-1">
+          <span class="text-[14px] font-bold text-gray-900">{{ formatHistoryDate(attempt.date) }}</span>
+          <div class="flex items-center gap-3 text-[12px] font-medium text-gray-400">
+            <span class="flex items-center gap-1">
+              <span class="material-symbols-outlined text-[14px]">schedule</span>
+              {{ attempt.timeTaken }}
+            </span>
+            <span>{{ attempt.totalCorrect }}/{{ attempt.totalQuestions }} correct</span>
           </div>
-        }
+        </div>
+        <div class="flex flex-col items-end gap-1 shrink-0">
+          <span class="text-xl font-black" [style.color]="getScoreColor(attempt.score)">{{ attempt.score }}%</span>
+        </div>
       </div>
-    </section>
+      }
+    </div>
+  </section>
   }
 
   <!-- Terms & Reviews Layout -->
@@ -225,50 +241,57 @@
           Questions ({{ deck()!.questionCount }})
         </h2>
         <div class="relative flex-1 max-w-[280px]">
-          <span class="absolute left-3.5 top-1/2 -translate-y-1/2 material-symbols-outlined text-[20px] text-gray-300">search</span>
-          <input type="text" placeholder="Search questions..." class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-[14px] font-semibold text-gray-900 outline-none transition-all placeholder-gray-400 focus:bg-white focus:border-[#4255FF] focus:shadow-sm" (input)="onFilterInput($event)" />
+          <span
+            class="absolute left-3.5 top-1/2 -translate-y-1/2 material-symbols-outlined text-[20px] text-gray-300">search</span>
+          <input type="text" placeholder="Search questions..."
+            class="w-full pl-10 pr-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-[14px] font-semibold text-gray-900 outline-none transition-all placeholder-gray-400 focus:bg-white focus:border-[#4255FF] focus:shadow-sm"
+            (input)="onFilterInput($event)" />
         </div>
       </div>
       <div class="flex flex-col gap-3">
         @for (q of visibleTerms; track q.id; let i = $index) {
-          <div class="flex flex-col sm:flex-row sm:items-stretch bg-white border border-gray-100 rounded-xl px-5 py-4 transition-all hover:border-[#4255FF] hover:shadow-sm group">
-            <div class="text-[12px] font-black text-[#4255FF] opacity-40 mb-2 sm:mb-0 sm:mr-6 shrink-0 pt-0.5">{{ i + 1 }}</div>
-            <div class="flex-1 sm:border-r border-gray-50 sm:pr-8 mb-4 sm:mb-0">
-              <span class="text-[15px] font-black text-gray-900 leading-tight break-words">{{ q.content }}</span>
-              @if (q.type !== 'TrueFalse') {
-                <div class="flex flex-wrap gap-1.5 mt-2">
-                  @for (opt of q.options; track opt) {
-                    <span class="inline-block text-[12px] px-2.5 py-1 rounded-lg font-semibold"
-                      [class]="q.correctAnswers.includes(opt) ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-gray-50 text-gray-500 border border-gray-100'">
-                      {{ opt }}
-                    </span>
-                  }
-                </div>
+        <div
+          class="flex flex-col sm:flex-row sm:items-stretch bg-white border border-gray-100 rounded-xl px-5 py-4 transition-all hover:border-[#4255FF] hover:shadow-sm group">
+          <div class="text-[12px] font-black text-[#4255FF] opacity-40 mb-2 sm:mb-0 sm:mr-6 shrink-0 pt-0.5">{{ i + 1 }}
+          </div>
+          <div class="flex-1 sm:border-r border-gray-50 sm:pr-8 mb-4 sm:mb-0">
+            <span class="text-[15px] font-black text-gray-900 leading-tight break-words">{{ q.content }}</span>
+            @if (q.type !== 'TrueFalse') {
+            <div class="flex flex-wrap gap-1.5 mt-2">
+              @for (opt of q.options; track opt) {
+              <span class="inline-block text-[12px] px-2.5 py-1 rounded-lg font-semibold"
+                [class]="q.correctAnswers.includes(opt) ? 'bg-green-50 text-green-700 border border-green-200' : 'bg-gray-50 text-gray-500 border border-gray-100'">
+                {{ opt }}
+              </span>
               }
             </div>
-            <div class="flex-[1.5] sm:pl-8 flex items-start gap-3 min-w-0">
-              <div class="flex-1 min-w-0">
-                @if (q.explanation) {
-                  <p class="text-[14px] font-medium text-gray-500 leading-relaxed break-words m-0">{{ q.explanation }}</p>
-                } @else {
-                  <p class="text-[13px] italic text-gray-300 m-0">No explanation available</p>
-                }
-                @if (q.hint) {
-                  <p class="text-[12px] text-amber-500 font-semibold mt-1.5 m-0">
-                    <span class="material-symbols-outlined text-[14px] align-middle">lightbulb</span>
-                    {{ q.hint }}
-                  </p>
-                }
-              </div>
+            }
+          </div>
+          <div class="flex-[1.5] sm:pl-8 flex items-start gap-3 min-w-0">
+            <div class="flex-1 min-w-0">
+              @if (q.explanation) {
+              <p class="text-[14px] font-medium text-gray-500 leading-relaxed break-words m-0">{{ q.explanation }}</p>
+              } @else {
+              <p class="text-[13px] italic text-gray-300 m-0">No explanation available</p>
+              }
+              @if (q.hint) {
+              <p class="text-[12px] text-amber-500 font-semibold mt-1.5 m-0">
+                <span class="material-symbols-outlined text-[14px] align-middle">lightbulb</span>
+                {{ q.hint }}
+              </p>
+              }
             </div>
           </div>
+        </div>
         }
       </div>
       @if (totalFilteredTerms > 4) {
-        <button class="w-full flex items-center justify-center gap-2 py-4 mt-4 bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl text-gray-500 font-bold text-[14px] cursor-pointer transition-all hover:bg-indigo-50 hover:border-[#4255FF] hover:text-[#4255FF]" (click)="toggleTerms()">
-          <span class="material-symbols-outlined text-[22px]">{{ showAllTerms() ? 'expand_less' : 'expand_more' }}</span>
-          {{ showAllTerms() ? 'Collapse' : 'See all ' + totalFilteredTerms + ' questions' }}
-        </button>
+      <button
+        class="w-full flex items-center justify-center gap-2 py-4 mt-4 bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl text-gray-500 font-bold text-[14px] cursor-pointer transition-all hover:bg-indigo-50 hover:border-[#4255FF] hover:text-[#4255FF]"
+        (click)="toggleTerms()">
+        <span class="material-symbols-outlined text-[22px]">{{ showAllTerms() ? 'expand_less' : 'expand_more' }}</span>
+        {{ showAllTerms() ? 'Collapse' : 'See all ' + totalFilteredTerms + ' questions' }}
+      </button>
       }
     </section>
 
@@ -278,122 +301,121 @@
       <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
         <h3 class="text-[15px] font-black text-gray-900 m-0 mb-5 uppercase tracking-wider">Ratings & Reviews</h3>
         @if (loadingRatings()) {
-          <div class="flex justify-center py-6 text-gray-400">
-            <span class="material-symbols-outlined text-[32px] animate-spin">progress_activity</span>
-          </div>
+        <div class="flex justify-center py-6 text-gray-400">
+          <span class="material-symbols-outlined text-[32px] animate-spin">progress_activity</span>
+        </div>
         } @else {
-          <div class="flex items-center gap-5 mb-6">
-            <span class="text-[3.5rem] font-black text-[#4255FF] leading-none tracking-tighter">
-              {{ (ratingSummary()?.averageRating ?? 0).toFixed(1) }}
-            </span>
-            <div class="flex flex-col">
-              <div class="flex gap-0.5 mb-1.5">
-                @for (s of getStarArray(ratingSummary()?.averageRating ?? 0); track $index) {
-                  <span class="material-symbols-outlined text-[18px]" [class]="s === 'empty' ? 'text-gray-200' : 'text-amber-400'">star</span>
-                }
-              </div>
-              <span class="text-[12px] font-extrabold text-gray-400 uppercase tracking-wide">{{ ratingSummary()?.totalRatings ?? 0 }} reviews</span>
+        <div class="flex items-center gap-5 mb-6">
+          <span class="text-[3.5rem] font-black text-[#4255FF] leading-none tracking-tighter">
+            {{ (ratingSummary()?.averageRating ?? 0).toFixed(1) }}
+          </span>
+          <div class="flex flex-col">
+            <div class="flex gap-0.5 mb-1.5">
+              @for (s of getStarArray(ratingSummary()?.averageRating ?? 0); track $index) {
+              <span class="material-symbols-outlined text-[18px]"
+                [class]="s === 'empty' ? 'text-gray-200' : 'text-amber-400'">star</span>
+              }
             </div>
+            <span class="text-[12px] font-extrabold text-gray-400 uppercase tracking-wide">{{
+              ratingSummary()?.totalRatings ?? 0 }} reviews</span>
           </div>
-          <div class="flex flex-col gap-2.5 mb-1">
-            @for (r of ratingBreakdown; track r.stars) {
-              <div class="flex items-center gap-2.5">
-                <span class="w-2 text-[12px] font-black text-gray-400">{{ r.stars }}</span>
-                <span class="material-symbols-outlined text-[13px] text-gray-300">star</span>
-                <div class="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden relative">
-                  <div class="absolute inset-y-0 left-0 bg-[#4255FF] rounded-full transition-[width] duration-700 ease-out" [style.width]="getBarWidth(r.count)"></div>
-                </div>
-                <span class="text-[11px] font-black text-gray-400 min-w-[15px] text-right">{{ r.count }}</span>
-              </div>
-            }
+        </div>
+        <div class="flex flex-col gap-2.5 mb-1">
+          @for (r of ratingBreakdown; track r.stars) {
+          <div class="flex items-center gap-2.5">
+            <span class="w-2 text-[12px] font-black text-gray-400">{{ r.stars }}</span>
+            <span class="material-symbols-outlined text-[13px] text-gray-300">star</span>
+            <div class="flex-1 h-3 bg-gray-100 rounded-full overflow-hidden relative">
+              <div class="absolute inset-y-0 left-0 bg-[#4255FF] rounded-full transition-[width] duration-700 ease-out"
+                [style.width]="getBarWidth(r.count)"></div>
+            </div>
+            <span class="text-[11px] font-black text-gray-400 min-w-[15px] text-right">{{ r.count }}</span>
           </div>
+          }
+        </div>
         }
       </div>
 
       <!-- Submit Rating -->
       @if (isLoggedIn()) {
-        <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-          <h3 class="text-[15px] font-black text-gray-900 m-0 mb-4 uppercase tracking-wider">Submit your rating</h3>
+      <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+        <h3 class="text-[15px] font-black text-gray-900 m-0 mb-4 uppercase tracking-wider">Submit your rating</h3>
 
-          @if (ratingSuccess()) {
-            <div class="flex items-center gap-2 bg-green-50 text-green-700 px-4 py-3 rounded-xl text-[13px] font-bold mb-4">
-              <span class="material-symbols-outlined text-[18px]">check_circle</span>
-              Rating submitted!
-            </div>
+        @if (ratingSuccess()) {
+        <div class="flex items-center gap-2 bg-green-50 text-green-700 px-4 py-3 rounded-xl text-[13px] font-bold mb-4">
+          <span class="material-symbols-outlined text-[18px]">check_circle</span>
+          Rating submitted!
+        </div>
+        }
+        @if (ratingError()) {
+        <div class="flex items-center gap-2 bg-red-50 text-red-600 px-4 py-3 rounded-xl text-[13px] font-bold mb-4">
+          <span class="material-symbols-outlined text-[18px]">error</span>
+          {{ ratingError() }}
+        </div>
+        }
+
+        <!-- Stars Picker -->
+        <div class="flex gap-1 mb-4">
+          @for (star of [1,2,3,4,5]; track star) {
+          <button class="bg-transparent border-none p-0 cursor-pointer transition-transform hover:scale-110"
+            (mouseenter)="setHoverRating(star)" (mouseleave)="clearHover()" (click)="setMyRating(star)">
+            <span class="material-symbols-outlined text-[32px]"
+              [class]="getStarState(star) === 'filled' ? 'text-amber-400' : 'text-gray-200'">star</span>
+          </button>
           }
-          @if (ratingError()) {
-            <div class="flex items-center gap-2 bg-red-50 text-red-600 px-4 py-3 rounded-xl text-[13px] font-bold mb-4">
-              <span class="material-symbols-outlined text-[18px]">error</span>
-              {{ ratingError() }}
-            </div>
-          }
+        </div>
 
-          <!-- Stars Picker -->
-          <div class="flex gap-1 mb-4">
-            @for (star of [1,2,3,4,5]; track star) {
-              <button
-                class="bg-transparent border-none p-0 cursor-pointer transition-transform hover:scale-110"
-                (mouseenter)="setHoverRating(star)"
-                (mouseleave)="clearHover()"
-                (click)="setMyRating(star)">
-                <span class="material-symbols-outlined text-[32px]"
-                  [class]="getStarState(star) === 'filled' ? 'text-amber-400' : 'text-gray-200'">star</span>
-              </button>
-            }
-          </div>
-
-          <!-- Comment -->
-          <textarea
-            class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-[14px] font-medium text-gray-900 resize-none outline-none transition-all placeholder-gray-400 focus:bg-white focus:border-[#4255FF] mb-4"
-            rows="3"
-            placeholder="Your comment (optional)..."
-            [ngModel]="myComment()"
-            (ngModelChange)="myComment.set($event)">
+        <!-- Comment -->
+        <textarea
+          class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-[14px] font-medium text-gray-900 resize-none outline-none transition-all placeholder-gray-400 focus:bg-white focus:border-[#4255FF] mb-4"
+          rows="3" placeholder="Your comment (optional)..." [ngModel]="myComment()"
+          (ngModelChange)="myComment.set($event)">
           </textarea>
 
-          <button
-            class="w-full flex items-center justify-center gap-2 py-3 bg-[#4255FF] border-none rounded-xl text-white font-black text-[14px] cursor-pointer transition-all hover:bg-[#3345e0] disabled:opacity-60 disabled:cursor-not-allowed"
-            [disabled]="!myRating() || submittingRating()"
-            (click)="submitRating()">
-            @if (submittingRating()) {
-              <span class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
-              Sending...
-            } @else {
-              <span class="material-symbols-outlined text-[18px]">send</span>
-              Submit Rating
-            }
-          </button>
-        </div>
+        <button
+          class="w-full flex items-center justify-center gap-2 py-3 bg-[#4255FF] border-none rounded-xl text-white font-black text-[14px] cursor-pointer transition-all hover:bg-[#3345e0] disabled:opacity-60 disabled:cursor-not-allowed"
+          [disabled]="!myRating() || submittingRating()" (click)="submitRating()">
+          @if (submittingRating()) {
+          <span class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+          Sending...
+          } @else {
+          <span class="material-symbols-outlined text-[18px]">send</span>
+          Submit Rating
+          }
+        </button>
+      </div>
       }
 
       <!-- Reviews List -->
       @if ((ratingSummary()?.ratings?.length ?? 0) > 0) {
-        <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
-          <h3 class="text-[15px] font-black text-gray-900 m-0 mb-5 uppercase tracking-wider">Recent Reviews</h3>
-          <div class="flex flex-col gap-5">
-            @for (rev of (ratingSummary()!.ratings | slice:0:5); track rev.id) {
-              <div class="flex flex-col gap-2.5 pb-5 border-b border-gray-50 last:pb-0 last:border-0">
-                <div class="flex items-start gap-3">
-                  <div class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-indigo-500 font-black text-[13px] shrink-0 border border-white shadow-xs">
-                    {{ getInitial(rev.userName) }}
-                  </div>
-                  <div class="flex flex-col min-w-0 flex-1">
-                    <span class="text-[14px] font-black text-gray-900 truncate leading-tight">{{ rev.userName }}</span>
-                    <span class="text-[11px] font-semibold text-gray-400 mt-0.5">{{ formatTimeAgo(rev.createdAt) }}</span>
-                  </div>
-                  <div class="flex gap-px shrink-0 mt-0.5">
-                    @for (s of getStarArray(rev.rating); track $index) {
-                      <span class="material-symbols-outlined text-[11px]" [class]="s === 'empty' ? 'text-gray-200' : 'text-amber-400'">star</span>
-                    }
-                  </div>
-                </div>
-                @if (rev.comment) {
-                  <p class="text-[13px] italic font-medium text-gray-500 leading-[1.6] m-0 pr-2">"{{ rev.comment }}"</p>
+      <div class="bg-white border border-gray-200 rounded-2xl p-6 shadow-sm">
+        <h3 class="text-[15px] font-black text-gray-900 m-0 mb-5 uppercase tracking-wider">Recent Reviews</h3>
+        <div class="flex flex-col gap-5">
+          @for (rev of (ratingSummary()!.ratings | slice:0:5); track rev.id) {
+          <div class="flex flex-col gap-2.5 pb-5 border-b border-gray-50 last:pb-0 last:border-0">
+            <div class="flex items-start gap-3">
+              <div
+                class="w-9 h-9 rounded-full bg-slate-100 flex items-center justify-center text-indigo-500 font-black text-[13px] shrink-0 border border-white shadow-xs">
+                {{ getInitial(rev.userName) }}
+              </div>
+              <div class="flex flex-col min-w-0 flex-1">
+                <span class="text-[14px] font-black text-gray-900 truncate leading-tight">{{ rev.userName }}</span>
+                <span class="text-[11px] font-semibold text-gray-400 mt-0.5">{{ formatTimeAgo(rev.createdAt) }}</span>
+              </div>
+              <div class="flex gap-px shrink-0 mt-0.5">
+                @for (s of getStarArray(rev.rating); track $index) {
+                <span class="material-symbols-outlined text-[11px]"
+                  [class]="s === 'empty' ? 'text-gray-200' : 'text-amber-400'">star</span>
                 }
               </div>
+            </div>
+            @if (rev.comment) {
+            <p class="text-[13px] italic font-medium text-gray-500 leading-[1.6] m-0 pr-2">"{{ rev.comment }}"</p>
             }
           </div>
+          }
         </div>
+      </div>
       }
 
     </aside>
@@ -403,47 +425,57 @@
 
 <!-- Invite Modal -->
 @if (isInviteModalOpen()) {
-  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-    <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl relative animate-in zoom-in-95 duration-200">
-      <button class="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-50 text-gray-500 flex items-center justify-center cursor-pointer hover:bg-gray-100 hover:text-gray-900 border-none" (click)="closeInviteModal()">
-        <span class="material-symbols-outlined text-[18px]">close</span>
-      </button>
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+  <div class="bg-white rounded-2xl w-full max-w-md p-6 shadow-xl relative animate-in zoom-in-95 duration-200">
+    <button
+      class="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-50 text-gray-500 flex items-center justify-center cursor-pointer hover:bg-gray-100 hover:text-gray-900 border-none"
+      (click)="closeInviteModal()">
+      <span class="material-symbols-outlined text-[18px]">close</span>
+    </button>
 
-       <h3 class="text-xl font-black text-gray-900 mt-0 mb-1">Invite friends</h3>
-       <p class="text-[13px] text-gray-500 font-medium mb-5">Enter the email of the friend you want to invite to this study set.</p>
+    <h3 class="text-xl font-black text-gray-900 mt-0 mb-1">Invite friends</h3>
+    <p class="text-[13px] text-gray-500 font-medium mb-5">Enter the email of the friend you want to invite to this study
+      set.</p>
 
-      @if (inviteSuccess()) {
-        <div class="flex items-center gap-2 p-3 bg-green-50 text-green-700 text-[13px] font-bold rounded-xl mb-4">
-          <span class="material-symbols-outlined text-[18px]">check_circle</span>
-          {{ inviteSuccess() }}
-        </div>
-      }
+    @if (inviteSuccess()) {
+    <div class="flex items-center gap-2 p-3 bg-green-50 text-green-700 text-[13px] font-bold rounded-xl mb-4">
+      <span class="material-symbols-outlined text-[18px]">check_circle</span>
+      {{ inviteSuccess() }}
+    </div>
+    }
 
-      @if (inviteError()) {
-        <div class="flex items-center gap-2 p-3 bg-red-50 text-red-700 text-[13px] font-bold rounded-xl mb-4">
-          <span class="material-symbols-outlined text-[18px]">error</span>
-          {{ inviteError() }}
-        </div>
-      }
+    @if (inviteError()) {
+    <div class="flex items-center gap-2 p-3 bg-red-50 text-red-700 text-[13px] font-bold rounded-xl mb-4">
+      <span class="material-symbols-outlined text-[18px]">error</span>
+      {{ inviteError() }}
+    </div>
+    }
 
-      <div class="flex flex-col gap-2 mb-6">
-        <label class="text-[11px] font-black text-gray-500 uppercase tracking-widest">Recipient Email</label>
-        <div class="relative flex items-center">
-          <span class="material-symbols-outlined absolute left-3 text-gray-400 text-[20px]">mail</span>
-          <input type="email" class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-[14px] font-medium text-gray-900 outline-none focus:border-[#4255FF] focus:ring-2 focus:ring-[#4255FF]/20 transition-all placeholder-gray-400" placeholder="nguyenvana@example.com" [ngModel]="inviteEmail()" (ngModelChange)="inviteEmail.set($event)" (keydown.enter)="sendInvite()" />
-        </div>
-      </div>
-
-      <div class="flex gap-3 justify-end">
-        <button class="px-5 py-2.5 rounded-xl bg-gray-100 text-gray-600 font-bold text-[13px] border-none cursor-pointer hover:bg-gray-200 transition-colors" (click)="closeInviteModal()">Cancel</button>
-        <button class="px-5 py-2.5 rounded-xl bg-[#4255FF] text-white font-bold text-[13px] border-none cursor-pointer flex items-center justify-center gap-2 hover:bg-[#3345e0] transition-colors disabled:opacity-50 disabled:cursor-not-allowed w-28" [disabled]="!inviteEmail().trim() || isInviting()" (click)="sendInvite()">
-          @if (isInviting()) {
-            <span class="material-symbols-outlined animate-spin text-[16px]">progress_activity</span>
-          } @else {
-            Send Invite
-          }
-        </button>
+    <div class="flex flex-col gap-2 mb-6">
+      <label class="text-[11px] font-black text-gray-500 uppercase tracking-widest">Recipient Email</label>
+      <div class="relative flex items-center">
+        <span class="material-symbols-outlined absolute left-3 text-gray-400 text-[20px]">mail</span>
+        <input type="email"
+          class="w-full pl-10 pr-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-[14px] font-medium text-gray-900 outline-none focus:border-[#4255FF] focus:ring-2 focus:ring-[#4255FF]/20 transition-all placeholder-gray-400"
+          placeholder="nguyenvana@example.com" [ngModel]="inviteEmail()" (ngModelChange)="inviteEmail.set($event)"
+          (keydown.enter)="sendInvite()" />
       </div>
     </div>
+
+    <div class="flex gap-3 justify-end">
+      <button
+        class="px-5 py-2.5 rounded-xl bg-gray-100 text-gray-600 font-bold text-[13px] border-none cursor-pointer hover:bg-gray-200 transition-colors"
+        (click)="closeInviteModal()">Cancel</button>
+      <button
+        class="px-5 py-2.5 rounded-xl bg-[#4255FF] text-white font-bold text-[13px] border-none cursor-pointer flex items-center justify-center gap-2 hover:bg-[#3345e0] transition-colors disabled:opacity-50 disabled:cursor-not-allowed w-28"
+        [disabled]="!inviteEmail().trim() || isInviting()" (click)="sendInvite()">
+        @if (isInviting()) {
+        <span class="material-symbols-outlined animate-spin text-[16px]">progress_activity</span>
+        } @else {
+        Send Invite
+        }
+      </button>
+    </div>
   </div>
+</div>
 }

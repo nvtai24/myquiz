@@ -1,0 +1,150 @@
+<div class="search-page">
+  <!-- Search Header -->
+  <div class="search-header">
+    <div class="search-header-inner">
+      <h1 class="search-title">
+        <span class="material-symbols-outlined title-icon">explore</span>
+        Explore Study Sets
+      </h1>
+      <p class="search-subtitle">Discover flashcards and study materials from the community</p>
+
+      <div class="search-input-wrap">
+        <span class="material-symbols-outlined search-icon">search</span>
+        <input type="text" placeholder="Search by deck name, tags, topics..." [ngModel]="searchTerm()"
+          (ngModelChange)="onSearchInput($event)" autofocus />
+        @if (searchTerm()) {
+        <button class="clear-btn" (click)="clearSearch()">
+          <span class="material-symbols-outlined">close</span>
+        </button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Area -->
+  <div class="results-area">
+    <!-- Search term indicator -->
+    @if (hasSearched() && searchTerm()) {
+    <div class="results-info">
+      <span class="material-symbols-outlined info-icon">filter_list</span>
+      <span class="info-text">
+        @if (pagination()) {
+        {{ pagination()!.totalRecords }} results for
+        } @else {
+        Results for
+        }
+        "<strong>{{ searchTerm() }}</strong>"
+      </span>
+    </div>
+    }
+
+    <!-- Loading State -->
+    @if (loading()) {
+    <div class="loading-state">
+      <div class="loading-grid">
+        @for (i of [1,2,3,4,5,6]; track i) {
+        <div class="skeleton-card">
+          <div class="skeleton-img shimmer"></div>
+          <div class="skeleton-body">
+            <div class="skeleton-line short shimmer"></div>
+            <div class="skeleton-line shimmer"></div>
+            <div class="skeleton-line long shimmer"></div>
+          </div>
+        </div>
+        }
+      </div>
+    </div>
+    }
+
+    <!-- Results Grid -->
+    @if (!loading() && results().length > 0) {
+    <div class="results-grid">
+      @for (deck of results(); track deck.id) {
+      <a class="deck-card" [routerLink]="['/deck', deck.id]">
+        <div class="deck-img">
+          @if (deck.thumbnailUrl) {
+          <img [src]="deck.thumbnailUrl" [alt]="deck.name" />
+          } @else {
+          <img src="/images/default-deck.png" alt="Deck" />
+          }
+          <span class="terms-chip">{{ deck.questionCount }} TERMS</span>
+          @if (deck.averageRating) {
+          <span class="rating-chip">
+            <span class="material-symbols-outlined">star</span>
+            {{ deck.averageRating.toFixed(1) }}
+          </span>
+          }
+        </div>
+        <div class="deck-body">
+          <div class="deck-tags">
+            @for (tag of deck.tags | slice:0:3; track tag) {
+            <span class="tag">{{ tag }}</span>
+            }
+          </div>
+          <h3 class="deck-name">{{ deck.name }}</h3>
+          <p class="deck-desc">{{ deck.description }}</p>
+          <div class="deck-footer">
+            <span class="deck-date">{{ deck.createdAt | date:'dd MMM yyyy' }}</span>
+            <span class="study-chip">
+              <span class="material-symbols-outlined">play_arrow</span>
+              Study
+            </span>
+          </div>
+        </div>
+      </a>
+      }
+    </div>
+
+    <!-- Pagination -->
+    @if (totalPages > 1) {
+    <div class="pagination">
+      <button class="page-btn nav-btn" [disabled]="currentPage() === 1" (click)="changePage(currentPage() - 1)">
+        <span class="material-symbols-outlined">chevron_left</span>
+      </button>
+
+      @for (p of pageNumbers; track $index) {
+      @if (p === -1) {
+      <span class="page-ellipsis">…</span>
+      } @else {
+      <button class="page-btn" [class.active]="p === currentPage()" (click)="changePage(p)">
+        {{ p }}
+      </button>
+      }
+      }
+
+      <button class="page-btn nav-btn" [disabled]="currentPage() === totalPages"
+        (click)="changePage(currentPage() + 1)">
+        <span class="material-symbols-outlined">chevron_right</span>
+      </button>
+    </div>
+    }
+    }
+
+    <!-- Empty State (after search) -->
+    @if (!loading() && hasSearched() && results().length === 0) {
+    <div class="empty-state">
+      <div class="empty-illustration">
+        <span class="material-symbols-outlined empty-icon">search_off</span>
+      </div>
+      <h3 class="empty-title">No results found</h3>
+      <p class="empty-desc">We couldn't find any study sets matching "<strong>{{ searchTerm() }}</strong>". Try
+        adjusting your search terms.</p>
+      <button class="empty-btn" (click)="clearSearch()">
+        <span class="material-symbols-outlined">refresh</span>
+        Clear & try again
+      </button>
+    </div>
+    }
+
+    <!-- Initial State (no search yet) -->
+    @if (!loading() && !hasSearched()) {
+    <div class="initial-state">
+      <div class="initial-illustration">
+        <span class="material-symbols-outlined initial-icon">find_in_page</span>
+      </div>
+      <h3 class="initial-title">Start exploring</h3>
+      <p class="initial-desc">Search for study sets, flashcards, and learning materials to boost your studies.</p>
+    </div>
+    }
+  </div>
+</div>

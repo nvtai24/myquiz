@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { Component, ElementRef, ViewChild, AfterViewInit, signal } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 
 @Component({
@@ -14,8 +14,21 @@ export class Landing implements AfterViewInit {
   private isAnimating = false;
   private readonly ANIMATION_DURATION = 350;
   private readonly EASING = 'cubic-bezier(0.4, 0, 0.2, 1)';
+  landingSearch = signal('');
 
   constructor(private router: Router) {}
+
+  onLandingSearchInput(event: Event) {
+    this.landingSearch.set((event.target as HTMLInputElement).value);
+  }
+
+  submitLandingSearch(event: Event) {
+    event.preventDefault();
+    const q = this.landingSearch().trim();
+    if (q) {
+      this.router.navigate(['/login']);
+    }
+  }
 
   ngAfterViewInit(): void {
     const track = this.modesTrack.nativeElement;

@@ -128,4 +128,10 @@ export class DeckService {
   acceptInvite(token: string): Observable<ApiResponse<string>> {
     return this.http.post<ApiResponse<string>>(`${this.endpoint}/invite/accept?token=${token}`, {});
   }
+
+  searchDecks(searchTerm: string, page: number = 1, size: number = 12): Observable<PagedResponse<DeckSummaryResponse>> {
+    return this.http.get<PagedResponse<DeckSummaryResponse>>(`${this.endpoint}/search`, {
+      params: { searchTerm, page: page.toString(), size: size.toString() }
+    });
+  }
 }

@@ -6,10 +6,15 @@
       </div>
     </div>
     <div class="search-wrap">
-      <div class="search-bar">
+      <form class="search-bar" (submit)="submitLandingSearch($event)">
         <span class="material-symbols-outlined search-icon">search</span>
-        <input type="text" placeholder="Search study sets, textbooks, questions..." />
-      </div>
+        <input
+          type="text"
+          placeholder="Search study sets, textbooks, questions..."
+          [value]="landingSearch()"
+          (input)="onLandingSearchInput($event)"
+        />
+      </form>
     </div>
     <div class="header-actions">
       <a routerLink="/login" class="login-link">Log in</a>

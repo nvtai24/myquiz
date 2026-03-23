@@ -1,99 +1,95 @@
 <div class="flex h-screen bg-[#f9fafb] font-[Inter]">
   <!-- Sidebar -->
-  <aside
-    [class]="sidebarCollapsed()
+  <aside [class]="sidebarCollapsed()
       ? 'w-16 min-w-[64px] bg-[#0f0a1e] flex flex-col shadow-2xl transition-all duration-300 overflow-hidden'
-      : 'w-60 min-w-[240px] bg-[#0f0a1e] flex flex-col shadow-2xl transition-all duration-300'"
-  >
+      : 'w-60 min-w-[240px] bg-[#0f0a1e] flex flex-col shadow-2xl transition-all duration-300'">
     <!-- Logo & Toggle -->
     <div class="flex items-center px-3 py-4 border-b border-white/5">
-      <button
-        (click)="toggleSidebar()"
-        class="w-10 h-10 rounded-full bg-[#1e1636] hover:bg-[#2d2150] flex items-center justify-center text-slate-300 border-none cursor-pointer transition-colors shrink-0"
-      >
+      <button (click)="toggleSidebar()"
+        class="w-10 h-10 rounded-full bg-[#1e1636] hover:bg-[#2d2150] flex items-center justify-center text-slate-300 border-none cursor-pointer transition-colors shrink-0">
         <span class="material-symbols-outlined">menu</span>
       </button>
-      <div
-        class="flex items-center gap-2 ml-3 overflow-hidden transition-all duration-300"
-        [style.width]="sidebarCollapsed() ? '0px' : '160px'"
-        [style.opacity]="sidebarCollapsed() ? '0' : '1'"
-      >
+      <div class="flex items-center gap-2 ml-3 overflow-hidden transition-all duration-300"
+        [style.width]="sidebarCollapsed() ? '0px' : '160px'" [style.opacity]="sidebarCollapsed() ? '0' : '1'">
         <img src="images/logo.png" alt="MyQuiz" class="h-10 w-auto drop-shadow-lg shrink-0">
       </div>
     </div>
 
     <!-- Nav -->
     <nav class="flex-1 px-2 py-4 space-y-1 overflow-y-auto overflow-x-hidden">
-      <a
-        routerLink="/dashboard"
-        routerLinkActive="!bg-[#4255FF] !text-white"
+      <a routerLink="/dashboard" routerLinkActive="!bg-[#4255FF] !text-white"
         [class]="sidebarCollapsed()
           ? 'flex items-center justify-center px-0 py-2.5 rounded-xl text-slate-300 font-semibold text-[13.5px] no-underline transition-all hover:bg-white/10 hover:text-white'
           : 'flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-300 font-semibold text-[13.5px] no-underline transition-all hover:bg-white/10 hover:text-white'"
-        [title]="sidebarCollapsed() ? 'Home' : ''"
-      >
+        [title]="sidebarCollapsed() ? 'Home' : ''">
         <span class="material-symbols-outlined shrink-0">home</span>
-        <span [class]="sidebarCollapsed() ? 'opacity-0 w-0 overflow-hidden whitespace-nowrap transition-all duration-200' : 'transition-all duration-200'">
+        <span
+          [class]="sidebarCollapsed() ? 'opacity-0 w-0 overflow-hidden whitespace-nowrap transition-all duration-200' : 'transition-all duration-200'">
           Home
         </span>
       </a>
       <div class="h-px bg-[#1e1636] mx-2 my-3"></div>
 
-      <a
-        routerLink="/library"
-        routerLinkActive="!bg-[#4255FF] !text-white"
+      <a routerLink="/search" routerLinkActive="!bg-[#4255FF] !text-white"
         [class]="sidebarCollapsed()
           ? 'flex items-center justify-center px-0 py-2.5 rounded-xl text-slate-300 font-semibold text-[13.5px] no-underline transition-all hover:bg-white/10 hover:text-white'
           : 'flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-300 font-semibold text-[13.5px] no-underline transition-all hover:bg-white/10 hover:text-white'"
-        [title]="sidebarCollapsed() ? 'My Library' : ''"
-      >
+        [title]="sidebarCollapsed() ? 'Explore' : ''">
+        <span class="material-symbols-outlined shrink-0">explore</span>
+        <span
+          [class]="sidebarCollapsed() ? 'opacity-0 w-0 overflow-hidden whitespace-nowrap transition-all duration-200' : 'transition-all duration-200'">
+          Explore
+        </span>
+      </a>
+      <div class="h-px bg-[#1e1636] mx-2 my-3"></div>
+
+      <a routerLink="/library" routerLinkActive="!bg-[#4255FF] !text-white"
+        [class]="sidebarCollapsed()
+          ? 'flex items-center justify-center px-0 py-2.5 rounded-xl text-slate-300 font-semibold text-[13.5px] no-underline transition-all hover:bg-white/10 hover:text-white'
+          : 'flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-300 font-semibold text-[13.5px] no-underline transition-all hover:bg-white/10 hover:text-white'"
+        [title]="sidebarCollapsed() ? 'My Library' : ''">
         <span class="material-symbols-outlined shrink-0">folder_open</span>
-        <span [class]="sidebarCollapsed() ? 'opacity-0 w-0 overflow-hidden whitespace-nowrap transition-all duration-200' : 'transition-all duration-200'">
+        <span
+          [class]="sidebarCollapsed() ? 'opacity-0 w-0 overflow-hidden whitespace-nowrap transition-all duration-200' : 'transition-all duration-200'">
           My Library
         </span>
       </a>
       <div class="h-px bg-[#1e1636] mx-2 my-3"></div>
 
-      <a
-        routerLink="/history"
-        routerLinkActive="!bg-[#4255FF] !text-white"
+      <a routerLink="/history" routerLinkActive="!bg-[#4255FF] !text-white"
         [class]="sidebarCollapsed()
           ? 'flex items-center justify-center px-0 py-2.5 rounded-xl text-slate-300 font-semibold text-[13.5px] no-underline transition-all hover:bg-white/10 hover:text-white'
           : 'flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-300 font-semibold text-[13.5px] no-underline transition-all hover:bg-white/10 hover:text-white'"
-        [title]="sidebarCollapsed() ? 'Quiz History' : ''"
-      >
+        [title]="sidebarCollapsed() ? 'Quiz History' : ''">
         <span class="material-symbols-outlined shrink-0">history</span>
-        <span [class]="sidebarCollapsed() ? 'opacity-0 w-0 overflow-hidden whitespace-nowrap transition-all duration-200' : 'transition-all duration-200'">
+        <span
+          [class]="sidebarCollapsed() ? 'opacity-0 w-0 overflow-hidden whitespace-nowrap transition-all duration-200' : 'transition-all duration-200'">
           Quiz History
         </span>
       </a>
       <div class="h-px bg-[#1e1636] mx-2 my-3"></div>
 
-      <a
-        routerLink="/subscription"
-        routerLinkActive="!bg-[#4255FF] !text-white"
+      <a routerLink="/subscription" routerLinkActive="!bg-[#4255FF] !text-white"
         [class]="sidebarCollapsed()
           ? 'flex items-center justify-center px-0 py-2.5 rounded-xl text-slate-300 font-semibold text-[13.5px] no-underline transition-all hover:bg-white/10 hover:text-white'
           : 'flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-300 font-semibold text-[13.5px] no-underline transition-all hover:bg-white/10 hover:text-white'"
-        [title]="sidebarCollapsed() ? 'Subscription' : ''"
-      >
+        [title]="sidebarCollapsed() ? 'Subscription' : ''">
         <span class="material-symbols-outlined shrink-0">credit_card</span>
-        <span [class]="sidebarCollapsed() ? 'opacity-0 w-0 overflow-hidden whitespace-nowrap transition-all duration-200' : 'transition-all duration-200'">
+        <span
+          [class]="sidebarCollapsed() ? 'opacity-0 w-0 overflow-hidden whitespace-nowrap transition-all duration-200' : 'transition-all duration-200'">
           Subscription
         </span>
       </a>
       <div class="h-px bg-[#1e1636] mx-2 my-3"></div>
 
-      <a
-        routerLink="/add-deck"
-        routerLinkActive="!bg-[#4255FF] !text-white"
+      <a routerLink="/add-deck" routerLinkActive="!bg-[#4255FF] !text-white"
         [class]="sidebarCollapsed()
           ? 'flex items-center justify-center px-0 py-2.5 rounded-xl text-slate-300 font-semibold text-[13.5px] no-underline transition-all hover:bg-white/10 hover:text-white'
           : 'flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-300 font-semibold text-[13.5px] no-underline transition-all hover:bg-white/10 hover:text-white'"
-        [title]="sidebarCollapsed() ? 'Create Study Set' : ''"
-      >
+        [title]="sidebarCollapsed() ? 'Create Study Set' : ''">
         <span class="material-symbols-outlined shrink-0">add</span>
-        <span [class]="sidebarCollapsed() ? 'opacity-0 w-0 overflow-hidden whitespace-nowrap transition-all duration-200' : 'transition-all duration-200'">
+        <span
+          [class]="sidebarCollapsed() ? 'opacity-0 w-0 overflow-hidden whitespace-nowrap transition-all duration-200' : 'transition-all duration-200'">
           Create Study Set
         </span>
       </a>
@@ -101,15 +97,14 @@
 
     <!-- Logout -->
     <div class="px-2 py-3 border-t border-white/5">
-      <button
-        (click)="logout()"
+      <button (click)="logout()"
         [class]="sidebarCollapsed()
           ? 'w-full flex items-center justify-center px-0 py-2.5 rounded-xl text-red-400 font-semibold text-[13.5px] transition-all hover:bg-red-500/10 bg-transparent border-none cursor-pointer'
           : 'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-400 font-semibold text-[13.5px] transition-all hover:bg-red-500/10 bg-transparent border-none cursor-pointer'"
-        [title]="sidebarCollapsed() ? 'Log out' : ''"
-      >
+        [title]="sidebarCollapsed() ? 'Log out' : ''">
         <span class="material-symbols-outlined shrink-0">logout</span>
-        <span [class]="sidebarCollapsed() ? 'opacity-0 w-0 overflow-hidden whitespace-nowrap transition-all duration-200' : 'transition-all duration-200'">
+        <span
+          [class]="sidebarCollapsed() ? 'opacity-0 w-0 overflow-hidden whitespace-nowrap transition-all duration-200' : 'transition-all duration-200'">
           Log out
         </span>
       </button>
@@ -123,41 +118,44 @@
       <div class="flex items-center gap-6 flex-1">
         <div class="flex items-center bg-gray-100 rounded-full px-4 py-2 gap-2 min-w-[500px]">
           <span class="material-symbols-outlined text-gray-400 text-[20px]">search</span>
-          <input
-            type="text"
-            placeholder="Search study sets, textbooks, questions..."
-            class="border-none outline-none bg-transparent text-[0.9rem] w-full text-gray-500"
-          />
+          <input type="text" placeholder="Search study sets, textbooks, questions..."
+            class="border-none outline-none bg-transparent text-[0.9rem] w-full text-gray-500" />
         </div>
       </div>
       <div class="flex items-center gap-3">
         <div class="relative">
           <div class="cursor-pointer text-[#4255FF]" (click)="toggleProfileMenu()">
             @if (currentUser()?.avatarUrl) {
-              <img [src]="currentUser()?.avatarUrl" alt="Avatar" class="w-9 h-9 rounded-full object-cover ring-2 ring-[#4255FF] ring-offset-2">
+            <img [src]="currentUser()?.avatarUrl" alt="Avatar"
+              class="w-9 h-9 rounded-full object-cover ring-2 ring-[#4255FF] ring-offset-2">
             } @else {
-              <span class="material-symbols-outlined text-[36px]">account_circle</span>
+            <span class="material-symbols-outlined text-[36px]">account_circle</span>
             }
           </div>
           @if (profileMenuOpen()) {
-            <div class="absolute top-[calc(100%+10px)] right-0 w-[200px] bg-white border border-gray-200 rounded-[14px] shadow-lg p-1.5 z-50 animate-[dropdownFade_0.15s_ease]">
-              <div class="absolute top-[-6px] right-[14px] w-3 h-3 bg-white border-l border-t border-gray-200 rotate-45"></div>
-              <a routerLink="/profile" class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-[10px] text-[0.85rem] font-semibold text-gray-800 no-underline hover:bg-gray-100 transition-colors">
-                <span class="material-symbols-outlined text-[20px] text-gray-500">person</span>
-                My Profile
-              </a>
-              @if (currentUser()?.roles?.includes('Admin')) {
-                <a routerLink="/admin/dashboard" class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-[10px] text-[0.85rem] font-semibold text-[#4255FF] no-underline hover:bg-gray-100 transition-colors">
-                  <span class="material-symbols-outlined text-[20px] text-[#4255FF]">admin_panel_settings</span>
-                  Admin Panel
-                </a>
-              }
-              <div class="h-px bg-gray-100 mx-2 my-1"></div>
-              <button (click)="logout()" class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-[10px] text-[0.85rem] font-semibold text-red-500 w-full bg-transparent border-none cursor-pointer hover:bg-gray-100 transition-colors">
-                <span class="material-symbols-outlined text-[20px] text-red-500">logout</span>
-                Log out
-              </button>
+          <div
+            class="absolute top-[calc(100%+10px)] right-0 w-[200px] bg-white border border-gray-200 rounded-[14px] shadow-lg p-1.5 z-50 animate-[dropdownFade_0.15s_ease]">
+            <div class="absolute top-[-6px] right-[14px] w-3 h-3 bg-white border-l border-t border-gray-200 rotate-45">
             </div>
+            <a routerLink="/profile"
+              class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-[10px] text-[0.85rem] font-semibold text-gray-800 no-underline hover:bg-gray-100 transition-colors">
+              <span class="material-symbols-outlined text-[20px] text-gray-500">person</span>
+              My Profile
+            </a>
+            @if (currentUser()?.roles?.includes('Admin')) {
+            <a routerLink="/admin/dashboard"
+              class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-[10px] text-[0.85rem] font-semibold text-[#4255FF] no-underline hover:bg-gray-100 transition-colors">
+              <span class="material-symbols-outlined text-[20px] text-[#4255FF]">admin_panel_settings</span>
+              Admin Panel
+            </a>
+            }
+            <div class="h-px bg-gray-100 mx-2 my-1"></div>
+            <button (click)="logout()"
+              class="flex items-center gap-2.5 px-3.5 py-2.5 rounded-[10px] text-[0.85rem] font-semibold text-red-500 w-full bg-transparent border-none cursor-pointer hover:bg-gray-100 transition-colors">
+              <span class="material-symbols-outlined text-[20px] text-red-500">logout</span>
+              Log out
+            </button>
+          </div>
           }
         </div>
       </div>
@@ -169,10 +167,8 @@
     </div>
 
     <!-- Floating Action Button -->
-    <a
-      routerLink="/add-deck"
-      class="fixed bottom-7 right-7 w-14 h-14 rounded-full bg-[#4255FF] text-white flex items-center justify-center shadow-lg cursor-pointer hover:scale-110 transition-transform z-50 no-underline"
-    >
+    <a routerLink="/add-deck"
+      class="fixed bottom-7 right-7 w-14 h-14 rounded-full bg-[#4255FF] text-white flex items-center justify-center shadow-lg cursor-pointer hover:scale-110 transition-transform z-50 no-underline">
       <span class="material-symbols-outlined text-[28px]">add</span>
     </a>
   </div>

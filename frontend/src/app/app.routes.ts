@@ -42,6 +42,7 @@ export const routes: Routes = [
     children: [
       { path: 'dashboard', loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.Dashboard) },
       { path: 'library', loadComponent: () => import('./pages/library/library').then(m => m.Library) },
+      { path: 'search', loadComponent: () => import('./pages/search/search').then(m => m.Search) },
       { path: 'add-deck', loadComponent: () => import('./pages/add-deck/add-deck').then(m => m.AddDeck) },
       { path: 'edit-deck/:id', loadComponent: () => import('./pages/add-deck/add-deck').then(m => m.AddDeck) },
       { path: 'deck/:id', loadComponent: () => import('./pages/deck-detail/deck-detail').then(m => m.DeckDetail) },

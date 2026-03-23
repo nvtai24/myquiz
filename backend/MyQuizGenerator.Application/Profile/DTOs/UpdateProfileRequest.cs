@@ -12,7 +12,4 @@ public class UpdateProfileRequest
 
     [StringLength(100, ErrorMessage = "Last name cannot exceed 100 characters")]
     public string? LastName { get; set; }
-
-    [Url(ErrorMessage = "Invalid avatar URL format")]
-    public string? AvatarUrl { get; set; }
 }

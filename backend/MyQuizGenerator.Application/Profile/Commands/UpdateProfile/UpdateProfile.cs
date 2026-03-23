@@ -6,7 +6,7 @@ using MyQuizGenerator.Application.Profile.DTOs;
 
 namespace MyQuizGenerator.Application.Profile.Commands.UpdateProfile;
 
-public record UpdateProfileCommand(string UserId, UpdateProfileRequest Request) : IRequest<UserResponse>;
+public record UpdateProfileCommand(string UserId, UpdateProfileRequest Request, string? AvatarUrl) : IRequest<UserResponse>;
 
 public class UpdateProfileCommandHandler : IRequestHandler<UpdateProfileCommand, UserResponse>
 {
@@ -23,7 +23,7 @@ public class UpdateProfileCommandHandler : IRequestHandler<UpdateProfileCommand,
             command.UserId,
             command.Request.FirstName,
             command.Request.LastName,
-            command.Request.AvatarUrl);
+            command.AvatarUrl);
 
         if (updatedUser == null)
         {

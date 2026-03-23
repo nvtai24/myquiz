@@ -2,6 +2,8 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyQuizGenerator.Application.Common.Exceptions;
+using MyQuizGenerator.Application.Common.Interfaces;
+using MyQuizGenerator.Application.Files.DTOs;
 using MyQuizGenerator.Application.Profile.Commands.UpdateProfile;
 using MyQuizGenerator.Application.Profile.DTOs;
 using MyQuizGenerator.Application.Profile.Queries.GetProfile;
@@ -15,6 +17,13 @@ namespace MyQuizGenerator.Presentation.Controllers;
 [Authorize]
 public class ProfileController : BaseApiController
 {
+    private readonly IFileService _fileService;
+
+    public ProfileController(IFileService fileService)
+    {
+        _fileService = fileService;
+    }
+
     /// <summary>
     /// Gets the current user's profile including subscription info.
     /// </summary>
@@ -38,7 +47,7 @@ public class ProfileController : BaseApiController
     /// Updates the current user's profile.
     /// </summary>
     [HttpPut]
-    public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
+    public async Task<IActionResult> UpdateProfile([FromForm] UpdateProfileRequest request, IFormFile? avatar)
     {
         var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
                   ?? User.FindFirst("sub")?.Value;
@@ -48,7 +57,15 @@ public class ProfileController : BaseApiController
             throw new UnauthorizedException("Invalid token");
         }
 
-        var command = new UpdateProfileCommand(userId, request);
+        string? avatarUrl = null;
+        if (avatar != null && avatar.Length > 0)
+        {
+            using var stream = avatar.OpenReadStream();
+            var fileRequest = new FileUploadRequest(stream, avatar.FileName, avatar.ContentType);
+            avatarUrl = await _fileService.UploadFileAsync(fileRequest);
+        }
+
+        var command = new UpdateProfileCommand(userId, request, avatarUrl);
         var updatedUser = await Mediator.Send(command);
         return ApiOk(updatedUser, "Profile updated successfully");
     }

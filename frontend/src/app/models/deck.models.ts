@@ -97,6 +97,7 @@ export interface CreateDeckRequest {
   source: DeckSource;
   tags: string[];
   questions: CreateQuestionRequest[];
+  thumbnailUrl?: string;
 }
 
 export interface CreateDeckRatingRequest {

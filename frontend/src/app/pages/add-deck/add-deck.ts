@@ -4,7 +4,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { DeckService } from '../../services/deck.service';
 import { PaymentService } from '../../services/payment.service';
 import { CreateDeckRequest, CreateQuestionRequest, GeneratedDeckResponse, GeneratedQuestionResponse, QuestionType } from '../../models/deck.models';
-import { forkJoin } from 'rxjs';
+import { forkJoin, of, switchMap, map, finalize } from 'rxjs';
 
 interface Card {
   id: number;
@@ -354,85 +354,75 @@ export class AddDeck implements OnInit {
   }
 
   saveDraft() {
-    if (this.savingDraft()) return;
-    this.errorMessage.set(null);
-
-    if (!this.title().trim()) {
-      this.showError('A title is required to save a draft');
-      return;
-    }
-
-    this.savingDraft.set(true);
-
-    const questions = this.buildQuestions();
-
-    const request: CreateDeckRequest = {
-      name: this.title().trim(),
-      description: this.description().trim(),
-      visibility: this.visibility() === 'public' ? 'Public' : 'Private',
-      status: 'Draft',
-      source: this.aiGenerated() ? 'AiGenerated' : 'Manual',
-      tags: [],
-      questions,
-    };
-
-    const action = this.isEditMode() && this.editingId() 
-      ? this.deckService.updateDeck(this.editingId()!, request, this.coverFile() ?? undefined)
-      : this.deckService.createDeck(request, this.coverFile() ?? undefined);
-
-    action.subscribe({
-      next: (res) => {
-        this.savingDraft.set(false);
-        if (res.success) {
-          this.showSuccess('Draft saved successfully!');
-        } else {
-          this.showError(res.message || 'Failed to save draft');
-        }
-      },
-      error: (err) => {
-        this.savingDraft.set(false);
-        this.showError(this.extractErrorMessage(err));
-      },
-    });
+    this.submitDeck('Draft');
   }
- 
+
   create() {
-    if (this.creating()) return;
     if (!this.title().trim()) {
       this.showError('Title is required to publish');
       return;
     }
+    this.submitDeck('Published');
+  }
 
-    this.creating.set(true);
+  private submitDeck(status: 'Draft' | 'Published') {
+    const isDraft = status === 'Draft';
+    if (isDraft) {
+      if (this.savingDraft()) return;
+      this.savingDraft.set(true);
+    } else {
+      if (this.creating()) return;
+      this.creating.set(true);
+    }
+
     this.errorMessage.set(null);
 
     const questions = this.buildQuestions();
-
     const request: CreateDeckRequest = {
       name: this.title().trim(),
       description: this.description().trim(),
       visibility: this.visibility() === 'public' ? 'Public' : 'Private',
-      status: 'Published',
+      status: status,
       source: this.aiGenerated() ? 'AiGenerated' : 'Manual',
       tags: [],
       questions,
+      thumbnailUrl: this.coverImage() || undefined
     };
 
-    const action = this.isEditMode() && this.editingId()
-      ? this.deckService.updateDeck(this.editingId()!, request, this.coverFile() ?? undefined)
-      : this.deckService.createDeck(request, this.coverFile() ?? undefined);
+    const upload$ = this.coverFile() 
+      ? this.deckService.uploadFile(this.coverFile()!).pipe(
+          map(res => {
+            if (res.success && res.data?.url) return res.data.url;
+            throw new Error(res.message || 'Failed to upload thumbnail');
+          })
+        )
+      : of(request.thumbnailUrl);
 
-    action.subscribe({
+    upload$.pipe(
+      switchMap(url => {
+        request.thumbnailUrl = url;
+        const action = this.isEditMode() && this.editingId() 
+          ? this.deckService.updateDeck(this.editingId()!, request)
+          : this.deckService.createDeck(request);
+        return action;
+      }),
+      finalize(() => {
+        if (isDraft) this.savingDraft.set(false);
+        else this.creating.set(false);
+      })
+    ).subscribe({
       next: (res) => {
-        this.creating.set(false);
         if (res.success) {
-          this.router.navigate(['/library']);
+          if (isDraft) {
+            this.showSuccess('Draft saved successfully!');
+          } else {
+            this.router.navigate(['/library']);
+          }
         } else {
-          this.showError(res.message || 'Failed to create deck');
+          this.showError(res.message || `Failed to ${isDraft ? 'save draft' : 'create deck'}`);
         }
       },
       error: (err) => {
-        this.creating.set(false);
         this.showError(this.extractErrorMessage(err));
       },
     });

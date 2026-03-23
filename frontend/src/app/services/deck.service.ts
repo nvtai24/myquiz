@@ -49,66 +49,31 @@ export class DeckService {
     return this.http.post<ApiResponse<string>>(`${this.endpoint}/${deckId}/ratings`, request);
   }
 
-  createDeck(request: CreateDeckRequest, file?: File): Observable<ApiResponse<string>> {
+  uploadFile(file: File): Observable<ApiResponse<{ url: string }>> {
     const formData = new FormData();
-    formData.append('name', request.name);
-    formData.append('description', request.description);
-    const visibilityMap: Record<string, string> = { 'Public': '0', 'Private': '1', 'Shared': '2' };
-    const statusMap: Record<string, string> = { 'Draft': '0', 'Published': '1' };
-    const sourceMap: Record<string, string> = { 'Manual': '0', 'AiGenerated': '1' };
-
-    formData.append('visibility', visibilityMap[request.visibility] || '0');
-    formData.append('status', statusMap[request.status] || '0');
-    formData.append('source', sourceMap[request.source] || '0');
-
-    request.tags.forEach((tag, i) => {
-      formData.append(`tags[${i}]`, tag);
-    });
-
-    request.questions.forEach((q, i) => {
-      formData.append(`questions[${i}].content`, q.content);
-      formData.append(`questions[${i}].type`, q.type);
-      if (q.hint) formData.append(`questions[${i}].hint`, q.hint);
-      if (q.explanation) formData.append(`questions[${i}].explanation`, q.explanation);
-      (q.options || []).forEach((opt, j) => formData.append(`questions[${i}].options[${j}]`, opt));
-      (q.correctAnswers || []).forEach((ans, j) => formData.append(`questions[${i}].correctAnswers[${j}]`, ans));
-    });
-
-    if (file) formData.append('thumbnail', file, file.name);
-
-    return this.http.post<ApiResponse<string>>(this.endpoint, formData);
+    formData.append('file', file, file.name);
+    return this.http.post<ApiResponse<{ url: string }>>('/api/Files/upload', formData);
   }
 
-  updateDeck(id: string, request: CreateDeckRequest, file?: File): Observable<ApiResponse<string>> {
-    const formData = new FormData();
-    formData.append('name', request.name);
-    formData.append('description', request.description);
-    
-    // Map enums to their exact integer representations to ensure flawless backend binding
-    const visibilityMap: Record<string, string> = { 'Public': '0', 'Private': '1', 'Shared': '2' };
-    const statusMap: Record<string, string> = { 'Draft': '0', 'Published': '1' };
-    const sourceMap: Record<string, string> = { 'Manual': '0', 'AiGenerated': '1' };
+  createDeck(request: CreateDeckRequest): Observable<ApiResponse<string>> {
+    return this.http.post<ApiResponse<string>>(this.endpoint, this.mapRequestToDto(request));
+  }
 
-    formData.append('visibility', visibilityMap[request.visibility] || '0');
-    formData.append('status', statusMap[request.status] || '0');
-    formData.append('source', sourceMap[request.source] || '0');
+  updateDeck(id: string, request: CreateDeckRequest): Observable<ApiResponse<string>> {
+    return this.http.put<ApiResponse<string>>(`${this.endpoint}/${id}`, this.mapRequestToDto(request));
+  }
 
-    request.tags.forEach((tag, i) => {
-      formData.append(`tags[${i}]`, tag);
-    });
+  private mapRequestToDto(request: CreateDeckRequest) {
+    const visibilityMap: Record<string, number> = { 'Public': 0, 'Private': 1, 'Shared': 2 };
+    const statusMap: Record<string, number> = { 'Draft': 0, 'Published': 1 };
+    const sourceMap: Record<string, number> = { 'Manual': 0, 'AiGenerated': 1 };
 
-    request.questions.forEach((q, i) => {
-      formData.append(`questions[${i}].content`, q.content);
-      formData.append(`questions[${i}].type`, q.type);
-      if (q.hint) formData.append(`questions[${i}].hint`, q.hint);
-      if (q.explanation) formData.append(`questions[${i}].explanation`, q.explanation);
-      (q.options || []).forEach((opt, j) => formData.append(`questions[${i}].options[${j}]`, opt));
-      (q.correctAnswers || []).forEach((ans, j) => formData.append(`questions[${i}].correctAnswers[${j}]`, ans));
-    });
-
-    if (file) formData.append('thumbnail', file, file.name);
-
-    return this.http.put<ApiResponse<string>>(`${this.endpoint}/${id}`, formData);
+    return {
+      ...request,
+      visibility: visibilityMap[request.visibility] ?? 0,
+      status: statusMap[request.status] ?? 0,
+      source: sourceMap[request.source] ?? 0
+    };
   }
 
   generateDeck(file: File): Observable<ApiResponse<GeneratedDeckResponse>> {

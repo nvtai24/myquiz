@@ -54,6 +54,28 @@ export class DeckDetail implements OnInit {
   showHint = signal(false);
   showExplanation = signal(false);
 
+  // Bottom List Toggles
+  expandedHints = signal<Set<number>>(new Set());
+  expandedExplanations = signal<Set<number>>(new Set());
+
+  toggleListHint(id: number) {
+    this.expandedHints.update((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
+  toggleListExplanation(id: number) {
+    this.expandedExplanations.update((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }
+
   currentQuestion = computed(() => {
     const questions = this.displayQuestions();
     if (!questions?.length) return null;

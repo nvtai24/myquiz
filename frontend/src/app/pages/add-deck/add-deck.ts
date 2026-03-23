@@ -7,6 +7,7 @@ import { PaymentService } from '../../services/payment.service';
 import {
   CreateDeckRequest,
   CreateQuestionRequest,
+  DeckStatus,
   DeckVisibility,
   GeneratedDeckResponse,
   GeneratedQuestionResponse,
@@ -54,6 +55,7 @@ export class AddDeck implements OnInit {
 
   isEditMode = signal(false);
   editingId = signal<string | null>(null);
+  editingStatus = signal<DeckStatus | null>(null);
   loadingDeck = signal(false);
   documentUrl = signal<string | null>(null);
   deletedQuestionIds = signal<number[]>([]);
@@ -145,6 +147,7 @@ export class AddDeck implements OnInit {
         this.loadingDeck.set(false);
         if (res.success && res.data) {
           const deck = res.data;
+          this.editingStatus.set(this.normalizeDeckStatus(deck.status));
           this.title.set(deck.name);
           this.description.set(deck.description || '');
           this.tags.set(deck.tags ?? []);
@@ -414,6 +417,10 @@ export class AddDeck implements OnInit {
     return !!this.title().trim();
   }
 
+  get canShowSaveDraft(): boolean {
+    return !this.isEditMode() || this.editingStatus() === 'Draft';
+  }
+
   saveDraft() {
     this.submitDeck('Draft');
   }
@@ -636,6 +643,12 @@ export class AddDeck implements OnInit {
       return messages.join('. ') || body.title || 'Validation failed';
     }
     return body?.message || 'An error occurred';
+  }
+
+  private normalizeDeckStatus(status: DeckStatus | number | string | null | undefined): DeckStatus | null {
+    if (status === 'Draft' || status === 0 || status === '0') return 'Draft';
+    if (status === 'Published' || status === 1 || status === '1') return 'Published';
+    return null;
   }
 
   addTag() {

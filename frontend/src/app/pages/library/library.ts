@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, computed, effect } from '@angular/core';
+import { Component, inject, signal, OnInit, computed, effect, untracked } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -58,7 +58,7 @@ export class Library implements OnInit {
     effect(() => {
       const tab = this.activeTab();
       this.currentPage.set(1);
-      this.loadDecks();
+      untracked(() => this.loadDecks());
     }, { allowSignalWrites: true });
   }
 

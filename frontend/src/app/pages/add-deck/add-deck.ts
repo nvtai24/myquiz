@@ -3,7 +3,15 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { DeckService } from '../../services/deck.service';
 import { PaymentService } from '../../services/payment.service';
-import { CreateDeckRequest, CreateQuestionRequest, GeneratedDeckResponse, GeneratedQuestionResponse, QuestionType, UpdateDeckRequest, UpdateQuestionRequest } from '../../models/deck.models';
+import {
+  CreateDeckRequest,
+  CreateQuestionRequest,
+  GeneratedDeckResponse,
+  GeneratedQuestionResponse,
+  QuestionType,
+  UpdateDeckRequest,
+  UpdateQuestionRequest,
+} from '../../models/deck.models';
 import { forkJoin, of, switchMap, map, finalize } from 'rxjs';
 
 interface Card {
@@ -80,10 +88,13 @@ export class AddDeck implements OnInit {
   private deckService = inject(DeckService);
   private paymentService = inject(PaymentService);
 
-  constructor(private router: Router, private route: ActivatedRoute) {}
+  constructor(
+    private router: Router,
+    private route: ActivatedRoute,
+  ) {}
 
   ngOnInit() {
-    this.route.paramMap.subscribe(params => {
+    this.route.paramMap.subscribe((params) => {
       const id = params.get('id');
       if (id) {
         this.isEditMode.set(true);
@@ -97,28 +108,28 @@ export class AddDeck implements OnInit {
   private loadSubscriptionLimits() {
     this.aiLimitLoading.set(true);
     forkJoin({
-      sub:  this.paymentService.getMySubscription(),
-      limit: this.paymentService.getMySubscriptionLimit()
+      sub: this.paymentService.getMySubscription(),
+      limit: this.paymentService.getMySubscriptionLimit(),
     }).subscribe({
-      next: ({sub, limit}) => {
+      next: ({ sub, limit }) => {
         this.aiLimitLoading.set(false);
         if (limit && !sub?.isExpired) {
           this.aiUsageMax.set(limit.dailyGenerateLimit);
           this.aiUsageCount.set(limit.dailyGenerateUsed);
         } else {
           // No active plan
-          this.aiUsageMax.set(0); 
-          this.aiUsageCount.set(0); 
+          this.aiUsageMax.set(0);
+          this.aiUsageCount.set(0);
         }
 
-        if(limit && limit.numDeckUsed >= limit.numDeckLimit && limit.numDeckLimit !== 0){
+        if (limit && limit.numDeckUsed >= limit.numDeckLimit && limit.numDeckLimit !== 0) {
           this.checkLimit.set(true);
         }
       },
       error: () => {
         this.aiLimitLoading.set(false);
-      }
-    })
+      },
+    });
   }
 
   private loadDeck(id: string) {
@@ -140,7 +151,7 @@ export class AddDeck implements OnInit {
           }
 
           if (deck.questions && deck.questions.length > 0) {
-            const mapped: Card[] = deck.questions.map(q => {
+            const mapped: Card[] = deck.questions.map((q) => {
               const cardType = this.mapQuestionTypeToCardType(q.type);
               const card: Card = {
                 id: this.nextId++,
@@ -149,12 +160,14 @@ export class AddDeck implements OnInit {
                 term: q.content,
                 hint: q.hint || undefined,
                 explanation: q.explanation || undefined,
-                showExtra: !!(q.hint || q.explanation)
+                showExtra: !!(q.hint || q.explanation),
               };
 
               if (cardType === 'multiple-choice') {
                 card.options = q.options?.length ? [...q.options] : ['', '', '', ''];
-                card.correctAnswers = q.correctAnswers?.map(ans => card.options!.indexOf(ans)).filter(i => i >= 0) || [0];
+                card.correctAnswers = q.correctAnswers
+                  ?.map((ans) => card.options!.indexOf(ans))
+                  .filter((i) => i >= 0) || [0];
                 if (card.correctAnswers.length === 0) card.correctAnswers = [0];
               } else if (cardType === 'true-false') {
                 const correctStr = (q.correctAnswers?.[0] || 'true').toLowerCase();
@@ -167,15 +180,18 @@ export class AddDeck implements OnInit {
             this.cards.set(mapped);
             // store snapshot for change detection
             this.originalQuestions.clear();
-            deck.questions.forEach(q => {
-              this.originalQuestions.set(q.id, JSON.stringify({
-                content: q.content,
-                type: q.type,
-                hint: q.hint || '',
-                explanation: q.explanation || '',
-                options: [...(q.options || [])].sort(),
-                correctAnswers: [...(q.correctAnswers || [])].sort(),
-              }));
+            deck.questions.forEach((q) => {
+              this.originalQuestions.set(
+                q.id,
+                JSON.stringify({
+                  content: q.content,
+                  type: q.type,
+                  hint: q.hint || '',
+                  explanation: q.explanation || '',
+                  options: [...(q.options || [])].sort(),
+                  correctAnswers: [...(q.correctAnswers || [])].sort(),
+                }),
+              );
             });
           }
 
@@ -191,12 +207,12 @@ export class AddDeck implements OnInit {
         this.loadingDeck.set(false);
         this.showError('Error loading deck');
         this.router.navigate(['/library']);
-      }
+      },
     });
   }
 
   toggleVisibility() {
-    this.visibility.update(v => v === 'public' ? 'private' : 'public');
+    this.visibility.update((v) => (v === 'public' ? 'private' : 'public'));
   }
 
   onCoverImageSelect(event: Event) {
@@ -218,15 +234,24 @@ export class AddDeck implements OnInit {
   }
 
   addCard() {
-    this.cards.update(cards => [...cards, { id: this.nextId++, type: 'multiple-choice', term: '', options: ['', '', '', ''], correctAnswers: [0] }]);
+    this.cards.update((cards) => [
+      ...cards,
+      {
+        id: this.nextId++,
+        type: 'multiple-choice',
+        term: '',
+        options: ['', '', '', ''],
+        correctAnswers: [0],
+      },
+    ]);
   }
 
   duplicateCard(index: number) {
     const card = this.cards()[index];
-    const newCard: Card = { 
-      id: this.nextId++, 
-      type: card.type, 
-      term: card.term, 
+    const newCard: Card = {
+      id: this.nextId++,
+      type: card.type,
+      term: card.term,
       definition: card.definition,
       options: card.options ? [...card.options] : undefined,
       correctAnswers: card.correctAnswers ? [...card.correctAnswers] : undefined,
@@ -234,7 +259,7 @@ export class AddDeck implements OnInit {
       hint: card.hint,
       explanation: card.explanation,
     };
-    this.cards.update(cards => {
+    this.cards.update((cards) => {
       const updated = [...cards];
       updated.splice(index + 1, 0, newCard);
       return updated;
@@ -245,13 +270,13 @@ export class AddDeck implements OnInit {
     if (this.cards().length <= 2) return;
     const card = this.cards()[index];
     if (card.questionId != null) {
-      this.deletedQuestionIds.update(ids => [...ids, card.questionId!]);
+      this.deletedQuestionIds.update((ids) => [...ids, card.questionId!]);
     }
-    this.cards.update(cards => cards.filter((_, i) => i !== index));
+    this.cards.update((cards) => cards.filter((_, i) => i !== index));
   }
 
   updateCardType(index: number, newType: 'fill-blank' | 'multiple-choice' | 'true-false') {
-    this.cards.update(cards => {
+    this.cards.update((cards) => {
       const updated = [...cards];
       const card = { ...updated[index], type: newType };
       if (newType === 'fill-blank' && card.blankAnswer === undefined) card.blankAnswer = '';
@@ -266,7 +291,7 @@ export class AddDeck implements OnInit {
   }
 
   updateTerm(index: number, value: string) {
-    this.cards.update(cards => {
+    this.cards.update((cards) => {
       const updated = [...cards];
       updated[index] = { ...updated[index], term: value };
       return updated;
@@ -274,7 +299,7 @@ export class AddDeck implements OnInit {
   }
 
   updateDefinition(index: number, value: string) {
-    this.cards.update(cards => {
+    this.cards.update((cards) => {
       const updated = [...cards];
       updated[index] = { ...updated[index], definition: value };
       return updated;
@@ -282,7 +307,7 @@ export class AddDeck implements OnInit {
   }
 
   updateBlankAnswer(index: number, value: string) {
-    this.cards.update(cards => {
+    this.cards.update((cards) => {
       const updated = [...cards];
       updated[index] = { ...updated[index], blankAnswer: value };
       return updated;
@@ -290,7 +315,7 @@ export class AddDeck implements OnInit {
   }
 
   updateOption(cardIndex: number, optionIndex: number, value: string) {
-    this.cards.update(cards => {
+    this.cards.update((cards) => {
       const updated = [...cards];
       const newOptions = [...(updated[cardIndex].options || [])];
       newOptions[optionIndex] = value;
@@ -300,12 +325,12 @@ export class AddDeck implements OnInit {
   }
 
   toggleCorrectAnswer(cardIndex: number, optionIndex: number) {
-    this.cards.update(cards => {
+    this.cards.update((cards) => {
       const updated = [...cards];
       const currentArr = updated[cardIndex].correctAnswers || [];
       let newAnswers = [...currentArr];
       if (newAnswers.includes(optionIndex)) {
-        newAnswers = newAnswers.filter(a => a !== optionIndex);
+        newAnswers = newAnswers.filter((a) => a !== optionIndex);
         if (newAnswers.length === 0) newAnswers = [optionIndex]; // prevent having 0 answers just to simplify logic
       } else {
         newAnswers.push(optionIndex);
@@ -316,7 +341,7 @@ export class AddDeck implements OnInit {
   }
 
   updateIsTrue(cardIndex: number, val: boolean) {
-    this.cards.update(cards => {
+    this.cards.update((cards) => {
       const updated = [...cards];
       updated[cardIndex] = { ...updated[cardIndex], isTrue: val };
       return updated;
@@ -324,7 +349,7 @@ export class AddDeck implements OnInit {
   }
 
   updateHint(index: number, value: string) {
-    this.cards.update(cards => {
+    this.cards.update((cards) => {
       const updated = [...cards];
       updated[index] = { ...updated[index], hint: value };
       return updated;
@@ -332,7 +357,7 @@ export class AddDeck implements OnInit {
   }
 
   updateExplanation(index: number, value: string) {
-    this.cards.update(cards => {
+    this.cards.update((cards) => {
       const updated = [...cards];
       updated[index] = { ...updated[index], explanation: value };
       return updated;
@@ -340,7 +365,7 @@ export class AddDeck implements OnInit {
   }
 
   toggleExtra(index: number) {
-    this.cards.update(cards => {
+    this.cards.update((cards) => {
       const updated = [...cards];
       updated[index] = { ...updated[index], showExtra: !updated[index].showExtra };
       return updated;
@@ -364,7 +389,7 @@ export class AddDeck implements OnInit {
     event.preventDefault();
     const fromIndex = this.dragIndex();
     if (fromIndex === null || fromIndex === index) return;
-    this.cards.update(cards => {
+    this.cards.update((cards) => {
       const updated = [...cards];
       const [moved] = updated.splice(fromIndex, 1);
       updated.splice(index, 0, moved);
@@ -417,66 +442,76 @@ export class AddDeck implements OnInit {
       tags: [],
       questions: this.buildQuestions(),
       thumbnailUrl: this.coverImage() || undefined,
-      documentUrl: this.documentUrl() || undefined
+      documentUrl: this.documentUrl() || undefined,
     };
 
     const thumbnail$ = this.coverFile()
-      ? this.deckService.uploadFile(this.coverFile()!).pipe(map(res => {
-          if (res.success && res.data?.url) return res.data.url;
-          throw new Error(res.message || 'Failed to upload thumbnail');
-        }))
+      ? this.deckService.uploadFile(this.coverFile()!).pipe(
+          map((res) => {
+            if (res.success && res.data?.url) return res.data.url;
+            throw new Error(res.message || 'Failed to upload thumbnail');
+          }),
+        )
       : of(createRequest.thumbnailUrl);
 
-    const document$ = (this.aiGenerated() && this.lastUsedAiFile())
-      ? this.deckService.uploadFile(this.lastUsedAiFile()!).pipe(map(res => {
-          if (res.success && res.data?.url) return res.data.url;
-          throw new Error(res.message || 'Failed to upload AI document');
-        }))
-      : of(createRequest.documentUrl);
+    const document$ =
+      this.aiGenerated() && this.lastUsedAiFile()
+        ? this.deckService.uploadFile(this.lastUsedAiFile()!).pipe(
+            map((res) => {
+              if (res.success && res.data?.url) return res.data.url;
+              throw new Error(res.message || 'Failed to upload AI document');
+            }),
+          )
+        : of(createRequest.documentUrl);
 
-    forkJoin({ thumbnail: thumbnail$, document: document$ }).pipe(
-      switchMap(({ thumbnail, document }) => {
-        createRequest.thumbnailUrl = thumbnail;
-        createRequest.documentUrl = document;
+    forkJoin({ thumbnail: thumbnail$, document: document$ })
+      .pipe(
+        switchMap(({ thumbnail, document }) => {
+          createRequest.thumbnailUrl = thumbnail;
+          createRequest.documentUrl = document;
 
-        if (isEdit) {
-          const updateRequest: UpdateDeckRequest = {
-            name: createRequest.name,
-            description: createRequest.description,
-            visibility,
-            status,
-            tags: [],
-            thumbnailUrl: thumbnail,
-            ...this.buildQuestionDiff(),
-          };
-          return this.deckService.updateDeck(this.editingId()!, updateRequest);
-        }
-
-        return this.deckService.createDeck(createRequest);
-      }),
-      finalize(() => {
-        if (isDraft) this.savingDraft.set(false);
-        else this.creating.set(false);
-      })
-    ).subscribe({
-      next: (res) => {
-        if (res.success) {
-          if (isDraft) {
-            this.showSuccess('Draft saved successfully!');
-          } else {
-            this.router.navigate(['/library']);
+          if (isEdit) {
+            const updateRequest: UpdateDeckRequest = {
+              name: createRequest.name,
+              description: createRequest.description,
+              visibility,
+              status,
+              tags: [],
+              thumbnailUrl: thumbnail,
+              ...this.buildQuestionDiff(),
+            };
+            return this.deckService.updateDeck(this.editingId()!, updateRequest);
           }
-        } else {
-          this.showError(res.message || `Failed to ${isDraft ? 'save draft' : 'create deck'}`);
-        }
-      },
-      error: (err) => {
-        this.showError(this.extractErrorMessage(err));
-      },
-    });
+
+          return this.deckService.createDeck(createRequest);
+        }),
+        finalize(() => {
+          if (isDraft) this.savingDraft.set(false);
+          else this.creating.set(false);
+        }),
+      )
+      .subscribe({
+        next: (res) => {
+          if (res.success) {
+            if (isDraft) {
+              this.showSuccess('Draft saved successfully!');
+            } else {
+              this.router.navigate(['/library']);
+            }
+          } else {
+            this.showError(res.message || `Failed to ${isDraft ? 'save draft' : 'create deck'}`);
+          }
+        },
+        error: (err) => {
+          this.showError(this.extractErrorMessage(err));
+        },
+      });
   }
 
-  private buildQuestionDiff(): Pick<UpdateDeckRequest, 'questionsToAdd' | 'questionsToUpdate' | 'questionIdsToDelete'> {
+  private buildQuestionDiff(): Pick<
+    UpdateDeckRequest,
+    'questionsToAdd' | 'questionsToUpdate' | 'questionIdsToDelete'
+  > {
     const questionsToAdd: CreateQuestionRequest[] = [];
     const questionsToUpdate: UpdateQuestionRequest[] = [];
 
@@ -487,8 +522,10 @@ export class AddDeck implements OnInit {
       let correctAnswers: string[] = [];
 
       if (card.type === 'multiple-choice') {
-        options = (card.options || []).filter(o => o.trim());
-        correctAnswers = (card.correctAnswers || []).map(i => (card.options || [])[i]).filter(Boolean);
+        options = (card.options || []).filter((o) => o.trim());
+        correctAnswers = (card.correctAnswers || [])
+          .map((i) => (card.options || [])[i])
+          .filter(Boolean);
       } else if (card.type === 'true-false') {
         options = ['True', 'False'];
         correctAnswers = [card.isTrue ? 'True' : 'False'];
@@ -532,15 +569,17 @@ export class AddDeck implements OnInit {
 
   private buildQuestions(): CreateQuestionRequest[] {
     return this.cards()
-      .filter(card => card.term.trim())
-      .map(card => {
+      .filter((card) => card.term.trim())
+      .map((card) => {
         const type = this.mapCardType(card.type);
         let options: string[] = [];
         let correctAnswers: string[] = [];
 
         if (card.type === 'multiple-choice') {
-          options = (card.options || []).filter(o => o.trim());
-          correctAnswers = (card.correctAnswers || []).map(i => (card.options || [])[i]).filter(Boolean);
+          options = (card.options || []).filter((o) => o.trim());
+          correctAnswers = (card.correctAnswers || [])
+            .map((i) => (card.options || [])[i])
+            .filter(Boolean);
         } else if (card.type === 'true-false') {
           options = ['True', 'False'];
           correctAnswers = [card.isTrue ? 'True' : 'False'];
@@ -561,9 +600,12 @@ export class AddDeck implements OnInit {
 
   private mapCardType(type: 'fill-blank' | 'multiple-choice' | 'true-false'): QuestionType {
     switch (type) {
-      case 'multiple-choice': return 'MultipleChoice';
-      case 'true-false': return 'TrueFalse';
-      case 'fill-blank': return 'FillInTheBlank';
+      case 'multiple-choice':
+        return 'MultipleChoice';
+      case 'true-false':
+        return 'TrueFalse';
+      case 'fill-blank':
+        return 'FillInTheBlank';
     }
   }
 
@@ -620,13 +662,13 @@ export class AddDeck implements OnInit {
   addFocusTopic() {
     const topic = this.aiFocusInput().trim();
     if (topic && !this.aiFocusTopics().includes(topic)) {
-      this.aiFocusTopics.update(t => [...t, topic]);
+      this.aiFocusTopics.update((t) => [...t, topic]);
       this.aiFocusInput.set('');
     }
   }
 
   removeFocusTopic(index: number) {
-    this.aiFocusTopics.update(t => t.filter((_, i) => i !== index));
+    this.aiFocusTopics.update((t) => t.filter((_, i) => i !== index));
   }
 
   onFocusKeydown(event: KeyboardEvent) {
@@ -670,7 +712,7 @@ export class AddDeck implements OnInit {
           return;
         }
         if (this.aiUsageMax() > 0) {
-          this.aiUsageCount.update(c => c + 1);
+          this.aiUsageCount.update((c) => c + 1);
         }
         this.applyGeneratedDeckResponse(res.data);
       },
@@ -706,8 +748,8 @@ export class AddDeck implements OnInit {
         card.options = q.options.length > 0 ? [...q.options] : ['', '', '', ''];
         // Map correctAnswers strings back to indices
         card.correctAnswers = q.correctAnswers
-          .map(ans => card.options!.indexOf(ans))
-          .filter(idx => idx >= 0);
+          .map((ans) => card.options!.indexOf(ans))
+          .filter((idx) => idx >= 0);
         if (card.correctAnswers.length === 0) card.correctAnswers = [0];
       } else if (cardType === 'true-false') {
         const correct = q.correctAnswers[0]?.toLowerCase();
@@ -719,10 +761,26 @@ export class AddDeck implements OnInit {
       return card;
     });
 
-    this.cards.set(mapped.length > 0 ? mapped : [
-      { id: this.nextId++, type: 'multiple-choice', term: '', options: ['', '', '', ''], correctAnswers: [0] },
-      { id: this.nextId++, type: 'multiple-choice', term: '', options: ['', '', '', ''], correctAnswers: [0] },
-    ]);
+    this.cards.set(
+      mapped.length > 0
+        ? mapped
+        : [
+            {
+              id: this.nextId++,
+              type: 'multiple-choice',
+              term: '',
+              options: ['', '', '', ''],
+              correctAnswers: [0],
+            },
+            {
+              id: this.nextId++,
+              type: 'multiple-choice',
+              term: '',
+              options: ['', '', '', ''],
+              correctAnswers: [0],
+            },
+          ],
+    );
 
     // Switch to manual mode so the user can review/edit
     this.mode.set('manual');
@@ -730,12 +788,18 @@ export class AddDeck implements OnInit {
     this.showSuccess(`${mapped.length} cards generated! Review and edit them before saving.`);
   }
 
-  private mapQuestionTypeToCardType(type: QuestionType): 'multiple-choice' | 'true-false' | 'fill-blank' {
+  private mapQuestionTypeToCardType(
+    type: QuestionType,
+  ): 'multiple-choice' | 'true-false' | 'fill-blank' {
     switch (type) {
-      case 'MultipleChoice': return 'multiple-choice';
-      case 'TrueFalse': return 'true-false';
-      case 'FillInTheBlank': return 'fill-blank';
-      default: return 'multiple-choice';
+      case 'MultipleChoice':
+        return 'multiple-choice';
+      case 'TrueFalse':
+        return 'true-false';
+      case 'FillInTheBlank':
+        return 'fill-blank';
+      default:
+        return 'multiple-choice';
     }
   }
 }

@@ -32,11 +32,14 @@
 }
 
 .tab {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   background: none;
   border: none;
-  padding: 10px 0;
+  padding: 12px 4px;
   font-size: 0.9rem;
-  font-weight: 500;
+  font-weight: 600;
   color: #6b7280;
   cursor: pointer;
   position: relative;
@@ -60,6 +63,25 @@
   height: 3px;
   background: #4255FF;
   border-radius: 2px 2px 0 0;
+}
+
+.tab-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: #f3f4f6;
+  color: #6b7280;
+  border-radius: 9999px;
+}
+
+.tab.active .tab-count {
+  background: #eef0ff;
+  color: #4255FF;
 }
 
 /* Search Bar inside Tabs Container */
@@ -452,42 +474,39 @@
   background: #f3f4f6;
   color: #6b7280;
 }
+.visibility-badge.shared {
+  background: #fef3c7;
+  color: #d97706;
+}
 .visibility-badge .material-symbols-outlined {
   font-size: 13px;
 }
 
+/* Status badge on image */
 .status-badge {
-  background: #dcfce7;
-  color: #16a34a;
-}
-.status-badge .material-symbols-outlined {
-  font-size: 13px;
-}
-.status-badge.draft {
-  background: #fef3c7;
-  color: #d97706;
-}
-.status-badge.published {
-  background: #dcfce7;
-  color: #16a34a;
-}
-
-/* Draft badge on image */
-.draft-badge {
   position: absolute;
   top: 12px;
   left: 12px;
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: rgba(217, 119, 6, 0.9);
-  color: #fff;
   font-size: 0.65rem;
   font-weight: 700;
   padding: 4px 10px;
   border-radius: 9999px;
   letter-spacing: 0.04em;
   backdrop-filter: blur(4px);
+}
+.status-badge .material-symbols-outlined {
+  font-size: 14px;
+}
+.status-badge.draft {
+  background: rgba(217, 119, 6, 0.9);
+  color: #fff;
+}
+.status-badge.published {
+  background: rgba(66, 85, 255, 0.9);
+  color: #fff;
 }
 
 /* Card Tags */
@@ -622,6 +641,49 @@
   color: #9ca3af;
 }
 
+/* Action buttons container */
+.quiz-actions {
+  display: flex;
+  gap: 8px;
+}
+
+/* Unified action buttons */
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border-radius: 9999px;
+  padding: 6px 14px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.action-btn .material-symbols-outlined {
+  font-size: 16px;
+}
+
+.action-btn.edit {
+  background: #fff;
+  color: #6b7280;
+  border: 1.5px solid #d1d5db;
+}
+.action-btn.edit:hover {
+  background: #f3f4f6;
+  color: #1e1e2f;
+  border-color: #9ca3af;
+}
+
+.action-btn.study {
+  background: #4255FF;
+  color: #fff;
+  border: none;
+}
+.action-btn.study:hover {
+  background: #3345dd;
+}
+
+/* Legacy buttons - kept for backwards compatibility */
 .study-btn {
   background: #4255FF;
   color: #fff;
@@ -638,7 +700,6 @@
   background: #3345dd;
 }
 
-/* Edit button for draft decks */
 .edit-btn {
   display: inline-flex;
   align-items: center;
@@ -660,7 +721,6 @@
   color: #92400e;
 }
 
-/* Edit button for published decks */
 .edit-published-btn {
   display: inline-flex;
   align-items: center;

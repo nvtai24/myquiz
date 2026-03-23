@@ -1,9 +1,10 @@
-import { Component, inject, signal, OnInit, computed } from '@angular/core';
+import { Component, inject, signal, OnInit, computed, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { DeckService } from '../../services/deck.service';
-import { DeckSummaryResponse, DeckSource, DeckVisibility } from '../../models/deck.models';
+import { DeckSummaryResponse } from '../../models/deck.models';
+import { PaginationMeta } from '../../models/api.models';
 
 const DECK_COLORS = ['#7c3aed', '#4255FF', '#059669', '#64748b', '#dc2626', '#d97706', '#0891b2'];
 const DECK_ICONS = ['style', 'code', 'api', 'webhook', 'school', 'menu_book', 'quiz'];
@@ -18,7 +19,7 @@ const DECK_ICONS = ['style', 'code', 'api', 'webhook', 'school', 'menu_book', 'q
 export class Library implements OnInit {
   private deckService = inject(DeckService);
 
-  activeTab = signal<'all' | 'drafts' | 'published'>('all');
+  activeTab = signal<'owned' | 'shared' | 'drafts'>('owned');
   searchQuery = signal('');
   sortBy = signal('recent');
   isSortOpen = signal(false);
@@ -29,21 +30,36 @@ export class Library implements OnInit {
   selectedTags = signal<string[]>([]);
   tagInput = signal('');
 
-  // Pagination
+  // Pagination (server-side)
   currentPage = signal(1);
-  itemsPerPage = signal(6);
+  itemsPerPage = 6;
+  pagination = signal<PaginationMeta | null>(null);
 
   // Data
-  allDecks = signal<DeckSummaryResponse[]>([]);
+  decks = signal<DeckSummaryResponse[]>([]);
   loading = signal(false);
   errorMessage = signal('');
+
+  // Tab counts
+  ownedDecksCount = signal(0);
+  sharedDecksCount = signal(0);
+  draftsCount = signal(0);
 
   // All unique tags from decks
   allTags = computed(() => {
     const tags = new Set<string>();
-    this.allDecks().forEach(d => d.tags?.forEach(t => tags.add(t)));
+    this.decks().forEach(d => d.tags?.forEach(t => tags.add(t)));
     return Array.from(tags).sort();
   });
+
+  constructor() {
+    // Reload data when tab changes
+    effect(() => {
+      const tab = this.activeTab();
+      this.currentPage.set(1);
+      this.loadDecks();
+    }, { allowSignalWrites: true });
+  }
 
   getDeckColor(index: number): string {
     return DECK_COLORS[index % DECK_COLORS.length];
@@ -54,61 +70,85 @@ export class Library implements OnInit {
   }
 
   ngOnInit() {
-    this.loadDecks();
+    this.loadAllCounts();
+  }
+
+  loadAllCounts() {
+    // Load counts for all tabs
+    this.deckService.getMyDecks(1, 1).subscribe(res => {
+      if (res.pagination) this.ownedDecksCount.set(res.pagination.totalRecords);
+    });
+    this.deckService.getSharedDecks(1, 1).subscribe(res => {
+      if (res.pagination) this.sharedDecksCount.set(res.pagination.totalRecords);
+    });
+    this.deckService.getDraftDecks(1, 1).subscribe(res => {
+      if (res.pagination) this.draftsCount.set(res.pagination.totalRecords);
+    });
   }
 
   loadDecks() {
     this.loading.set(true);
     this.errorMessage.set('');
-    this.deckService.getUserDecks().subscribe({
+
+    const page = this.currentPage();
+    const size = this.itemsPerPage;
+    const tab = this.activeTab();
+
+    const apiCall = tab === 'owned'
+      ? this.deckService.getMyDecks(page, size)
+      : tab === 'shared'
+        ? this.deckService.getSharedDecks(page, size)
+        : this.deckService.getDraftDecks(page, size);
+
+    apiCall.subscribe({
       next: (res) => {
         this.loading.set(false);
         if (res.success) {
-          this.allDecks.set(res.data || []);
+          this.decks.set(res.data || []);
+          this.pagination.set(res.pagination || null);
+          // Update count for current tab
+          if (res.pagination) {
+            if (tab === 'owned') this.ownedDecksCount.set(res.pagination.totalRecords);
+            else if (tab === 'shared') this.sharedDecksCount.set(res.pagination.totalRecords);
+            else this.draftsCount.set(res.pagination.totalRecords);
+          }
         } else {
-          this.errorMessage.set(res.message || 'Không thể tải bộ thẻ');
+          this.errorMessage.set(res.message || 'Cannot load decks');
         }
       },
       error: (err) => {
         this.loading.set(false);
-        this.errorMessage.set(err.error?.message || 'Đã xảy ra lỗi khi tải bộ thẻ');
+        this.errorMessage.set(err.error?.message || 'An error occurred while loading decks');
       },
     });
   }
 
   get filteredSets(): DeckSummaryResponse[] {
-    let decks = this.allDecks() || [];
+    let deckList = this.decks() || [];
 
-    // Filter by tab (Drafts vs Published)
-    if (this.activeTab() === 'drafts') {
-      decks = decks.filter(d => d.status === 'Draft');
-    } else if (this.activeTab() === 'published') {
-      decks = decks.filter(d => d.status === 'Published');
-    }
-
-    // Search by name/description/tags
+    // Client-side search filter
     if (this.searchQuery()) {
       const q = this.searchQuery().toLowerCase();
-      decks = decks.filter(s =>
+      deckList = deckList.filter(s =>
         s?.name?.toLowerCase().includes(q) ||
         s?.description?.toLowerCase().includes(q) ||
         s?.tags?.some(t => t.toLowerCase().includes(q))
       );
     }
 
-    // Filter by visibility (used as source proxy since DeckSummaryResponse has visibility)
+    // Client-side visibility filter
     if (this.selectedVisibility() !== 'all') {
-      decks = decks.filter(d => d.visibility === this.selectedVisibility());
+      deckList = deckList.filter(d => d.visibility === this.selectedVisibility());
     }
 
-    // Filter by tags
+    // Client-side tags filter
     const tags = this.selectedTags();
     if (tags.length > 0) {
-      decks = decks.filter(d => tags.every(t => d.tags?.includes(t)));
+      deckList = deckList.filter(d => tags.every(t => d.tags?.includes(t)));
     }
 
-    // Sort
-    decks = [...decks].sort((a, b) => {
+    // Client-side sort
+    deckList = [...deckList].sort((a, b) => {
       if (this.sortBy() === 'recent') {
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       }
@@ -118,16 +158,15 @@ export class Library implements OnInit {
       return 0;
     });
 
-    return decks;
+    return deckList;
   }
 
   get totalPages(): number {
-    return Math.ceil(this.filteredSets.length / this.itemsPerPage());
+    return this.pagination()?.totalPages || 1;
   }
 
   get paginatedSets(): DeckSummaryResponse[] {
-    const start = (this.currentPage() - 1) * this.itemsPerPage();
-    return this.filteredSets.slice(start, start + this.itemsPerPage());
+    return this.filteredSets;
   }
 
   get hasActiveFilters(): boolean {
@@ -137,9 +176,10 @@ export class Library implements OnInit {
       this.sortBy() !== 'recent';
   }
 
-  setTab(tab: 'all' | 'drafts' | 'published') {
-    this.activeTab.set(tab);
-    this.currentPage.set(1);
+  setTab(tab: 'owned' | 'shared' | 'drafts') {
+    if (this.activeTab() !== tab) {
+      this.activeTab.set(tab);
+    }
   }
 
   toggleSort() { this.isSortOpen.update(v => !v); }
@@ -179,8 +219,9 @@ export class Library implements OnInit {
   }
 
   changePage(page: number) {
-    if (page >= 1 && page <= this.totalPages) {
+    if (page >= 1 && page <= this.totalPages && page !== this.currentPage()) {
       this.currentPage.set(page);
+      this.loadDecks();
     }
   }
 }

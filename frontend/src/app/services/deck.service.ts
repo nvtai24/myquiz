@@ -1,7 +1,7 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { ApiResponse } from '../models/api.models';
+import { ApiResponse, PagedResponse } from '../models/api.models';
 import {
   CreateDeckRequest,
   CreateDeckRatingRequest,
@@ -20,6 +20,21 @@ export class DeckService {
 
   getUserDecks(): Observable<ApiResponse<DeckSummaryResponse[]>> {
     return this.http.get<ApiResponse<DeckSummaryResponse[]>>(this.endpoint);
+  }
+
+  getMyDecks(page = 1, size = 6): Observable<PagedResponse<DeckSummaryResponse>> {
+    const params = new HttpParams().set('page', page).set('size', size);
+    return this.http.get<PagedResponse<DeckSummaryResponse>>(`${this.endpoint}/my`, { params });
+  }
+
+  getDraftDecks(page = 1, size = 6): Observable<PagedResponse<DeckSummaryResponse>> {
+    const params = new HttpParams().set('page', page).set('size', size);
+    return this.http.get<PagedResponse<DeckSummaryResponse>>(`${this.endpoint}/drafts`, { params });
+  }
+
+  getSharedDecks(page = 1, size = 6): Observable<PagedResponse<DeckSummaryResponse>> {
+    const params = new HttpParams().set('page', page).set('size', size);
+    return this.http.get<PagedResponse<DeckSummaryResponse>>(`${this.endpoint}/shared`, { params });
   }
 
   getDeckById(id: string): Observable<ApiResponse<DeckDetailResponse>> {

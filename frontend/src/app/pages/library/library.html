@@ -3,9 +3,21 @@
   <!-- Tabs & Search -->
   <div class="tabs-container">
     <div class="tabs">
-      <button class="tab" [class.active]="activeTab() === 'all'" (click)="setTab('all')">All</button>
-      <button class="tab" [class.active]="activeTab() === 'drafts'" (click)="setTab('drafts')">Drafts</button>
-      <button class="tab" [class.active]="activeTab() === 'published'" (click)="setTab('published')">Published</button>
+      <button class="tab" [class.active]="activeTab() === 'owned'" (click)="setTab('owned')">
+        <span class="material-symbols-outlined text-[18px]">folder_open</span>
+        My Decks
+        <span class="tab-count">{{ ownedDecksCount() }}</span>
+      </button>
+      <button class="tab" [class.active]="activeTab() === 'shared'" (click)="setTab('shared')">
+        <span class="material-symbols-outlined text-[18px]">group</span>
+        Shared with me
+        <span class="tab-count">{{ sharedDecksCount() }}</span>
+      </button>
+      <button class="tab" [class.active]="activeTab() === 'drafts'" (click)="setTab('drafts')">
+        <span class="material-symbols-outlined text-[18px]">edit_note</span>
+        Drafts
+        <span class="tab-count">{{ draftsCount() }}</span>
+      </button>
     </div>
 
     <div class="search-bar">
@@ -154,25 +166,16 @@
             } @else {
             <img src="/images/default-deck.png" alt="Flashcards" class="absolute inset-0 w-full h-full object-cover" />
             }
-            @if (deck.status === 'Published') {
-            <span class="draft-badge z-10" style="background-color: #eef0ff; color: #4255FF;">
-              <span class="material-symbols-outlined" style="font-size:14px">public</span>
-              Published
+            <span class="status-badge z-10" [class.published]="deck.status === 'Published'" [class.draft]="deck.status === 'Draft'">
+              <span class="material-symbols-outlined">{{ deck.status === 'Published' ? 'public' : 'edit_note' }}</span>
+              {{ deck.status }}
             </span>
-            }
-            @if (deck.status === 'Draft') {
-            <span class="draft-badge z-10">
-              <span class="material-symbols-outlined" style="font-size:14px">edit_note</span>
-              Draft
-            </span>
-            }
             <span class="terms-badge z-10">{{ deck.questionCount }} TERMS</span>
           </div>
           <div class="quiz-info">
             <div class="quiz-badges">
-              <span class="visibility-badge" [class.private]="deck.visibility === 'Private'">
-                <span class="material-symbols-outlined">{{ deck.visibility === 'Private' ? 'lock' : deck.visibility ===
-                  'Shared' ? 'group' : 'public' }}</span>
+              <span class="visibility-badge" [class.private]="deck.visibility === 'Private'" [class.shared]="deck.visibility === 'Shared'">
+                <span class="material-symbols-outlined">{{ deck.visibility === 'Private' ? 'lock' : deck.visibility === 'Shared' ? 'group' : 'public' }}</span>
                 {{ deck.visibility }}
               </span>
               @for (tag of deck.tags | slice:0:2; track tag) {
@@ -187,30 +190,32 @@
             <p class="quiz-desc" [title]="deck.description">{{ deck.description }}</p>
 
             <!-- Rating -->
-            @if (deck.totalRatings) {
             <div class="deck-rating">
+              @if (deck.totalRatings) {
               <span class="material-symbols-outlined star-icon">star</span>
               <span class="rating-val">{{ (deck.averageRating ?? 0).toFixed(1) }}</span>
               <span class="rating-count">({{ deck.totalRatings }})</span>
+              } @else {
+              <span class="text-[12px] text-gray-400">No ratings yet</span>
+              }
             </div>
-            }
 
             <p class="quiz-date">{{ deck.createdAt | date:'dd/MM/yyyy' }}</p>
 
             <div class="quiz-footer">
               <span class="text-[12px] text-gray-400 font-medium">{{ deck.questionCount }} questions</span>
-              <div style="display: flex; gap: 8px;">
-                @if (deck.visibility !== 'Shared') {
-                <button class="edit-published-btn" (click)="$event.stopPropagation()"
-                  [routerLink]="['/edit-deck', deck.id]">
-                  <span class="material-symbols-outlined"
-                    style="font-size:16px; margin-right:2px; vertical-align: middle;">edit</span>
+              <div class="quiz-actions">
+                @if (activeTab() !== 'shared') {
+                <button class="action-btn edit" (click)="$event.stopPropagation()" [routerLink]="['/edit-deck', deck.id]">
+                  <span class="material-symbols-outlined">edit</span>
                   Edit
                 </button>
                 }
-                @if(deck.status === 'Published'){
-                <button class="study-btn" (click)="$event.stopPropagation()"
-                  [routerLink]="['/deck', deck.id]">Study</button>
+                @if (deck.status === 'Published') {
+                <button class="action-btn study" (click)="$event.stopPropagation()" [routerLink]="['/deck', deck.id]">
+                  <span class="material-symbols-outlined">play_arrow</span>
+                  Study
+                </button>
                 }
               </div>
             </div>

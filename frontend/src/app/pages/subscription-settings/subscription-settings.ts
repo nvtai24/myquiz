@@ -17,6 +17,7 @@ export class SubscriptionSettings implements OnInit, OnDestroy {
 
   plans = signal<SubscriptionPlanResponse[]>([]);
   mySubscription = signal<UserSubscriptionResponse | null>(null);
+  currentPlanOrder = signal<number>(0);
 
   loadingPlans = signal(true);
   loadingSubscription = signal(true);
@@ -51,11 +52,16 @@ export class SubscriptionSettings implements OnInit, OnDestroy {
         this.mySubscription.set(mySubscription);
         this.loadingPlans.set(false);
         this.loadingSubscription.set(false);
+
+        // Sort plans by order and show all
         const sorted = plans.sort((a, b) => a.order - b.order);
+        this.plans.set(sorted);
+
+        // Calculate current plan order for upgrade/downgrade validation
         const currentOrder = (mySubscription?.isExpired || !mySubscription)
           ? 0
           : sorted.find(plan => plan.name === mySubscription?.planName)?.order || 0;
-        this.plans.set(sorted.filter(plan => plan.order >= currentOrder));
+        this.currentPlanOrder.set(currentOrder);
       },
       error: () => {
         this.loadingPlans.set(false);
@@ -102,8 +108,20 @@ export class SubscriptionSettings implements OnInit, OnDestroy {
     return plan.price === 0;
   }
 
+  canUpgrade(plan: SubscriptionPlanResponse): boolean {
+    // Can upgrade if plan order is higher than current plan order
+    // Default isActive to true if not specified
+    const isActive = plan.isActive !== false;
+    return plan.order > this.currentPlanOrder() && isActive;
+  }
+
+  isDowngrade(plan: SubscriptionPlanResponse): boolean {
+    // Is downgrade if plan order is lower than current plan order (and not current plan)
+    return plan.order < this.currentPlanOrder() && !this.isCurrentPlan(plan);
+  }
+
   selectPlan(plan: SubscriptionPlanResponse): void {
-    if (this.isCurrentPlan(plan) || this.isFree(plan)) return;
+    if (this.isCurrentPlan(plan) || !this.canUpgrade(plan)) return;
     this.creatingOrder.set(true);
     this.orderError.set(null);
     this.paymentOrder.set(null);
@@ -117,7 +135,7 @@ export class SubscriptionSettings implements OnInit, OnDestroy {
       },
       error: (err) => {
         this.creatingOrder.set(false);
-        this.orderError.set(err?.error?.message ?? 'Không thể tạo lệnh thanh toán. Vui lòng thử lại.');
+        this.orderError.set(err?.error?.message ?? 'Failed to create payment order. Please try again.');
       }
     });
   }

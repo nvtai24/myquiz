@@ -52,9 +52,9 @@
   <div class="plans-grid">
     @for (plan of plans(); track plan.id) {
     <div class="plan-card" [class.active]="isCurrentPlan(plan)"
-      [class.highlighted]="!isFree(plan) && !isCurrentPlan(plan)">
-      @if (!isFree(plan) && !isCurrentPlan(plan)) {
-      <span class="popular-badge">Popular</span>
+      [class.highlighted]="canUpgrade(plan)" [class.downgrade]="isDowngrade(plan) && !isFree(plan)">
+      @if (canUpgrade(plan)) {
+      <span class="popular-badge">Upgrade</span>
       }
       @if (isCurrentPlan(plan)) {
       <span class="current-badge">Active</span>
@@ -76,7 +76,7 @@
           @if (plan.numDeckLimit > 0) {
           Up to <strong>{{ plan.numDeckLimit }}</strong> study sets
           } @else {
-          Unlimited study sets
+          <strong>Unlimited</strong> study sets
           }
         </li>
         <li class="feature-item">
@@ -84,17 +84,21 @@
           @if (plan.dailyGenerateLimit > 0) {
           <strong>{{ plan.dailyGenerateLimit }}</strong> AI generations / day
           } @else {
-          Unlimited AI generations
+          <strong>Unlimited</strong> AI generations
           }
         </li>
       </ul>
 
-      <button class="plan-btn" [class.current]="isCurrentPlan(plan)" [class.free-btn]="isFree(plan)"
-        [disabled]="isCurrentPlan(plan) || isFree(plan) || creatingOrder()" (click)="selectPlan(plan)">
+      <button class="plan-btn" [class.current]="isCurrentPlan(plan)" [class.downgrade-btn]="isDowngrade(plan)" [class.free-btn]="isFree(plan)"
+        [disabled]="!canUpgrade(plan) || creatingOrder()" (click)="selectPlan(plan)">
         @if (isCurrentPlan(plan)) {
         <span class="material-symbols-outlined">check_circle</span> Current plan
         } @else if (isFree(plan)) {
-        Basic plan
+        Default
+        } @else if (isDowngrade(plan)) {
+        <span class="material-symbols-outlined">block</span> Downgrade
+        } @else if (plan.isActive === false) {
+        <span class="material-symbols-outlined">block</span> Unavailable
         } @else {
         <span class="material-symbols-outlined">bolt</span> Upgrade now
         }
@@ -126,30 +130,24 @@
     </div>
     } @else if (paymentOrder()) {
     <div class="payment-content">
-
-      <div class="payment-header">
-        <h2 class="modal-title">
-          <span class="material-symbols-outlined">qr_code_2</span>
-          Payment – {{ paymentOrder()!.planName }}
-        </h2>
-        <p class="modal-subtitle">Scan QR code or transfer manually with the details below</p>
-        <div class="countdown-bar" [class.urgent]="isUrgent()">
-          <span class="material-symbols-outlined">timer</span>
-          <span>Order expires in: &nbsp;<strong>{{ countdownDisplay() }}</strong></span>
-        </div>
-      </div>
-
       <div class="payment-body">
-
         <div class="qr-section">
-          <span class="qr-label">Scan to pay</span>
+          <p class="qr-instruction">Scan with your banking app</p>
           <div class="qr-box">
             <img class="qr-img" [src]="paymentOrder()!.qrCodeUrl" alt="QR Code" />
           </div>
-          <p class="qr-hint">Works with MoMo, ZaloPay,<br>VietQR and all banking apps</p>
+          <div class="countdown-bar" [class.urgent]="isUrgent()">
+            <span class="material-symbols-outlined">timer</span>
+            <span>{{ countdownDisplay() }}</span>
+          </div>
         </div>
 
         <div class="bank-info">
+          <p class="bank-instruction">Or transfer manually</p>
+          <div class="bank-row highlight-row">
+            <span class="bank-label">Amount</span>
+            <span class="bank-value amount-text">{{ formatCurrency(paymentOrder()!.amount) }}</span>
+          </div>
           <div class="bank-row">
             <span class="bank-label">Bank</span>
             <span class="bank-value">{{ paymentOrder()!.bankCode }}</span>
@@ -168,11 +166,7 @@
             <span class="bank-value">{{ paymentOrder()!.accountName }}</span>
           </div>
           <div class="bank-row highlight-row">
-            <span class="bank-label">Amount</span>
-            <span class="bank-value amount-text">{{ formatCurrency(paymentOrder()!.amount) }}</span>
-          </div>
-          <div class="bank-row highlight-row">
-            <span class="bank-label">Transfer description</span>
+            <span class="bank-label">Transfer Content</span>
             <div class="bank-value copy-row">
               <span class="transfer-content">{{ paymentOrder()!.transferContent }}</span>
               <button class="btn-copy" (click)="copyToClipboard(paymentOrder()!.transferContent)" title="Copy">
@@ -181,26 +175,20 @@
             </div>
           </div>
         </div>
-
       </div>
 
       <div class="payment-footer">
         @if (copySuccess()) {
         <div class="copy-toast">
           <span class="material-symbols-outlined">check_circle</span>
-          Copied to clipboard!
+          Copied!
         </div>
         }
-        <div class="modal-note">
+        <div class="auto-activate-note">
           <span class="material-symbols-outlined">info</span>
-          <span>
-            Your plan activates automatically after payment is confirmed.<br>
-            Order expires at: <strong>{{ formatDatetime(paymentOrder()!.expiresAt) }}</strong>
-          </span>
+          <span>Your plan will activate automatically after payment is confirmed</span>
         </div>
-        <button class="btn-close-full" (click)="closeModal()">Close</button>
       </div>
-
     </div>
     }
 

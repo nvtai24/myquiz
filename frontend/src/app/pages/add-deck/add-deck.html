@@ -17,17 +17,38 @@
       </div>
     </div>
     <div class="flex items-center gap-3">
+
+       @if (isEditMode()) {
       <button
-        class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-semibold cursor-pointer transition-all border"
-        [class]="visibility() === 'private' ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100' : 'bg-green-50 text-green-600 border-green-200 hover:bg-green-100'"
-        (click)="toggleVisibility()">
-        <span class="material-symbols-outlined text-[16px]">{{ visibility() === 'private' ? 'lock' : 'public' }}</span>
-        {{ visibility() === 'private' ? 'Private' : 'Public' }}
+        class="flex items-center gap-1.5 bg-white border border-red-200 text-red-500 text-[13px] font-semibold cursor-pointer px-5 py-2.5 rounded-xl transition-all hover:bg-red-50 hover:border-red-300 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
+        (click)="deleteDeck()" [disabled]="deleting()">
+        @if (deleting()) {
+        <span class="material-symbols-outlined text-[17px] animate-spin">progress_activity</span>
+        Deleting...
+        } @else {
+        <span class="material-symbols-outlined text-[17px]">delete</span>
+        Delete
+        }
       </button>
-      <span class="flex items-center gap-1.5 text-[13px] font-bold text-[#4255FF] px-4 py-2 bg-[#eef0ff] rounded-xl">
-        <span class="material-symbols-outlined text-[16px]">style</span>
-        {{ cards().length }} Cards
-      </span>
+      }
+
+      <div class="relative flex items-center">
+        <span class="material-symbols-outlined text-[16px] absolute left-3 pointer-events-none"
+          [class]="visibility() === 'private' ? 'text-red-500' : visibility() === 'shared' ? 'text-blue-500' : 'text-green-600'">
+          {{ visibility() === 'private' ? 'lock' : visibility() === 'shared' ? 'group' : 'public' }}
+        </span>
+        <select
+          class="appearance-none pl-8 pr-8 py-2 rounded-xl text-[13px] font-semibold border cursor-pointer outline-none transition-all"
+          [class]="visibility() === 'private' ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100' : visibility() === 'shared' ? 'bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100' : 'bg-green-50 text-green-600 border-green-200 hover:bg-green-100'"
+          [ngModel]="visibility()" (ngModelChange)="visibility.set($event)">
+          <option value="public">Public</option>
+          <option value="private">Private</option>
+          <option value="shared">Shared</option>
+        </select>
+        <span class="material-symbols-outlined text-[14px] absolute right-2 pointer-events-none"
+          [class]="visibility() === 'private' ? 'text-red-400' : visibility() === 'shared' ? 'text-blue-400' : 'text-green-500'">expand_more</span>
+      </div>
+     
       <button
         class="flex items-center gap-1.5 bg-white border border-gray-200 text-[13px] font-semibold cursor-pointer px-5 py-2.5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         [class]="canSaveDraft ? 'text-[#141118] hover:bg-gray-50 hover:border-gray-300' : 'text-gray-400'"
@@ -133,6 +154,33 @@
           class="border-none border-b-2 border-gray-200 py-3 text-[15px] text-[#141118] outline-none resize-y transition-colors bg-transparent min-h-[70px] placeholder-[#b0a3bf] focus:border-[#4255FF]"
           placeholder="Add a description..." rows="2" [ngModel]="description()"
           (ngModelChange)="description.set($event)"></textarea>
+      </div>
+      <div class="flex flex-col gap-2">
+        <label class="text-[11px] font-bold text-[#4255FF] tracking-widest flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[16px]">label</span>
+          TAGS
+        </label>
+        <div
+          class="flex flex-wrap items-center gap-2 border-b-2 border-gray-200 py-2 min-h-[44px] transition-colors focus-within:border-[#4255FF]">
+          @for (tag of tags(); track tag; let i = $index) {
+          <span
+            class="flex items-center gap-1 px-2.5 py-1 bg-[#eef0ff] text-[#4255FF] text-[12px] font-semibold rounded-lg">
+            {{ tag }}
+            <button
+              class="w-4 h-4 flex items-center justify-center bg-transparent border-none cursor-pointer text-[#4255FF] opacity-60 hover:opacity-100 p-0"
+              (click)="removeTag(i)" type="button">
+              <span class="material-symbols-outlined text-[13px]">close</span>
+            </button>
+          </span>
+          }
+          <input type="text"
+            class="border-none outline-none text-[14px] font-medium text-[#141118] bg-transparent placeholder-[#b0a3bf] flex-1 min-w-[120px] py-1"
+            placeholder="{{ tags().length === 0 ? 'Add tags, press Enter or comma…' : 'Add more…' }}"
+            [ngModel]="tagInput()" (ngModelChange)="tagInput.set($event)" (keydown)="onTagKeydown($event)"
+            (blur)="addTag()" />
+        </div>
+        <p class="text-[11px] text-[#b0a3bf] font-medium m-0">Press Enter or comma to add. Backspace removes last tag.
+        </p>
       </div>
     </div>
     <div

@@ -1,4 +1,5 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
+import Swal from 'sweetalert2';
 import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { DeckService } from '../../services/deck.service';
@@ -6,6 +7,7 @@ import { PaymentService } from '../../services/payment.service';
 import {
   CreateDeckRequest,
   CreateQuestionRequest,
+  DeckVisibility,
   GeneratedDeckResponse,
   GeneratedQuestionResponse,
   QuestionType,
@@ -38,13 +40,17 @@ interface Card {
 export class AddDeck implements OnInit {
   title = signal('');
   description = signal('');
-  visibility = signal<'public' | 'private'>('public');
+  visibility = signal<'public' | 'private' | 'shared'>('public');
   coverImage = signal<string | null>(null);
   coverFile = signal<File | null>(null);
   savingDraft = signal(false);
   creating = signal(false);
+  deleting = signal(false);
   errorMessage = signal<string | null>(null);
   successMessage = signal<string | null>(null);
+
+  tags = signal<string[]>([]);
+  tagInput = signal('');
 
   isEditMode = signal(false);
   editingId = signal<string | null>(null);
@@ -141,7 +147,9 @@ export class AddDeck implements OnInit {
           const deck = res.data;
           this.title.set(deck.name);
           this.description.set(deck.description || '');
-          this.visibility.set(deck.visibility === 'Private' ? 'private' : 'public');
+          this.tags.set(deck.tags ?? []);
+          const visRevMap: Record<string, 'public' | 'private' | 'shared'> = { Public: 'public', Private: 'private', Shared: 'shared' };
+          this.visibility.set(visRevMap[deck.visibility] ?? 'public');
           this.coverImage.set(deck.thumbnailUrl || null);
 
           if (deck.visibility === 'Shared') {
@@ -430,7 +438,8 @@ export class AddDeck implements OnInit {
 
     this.errorMessage.set(null);
 
-    const visibility = this.visibility() === 'public' ? 'Public' : 'Private';
+    const visMap: Record<string, DeckVisibility> = { public: 'Public', private: 'Private', shared: 'Shared' };
+    const visibility: DeckVisibility = visMap[this.visibility()] ?? 'Public';
     const isEdit = this.isEditMode() && !!this.editingId();
 
     const createRequest: CreateDeckRequest = {
@@ -439,7 +448,7 @@ export class AddDeck implements OnInit {
       visibility,
       status,
       source: this.aiGenerated() ? 'AiGenerated' : 'Manual',
-      tags: [],
+      tags: this.tags(),
       questions: this.buildQuestions(),
       thumbnailUrl: this.coverImage() || undefined,
       documentUrl: this.documentUrl() || undefined,
@@ -476,8 +485,8 @@ export class AddDeck implements OnInit {
               description: createRequest.description,
               visibility,
               status,
-              tags: [],
-              thumbnailUrl: thumbnail,
+            tags: this.tags(),
+            thumbnailUrl: thumbnail,
               ...this.buildQuestionDiff(),
             };
             return this.deckService.updateDeck(this.editingId()!, updateRequest);
@@ -627,6 +636,66 @@ export class AddDeck implements OnInit {
       return messages.join('. ') || body.title || 'Validation failed';
     }
     return body?.message || 'An error occurred';
+  }
+
+  addTag() {
+    const tag = this.tagInput().trim();
+    if (tag && !this.tags().includes(tag)) {
+      this.tags.update((t) => [...t, tag]);
+    }
+    this.tagInput.set('');
+  }
+
+  removeTag(index: number) {
+    this.tags.update((t) => t.filter((_, i) => i !== index));
+  }
+
+  onTagKeydown(event: KeyboardEvent) {
+    if (event.key === 'Enter' || event.key === ',') {
+      event.preventDefault();
+      this.addTag();
+    } else if (event.key === 'Backspace' && !this.tagInput() && this.tags().length > 0) {
+      this.removeTag(this.tags().length - 1);
+    }
+  }
+
+  deleteDeck() {
+    const id = this.editingId();
+    if (!id) return;
+    Swal.fire({
+      title: 'Delete study set?',
+      text: 'This action cannot be undone. All cards in this set will be permanently removed.',
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#6b7280',
+      confirmButtonText: 'Yes, delete it',
+      cancelButtonText: 'Cancel',
+    }).then((result) => {
+      if (!result.isConfirmed) return;
+      this.deleting.set(true);
+      this.deckService.deleteDeck(id).subscribe({
+        next: (res) => {
+          this.deleting.set(false);
+          if (res.success) {
+            Swal.fire({
+              title: 'Deleted!',
+              text: 'Your study set has been deleted.',
+              icon: 'success',
+              confirmButtonColor: '#4255FF',
+              timer: 1800,
+              showConfirmButton: false,
+            }).then(() => this.router.navigate(['/library']));
+          } else {
+            this.showError(res.message || 'Failed to delete study set');
+          }
+        },
+        error: (err) => {
+          this.deleting.set(false);
+          this.showError(this.extractErrorMessage(err));
+        },
+      });
+    });
   }
 
   cancel() {

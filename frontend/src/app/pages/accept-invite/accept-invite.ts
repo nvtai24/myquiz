@@ -1,6 +1,7 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { Component, OnInit, inject, signal } from '@angular/core';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import Swal from 'sweetalert2';
 import { DeckService } from '../../services/deck.service';
 
 @Component({
@@ -8,40 +9,19 @@ import { DeckService } from '../../services/deck.service';
   standalone: true,
   imports: [CommonModule, RouterModule],
   template: `
-    <div class="min-h-[70vh] flex items-center justify-center p-4">
-      <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 max-w-md w-full text-center">
-        @if (status() === 'loading') {
+    @if (isProcessing()) {
+      <div class="min-h-[70vh] flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 max-w-md w-full text-center">
           <div class="flex flex-col items-center justify-center gap-4">
             <span class="material-symbols-outlined text-[48px] text-[#4255FF] animate-spin">progress_activity</span>
-            <h2 class="text-xl font-black text-gray-900 m-0">Đang xử lý lời mời</h2>
-            <p class="text-gray-500 text-[14px]">Vui lòng đợi trong giây lát...</p>
+            <h2 class="text-xl font-black text-gray-900 m-0">Processing Invitation</h2>
+            <p class="text-gray-500 text-[14px]">
+              Please wait while we verify your invitation link.
+            </p>
           </div>
-        } @else if (status() === 'success') {
-          <div class="flex flex-col items-center justify-center gap-4">
-            <div class="w-16 h-16 rounded-full bg-green-50 text-green-500 flex items-center justify-center mb-2">
-              <span class="material-symbols-outlined text-[36px]">check_circle</span>
-            </div>
-            <h2 class="text-xl font-black text-gray-900 m-0">Chấp nhận thành công!</h2>
-            <p class="text-gray-500 text-[14px]">Bạn đã được thêm vào bộ thẻ. Bây giờ bạn có thể xem và học bộ thẻ này.</p>
-            <button routerLink="/library" class="mt-4 w-full py-3.5 bg-[#4255FF] text-white font-bold text-[14px] rounded-xl cursor-pointer hover:bg-[#3345e0] transition-colors border-none">
-              Vào thư viện
-            </button>
-          </div>
-        } @else {
-          <div class="flex flex-col items-center justify-center gap-4">
-            <div class="w-16 h-16 rounded-full bg-red-50 text-red-500 flex items-center justify-center mb-2">
-              <span class="material-symbols-outlined text-[36px]">error</span>
-            </div>
-            <h2 class="text-xl font-black text-gray-900 m-0">Không thể chấp nhận lời mời</h2>
-            <p class="text-red-500 font-medium text-[14px] bg-red-50 px-4 py-3 rounded-lg w-full">{{ errorMessage() }}</p>
-            <p class="text-gray-500 text-[13px] mt-2">Đường dẫn có thể đã hết hạn hoặc không hợp lệ.</p>
-            <button routerLink="/dashboard" class="mt-4 w-full py-3.5 bg-gray-100 text-gray-700 font-bold text-[14px] rounded-xl cursor-pointer hover:bg-gray-200 transition-colors border-none">
-              Về trang chủ
-            </button>
-          </div>
-        }
+        </div>
       </div>
-    </div>
+    }
   `,
   styles: [`
     :host {
@@ -53,39 +33,76 @@ import { DeckService } from '../../services/deck.service';
 })
 export class AcceptInvite implements OnInit {
   private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private deckService = inject(DeckService);
-
-  status = signal<'loading' | 'success' | 'error'>('loading');
-  errorMessage = signal<string>('');
+  isProcessing = signal(true);
 
   ngOnInit() {
     this.route.queryParamMap.subscribe(params => {
       const token = params.get('token');
+
       if (!token) {
-        this.status.set('error');
-        this.errorMessage.set('Khong tim thay token loi moi hop le trong duong dan.');
+        this.showErrorAndRedirect(
+          'Invalid Invitation',
+          'The invitation link is missing a valid token.',
+          '/dashboard',
+        );
         return;
       }
 
       this.deckService.acceptInvite(token).subscribe({
         next: (res) => {
           if (res?.success) {
-            this.status.set('success');
+            this.showSuccessAndRedirect(
+              'Invitation Accepted',
+              res.message || 'You have successfully joined this deck.',
+              '/library',
+            );
             return;
           }
 
-          this.status.set('error');
-          this.errorMessage.set(
-            res?.message || 'Khong the chap nhan loi moi. Hay kiem tra lai tai khoan dang nhap.'
+          this.showErrorAndRedirect(
+            'Invitation Failed',
+            res?.message || 'This invitation could not be accepted with the current account.',
+            '/dashboard',
           );
         },
         error: (err) => {
-          this.status.set('error');
-          this.errorMessage.set(
-            err?.error?.message || 'Da xay ra loi khi xac nhan loi moi.'
+          this.showErrorAndRedirect(
+            'Invitation Failed',
+            err?.error?.message || 'An error occurred while accepting the invitation.',
+            '/dashboard',
           );
         }
       });
     });
+  }
+
+  private async showSuccessAndRedirect(title: string, text: string, redirectTo: string) {
+    this.isProcessing.set(false);
+    await Swal.fire({
+      title,
+      text,
+      icon: 'success',
+      confirmButtonColor: '#4255FF',
+      confirmButtonText: 'Go to Library',
+      allowOutsideClick: false,
+    });
+
+    this.router.navigate([redirectTo]);
+  }
+
+  private async showErrorAndRedirect(title: string, text: string, redirectTo: string) {
+    this.isProcessing.set(false);
+    await Swal.fire({
+      title,
+      text,
+      icon: 'error',
+      confirmButtonColor: '#4255FF',
+      confirmButtonText: 'Back to Dashboard',
+      allowOutsideClick: false,
+    });
+
+    this.router.navigate([redirectTo]);
   }
 }

@@ -101,6 +101,28 @@ export interface CreateDeckRequest {
   documentUrl?: string;
 }
 
+export interface UpdateQuestionRequest {
+  id: number;
+  content: string;
+  type: QuestionType;
+  hint: string;
+  explanation: string;
+  options: string[];
+  correctAnswers: string[];
+}
+
+export interface UpdateDeckRequest {
+  name: string;
+  description: string;
+  visibility: DeckVisibility;
+  status: DeckStatus;
+  tags: string[];
+  thumbnailUrl?: string;
+  questionsToAdd: CreateQuestionRequest[];
+  questionsToUpdate: UpdateQuestionRequest[];
+  questionIdsToDelete: number[];
+}
+
 export interface CreateDeckRatingRequest {
   rating: number;
   comment?: string;

@@ -8,7 +8,8 @@ import {
   DeckDetailResponse,
   DeckRatingSummaryResponse,
   DeckSummaryResponse,
-  GeneratedDeckResponse
+  GeneratedDeckResponse,
+  UpdateDeckRequest
 } from '../models/deck.models';
 
 @Injectable({
@@ -59,8 +60,15 @@ export class DeckService {
     return this.http.post<ApiResponse<string>>(this.endpoint, this.mapRequestToDto(request));
   }
 
-  updateDeck(id: string, request: CreateDeckRequest): Observable<ApiResponse<string>> {
-    return this.http.put<ApiResponse<string>>(`${this.endpoint}/${id}`, this.mapRequestToDto(request));
+  updateDeck(id: string, request: UpdateDeckRequest): Observable<ApiResponse<string>> {
+    const visibilityMap: Record<string, number> = { 'Public': 0, 'Private': 1, 'Shared': 2 };
+    const statusMap: Record<string, number> = { 'Draft': 0, 'Published': 1 };
+    const body = {
+      ...request,
+      visibility: visibilityMap[request.visibility] ?? 0,
+      status: statusMap[request.status] ?? 0,
+    };
+    return this.http.put<ApiResponse<string>>(`${this.endpoint}/${id}`, body);
   }
 
   private mapRequestToDto(request: CreateDeckRequest) {

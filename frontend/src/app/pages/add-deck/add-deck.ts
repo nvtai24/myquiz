@@ -3,11 +3,12 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { DeckService } from '../../services/deck.service';
 import { PaymentService } from '../../services/payment.service';
-import { CreateDeckRequest, CreateQuestionRequest, GeneratedDeckResponse, GeneratedQuestionResponse, QuestionType } from '../../models/deck.models';
+import { CreateDeckRequest, CreateQuestionRequest, GeneratedDeckResponse, GeneratedQuestionResponse, QuestionType, UpdateDeckRequest, UpdateQuestionRequest } from '../../models/deck.models';
 import { forkJoin, of, switchMap, map, finalize } from 'rxjs';
 
 interface Card {
   id: number;
+  questionId?: number; // set when loaded from server (edit mode)
   type: 'fill-blank' | 'multiple-choice' | 'true-false';
   term: string;
   definition?: string;
@@ -41,6 +42,7 @@ export class AddDeck implements OnInit {
   editingId = signal<string | null>(null);
   loadingDeck = signal(false);
   documentUrl = signal<string | null>(null);
+  deletedQuestionIds = signal<number[]>([]);
 
   /* ── Creation mode ── */
   mode = signal<'manual' | 'ai'>('manual');
@@ -62,6 +64,9 @@ export class AddDeck implements OnInit {
   aiUsageCount = signal<number>(0);
   aiUsageMax = signal<number>(0); // 0 means no active plan or infinite (but we have limits typically). Wait, Free plan may have 0. If 0, UI might say "Buy plan".
   aiLimitLoading = signal<boolean>(false);
+
+  // snapshot of original question data keyed by questionId (for change detection in edit mode)
+  private originalQuestions = new Map<number, string>();
 
   private nextId = 3;
   cards = signal<Card[]>([
@@ -139,6 +144,7 @@ export class AddDeck implements OnInit {
               const cardType = this.mapQuestionTypeToCardType(q.type);
               const card: Card = {
                 id: this.nextId++,
+                questionId: q.id,
                 type: cardType,
                 term: q.content,
                 hint: q.hint || undefined,
@@ -159,6 +165,18 @@ export class AddDeck implements OnInit {
               return card;
             });
             this.cards.set(mapped);
+            // store snapshot for change detection
+            this.originalQuestions.clear();
+            deck.questions.forEach(q => {
+              this.originalQuestions.set(q.id, JSON.stringify({
+                content: q.content,
+                type: q.type,
+                hint: q.hint || '',
+                explanation: q.explanation || '',
+                options: [...(q.options || [])].sort(),
+                correctAnswers: [...(q.correctAnswers || [])].sort(),
+              }));
+            });
           }
 
           if (deck.documents && deck.documents.length > 0) {
@@ -225,6 +243,10 @@ export class AddDeck implements OnInit {
 
   deleteCard(index: number) {
     if (this.cards().length <= 2) return;
+    const card = this.cards()[index];
+    if (card.questionId != null) {
+      this.deletedQuestionIds.update(ids => [...ids, card.questionId!]);
+    }
     this.cards.update(cards => cards.filter((_, i) => i !== index));
   }
 
@@ -383,41 +405,54 @@ export class AddDeck implements OnInit {
 
     this.errorMessage.set(null);
 
-    const questions = this.buildQuestions();
-    const request: CreateDeckRequest = {
+    const visibility = this.visibility() === 'public' ? 'Public' : 'Private';
+    const isEdit = this.isEditMode() && !!this.editingId();
+
+    const createRequest: CreateDeckRequest = {
       name: this.title().trim(),
       description: this.description().trim(),
-      visibility: this.visibility() === 'public' ? 'Public' : 'Private',
-      status: status,
+      visibility,
+      status,
       source: this.aiGenerated() ? 'AiGenerated' : 'Manual',
       tags: [],
-      questions,
+      questions: this.buildQuestions(),
       thumbnailUrl: this.coverImage() || undefined,
       documentUrl: this.documentUrl() || undefined
     };
 
-    const thumbnail$ = this.coverFile() 
+    const thumbnail$ = this.coverFile()
       ? this.deckService.uploadFile(this.coverFile()!).pipe(map(res => {
           if (res.success && res.data?.url) return res.data.url;
           throw new Error(res.message || 'Failed to upload thumbnail');
         }))
-      : of(request.thumbnailUrl);
+      : of(createRequest.thumbnailUrl);
 
     const document$ = (this.aiGenerated() && this.lastUsedAiFile())
       ? this.deckService.uploadFile(this.lastUsedAiFile()!).pipe(map(res => {
           if (res.success && res.data?.url) return res.data.url;
           throw new Error(res.message || 'Failed to upload AI document');
         }))
-      : of(request.documentUrl);
+      : of(createRequest.documentUrl);
 
     forkJoin({ thumbnail: thumbnail$, document: document$ }).pipe(
       switchMap(({ thumbnail, document }) => {
-        request.thumbnailUrl = thumbnail;
-        request.documentUrl = document;
-        const action = this.isEditMode() && this.editingId() 
-          ? this.deckService.updateDeck(this.editingId()!, request)
-          : this.deckService.createDeck(request);
-        return action;
+        createRequest.thumbnailUrl = thumbnail;
+        createRequest.documentUrl = document;
+
+        if (isEdit) {
+          const updateRequest: UpdateDeckRequest = {
+            name: createRequest.name,
+            description: createRequest.description,
+            visibility,
+            status,
+            tags: [],
+            thumbnailUrl: thumbnail,
+            ...this.buildQuestionDiff(),
+          };
+          return this.deckService.updateDeck(this.editingId()!, updateRequest);
+        }
+
+        return this.deckService.createDeck(createRequest);
       }),
       finalize(() => {
         if (isDraft) this.savingDraft.set(false);
@@ -439,6 +474,60 @@ export class AddDeck implements OnInit {
         this.showError(this.extractErrorMessage(err));
       },
     });
+  }
+
+  private buildQuestionDiff(): Pick<UpdateDeckRequest, 'questionsToAdd' | 'questionsToUpdate' | 'questionIdsToDelete'> {
+    const questionsToAdd: CreateQuestionRequest[] = [];
+    const questionsToUpdate: UpdateQuestionRequest[] = [];
+
+    for (const card of this.cards()) {
+      if (!card.term.trim()) continue;
+      const type = this.mapCardType(card.type);
+      let options: string[] = [];
+      let correctAnswers: string[] = [];
+
+      if (card.type === 'multiple-choice') {
+        options = (card.options || []).filter(o => o.trim());
+        correctAnswers = (card.correctAnswers || []).map(i => (card.options || [])[i]).filter(Boolean);
+      } else if (card.type === 'true-false') {
+        options = ['True', 'False'];
+        correctAnswers = [card.isTrue ? 'True' : 'False'];
+      } else if (card.type === 'fill-blank') {
+        correctAnswers = card.blankAnswer ? [card.blankAnswer] : [];
+      }
+
+      const base = {
+        content: card.term,
+        type,
+        hint: card.hint?.trim() || '',
+        explanation: card.explanation?.trim() || '',
+        options,
+        correctAnswers,
+      };
+
+      if (card.questionId != null) {
+        const snapshot = JSON.stringify({
+          content: base.content,
+          type: base.type,
+          hint: base.hint,
+          explanation: base.explanation,
+          options: [...base.options].sort(),
+          correctAnswers: [...base.correctAnswers].sort(),
+        });
+        const original = this.originalQuestions.get(card.questionId);
+        if (snapshot !== original) {
+          questionsToUpdate.push({ id: card.questionId, ...base });
+        }
+      } else {
+        questionsToAdd.push(base);
+      }
+    }
+
+    return {
+      questionsToAdd,
+      questionsToUpdate,
+      questionIdsToDelete: this.deletedQuestionIds(),
+    };
   }
 
   private buildQuestions(): CreateQuestionRequest[] {

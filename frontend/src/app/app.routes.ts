@@ -50,7 +50,6 @@ export const routes: Routes = [
       { path: 'quiz-result/:id', loadComponent: () => import('./pages/quiz-result/quiz-result').then(m => m.QuizResult) },
       { path: 'history', loadComponent: () => import('./pages/quiz-history/quiz-history').then(m => m.QuizHistory) },
       { path: 'invite/accept', loadComponent: () => import('./pages/accept-invite/accept-invite').then(m => m.AcceptInvite) },
-      { path: 'account-settings', loadComponent: () => import('./pages/account-settings/account-settings').then(m => m.AccountSettings) },
       { path: 'profile', loadComponent: () => import('./pages/user-profile/user-profile').then(m => m.UserProfile) },
       { path: 'subscription', loadComponent: () => import('./pages/subscription-settings/subscription-settings').then(m => m.SubscriptionSettings) },
     ]

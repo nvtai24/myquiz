@@ -1,9 +1,32 @@
 <div class="profile-page">
+  <!-- Toast Notifications -->
+  @if (saveSuccess()) {
+    <div class="toast success">
+      <span class="material-symbols-outlined">check_circle</span>
+      {{ saveSuccess() }}
+    </div>
+  }
+  @if (saveError()) {
+    <div class="toast error">
+      <span class="material-symbols-outlined">error</span>
+      {{ saveError() }}
+    </div>
+  }
+
   <!-- Profile Hero -->
   <div class="hero-card">
     <div class="hero-left">
       <div class="hero-avatar">
-        <span class="material-symbols-outlined avatar-icon">account_circle</span>
+        @if (avatarUrl()) {
+          <img [src]="avatarUrl()" alt="Avatar" class="avatar-img" />
+        } @else {
+          <span class="material-symbols-outlined avatar-icon">account_circle</span>
+        }
+        @if (editMode()) {
+          <button class="avatar-edit-btn" (click)="avatarInput.click()">
+            <span class="material-symbols-outlined">edit</span>
+          </button>
+        }
       </div>
       <div class="hero-info">
         <div class="name-row">
@@ -13,87 +36,165 @@
         <p class="user-email">{{ currentUser()?.email }}</p>
       </div>
     </div>
-    <button class="create-set-btn" routerLink="/add-deck">
-      <span class="material-symbols-outlined">add</span>
-      Tạo bộ thẻ
-    </button>
+    <div class="hero-actions">
+      @if (!editMode()) {
+        <button class="btn-edit" (click)="toggleEditMode()">
+          <span class="material-symbols-outlined">edit</span>
+          Chỉnh sửa
+        </button>
+      }
+    </div>
+    <input #avatarInput type="file" accept="image/*" hidden (change)="onAvatarSelect($event)" />
   </div>
 
-  <!-- Subscription Info -->
-  <div class="subscription-card">
-    <div class="sub-header">
-      <span class="material-symbols-outlined sub-icon">workspace_premium</span>
-      <div>
-        <p class="sub-label">Gói hiện tại</p>
-        @if (loadingSubscription()) {
-          <div class="skeleton-line wide"></div>
-        } @else if (subscription()) {
-          <h2 class="sub-name">{{ subscription()!.planName }}</h2>
-        } @else {
-          <h2 class="sub-name free">Free Plan</h2>
-        }
-      </div>
+  <!-- Personal Information Section -->
+  <div class="section-card">
+    <div class="section-header">
+      <h3 class="section-heading">Thông tin cá nhân</h3>
     </div>
 
-    @if (!loadingSubscription()) {
-      <div class="sub-stats">
-        @if (subscription()) {
-          <div class="sub-stat">
-            <span class="material-symbols-outlined">style</span>
-            <div>
-              <span class="sub-stat-value">{{ subscription()!.numDeckLimit }}</span>
-              <span class="sub-stat-label">Bộ thẻ tối đa</span>
-            </div>
-          </div>
-          <div class="sub-stat">
-            <span class="material-symbols-outlined">auto_awesome</span>
-            <div>
-              <span class="sub-stat-value">{{ subscription()!.dailyGenerateLimit }}</span>
-              <span class="sub-stat-label">Lần tạo AI / ngày</span>
-            </div>
-          </div>
-          <div class="sub-stat">
-            <span class="material-symbols-outlined">event</span>
-            <div>
-              <span class="sub-stat-value">{{ formatDate(subscription()!.endDate) }}</span>
-              <span class="sub-stat-label">Hết hạn</span>
-            </div>
-          </div>
-          @if (subscription()!.isExpired) {
-            <div class="expired-badge">
-              <span class="material-symbols-outlined">warning</span>
-              Gói đã hết hạn
-            </div>
+    @if (editMode()) {
+      <!-- Edit Mode -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">Tên</label>
+          <input type="text" class="form-input" [ngModel]="firstName()" (ngModelChange)="firstName.set($event)" placeholder="Nhập tên..." />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Họ</label>
+          <input type="text" class="form-input" [ngModel]="lastName()" (ngModelChange)="lastName.set($event)" placeholder="Nhập họ..." />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <div class="email-row">
+          <input type="email" class="form-input" [ngModel]="email()" (ngModelChange)="email.set($event)" disabled />
+          <span class="verified-badge">
+            <span class="material-symbols-outlined">check_circle</span>
+            ĐÃ XÁC MINH
+          </span>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-cancel" (click)="toggleEditMode()">Hủy</button>
+        <button class="btn-save" (click)="saveChanges()" [disabled]="saving()">
+          @if (saving()) {
+            <span class="material-symbols-outlined spin">progress_activity</span>
+            Đang lưu...
+          } @else {
+            Lưu thay đổi
           }
-        } @else {
-          <div class="sub-stat">
-            <span class="material-symbols-outlined">style</span>
-            <div>
-              <span class="sub-stat-value">–</span>
-              <span class="sub-stat-label">Bộ thẻ tối đa</span>
-            </div>
-          </div>
-          <div class="sub-stat">
-            <span class="material-symbols-outlined">auto_awesome</span>
-            <div>
-              <span class="sub-stat-value">–</span>
-              <span class="sub-stat-label">Lần tạo AI / ngày</span>
-            </div>
-          </div>
-          <div class="sub-stat upgrade">
-            <span class="material-symbols-outlined">trending_up</span>
-            <div>
-              <a class="upgrade-link" routerLink="/subscription-settings">Nâng cấp ngay →</a>
-              <span class="sub-stat-label">Để mở khoá thêm tính năng</span>
-            </div>
-          </div>
-        }
+        </button>
       </div>
     } @else {
-      <div class="sub-stats">
-        <div class="skeleton-line"></div>
-        <div class="skeleton-line"></div>
-        <div class="skeleton-line"></div>
+      <!-- View Mode -->
+      <div class="info-grid">
+        <div class="info-item">
+          <span class="info-label">Họ và tên</span>
+          <span class="info-value">{{ displayName || '–' }}</span>
+        </div>
+        <div class="info-item">
+          <span class="info-label">Email</span>
+          <span class="info-value">{{ currentUser()?.email || '–' }}</span>
+        </div>
+      </div>
+    }
+  </div>
+
+  <!-- Security Section -->
+  <div class="section-card">
+    <div class="section-header">
+      <h3 class="section-heading">Bảo mật</h3>
+    </div>
+
+    <div class="security-actions">
+      <button class="btn-security" (click)="togglePasswordSection()">
+        <span class="material-symbols-outlined">lock_reset</span>
+        <div class="btn-security-text">
+          <span class="btn-security-title">Đổi mật khẩu</span>
+          <span class="btn-security-desc">Cập nhật mật khẩu của bạn</span>
+        </div>
+        <span class="material-symbols-outlined arrow">{{ showPasswordSection() ? 'expand_less' : 'expand_more' }}</span>
+      </button>
+
+      <button class="btn-security" (click)="forgotPassword()">
+        <span class="material-symbols-outlined">help</span>
+        <div class="btn-security-text">
+          <span class="btn-security-title">Quên mật khẩu</span>
+          <span class="btn-security-desc">Đặt lại mật khẩu qua email</span>
+        </div>
+        <span class="material-symbols-outlined arrow">chevron_right</span>
+      </button>
+    </div>
+
+    <!-- Change Password Form -->
+    @if (showPasswordSection()) {
+      <div class="password-form">
+        @if (passwordSuccess()) {
+          <div class="toast success inline-toast">
+            <span class="material-symbols-outlined">check_circle</span>
+            {{ passwordSuccess() }}
+          </div>
+        }
+        @if (passwordError()) {
+          <div class="toast error inline-toast">
+            <span class="material-symbols-outlined">error</span>
+            {{ passwordError() }}
+          </div>
+        }
+
+        <div class="form-group">
+          <label class="form-label">Mật khẩu hiện tại</label>
+          <div class="password-input-wrap">
+            <input [type]="showCurrentPassword() ? 'text' : 'password'" class="form-input" placeholder="••••••••"
+              [ngModel]="currentPassword()" (ngModelChange)="currentPassword.set($event)" />
+            <button class="toggle-pw-btn" (click)="showCurrentPassword.update(v => !v)" type="button">
+              <span class="material-symbols-outlined">{{ showCurrentPassword() ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">Mật khẩu mới</label>
+            <div class="password-input-wrap">
+              <input [type]="showNewPassword() ? 'text' : 'password'" class="form-input" placeholder="Mật khẩu mới"
+                [ngModel]="newPassword()" (ngModelChange)="newPassword.set($event)" />
+              <button class="toggle-pw-btn" (click)="showNewPassword.update(v => !v)" type="button">
+                <span class="material-symbols-outlined">{{ showNewPassword() ? 'visibility_off' : 'visibility' }}</span>
+              </button>
+            </div>
+            @if (newPassword()) {
+              <div class="strength-bar-wrap">
+                <div class="strength-bar" [style.width]="(passwordStrength() / 4 * 100) + '%'" [style.background]="strengthColor"></div>
+              </div>
+              <p class="strength-label" [style.color]="strengthColor">{{ strengthLabel }}</p>
+            }
+          </div>
+          <div class="form-group">
+            <label class="form-label">Xác nhận mật khẩu mới</label>
+            <div class="password-input-wrap">
+              <input [type]="showConfirmPassword() ? 'text' : 'password'" class="form-input" placeholder="Xác nhận"
+                [ngModel]="confirmPassword()" (ngModelChange)="confirmPassword.set($event)" />
+              <button class="toggle-pw-btn" (click)="showConfirmPassword.update(v => !v)" type="button">
+                <span class="material-symbols-outlined">{{ showConfirmPassword() ? 'visibility_off' : 'visibility' }}</span>
+              </button>
+            </div>
+            @if (confirmPassword() && newPassword() !== confirmPassword()) {
+              <p class="mismatch-hint">Mật khẩu không khớp</p>
+            }
+          </div>
+        </div>
+
+        <button class="btn-change-pw" (click)="changePassword()" [disabled]="changingPassword()">
+          @if (changingPassword()) {
+            <span class="material-symbols-outlined spin">progress_activity</span>
+            Đang xử lý...
+          } @else {
+            <span class="material-symbols-outlined">lock_reset</span>
+            Đổi mật khẩu
+          }
+        </button>
       </div>
     }
   </div>

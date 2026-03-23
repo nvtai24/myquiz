@@ -15,7 +15,6 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, IdentityRole, str
     {
     }
 
-    public DbSet<UploadedFile> UploadedFiles { get; set; }
     public DbSet<Deck> Decks { get; set; }
     public DbSet<Question> Questions { get; set; }
     public DbSet<DeckInvitation> DeckInvitations { get; set; }
@@ -36,19 +35,6 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, IdentityRole, str
             entity.Property(u => u.FirstName).HasMaxLength(100);
             entity.Property(u => u.LastName).HasMaxLength(100);
             entity.Ignore(u => u.FullName);
-        });
-
-        modelBuilder.Entity<UploadedFile>(entity =>
-        {
-            entity.ToTable("UploadedFiles");
-            entity.HasKey(e => e.Id);
-            entity.Property(e => e.Url).IsRequired();
-            entity.Property(e => e.OriginalFileName).IsRequired();
-
-            entity.HasOne<Deck>()
-                .WithMany(d => d.Documents)
-                .HasForeignKey(f => f.DeckId)
-                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Deck>(entity =>

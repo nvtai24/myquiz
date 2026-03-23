@@ -21,5 +21,5 @@ public class UploadedFile
 
     public string? CreatedBy { get; set; }
 
-    public Guid? DeckId { get; set; }
+    // public Guid? DeckId { get; set; }
 }

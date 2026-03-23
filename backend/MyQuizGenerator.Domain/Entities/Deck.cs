@@ -10,12 +10,12 @@ public class Deck
     public DeckVisibility Visibility { get; set; }
     public DeckStatus Status { get; set; }
     public DeckSource Source { get; set; }
-    public string ThumbnailUrl { get; set; } = string.Empty;
-    public string[] Tags { get; set; } = Array.Empty<string>();
+    public string? ThumbnailUrl { get; set; }
+    public string[]? Tags { get; set; } = Array.Empty<string>();
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public DateTime? UpdatedAt { get; set; } = null;
     public string OwnerId { get; set; } = string.Empty;
-    public ICollection<UploadedFile> Documents { get; set; } = new List<UploadedFile>();
+    public string? DocumentUrl { get; set; }
     public ICollection<Question> Questions { get; set; } = new List<Question>();
     public ICollection<DeckInvitation> DeckInvitations { get; set; } = new List<DeckInvitation>();
     public ICollection<DeckMember> DeckMembers { get; set; } = new List<DeckMember>();

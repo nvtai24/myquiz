@@ -86,44 +86,10 @@ public class CreateDeckCommandHandler : IRequestHandler<CreateDeckCommand, Guid>
             Source = request.Request.Source,
             Tags = request.Request.Tags,
             OwnerId = userId,
-            Questions = listQuestions
+            Questions = listQuestions,
+            ThumbnailUrl = request.Request.ThumbnailUrl,
+            DocumentUrl = request.Request.DocumentUrl
         };
-
-        // Upload thumbnail file and set URL if provided
-        if (request.Request.ThumbnailStream != null && !string.IsNullOrEmpty(request.Request.ThumbnailFileName))
-        {
-            var thumbnailUploadRequest = new FileUploadRequest(
-                request.Request.ThumbnailStream,
-                request.Request.ThumbnailFileName,
-                request.Request.ThumbnailContentType ?? "image/png");
-
-            var thumbnailUrl = await _fileService.UploadFileAsync(thumbnailUploadRequest);
-            deck.ThumbnailUrl = thumbnailUrl;
-        }
-
-        // Upload file and attach to deck if provided
-        if (request.Request.FileStream != null && !string.IsNullOrEmpty(request.Request.FileName))
-        {
-            var fileUploadRequest = new FileUploadRequest(
-                request.Request.FileStream,
-                request.Request.FileName,
-                request.Request.FileContentType ?? "application/octet-stream"); // default content type
-
-            var fileUrl = await _fileService.UploadFileAsync(fileUploadRequest);
-
-            var uploadedFile = new UploadedFile
-            {
-                FileName = request.Request.FileName,
-                OriginalFileName = request.Request.FileName,
-                Url = fileUrl,
-                ContentType = request.Request.FileContentType!,
-                Size = request.Request.FileStream.Length,
-                DeckId = deckId,
-                CreatedBy = _currentUserService.UserId
-            };
-
-            deck.Documents = new List<UploadedFile> { uploadedFile };
-        }
 
         await _deckRepository.AddAsync(deck, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

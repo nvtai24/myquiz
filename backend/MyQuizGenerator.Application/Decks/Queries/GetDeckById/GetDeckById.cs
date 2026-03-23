@@ -35,9 +35,9 @@ public class GetDeckByIdQueryHandler : IRequestHandler<GetDeckByIdQuery, DeckDet
             Name = deck.Name,
             Description = deck.Description,
             Visibility = deck.Visibility,
-            Tags = deck.Tags,
+            Tags = deck.Tags ?? [],
             QuestionCount = deck.Questions.Count,
-            ThumbnailUrl = deck.ThumbnailUrl,
+            ThumbnailUrl = deck.ThumbnailUrl ?? string.Empty,
             CreatedAt = deck.CreatedAt,
             UpdatedAt = deck.UpdatedAt,
             AverageRating = deck.DeckRatings?.Count > 0 ? Math.Round(deck.DeckRatings.Average(r => r.Rating), 1) : 0,
@@ -52,13 +52,7 @@ public class GetDeckByIdQueryHandler : IRequestHandler<GetDeckByIdQuery, DeckDet
                 Options = q.Options,
                 CorrectAnswers = q.CorrectAnswers
             }).ToList(),
-            Documents = deck.Documents.Select(d => new DeckDocumentResponse
-            {
-                FileName = d.OriginalFileName,
-                Url = d.Url,
-                ContentType = d.ContentType,
-                Size = d.Size
-            }).ToList()
+            DocumentUrl = deck.DocumentUrl
         };
     }
 }

@@ -167,6 +167,9 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("DocumentUrl")
+                        .HasColumnType("text");
+
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("text");
@@ -184,11 +187,9 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                         .HasColumnType("text");
 
                     b.Property<string[]>("Tags")
-                        .IsRequired()
                         .HasColumnType("text[]");
 
                     b.Property<string>("ThumbnailUrl")
-                        .IsRequired()
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("UpdatedAt")
@@ -484,47 +485,6 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("SubscriptionPlans");
-                });
-
-            modelBuilder.Entity("MyQuizGenerator.Domain.Entities.UploadedFile", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("ContentType")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("CreatedBy")
-                        .HasColumnType("text");
-
-                    b.Property<Guid?>("DeckId")
-                        .HasColumnType("uuid");
-
-                    b.Property<string>("FileName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("OriginalFileName")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<long>("Size")
-                        .HasColumnType("bigint");
-
-                    b.Property<string>("Url")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("DeckId");
-
-                    b.ToTable("UploadedFiles", (string)null);
                 });
 
             modelBuilder.Entity("MyQuizGenerator.Domain.Entities.UserAnswer", b =>
@@ -826,14 +786,6 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                     b.Navigation("Deck");
                 });
 
-            modelBuilder.Entity("MyQuizGenerator.Domain.Entities.UploadedFile", b =>
-                {
-                    b.HasOne("MyQuizGenerator.Domain.Entities.Deck", null)
-                        .WithMany("Documents")
-                        .HasForeignKey("DeckId")
-                        .OnDelete(DeleteBehavior.Cascade);
-                });
-
             modelBuilder.Entity("MyQuizGenerator.Domain.Entities.UserAnswer", b =>
                 {
                     b.HasOne("MyQuizGenerator.Domain.Entities.Question", "Question")
@@ -877,8 +829,6 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                     b.Navigation("DeckMembers");
 
                     b.Navigation("DeckRatings");
-
-                    b.Navigation("Documents");
 
                     b.Navigation("Questions");
 

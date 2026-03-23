@@ -98,6 +98,7 @@ export interface CreateDeckRequest {
   tags: string[];
   questions: CreateQuestionRequest[];
   thumbnailUrl?: string;
+  documentUrl?: string;
 }
 
 export interface CreateDeckRatingRequest {

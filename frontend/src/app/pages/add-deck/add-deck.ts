@@ -40,6 +40,7 @@ export class AddDeck implements OnInit {
   isEditMode = signal(false);
   editingId = signal<string | null>(null);
   loadingDeck = signal(false);
+  documentUrl = signal<string | null>(null);
 
   /* ── Creation mode ── */
   mode = signal<'manual' | 'ai'>('manual');
@@ -56,6 +57,7 @@ export class AddDeck implements OnInit {
   aiFocusTopics = signal<string[]>([]);
   aiGenerating = signal(false);
   aiGenerated = signal(false); // true if cards came from AI
+  lastUsedAiFile = signal<File | null>(null);
 
   aiUsageCount = signal<number>(0);
   aiUsageMax = signal<number>(0); // 0 means no active plan or infinite (but we have limits typically). Wait, Free plan may have 0. If 0, UI might say "Buy plan".
@@ -157,6 +159,10 @@ export class AddDeck implements OnInit {
               return card;
             });
             this.cards.set(mapped);
+          }
+
+          if (deck.documents && deck.documents.length > 0) {
+            this.documentUrl.set(deck.documents[0].fileUrl);
           }
         } else {
           this.showError('Could not load deck details');
@@ -386,21 +392,28 @@ export class AddDeck implements OnInit {
       source: this.aiGenerated() ? 'AiGenerated' : 'Manual',
       tags: [],
       questions,
-      thumbnailUrl: this.coverImage() || undefined
+      thumbnailUrl: this.coverImage() || undefined,
+      documentUrl: this.documentUrl() || undefined
     };
 
-    const upload$ = this.coverFile() 
-      ? this.deckService.uploadFile(this.coverFile()!).pipe(
-          map(res => {
-            if (res.success && res.data?.url) return res.data.url;
-            throw new Error(res.message || 'Failed to upload thumbnail');
-          })
-        )
+    const thumbnail$ = this.coverFile() 
+      ? this.deckService.uploadFile(this.coverFile()!).pipe(map(res => {
+          if (res.success && res.data?.url) return res.data.url;
+          throw new Error(res.message || 'Failed to upload thumbnail');
+        }))
       : of(request.thumbnailUrl);
 
-    upload$.pipe(
-      switchMap(url => {
-        request.thumbnailUrl = url;
+    const document$ = (this.aiGenerated() && this.lastUsedAiFile())
+      ? this.deckService.uploadFile(this.lastUsedAiFile()!).pipe(map(res => {
+          if (res.success && res.data?.url) return res.data.url;
+          throw new Error(res.message || 'Failed to upload AI document');
+        }))
+      : of(request.documentUrl);
+
+    forkJoin({ thumbnail: thumbnail$, document: document$ }).pipe(
+      switchMap(({ thumbnail, document }) => {
+        request.thumbnailUrl = thumbnail;
+        request.documentUrl = document;
         const action = this.isEditMode() && this.editingId() 
           ? this.deckService.updateDeck(this.editingId()!, request)
           : this.deckService.createDeck(request);
@@ -558,6 +571,7 @@ export class AddDeck implements OnInit {
 
     this.aiGenerating.set(true);
     this.errorMessage.set(null);
+    this.lastUsedAiFile.set(fileToSend);
 
     this.deckService.generateDeck(fileToSend!).subscribe({
       next: (res) => {

@@ -177,4 +177,16 @@ public class DeckRepository : Repository<Guid, Deck>, IDeckRepository
 
         return (items, totalCount);
     }
+
+    public async Task<List<Question>> GetQuestionsByIdsAsync(IEnumerable<int> ids, Guid deckId, CancellationToken cancellationToken = default)
+    {
+        return await _context.Questions
+            .Where(q => ids.Contains(q.Id) && q.DeckId == deckId)
+            .ToListAsync(cancellationToken);
+    }
+
+    public async Task AddQuestionsAsync(IEnumerable<Question> questions, CancellationToken cancellationToken = default)
+    {
+        await _context.Questions.AddRangeAsync(questions, cancellationToken);
+    }
 }

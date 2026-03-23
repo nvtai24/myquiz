@@ -17,4 +17,11 @@ public class UpdateDeckRequest
     public string[] Tags { get; set; } = Array.Empty<string>();
 
     public string? ThumbnailUrl { get; set; }
+
+    // Questions management
+    public List<CreateQuestionRequest> QuestionsToAdd { get; set; } = [];
+
+    public List<UpdateQuestionRequest> QuestionsToUpdate { get; set; } = [];
+
+    public List<int> QuestionIdsToDelete { get; set; } = [];
 }

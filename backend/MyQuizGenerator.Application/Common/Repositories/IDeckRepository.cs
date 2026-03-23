@@ -16,4 +16,8 @@ public interface IDeckRepository : IRepository<Guid, Deck>
     Task<(List<Deck> Items, int TotalCount)> GetSharedDecksAsync(string userId, int page, int size, CancellationToken cancellationToken = default);
     Task<(List<Deck> Items, int TotalCount)> GetAttemptedDecksAsync(string userId, int page, int size, CancellationToken cancellationToken = default);
     Task<(List<Deck> Items, int TotalCount)> SearchPublicDecksAsync(string? searchTerm, int page, int size, CancellationToken cancellationToken = default);
+
+    // Question management
+    Task<List<Question>> GetQuestionsByIdsAsync(IEnumerable<int> ids, Guid deckId, CancellationToken cancellationToken = default);
+    Task AddQuestionsAsync(IEnumerable<Question> questions, CancellationToken cancellationToken = default);
 }

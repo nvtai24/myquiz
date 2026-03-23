@@ -164,7 +164,7 @@
             @if (deck.thumbnailUrl) {
             <img [src]="deck.thumbnailUrl" [alt]="deck.name" class="absolute inset-0 w-full h-full object-cover" />
             } @else {
-            <img src="/images/default-deck.png" alt="Flashcards" class="absolute inset-0 w-full h-full object-cover" />
+            <img src="/images/thumbnail_default.png" alt="Flashcards" class="absolute inset-0 w-full h-full object-cover" />
             }
             <span class="status-badge z-10" [class.published]="deck.status === 'Published'" [class.draft]="deck.status === 'Draft'">
               <span class="material-symbols-outlined">{{ deck.status === 'Published' ? 'public' : 'edit_note' }}</span>

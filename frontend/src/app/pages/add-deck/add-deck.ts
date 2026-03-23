@@ -403,11 +403,6 @@ export class AddDeck implements OnInit {
       return;
     }
 
-    if (!this.coverImage()) {
-      this.showError('A cover image is required to publish this study set');
-      return;
-    }
-
     this.creating.set(true);
     this.errorMessage.set(null);
 

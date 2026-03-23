@@ -64,6 +64,9 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, IdentityRole, str
                 .WithMany(d => d.Questions)
                 .HasForeignKey(q => q.DeckId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            // Global Query Filter for Soft Delete
+            entity.HasQueryFilter(q => !q.IsDeleted);
         });
 
         modelBuilder.Entity<DeckInvitation>(entity =>

@@ -13,6 +13,10 @@ public class Question
     public Guid DeckId { get; set; }
     public virtual Deck Deck { get; set; } = null!;
 
+    // Soft Delete
+    public bool IsDeleted { get; set; } = false;
+    public DateTime? DeletedAt { get; set; }
+
     // Maybe not needed
     public virtual ICollection<UserAnswer> UserAnswers { get; set; } = new List<UserAnswer>();
 }

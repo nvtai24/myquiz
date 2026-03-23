@@ -384,6 +384,9 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                     b.Property<Guid>("DeckId")
                         .HasColumnType("uuid");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("timestamp with time zone");
+
                     b.Property<string>("Explanation")
                         .IsRequired()
                         .HasColumnType("text");
@@ -391,6 +394,9 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                     b.Property<string>("Hint")
                         .IsRequired()
                         .HasColumnType("text");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("boolean");
 
                     b.Property<string[]>("Options")
                         .IsRequired()

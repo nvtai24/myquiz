@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using MyQuizGenerator.Application.Common.Exceptions;
 using MyQuizGenerator.Application.Common.Interfaces;
+using MyQuizGenerator.Application.Common.Services;
 using MyQuizGenerator.Application.Files.DTOs;
 using MyQuizGenerator.Application.Profile.Commands.UpdateProfile;
 using MyQuizGenerator.Application.Profile.DTOs;

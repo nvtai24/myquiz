@@ -1,7 +1,7 @@
 using MediatR;
 using MyQuizGenerator.Application.Common.Interfaces;
+using MyQuizGenerator.Application.Common.Services;
 using MyQuizGenerator.Application.Files.DTOs;
-using MyQuizGenerator.Domain.Entities;
 
 namespace MyQuizGenerator.Application.Files.Commands.UploadFile;
 
@@ -11,15 +11,10 @@ public class UploadFileCommandHandler : IRequestHandler<UploadFileCommand, strin
 {
     private readonly IFileService _fileService;
 
-    //private readonly IRepository<string, UploadedFile> _repository;
-    private readonly IUnitOfWork _unitOfWork;
-
     public UploadFileCommandHandler(
-        IFileService fileService,
-        IUnitOfWork unitOfWork)
+        IFileService fileService)
     {
         _fileService = fileService;
-        _unitOfWork = unitOfWork;
     }
 
     public async Task<string> Handle(UploadFileCommand request, CancellationToken cancellationToken)

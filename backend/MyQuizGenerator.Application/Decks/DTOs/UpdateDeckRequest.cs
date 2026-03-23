@@ -16,8 +16,5 @@ public class UpdateDeckRequest
 
     public string[] Tags { get; set; } = Array.Empty<string>();
 
-    // Thumbnail file info (populated by Controller from IFormFile)
-    public Stream? ThumbnailStream { get; set; }
-    public string? ThumbnailFileName { get; set; }
-    public string? ThumbnailContentType { get; set; }
+    public string? ThumbnailUrl { get; set; }
 }

@@ -9,6 +9,7 @@ using Amazon.S3;
 using Amazon;
 using Microsoft.Extensions.Options;
 using MyQuizGenerator.Infrastructure.Settings;
+using MyQuizGenerator.Application.Common.Services;
 
 namespace MyQuizGenerator.Infrastructure.Extensions;
 

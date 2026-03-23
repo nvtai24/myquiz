@@ -69,14 +69,8 @@ public class DecksController : BaseApiController
     /// <param name="id">The deck ID.</param>
     /// <param name="request">The deck update request.</param>
     [HttpPut("{id}")]
-    public async Task<IActionResult> Update(Guid id, [FromForm] UpdateDeckRequest request, IFormFile? thumbnail)
+    public async Task<IActionResult> Update(Guid id, [FromBody] UpdateDeckRequest request)
     {
-        if (thumbnail != null && thumbnail.Length > 0)
-        {
-            request.ThumbnailStream = thumbnail.OpenReadStream();
-            request.ThumbnailFileName = thumbnail.FileName;
-            request.ThumbnailContentType = thumbnail.ContentType;
-        }
 
         var command = new UpdateDeck.UpdateDeckCommand(id, request);
         await _mediator.Send(command);

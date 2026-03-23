@@ -1,11 +1,9 @@
 using Amazon.S3;
 using Amazon.S3.Model;
 using Microsoft.Extensions.Options;
-using MyQuizGenerator.Application.Common.Interfaces;
 using MyQuizGenerator.Infrastructure.Settings;
-using MyQuizGenerator.Application.Files.Commands;
-using MyQuizGenerator.Application.Files.Commands.UploadFile;
 using MyQuizGenerator.Application.Files.DTOs;
+using MyQuizGenerator.Application.Common.Services;
 
 namespace MyQuizGenerator.Infrastructure.Services;
 

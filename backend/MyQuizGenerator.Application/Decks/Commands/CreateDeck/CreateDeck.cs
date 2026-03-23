@@ -3,10 +3,9 @@ using Microsoft.EntityFrameworkCore;
 using MyQuizGenerator.Application.Common.Exceptions;
 using MyQuizGenerator.Application.Common.Interfaces;
 using MyQuizGenerator.Application.Common.Interfaces.Repositories;
+using MyQuizGenerator.Application.Common.Services;
 using MyQuizGenerator.Application.Decks.DTOs;
-using MyQuizGenerator.Application.Files.DTOs;
 using MyQuizGenerator.Domain.Entities;
-using MyQuizGenerator.Domain.Enums;
 
 namespace MyQuizGenerator.Application.Decks.Commands.CreateDeck;
 

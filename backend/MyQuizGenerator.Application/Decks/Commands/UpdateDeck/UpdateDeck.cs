@@ -2,6 +2,7 @@ using MediatR;
 using MyQuizGenerator.Application.Common.Exceptions;
 using MyQuizGenerator.Application.Common.Interfaces;
 using MyQuizGenerator.Application.Common.Interfaces.Repositories;
+using MyQuizGenerator.Application.Common.Services;
 using MyQuizGenerator.Application.Decks.DTOs;
 using MyQuizGenerator.Application.Files.DTOs;
 using MyQuizGenerator.Domain.Entities;
@@ -49,18 +50,7 @@ public class UpdateDeckCommandHandler : IRequestHandler<UpdateDeckCommand>
         deck.Visibility = request.Request.Visibility;
         deck.Tags = request.Request.Tags;
         deck.UpdatedAt = DateTime.UtcNow;
-
-        // Upload thumbnail file and set URL if provided
-        if (request.Request.ThumbnailStream != null && !string.IsNullOrEmpty(request.Request.ThumbnailFileName))
-        {
-            var thumbnailUploadRequest = new FileUploadRequest(
-                request.Request.ThumbnailStream,
-                request.Request.ThumbnailFileName,
-                request.Request.ThumbnailContentType ?? "image/png");
-
-            var thumbnailUrl = await _fileService.UploadFileAsync(thumbnailUploadRequest);
-            deck.ThumbnailUrl = thumbnailUrl;
-        }
+        deck.ThumbnailUrl = request.Request.ThumbnailUrl;
 
         _deckRepository.Update(deck);
         await _unitOfWork.SaveChangesAsync(cancellationToken);

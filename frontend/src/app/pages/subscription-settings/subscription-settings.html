@@ -126,69 +126,84 @@
     </div>
     } @else if (paymentOrder()) {
     <div class="payment-content">
-      <h2 class="modal-title">
-        <span class="material-symbols-outlined">qr_code_2</span>
-        Payment – {{ paymentOrder()!.planName }}
-      </h2>
-      <p class="modal-subtitle">Scan QR code or transfer with details below</p>
 
-      <!-- QR Code -->
-      <div class="qr-section">
-        <div class="qr-box">
-          <img class="qr-img" [src]="paymentOrder()!.qrCodeUrl" alt="QR Code thanh toán" />
+      <div class="payment-header">
+        <h2 class="modal-title">
+          <span class="material-symbols-outlined">qr_code_2</span>
+          Payment – {{ paymentOrder()!.planName }}
+        </h2>
+        <p class="modal-subtitle">Scan QR code or transfer manually with the details below</p>
+        <div class="countdown-bar" [class.urgent]="isUrgent()">
+          <span class="material-symbols-outlined">timer</span>
+          <span>Order expires in: &nbsp;<strong>{{ countdownDisplay() }}</strong></span>
         </div>
       </div>
 
-      <!-- Bank Info -->
-      <div class="bank-info">
-        <div class="bank-row">
-          <span class="bank-label">Bank</span>
-          <span class="bank-value">{{ paymentOrder()!.bankCode }}</span>
+      <div class="payment-body">
+
+        <div class="qr-section">
+          <span class="qr-label">Scan to pay</span>
+          <div class="qr-box">
+            <img class="qr-img" [src]="paymentOrder()!.qrCodeUrl" alt="QR Code" />
+          </div>
+          <p class="qr-hint">Works with MoMo, ZaloPay,<br>VietQR and all banking apps</p>
         </div>
-        <div class="bank-row">
-          <span class="bank-label">Account Number</span>
-          <div class="bank-value copy-row">
-            <span>{{ paymentOrder()!.bankAccount }}</span>
-            <button class="btn-copy" (click)="copyToClipboard(paymentOrder()!.bankAccount)" title="Copy">
-              <span class="material-symbols-outlined">content_copy</span>
-            </button>
+
+        <div class="bank-info">
+          <div class="bank-row">
+            <span class="bank-label">Bank</span>
+            <span class="bank-value">{{ paymentOrder()!.bankCode }}</span>
+          </div>
+          <div class="bank-row">
+            <span class="bank-label">Account Number</span>
+            <div class="bank-value copy-row">
+              <span>{{ paymentOrder()!.bankAccount }}</span>
+              <button class="btn-copy" (click)="copyToClipboard(paymentOrder()!.bankAccount)" title="Copy">
+                <span class="material-symbols-outlined">content_copy</span>
+              </button>
+            </div>
+          </div>
+          <div class="bank-row">
+            <span class="bank-label">Account Name</span>
+            <span class="bank-value">{{ paymentOrder()!.accountName }}</span>
+          </div>
+          <div class="bank-row highlight-row">
+            <span class="bank-label">Amount</span>
+            <span class="bank-value amount-text">{{ formatCurrency(paymentOrder()!.amount) }}</span>
+          </div>
+          <div class="bank-row highlight-row">
+            <span class="bank-label">Transfer description</span>
+            <div class="bank-value copy-row">
+              <span class="transfer-content">{{ paymentOrder()!.transferContent }}</span>
+              <button class="btn-copy" (click)="copyToClipboard(paymentOrder()!.transferContent)" title="Copy">
+                <span class="material-symbols-outlined">content_copy</span>
+              </button>
+            </div>
           </div>
         </div>
-        <div class="bank-row">
-          <span class="bank-label">Account Name</span>
-          <span class="bank-value">{{ paymentOrder()!.accountName }}</span>
-        </div>
-        <div class="bank-row highlight-row">
-          <span class="bank-label">Amount</span>
-          <span class="bank-value amount-text">{{ formatCurrency(paymentOrder()!.amount) }}</span>
-        </div>
-        <div class="bank-row highlight-row">
-          <span class="bank-label">Description</span>
-          <div class="bank-value copy-row">
-            <span class="transfer-content">{{ paymentOrder()!.transferContent }}</span>
-            <button class="btn-copy" (click)="copyToClipboard(paymentOrder()!.transferContent)" title="Copy">
-              <span class="material-symbols-outlined">content_copy</span>
-            </button>
-          </div>
-        </div>
+
       </div>
 
-      @if (copySuccess()) {
-      <div class="copy-toast">
-        <span class="material-symbols-outlined">check_circle</span>
-        Copied!
+      <div class="payment-footer">
+        @if (copySuccess()) {
+        <div class="copy-toast">
+          <span class="material-symbols-outlined">check_circle</span>
+          Copied to clipboard!
+        </div>
+        }
+        <div class="modal-note">
+          <span class="material-symbols-outlined">info</span>
+          <span>
+            Your plan activates automatically after payment is confirmed.<br>
+            Order expires at: <strong>{{ formatDatetime(paymentOrder()!.expiresAt) }}</strong>
+          </span>
+        </div>
+        <button class="btn-close-full" (click)="closeModal()">Close</button>
       </div>
-      }
 
-      <div class="modal-note">
-        <span class="material-symbols-outlined">info</span>
-        <span>The plan will be activated automatically once payment is received.<br>
-          Order expires at: <strong>{{ formatDatetime(paymentOrder()!.expiresAt) }}</strong></span>
-      </div>
-
-      <button class="btn-close-full" (click)="closeModal()">Close</button>
     </div>
     }
+
   </div>
 </div>
 }

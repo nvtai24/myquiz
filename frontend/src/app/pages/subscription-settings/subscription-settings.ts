@@ -1,4 +1,4 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, inject, signal, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { PaymentService } from '../../services/payment.service';
@@ -12,7 +12,7 @@ import { forkJoin } from 'rxjs';
   templateUrl: './subscription-settings.html',
   styleUrl: './subscription-settings.css',
 })
-export class SubscriptionSettings implements OnInit {
+export class SubscriptionSettings implements OnInit, OnDestroy {
   private paymentService = inject(PaymentService);
 
   plans = signal<SubscriptionPlanResponse[]>([]);
@@ -29,25 +29,67 @@ export class SubscriptionSettings implements OnInit {
   orderError = signal<string | null>(null);
   copySuccess = signal(false);
 
+  // Countdown
+  countdown = signal<number>(15 * 60);
+  private countdownInterval: ReturnType<typeof setInterval> | null = null;
+
+  countdownDisplay = computed(() => {
+    const s = this.countdown();
+    const m = Math.floor(s / 60).toString().padStart(2, '0');
+    const sec = (s % 60).toString().padStart(2, '0');
+    return `${m}:${sec}`;
+  });
+
+  isUrgent = computed(() => this.countdown() <= 60);
+
   ngOnInit(): void {
     forkJoin({
       plans: this.paymentService.getSubscriptionPlans(),
-      mySubscription:this.paymentService.getMySubscription()
-       }).subscribe({
-        next: ({plans ,mySubscription }) => {
-          this.mySubscription.set(mySubscription);
-          this.loadingPlans.set(false);
-          this.loadingSubscription.set(false);
-          const sorted = plans.sort((a, b) => a.order - b.order);
-          const currentOrder = (mySubscription?.isExpired || !mySubscription)?  0 : sorted.find(plan => plan.name === mySubscription?.planName)?.order || 0;
-          this.plans.set(sorted.filter(plan => plan.order >= currentOrder));
-        },
-        error: () => {
-          this.loadingPlans.set(false);
-          this.loadingSubscription.set(false);
-          this.plansError.set(true);
+      mySubscription: this.paymentService.getMySubscription()
+    }).subscribe({
+      next: ({ plans, mySubscription }) => {
+        this.mySubscription.set(mySubscription);
+        this.loadingPlans.set(false);
+        this.loadingSubscription.set(false);
+        const sorted = plans.sort((a, b) => a.order - b.order);
+        const currentOrder = (mySubscription?.isExpired || !mySubscription)
+          ? 0
+          : sorted.find(plan => plan.name === mySubscription?.planName)?.order || 0;
+        this.plans.set(sorted.filter(plan => plan.order >= currentOrder));
+      },
+      error: () => {
+        this.loadingPlans.set(false);
+        this.loadingSubscription.set(false);
+        this.plansError.set(true);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.clearCountdown();
+  }
+
+  private startCountdown(): void {
+    this.countdown.set(15 * 60);
+    this.clearCountdown();
+
+    this.countdownInterval = setInterval(() => {
+      this.countdown.update(v => {
+        if (v <= 1) {
+          this.clearCountdown();
+          this.closeModal();
+          return 0;
         }
-      })
+        return v - 1;
+      });
+    }, 1000);
+  }
+
+  private clearCountdown(): void {
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+      this.countdownInterval = null;
+    }
   }
 
   isCurrentPlan(plan: SubscriptionPlanResponse): boolean {
@@ -71,6 +113,7 @@ export class SubscriptionSettings implements OnInit {
       next: (order) => {
         this.paymentOrder.set(order);
         this.creatingOrder.set(false);
+        this.startCountdown(); // ← bắt đầu đếm ngược sau khi có order
       },
       error: (err) => {
         this.creatingOrder.set(false);
@@ -80,6 +123,7 @@ export class SubscriptionSettings implements OnInit {
   }
 
   closeModal(): void {
+    this.clearCountdown(); // ← dọn interval trước khi đóng
     this.showModal.set(false);
     this.paymentOrder.set(null);
     this.orderError.set(null);

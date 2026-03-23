@@ -98,6 +98,12 @@ public class DeckRepository : Repository<Guid, Deck>, IDeckRepository
     {
         await _context.DeckMembers.AddAsync(deckMember, cancellationToken);
     }
+    
+    public async Task<bool> IsMemberAsync(Guid deckId, string userId, CancellationToken cancellationToken = default)
+    {
+        return await _context.DeckMembers
+            .AnyAsync(dm => dm.DeckId == deckId && dm.UserId == userId, cancellationToken);
+    }
 
     public async Task<(List<Deck> Items, int TotalCount)> GetSharedDecksAsync(string userId, int page, int size, CancellationToken cancellationToken = default)
     {

@@ -54,11 +54,24 @@ public class CreateDeckInvitationCommandHandler : IRequestHandler<CreateDeckInvi
             throw new ForbiddenException("You are not the owner of this deck.");
         }
 
-        // Optional: Check if email is self (needs extra call, skipping for performance or adding later if needed)
-        // var currentUser = await _authService.GetUserByIdAsync(currentUserId);
-        // if (currentUser?.Email == request.Email) throw new ValidationException...
+        // 3. Validate invited user
+        var currentUser = await _authService.GetUserByIdAsync(currentUserId);
+        if (currentUser?.Email == request.Email)
+        {
+            throw new ValidationException("You cannot invite yourself to your own deck.");
+        }
 
-        // 3. Check if invitation already exists (by Email)
+        var invitedUser = await _authService.GetUserByEmailAsync(request.Email);
+        if (invitedUser != null)
+        {
+            var isMember = await _deckRepository.IsMemberAsync(request.DeckId, invitedUser.Id, cancellationToken);
+            if (isMember)
+            {
+                throw new ValidationException("User is already a member of this deck.");
+            }
+        }
+
+        // 4. Check if invitation already exists (by Email)
         var exists = await _deckRepository.HasInvitationAsync(request.DeckId, request.Email, cancellationToken);
         if (exists)
         {

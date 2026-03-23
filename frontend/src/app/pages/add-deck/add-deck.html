@@ -33,20 +33,17 @@
       }
 
       <div class="relative flex items-center">
-        <span class="material-symbols-outlined text-[16px] absolute left-3 pointer-events-none"
-          [class]="visibility() === 'private' ? 'text-red-500' : visibility() === 'shared' ? 'text-blue-500' : 'text-green-600'">
+        <span class="material-symbols-outlined text-[16px] absolute left-3 pointer-events-none text-gray-500">
           {{ visibility() === 'private' ? 'lock' : visibility() === 'shared' ? 'group' : 'public' }}
         </span>
         <select
-          class="appearance-none pl-8 pr-8 py-2 rounded-xl text-[13px] font-semibold border cursor-pointer outline-none transition-all"
-          [class]="visibility() === 'private' ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100' : visibility() === 'shared' ? 'bg-blue-50 text-blue-600 border-blue-200 hover:bg-blue-100' : 'bg-green-50 text-green-600 border-green-200 hover:bg-green-100'"
+          class="appearance-none pl-8 pr-8 py-2 rounded-xl text-[13px] font-semibold border cursor-pointer outline-none transition-all bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300"
           [ngModel]="visibility()" (ngModelChange)="visibility.set($event)">
           <option value="public">Public</option>
           <option value="private">Private</option>
           <option value="shared">Shared</option>
         </select>
-        <span class="material-symbols-outlined text-[14px] absolute right-2 pointer-events-none"
-          [class]="visibility() === 'private' ? 'text-red-400' : visibility() === 'shared' ? 'text-blue-400' : 'text-green-500'">expand_more</span>
+        <span class="material-symbols-outlined text-[14px] absolute right-2 pointer-events-none text-gray-400">expand_more</span>
       </div>
      
       @if (canShowSaveDraft) {

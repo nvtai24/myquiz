@@ -15,7 +15,7 @@ public class ExpirePaymentTransactionsJob : BackgroundService
 {
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<ExpirePaymentTransactionsJob> _logger;
-    private static readonly TimeSpan Interval = TimeSpan.FromMinutes(1);
+    private static readonly TimeSpan Interval = TimeSpan.FromMinutes(5);
 
     public ExpirePaymentTransactionsJob(
         IServiceScopeFactory scopeFactory,

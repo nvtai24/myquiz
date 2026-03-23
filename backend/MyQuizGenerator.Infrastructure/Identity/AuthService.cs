@@ -483,5 +483,53 @@ public class AuthService : IAuthService
 
         _logger.LogInformation("Role '{Role}' assigned to user: {UserId}", role, userId);
     }
+
+    public async Task<UserResponse?> UpdateProfileAsync(string userId, string? firstName, string? lastName, string? avatarUrl)
+    {
+        var user = await _userManager.FindByIdAsync(userId);
+        if (user == null)
+        {
+            return null;
+        }
+
+        // Update fields only if provided
+        if (firstName != null)
+        {
+            user.FirstName = firstName;
+        }
+
+        if (lastName != null)
+        {
+            user.LastName = lastName;
+        }
+
+        if (avatarUrl != null)
+        {
+            user.AvatarUrl = avatarUrl;
+        }
+
+        user.UpdatedAt = DateTime.UtcNow;
+
+        var result = await _userManager.UpdateAsync(user);
+        if (!result.Succeeded)
+        {
+            var errors = result.Errors.Select(e => e.Description).ToList();
+            _logger.LogWarning("Failed to update profile for user {UserId}: {Errors}", userId, string.Join(", ", errors));
+            throw new Application.Common.Exceptions.ValidationException(errors);
+        }
+
+        _logger.LogInformation("Profile updated successfully for user: {UserId}", userId);
+
+        var roles = await _userManager.GetRolesAsync(user);
+        return new UserResponse
+        {
+            Id = user.Id,
+            Email = user.Email!,
+            FirstName = user.FirstName,
+            LastName = user.LastName,
+            AvatarUrl = user.AvatarUrl,
+            Roles = roles.ToList()
+        };
+    }
 }
 

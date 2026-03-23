@@ -95,5 +95,10 @@ public interface IAuthService
     /// Assigns a role to a user, replacing existing roles.
     /// </summary>
     Task AssignRoleAsync(string userId, string role);
+
+    /// <summary>
+    /// Updates user profile information.
+    /// </summary>
+    Task<UserResponse?> UpdateProfileAsync(string userId, string? firstName, string? lastName, string? avatarUrl);
 }
 

@@ -40,6 +40,7 @@ public class GetDeckByIdQueryHandler : IRequestHandler<GetDeckByIdQuery, DeckDet
             Name = deck.Name,
             Description = deck.Description,
             Visibility = deck.Visibility,
+            Status = deck.Status,
             Tags = deck.Tags ?? [],
             QuestionCount = deck.Questions.Count,
             ThumbnailUrl = deck.ThumbnailUrl ?? string.Empty,

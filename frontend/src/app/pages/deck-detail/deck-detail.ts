@@ -46,6 +46,41 @@ export class DeckDetail implements OnInit {
   showAllTerms = signal(false);
   filterText = signal('');
 
+  // Flashcard
+  currentCardIndex = signal(0);
+  isFlipped = signal(false);
+  showHint = signal(false);
+  showExplanation = signal(false);
+
+  currentQuestion = computed(() => {
+    const questions = this.deck()?.questions;
+    if (!questions?.length) return null;
+    return questions[this.currentCardIndex()] ?? null;
+  });
+
+  flipCard() { this.isFlipped.update(v => !v); }
+
+  nextCard() {
+    const total = this.deck()?.questions?.length ?? 0;
+    if (this.currentCardIndex() < total - 1) {
+      this.currentCardIndex.update(i => i + 1);
+      this.resetCard();
+    }
+  }
+
+  prevCard() {
+    if (this.currentCardIndex() > 0) {
+      this.currentCardIndex.update(i => i - 1);
+      this.resetCard();
+    }
+  }
+
+  resetCard() {
+    this.isFlipped.set(false);
+    this.showHint.set(false);
+    this.showExplanation.set(false);
+  }
+
   // Quiz history
   quizHistory = signal<QuizAttemptSummary[]>([]);
 
@@ -56,6 +91,19 @@ export class DeckDetail implements OnInit {
   submittingRating = signal(false);
   ratingSuccess = signal(false);
   ratingError = signal<string | null>(null);
+
+  // Rating modal
+  isRatingModalOpen = signal(false);
+
+  openRatingModal() {
+    this.isRatingModalOpen.set(true);
+    this.ratingSuccess.set(false);
+    this.ratingError.set(null);
+  }
+
+  closeRatingModal() {
+    this.isRatingModalOpen.set(false);
+  }
 
   // Invite modal
   isInviteModalOpen = signal(false);
@@ -84,7 +132,7 @@ export class DeckDetail implements OnInit {
     this.inviteError.set(null);
 
     this.deckService.invite(this.deckId, this.inviteEmail().trim()).subscribe({
-      next: (res) => {
+      next: () => {
         this.isInviting.set(false);
         this.inviteSuccess.set('Đã gửi lời mời thành công!');
         this.inviteEmail.set('');
@@ -222,11 +270,13 @@ export class DeckDetail implements OnInit {
       next: () => {
         this.submittingRating.set(false);
         this.ratingSuccess.set(true);
-        // Reload ratings
         this.deckService.getRatings(this.deckId).subscribe(res => {
           this.ratingSummary.set(res.data ?? null);
         });
-        setTimeout(() => this.ratingSuccess.set(false), 3000);
+        setTimeout(() => {
+          this.ratingSuccess.set(false);
+          this.closeRatingModal();
+        }, 1500);
       },
       error: (err) => {
         this.submittingRating.set(false);

@@ -10,7 +10,7 @@ export const routes: Routes = [
   { path: 'login', loadComponent: () => import('./pages/login/login').then(m => m.Login), canActivate: [noAuthGuard] },
   { path: 'register', loadComponent: () => import('./pages/register/register').then(m => m.register), canActivate: [noAuthGuard] },
   { path: 'forgot-password', loadComponent: () => import('./pages/forgot-password/forgot-password').then(m => m.ForgotPassword), canActivate: [noAuthGuard] },
-  { path: 'reset-password', loadComponent: () => import('./pages/reset-password/reset-password').then(m => m.ResetPassword), canActivate: [noAuthGuard] },
+  { path: 'reset-password', loadComponent: () => import('./pages/reset-password/reset-password').then(m => m.ResetPassword) },
 
   // Verify email
   { path: 'verify-email', loadComponent: () => import('./pages/verify-email/verify-email').then(m => m.VerifyEmail) },

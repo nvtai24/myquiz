@@ -1,4 +1,4 @@
-namespace MyQuizGenerator.Application.Common.Interfaces;
+namespace MyQuizGenerator.Application.Common.Services;
 
 using MyQuizGenerator.Application.Files.DTOs;
 

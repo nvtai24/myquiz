@@ -30,6 +30,44 @@ public class DeckRepository : Repository<Guid, Deck>, IDeckRepository
         return (items, totalCount);
     }
 
+    public async Task<(List<Deck> Items, int TotalCount)> GetMyPublishedDecksAsync(string userId, int page, int size, CancellationToken cancellationToken = default)
+    {
+        var query = _context.Decks
+            .AsNoTracking()
+            .Where(d => d.OwnerId == userId && d.Status == Domain.Enums.DeckStatus.Published);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .Include(d => d.Questions)
+            .Include(d => d.DeckRatings)
+            .OrderByDescending(d => d.CreatedAt)
+            .Skip((page - 1) * size)
+            .Take(size)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
+    }
+
+    public async Task<(List<Deck> Items, int TotalCount)> GetMyDraftsAsync(string userId, int page, int size, CancellationToken cancellationToken = default)
+    {
+        var query = _context.Decks
+            .AsNoTracking()
+            .Where(d => d.OwnerId == userId && d.Status == Domain.Enums.DeckStatus.Draft);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .Include(d => d.Questions)
+            .Include(d => d.DeckRatings)
+            .OrderByDescending(d => d.CreatedAt)
+            .Skip((page - 1) * size)
+            .Take(size)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
+    }
+
     public async Task<Deck?> GetDeckByIdWithQuestionsAsync(Guid id, CancellationToken cancellationToken = default)
     {
         return await _context.Decks

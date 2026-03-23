@@ -7,6 +7,8 @@ using CreateDeck = MyQuizGenerator.Application.Decks.Commands.CreateDeck;
 using UpdateDeck = MyQuizGenerator.Application.Decks.Commands.UpdateDeck;
 using DeleteDeck = MyQuizGenerator.Application.Decks.Commands.DeleteDeck;
 using UserDecks = MyQuizGenerator.Application.Decks.Queries.GetUserDecks;
+using MyDecks = MyQuizGenerator.Application.Decks.Queries.GetMyDecks;
+using Drafts = MyQuizGenerator.Application.Decks.Queries.GetDrafts;
 using SharedDecks = MyQuizGenerator.Application.Decks.Queries.GetSharedDecks;
 using AttemptedDecks = MyQuizGenerator.Application.Decks.Queries.GetAttemptedDecks;
 using DeckDetails = MyQuizGenerator.Application.Decks.Queries.GetDeckById;
@@ -123,6 +125,46 @@ public class DecksController : BaseApiController
         }
 
         var query = new UserDecks.GetUserDecksQuery(userId, page, size);
+        var result = await _mediator.Send(query);
+        return ApiPaged(result.Items, result.Page, result.Size, result.TotalRecords);
+    }
+
+    /// <summary>
+    /// Gets a paginated list of published decks owned by the current user.
+    /// </summary>
+    /// <param name="page">Page number (default: 1).</param>
+    /// <param name="size">Page size (default: 10).</param>
+    /// <returns>Paginated list of my published deck summaries.</returns>
+    [HttpGet("my")]
+    public async Task<IActionResult> GetMyDecks([FromQuery] int page = 1, [FromQuery] int size = 10)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return ApiUnauthorized();
+        }
+
+        var query = new MyDecks.GetMyDecksQuery(userId, page, size);
+        var result = await _mediator.Send(query);
+        return ApiPaged(result.Items, result.Page, result.Size, result.TotalRecords);
+    }
+
+    /// <summary>
+    /// Gets a paginated list of draft decks owned by the current user.
+    /// </summary>
+    /// <param name="page">Page number (default: 1).</param>
+    /// <param name="size">Page size (default: 10).</param>
+    /// <returns>Paginated list of draft deck summaries.</returns>
+    [HttpGet("drafts")]
+    public async Task<IActionResult> GetDrafts([FromQuery] int page = 1, [FromQuery] int size = 10)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return ApiUnauthorized();
+        }
+
+        var query = new Drafts.GetDraftsQuery(userId, page, size);
         var result = await _mediator.Send(query);
         return ApiPaged(result.Items, result.Page, result.Size, result.TotalRecords);
     }

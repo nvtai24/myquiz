@@ -94,6 +94,7 @@ public class LoginCommandHandler : IRequestHandler<LoginCommand, LoginResponse>
                 Email = userInfo.Email,
                 FirstName = userInfo.FirstName,
                 LastName = userInfo.LastName,
+                AvatarUrl = userInfo.AvatarUrl,
                 Roles = roles.ToList()
             }
         };

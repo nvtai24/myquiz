@@ -38,6 +38,9 @@ public class GoogleLoginCommandHandler : IRequestHandler<GoogleLoginCommand, Log
         // Validate token and create/get user in AuthService
         var (userId, email, firstName, lastName, isNewUser) = await _authService.GoogleLoginAsync(request.Request.IdToken);
 
+        // Get full user info including avatar
+        var userInfo = await _authService.GetUserByIdAsync(userId);
+
         // Get user roles
         var roles = await _authService.GetUserRolesAsync(userId);
 
@@ -60,6 +63,7 @@ public class GoogleLoginCommandHandler : IRequestHandler<GoogleLoginCommand, Log
                 Email = email,
                 FirstName = firstName,
                 LastName = lastName,
+                AvatarUrl = userInfo?.AvatarUrl,
                 Roles = roles.ToList()
             }
         };

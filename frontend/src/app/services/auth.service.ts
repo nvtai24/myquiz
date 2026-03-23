@@ -113,4 +113,15 @@ export class AuthService {
       })
     );
   }
+
+  updateUser(partialUser: Partial<User>): void {
+    const current = this.currentUser();
+    if (current) {
+      const updated = { ...current, ...partialUser };
+      this.currentUser.set(updated);
+      if (isPlatformBrowser(this.platformId)) {
+        localStorage.setItem('user', JSON.stringify(updated));
+      }
+    }
+  }
 }

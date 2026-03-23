@@ -218,6 +218,12 @@ export class UserProfile implements OnInit {
         if (res.data) {
           this.profile.set(res.data);
           this.avatarUrl.set(res.data.avatarUrl ?? null);
+          
+          this.authService.updateUser({
+            firstName: res.data.firstName,
+            lastName: res.data.lastName,
+            avatarUrl: res.data.avatarUrl ?? undefined,
+          });
         }
         this.avatarFile.set(null);
         this.saving.set(false);

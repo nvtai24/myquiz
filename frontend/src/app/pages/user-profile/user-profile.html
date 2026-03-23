@@ -40,7 +40,7 @@
       @if (!editMode()) {
         <button class="btn-edit" (click)="toggleEditMode()">
           <span class="material-symbols-outlined">edit</span>
-          Chỉnh sửa
+          Edit
         </button>
       }
     </div>
@@ -50,19 +50,19 @@
   <!-- Personal Information Section -->
   <div class="section-card">
     <div class="section-header">
-      <h3 class="section-heading">Thông tin cá nhân</h3>
+      <h3 class="section-heading">Personal Information</h3>
     </div>
 
     @if (editMode()) {
       <!-- Edit Mode -->
       <div class="form-row">
         <div class="form-group">
-          <label class="form-label">Tên</label>
-          <input type="text" class="form-input" [ngModel]="firstName()" (ngModelChange)="firstName.set($event)" placeholder="Nhập tên..." />
+          <label class="form-label">First Name</label>
+          <input type="text" class="form-input" [ngModel]="firstName()" (ngModelChange)="firstName.set($event)" placeholder="Enter first name..." />
         </div>
         <div class="form-group">
-          <label class="form-label">Họ</label>
-          <input type="text" class="form-input" [ngModel]="lastName()" (ngModelChange)="lastName.set($event)" placeholder="Nhập họ..." />
+          <label class="form-label">Last Name</label>
+          <input type="text" class="form-input" [ngModel]="lastName()" (ngModelChange)="lastName.set($event)" placeholder="Enter last name..." />
         </div>
       </div>
       <div class="form-group">
@@ -71,18 +71,18 @@
           <input type="email" class="form-input" [ngModel]="email()" (ngModelChange)="email.set($event)" disabled />
           <span class="verified-badge">
             <span class="material-symbols-outlined">check_circle</span>
-            ĐÃ XÁC MINH
+            VERIFIED
           </span>
         </div>
       </div>
       <div class="form-actions">
-        <button class="btn-cancel" (click)="toggleEditMode()">Hủy</button>
+        <button class="btn-cancel" (click)="toggleEditMode()">Cancel</button>
         <button class="btn-save" (click)="saveChanges()" [disabled]="saving()">
           @if (saving()) {
             <span class="material-symbols-outlined spin">progress_activity</span>
-            Đang lưu...
+            Saving...
           } @else {
-            Lưu thay đổi
+            Save Changes
           }
         </button>
       </div>
@@ -91,7 +91,7 @@
       @if (loadingProfile()) {
         <div class="info-grid">
           <div class="info-item">
-            <span class="info-label">Họ và tên</span>
+            <span class="info-label">Full Name</span>
             <div class="skeleton-line" style="width: 150px;"></div>
           </div>
           <div class="info-item">
@@ -102,7 +102,7 @@
       } @else {
         <div class="info-grid">
           <div class="info-item">
-            <span class="info-label">Họ và tên</span>
+            <span class="info-label">Full Name</span>
             <span class="info-value">{{ displayName || '–' }}</span>
           </div>
           <div class="info-item">
@@ -117,15 +117,15 @@
   <!-- Security Section -->
   <div class="section-card">
     <div class="section-header">
-      <h3 class="section-heading">Bảo mật</h3>
+      <h3 class="section-heading">Security</h3>
     </div>
 
     <div class="security-actions">
       <button class="btn-security" (click)="togglePasswordSection()">
         <span class="material-symbols-outlined">lock_reset</span>
         <div class="btn-security-text">
-          <span class="btn-security-title">Đổi mật khẩu</span>
-          <span class="btn-security-desc">Cập nhật mật khẩu của bạn</span>
+          <span class="btn-security-title">Change Password</span>
+          <span class="btn-security-desc">Update your password</span>
         </div>
       </button>
 
@@ -136,8 +136,8 @@
           <span class="material-symbols-outlined">help</span>
         }
         <div class="btn-security-text">
-          <span class="btn-security-title">Quên mật khẩu</span>
-          <span class="btn-security-desc">Đặt lại mật khẩu qua email</span>
+          <span class="btn-security-title">Forgot Password</span>
+          <span class="btn-security-desc">Reset password via email</span>
         </div>
       </button>
     </div>
@@ -173,7 +173,7 @@
         }
 
         <div class="form-group">
-          <label class="form-label">Mật khẩu hiện tại</label>
+          <label class="form-label">Current Password</label>
           <div class="password-input-wrap">
             <input [type]="showCurrentPassword() ? 'text' : 'password'" class="form-input" placeholder="••••••••"
               [ngModel]="currentPassword()" (ngModelChange)="currentPassword.set($event)" />
@@ -185,9 +185,9 @@
 
         <div class="form-row">
           <div class="form-group">
-            <label class="form-label">Mật khẩu mới</label>
+            <label class="form-label">New Password</label>
             <div class="password-input-wrap">
-              <input [type]="showNewPassword() ? 'text' : 'password'" class="form-input" placeholder="Mật khẩu mới"
+              <input [type]="showNewPassword() ? 'text' : 'password'" class="form-input" placeholder="New password"
                 [ngModel]="newPassword()" (ngModelChange)="newPassword.set($event)" />
               <button class="toggle-pw-btn" (click)="showNewPassword.update(v => !v)" type="button">
                 <span class="material-symbols-outlined">{{ showNewPassword() ? 'visibility_off' : 'visibility' }}</span>
@@ -201,16 +201,16 @@
             }
           </div>
           <div class="form-group">
-            <label class="form-label">Xác nhận mật khẩu mới</label>
+            <label class="form-label">Confirm New Password</label>
             <div class="password-input-wrap">
-              <input [type]="showConfirmPassword() ? 'text' : 'password'" class="form-input" placeholder="Xác nhận"
+              <input [type]="showConfirmPassword() ? 'text' : 'password'" class="form-input" placeholder="Confirm"
                 [ngModel]="confirmPassword()" (ngModelChange)="confirmPassword.set($event)" />
               <button class="toggle-pw-btn" (click)="showConfirmPassword.update(v => !v)" type="button">
                 <span class="material-symbols-outlined">{{ showConfirmPassword() ? 'visibility_off' : 'visibility' }}</span>
               </button>
             </div>
             @if (confirmPassword() && newPassword() !== confirmPassword()) {
-              <p class="mismatch-hint">Mật khẩu không khớp</p>
+              <p class="mismatch-hint">Passwords do not match</p>
             }
           </div>
         </div>
@@ -218,10 +218,10 @@
         <button class="btn-change-pw" (click)="changePassword()" [disabled]="changingPassword()">
           @if (changingPassword()) {
             <span class="material-symbols-outlined spin">progress_activity</span>
-            Đang xử lý...
+            Processing...
           } @else {
             <span class="material-symbols-outlined">lock_reset</span>
-            Đổi mật khẩu
+            Change Password
           }
         </button>
       </div>

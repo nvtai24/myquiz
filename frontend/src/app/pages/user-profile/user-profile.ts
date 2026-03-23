@@ -70,10 +70,10 @@ export class UserProfile implements OnInit {
   get strengthLabel(): string {
     const s = this.passwordStrength();
     if (s === 0) return '';
-    if (s === 1) return 'Yếu';
-    if (s === 2) return 'Trung bình';
-    if (s === 3) return 'Tốt';
-    return 'Mạnh';
+    if (s === 1) return 'Weak';
+    if (s === 2) return 'Medium';
+    if (s === 3) return 'Good';
+    return 'Strong';
   }
 
   get strengthColor(): string {
@@ -166,7 +166,7 @@ export class UserProfile implements OnInit {
 
   formatDate(dateStr: string): string {
     if (!dateStr) return '';
-    return new Date(dateStr).toLocaleDateString('vi-VN');
+    return new Date(dateStr).toLocaleDateString('en-US');
   }
 
   toggleEditMode() {
@@ -221,13 +221,13 @@ export class UserProfile implements OnInit {
         }
         this.avatarFile.set(null);
         this.saving.set(false);
-        this.saveSuccess.set('Thông tin đã được lưu thành công!');
+        this.saveSuccess.set('Profile updated successfully!');
         this.editMode.set(false);
         setTimeout(() => this.saveSuccess.set(null), 3000);
       },
       error: (err) => {
         this.saving.set(false);
-        this.saveError.set(err?.error?.message ?? 'Không thể cập nhật thông tin.');
+        this.saveError.set(err?.error?.message ?? 'Failed to update profile.');
         setTimeout(() => this.saveError.set(null), 3000);
       }
     });
@@ -249,17 +249,17 @@ export class UserProfile implements OnInit {
     this.passwordError.set(null);
 
     if (!this.currentPassword() || !this.newPassword() || !this.confirmPassword()) {
-      this.passwordError.set('Vui lòng nhập đầy đủ thông tin mật khẩu.');
+      this.passwordError.set('Please fill in all password fields.');
       return;
     }
 
     if (this.newPassword() !== this.confirmPassword()) {
-      this.passwordError.set('Mật khẩu mới không khớp.');
+      this.passwordError.set('New passwords do not match.');
       return;
     }
 
     if (this.newPassword().length < 8) {
-      this.passwordError.set('Mật khẩu mới phải có ít nhất 8 ký tự.');
+      this.passwordError.set('New password must be at least 8 characters.');
       return;
     }
 
@@ -270,7 +270,7 @@ export class UserProfile implements OnInit {
     }).subscribe({
       next: () => {
         this.changingPassword.set(false);
-        this.passwordSuccess.set('Mật khẩu đã được thay đổi thành công!');
+        this.passwordSuccess.set('Password changed successfully!');
         this.currentPassword.set('');
         this.newPassword.set('');
         this.confirmPassword.set('');
@@ -281,7 +281,7 @@ export class UserProfile implements OnInit {
       },
       error: (err) => {
         this.changingPassword.set(false);
-        this.passwordError.set(err?.error?.message ?? 'Không thể thay đổi mật khẩu.');
+        this.passwordError.set(err?.error?.message ?? 'Failed to change password.');
       }
     });
   }
@@ -294,7 +294,7 @@ export class UserProfile implements OnInit {
   forgotPassword() {
     const email = this.userEmail;
     if (!email) {
-      this.forgotPasswordError.set('Không tìm thấy email.');
+      this.forgotPasswordError.set('Email not found.');
       return;
     }
 
@@ -305,12 +305,12 @@ export class UserProfile implements OnInit {
     this.http.post('/api/Auth/forgot-password', { email }).subscribe({
       next: () => {
         this.sendingForgotPassword.set(false);
-        this.forgotPasswordSuccess.set('Email đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra hộp thư.');
+        this.forgotPasswordSuccess.set('Password reset email sent. Please check your inbox.');
         setTimeout(() => this.forgotPasswordSuccess.set(null), 5000);
       },
       error: (err) => {
         this.sendingForgotPassword.set(false);
-        this.forgotPasswordError.set(err?.error?.message ?? 'Không thể gửi email đặt lại mật khẩu.');
+        this.forgotPasswordError.set(err?.error?.message ?? 'Failed to send password reset email.');
         setTimeout(() => this.forgotPasswordError.set(null), 5000);
       }
     });

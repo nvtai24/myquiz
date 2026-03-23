@@ -1,11 +1,48 @@
-/* Styles moved to Tailwind CSS classes in HTML */
-
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes fadeSlide {
   from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── 3D Flashcard Flip ── */
+.card-flip-scene {
+  perspective: 1400px;
+  width: 100%;
+}
+
+.card-flip-inner {
+  position: relative;
+  width: 100%;
+  min-height: 320px;
+  transform-style: preserve-3d;
+  transition: transform 0.52s cubic-bezier(0.4, 0.2, 0.2, 1);
+}
+
+@media (min-width: 640px) {
+  .card-flip-inner {
+    min-height: 360px;
+  }
+}
+
+.card-flip-inner.flipped {
+  transform: rotateY(180deg);
+}
+
+.card-flip-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.card-flip-back {
+  transform: rotateY(180deg);
 }

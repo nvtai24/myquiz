@@ -17,7 +17,7 @@ interface QuizAttemptSummary {
 import {
   DeckDetailResponse,
   DeckRatingSummaryResponse,
-  QuestionResponse
+  QuestionResponse,
 } from '../../models/deck.models';
 
 @Component({
@@ -47,13 +47,15 @@ export class DeckDetail implements OnInit {
   filterText = signal('');
 
   // Flashcard
+  displayQuestions = signal<QuestionResponse[]>([]);
+  isShuffled = signal(false);
   currentCardIndex = signal(0);
   isFlipped = signal(false);
   showHint = signal(false);
   showExplanation = signal(false);
 
   currentQuestion = computed(() => {
-    const questions = this.deck()?.questions;
+    const questions = this.displayQuestions();
     if (!questions?.length) return null;
     return questions[this.currentCardIndex()] ?? null;
   });
@@ -61,7 +63,7 @@ export class DeckDetail implements OnInit {
   flipCard() { this.isFlipped.update(v => !v); }
 
   nextCard() {
-    const total = this.deck()?.questions?.length ?? 0;
+    const total = this.displayQuestions().length;
     if (this.currentCardIndex() < total - 1) {
       this.currentCardIndex.update(i => i + 1);
       this.resetCard();
@@ -79,6 +81,29 @@ export class DeckDetail implements OnInit {
     this.isFlipped.set(false);
     this.showHint.set(false);
     this.showExplanation.set(false);
+  }
+
+  shuffleCards() {
+    const questions = this.deck()?.questions ?? [];
+    if (!this.isShuffled()) {
+      const shuffled = [...questions];
+      for (let i = shuffled.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+      }
+      this.displayQuestions.set(shuffled);
+      this.isShuffled.set(true);
+    } else {
+      this.displayQuestions.set([...questions]);
+      this.isShuffled.set(false);
+    }
+    this.currentCardIndex.set(0);
+    this.resetCard();
+  }
+
+  restartCards() {
+    this.currentCardIndex.set(0);
+    this.resetCard();
   }
 
   // Quiz history
@@ -161,6 +186,7 @@ export class DeckDetail implements OnInit {
     this.deckService.getDeckById(id).subscribe({
       next: (res) => {
         this.deck.set(res.data ?? null);
+        this.displayQuestions.set(res.data?.questions ?? []);
         this.loadingDeck.set(false);
       },
       error: (err) => {

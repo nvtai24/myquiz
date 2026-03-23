@@ -190,7 +190,7 @@
     </div>
 
     <!-- ── Flashcard Viewer ── -->
-    @if (deck()!.questions?.length && currentQuestion()) {
+    @if (displayQuestions().length && currentQuestion()) {
       @let q = currentQuestion()!;
       <div class="mb-6">
         <!-- Header row -->
@@ -199,163 +199,198 @@
             <span class="material-symbols-outlined text-[22px] text-[#4255FF]">flip</span>
             Flashcards
           </h2>
-          <span class="text-[13px] font-semibold text-gray-400">
-            {{ currentCardIndex() + 1 }} / {{ deck()!.questions.length }}
-          </span>
+          <div class="flex items-center gap-2">
+            <span class="text-[13px] font-bold text-gray-400 tabular-nums">
+              {{ currentCardIndex() + 1 }} / {{ displayQuestions().length }}
+            </span>
+            <button
+              (click)="shuffleCards()"
+              title="Shuffle"
+              class="w-9 h-9 rounded-xl border flex items-center justify-center cursor-pointer transition-all"
+              [class]="isShuffled() ? 'bg-[#eef0ff] border-[#4255FF] text-[#4255FF]' : 'bg-white border-gray-200 text-gray-400 hover:border-[#4255FF] hover:text-[#4255FF]'"
+            >
+              <span class="material-symbols-outlined text-[18px]">shuffle</span>
+            </button>
+            <button
+              (click)="restartCards()"
+              title="Restart"
+              class="w-9 h-9 rounded-xl border bg-white border-gray-200 text-gray-400 flex items-center justify-center cursor-pointer transition-all hover:border-gray-400 hover:text-gray-700"
+            >
+              <span class="material-symbols-outlined text-[18px]">restart_alt</span>
+            </button>
+          </div>
         </div>
 
         <!-- Progress bar -->
-        <div class="h-1.5 bg-gray-100 rounded-full overflow-hidden mb-4">
+        <div class="h-1 bg-gray-100 rounded-full overflow-hidden mb-5">
           <div
             class="h-full bg-[#4255FF] rounded-full transition-[width] duration-300"
-            [style.width]="((currentCardIndex() + 1) / deck()!.questions.length) * 100 + '%'"
+            [style.width]="((currentCardIndex() + 1) / displayQuestions().length) * 100 + '%'"
           ></div>
         </div>
 
-        <!-- Card -->
-        <div class="card-flip-scene w-full">
-          <div class="card-flip-inner" [class.flipped]="isFlipped()" (click)="flipCard()">
-            <!-- Front: Question + Options -->
-            <div
-              class="card-flip-face bg-white border-2 border-gray-200 cursor-pointer shadow-sm hover:shadow-md transition-shadow flex flex-col"
-            >
-              <div class="flex-1 p-6 flex flex-col justify-center">
-                <p class="text-[11px] font-bold text-gray-400 uppercase tracking-widest mb-3 m-0">
-                  Click to reveal answer
-                </p>
-                <p class="text-[17px] font-bold text-gray-900 leading-snug mb-4 m-0">
-                  {{ q.content }}
-                </p>
-                @if (q.options?.length) {
-                  <div class="flex flex-col gap-2">
-                    @for (opt of q.options; track opt; let i = $index) {
-                      <div
-                        class="flex items-center gap-2.5 px-3 py-2 bg-gray-50 rounded-xl text-[13px] font-medium text-gray-700"
-                      >
-                        <span
-                          class="w-6 h-6 rounded-full bg-gray-200 text-gray-500 text-[11px] font-black flex items-center justify-center shrink-0"
-                          >{{ 'ABCD'[i] }}</span
-                        >
-                        {{ opt }}
-                      </div>
-                    }
-                  </div>
-                }
-              </div>
-              <div
-                class="border-t border-gray-100 px-6 py-2.5 flex items-center justify-center gap-1.5 text-[12px] font-semibold text-gray-300"
-              >
-                <span class="material-symbols-outlined text-[16px]">touch_app</span>
-                Tap to flip
-              </div>
-            </div>
-
-            <!-- Back: Correct Answers -->
-            <div
-              class="card-flip-face card-flip-back bg-green-50/60 border-2 border-green-200 cursor-pointer flex flex-col"
-            >
-              <div class="flex-1 p-6 flex flex-col justify-center">
-                <p class="text-[11px] font-bold text-green-600 uppercase tracking-widest mb-3 m-0">
-                  Correct Answer
-                </p>
-                <div class="flex flex-col gap-2">
-                  @for (ans of q.correctAnswers; track ans) {
-                    <div
-                      class="flex items-center gap-2.5 px-4 py-3 bg-white border border-green-200 rounded-xl text-[15px] font-bold text-green-700 shadow-sm"
-                    >
-                      <span class="material-symbols-outlined text-[20px] text-green-500"
-                        >check_circle</span
-                      >
-                      {{ ans }}
-                    </div>
-                  }
-                </div>
-              </div>
-              <div
-                class="border-t border-green-100 px-6 py-2.5 flex items-center justify-center gap-1.5 text-[12px] font-semibold text-green-400"
-              >
-                <span class="material-symbols-outlined text-[16px]">touch_app</span>
-                Tap to flip back
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Navigation + Hint/Explanation -->
-        <div class="flex items-center justify-between mt-4">
+        <!-- Card + Side Navigation -->
+        <div class="flex items-center gap-3 sm:gap-4">
+          <!-- Prev -->
           <button
             (click)="prevCard()"
             [disabled]="currentCardIndex() === 0"
-            class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gray-100 text-gray-600 font-bold text-[13px] border-none cursor-pointer hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            class="w-11 h-11 shrink-0 rounded-2xl border-2 border-gray-200 bg-white text-gray-400 flex items-center justify-center cursor-pointer hover:border-[#4255FF] hover:text-[#4255FF] hover:bg-[#eef0ff] disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
           >
-            <span class="material-symbols-outlined text-[18px]">arrow_back</span>
-            Prev
+            <span class="material-symbols-outlined text-[20px]">arrow_back_ios</span>
           </button>
 
-          <div class="flex gap-2">
-            @if (q.hint) {
-              <button
-                (click)="showHint.update(v => !v); $event.stopPropagation()"
-                class="flex items-center gap-1 px-3 py-2 rounded-xl text-[12px] font-bold border cursor-pointer transition-colors"
-                [class]="
-                  showHint()
-                    ? 'bg-amber-50 border-amber-300 text-amber-600'
-                    : 'bg-gray-50 border-gray-200 text-gray-400 hover:border-amber-200 hover:text-amber-500'
-                "
+          <!-- Card -->
+          <div class="card-flip-scene flex-1">
+            <div class="card-flip-inner" [class.flipped]="isFlipped()" (click)="flipCard()">
+
+              <!-- Front: Question -->
+              <div
+                class="card-flip-face bg-white border-2 border-gray-200 cursor-pointer shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:border-gray-300 transition-colors"
               >
-                <span class="material-symbols-outlined text-[16px]">lightbulb</span>
-                Hint
-              </button>
-            }
-            @if (q.explanation) {
-              <button
-                (click)="showExplanation.update(v => !v); $event.stopPropagation()"
-                class="flex items-center gap-1 px-3 py-2 rounded-xl text-[12px] font-bold border cursor-pointer transition-colors"
-                [class]="
-                  showExplanation()
-                    ? 'bg-blue-50 border-blue-300 text-blue-600'
-                    : 'bg-gray-50 border-gray-200 text-gray-400 hover:border-blue-200 hover:text-blue-500'
-                "
+                <div class="flex-1 p-8 flex flex-col justify-center overflow-y-auto">
+                  <p class="text-[10px] font-black text-gray-300 uppercase tracking-[0.15em] mb-4 m-0">
+                    Question / Term
+                  </p>
+                  <p class="text-[18px] sm:text-[20px] font-bold text-gray-900 leading-snug m-0 mb-4">
+                    {{ q.content }}
+                  </p>
+                  @if (q.options?.length) {
+                    <div class="flex flex-col gap-2 mt-1">
+                      @for (opt of q.options; track opt; let i = $index) {
+                        <div
+                          class="flex items-center gap-3 px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-[13px] font-medium text-gray-700"
+                        >
+                          <span
+                            class="w-6 h-6 rounded-full bg-white border border-gray-200 text-gray-500 text-[11px] font-black flex items-center justify-center shrink-0"
+                            >{{ 'ABCD'[i] }}</span
+                          >
+                          {{ opt }}
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+                <!-- Bottom strip: tap hint + hint button -->
+                <div
+                  class="border-t border-gray-100 px-6 py-3 flex items-center justify-between bg-gray-50/50 shrink-0"
+                >
+                  <span
+                    class="flex items-center gap-1.5 text-[12px] text-gray-300 font-semibold select-none"
+                  >
+                    <span class="material-symbols-outlined text-[15px]">touch_app</span>
+                    Tap to flip
+                  </span>
+                  @if (q.hint) {
+                    <button
+                      (click)="showHint.update(v => !v); $event.stopPropagation()"
+                      class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold border cursor-pointer transition-all"
+                      [class]="showHint() ? 'bg-amber-50 border-amber-300 text-amber-600' : 'bg-white border-gray-200 text-gray-400 hover:border-amber-300 hover:text-amber-500'"
+                    >
+                      <span class="material-symbols-outlined text-[15px]">lightbulb</span>
+                      Hint
+                    </button>
+                  }
+                </div>
+              </div>
+
+              <!-- Back: Answer -->
+              <div
+                class="card-flip-face card-flip-back bg-[#f5f7ff] border-2 border-[#4255FF]/25 cursor-pointer shadow-[0_4px_20px_rgba(66,85,255,0.08)]"
               >
-                <span class="material-symbols-outlined text-[16px]">info</span>
-                Explanation
-              </button>
-            }
+                <div class="flex-1 p-8 flex flex-col justify-center overflow-y-auto">
+                  <p
+                    class="text-[10px] font-black text-[#4255FF] uppercase tracking-[0.15em] mb-4 m-0"
+                  >
+                    Correct Answer
+                  </p>
+                  <div class="flex flex-col gap-2.5">
+                    @for (ans of q.correctAnswers; track ans) {
+                      <div
+                        class="flex items-center gap-3 px-5 py-3.5 bg-white border border-[#4255FF]/20 rounded-xl text-[16px] font-bold text-gray-900 shadow-sm"
+                      >
+                        <span
+                          class="material-symbols-outlined text-[20px] text-[#4255FF]"
+                          style="font-variation-settings: 'FILL' 1"
+                          >check_circle</span
+                        >
+                        {{ ans }}
+                      </div>
+                    }
+                  </div>
+                </div>
+                <!-- Bottom strip: tap hint + explanation button -->
+                <div
+                  class="border-t border-[#4255FF]/10 px-6 py-3 flex items-center justify-between bg-[#4255FF]/5 shrink-0"
+                >
+                  <span
+                    class="flex items-center gap-1.5 text-[12px] text-[#4255FF]/40 font-semibold select-none"
+                  >
+                    <span class="material-symbols-outlined text-[15px]">touch_app</span>
+                    Tap to flip back
+                  </span>
+                  @if (q.explanation) {
+                    <button
+                      (click)="showExplanation.update(v => !v); $event.stopPropagation()"
+                      class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12px] font-bold border cursor-pointer transition-all"
+                      [class]="showExplanation() ? 'bg-blue-50 border-blue-300 text-blue-600' : 'bg-white border-[#4255FF]/20 text-[#4255FF]/60 hover:border-blue-300 hover:text-blue-500'"
+                    >
+                      <span class="material-symbols-outlined text-[15px]">school</span>
+                      Explanation
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
           </div>
 
+          <!-- Next -->
           <button
             (click)="nextCard()"
-            [disabled]="currentCardIndex() === deck()!.questions.length - 1"
-            class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gray-100 text-gray-600 font-bold text-[13px] border-none cursor-pointer hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+            [disabled]="currentCardIndex() === displayQuestions().length - 1"
+            class="w-11 h-11 shrink-0 rounded-2xl border-2 border-gray-200 bg-white text-gray-400 flex items-center justify-center cursor-pointer hover:border-[#4255FF] hover:text-[#4255FF] hover:bg-[#eef0ff] disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
           >
-            Next
-            <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+            <span class="material-symbols-outlined text-[20px]">arrow_forward_ios</span>
           </button>
         </div>
 
-        <!-- Hint panel -->
-        @if (showHint() && q.hint) {
+        <!-- Hint panel — only on front face -->
+        @if (showHint() && !isFlipped() && q.hint) {
           <div
-            class="mt-3 px-4 py-3 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-2"
+            class="mt-3 px-5 py-4 bg-amber-50 border border-amber-200 rounded-xl flex items-start gap-3"
           >
-            <span class="material-symbols-outlined text-[18px] text-amber-500 shrink-0 mt-0.5"
+            <span
+              class="material-symbols-outlined text-[20px] text-amber-500 shrink-0 mt-0.5"
+              style="font-variation-settings: 'FILL' 1"
               >lightbulb</span
             >
-            <p class="text-[13px] text-amber-700 font-medium m-0 leading-relaxed">{{ q.hint }}</p>
+            <div>
+              <p class="text-[10px] font-black text-amber-500 uppercase tracking-widest m-0 mb-1">
+                Hint
+              </p>
+              <p class="text-[13px] text-amber-800 font-medium m-0 leading-relaxed">{{ q.hint }}</p>
+            </div>
           </div>
         }
 
-        <!-- Explanation panel -->
-        @if (showExplanation() && q.explanation) {
+        <!-- Explanation panel — only on back face -->
+        @if (showExplanation() && isFlipped() && q.explanation) {
           <div
-            class="mt-3 px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-2"
+            class="mt-3 px-5 py-4 bg-blue-50 border border-blue-200 rounded-xl flex items-start gap-3"
           >
-            <span class="material-symbols-outlined text-[18px] text-blue-500 shrink-0 mt-0.5"
-              >info</span
+            <span
+              class="material-symbols-outlined text-[20px] text-blue-500 shrink-0 mt-0.5"
+              style="font-variation-settings: 'FILL' 1"
+              >school</span
             >
-            <p class="text-[13px] text-blue-700 font-medium m-0 leading-relaxed">
-              {{ q.explanation }}
-            </p>
+            <div>
+              <p class="text-[10px] font-black text-blue-500 uppercase tracking-widest m-0 mb-1">
+                Explanation
+              </p>
+              <p class="text-[13px] text-blue-800 font-medium m-0 leading-relaxed">
+                {{ q.explanation }}
+              </p>
+            </div>
           </div>
         }
       </div>

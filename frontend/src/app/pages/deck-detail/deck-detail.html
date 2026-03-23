@@ -508,72 +508,114 @@
         <div class="flex flex-col gap-2">
           @for (q of visibleTerms; track q.id; let i = $index) {
             <div
-              class="bg-white border border-gray-100 rounded-xl p-4 hover:border-indigo-200 hover:shadow-sm transition-all"
+              class="bg-white border border-gray-100 rounded-2xl p-4 hover:border-indigo-200 hover:shadow-sm transition-all"
             >
-              <div class="flex items-start gap-3">
-                <span
-                  class="text-[11px] font-black text-[#4255FF] opacity-50 mt-0.5 shrink-0 w-5 text-right"
-                  >{{ i + 1 }}</span
-                >
-                <div class="flex-1 min-w-0">
-                  <p class="text-[14px] font-bold text-gray-900 m-0 mb-2 leading-snug">
-                    {{ q.content }}
-                  </p>
-
-                  @if (q.options?.length) {
-                    <div class="flex flex-wrap gap-1.5 mb-2">
-                      @for (opt of q.options; track opt) {
-                        <span
-                          class="text-[12px] px-2 py-0.5 rounded-lg font-semibold border"
-                          [class]="
-                            q.correctAnswers.includes(opt)
-                              ? 'bg-green-50 text-green-700 border-green-200'
-                              : 'bg-gray-50 text-gray-500 border-gray-100'
-                          "
-                        >
-                          {{ opt }}
-                        </span>
-                      }
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <div class="min-w-0 rounded-2xl border border-gray-100 bg-gray-50/60 p-4">
+                    <div class="flex items-center gap-2 mb-3">
+                      <span class="material-symbols-outlined text-[18px] text-[#4255FF]">help</span>
+                      <span class="text-[11px] font-black uppercase tracking-[0.14em] text-gray-400">
+                        Question
+                      </span>
                     </div>
-                  }
 
-                  <div class="flex flex-wrap gap-2 mt-2">
-                    @if (q.hint) {
-                      <button
-                        (click)="toggleListHint(q.id)"
-                        class="flex flex-col items-start gap-1 px-3 py-2 rounded-xl text-[11px] border cursor-pointer transition-all max-w-[250px] text-left"
-                        [class]="expandedHints().has(q.id) ? 'bg-amber-50 border-amber-300 text-amber-900' : 'bg-white border-gray-100 text-gray-400 hover:border-amber-300 hover:text-amber-500'"
-                      >
-                        <div class="flex items-center gap-1.5 w-full">
-                          <span class="material-symbols-outlined text-[14px] shrink-0" [class.text-amber-500]="expandedHints().has(q.id)" [style.font-variation-settings]="expandedHints().has(q.id) ? '\'FILL\' 1' : ''">lightbulb</span>
-                          <span class="font-black uppercase tracking-wider text-[9px]" [class.opacity-50]="expandedHints().has(q.id)">Hint</span>
-                        </div>
-                        @if (expandedHints().has(q.id)) {
-                          <p class="m-0 font-medium leading-relaxed text-[12px] mt-0.5 italic animate-in fade-in slide-in-from-top-1 duration-200">
-                            {{ q.hint }}
-                          </p>
+                    <p class="text-[14px] font-bold text-gray-900 m-0 mb-3 leading-snug">
+                      {{ q.content }}
+                    </p>
+
+                    @if (q.options?.length) {
+                      <div class="flex flex-col gap-2">
+                        @for (opt of q.options; track opt; let optionIndex = $index) {
+                          <div
+                            class="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-3 py-2 text-[12px] font-semibold text-gray-700"
+                          >
+                            <span
+                              class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-[10px] font-black text-gray-500"
+                            >
+                              {{ 'ABCD'[optionIndex] }}
+                            </span>
+                            <span class="min-w-0">{{ opt }}</span>
+                          </div>
                         }
-                      </button>
+                      </div>
                     }
-                    @if (q.explanation) {
-                      <button
-                        (click)="toggleListExplanation(q.id)"
-                        class="flex flex-col items-start gap-1 px-3 py-2 rounded-xl text-[11px] border cursor-pointer transition-all max-w-[350px] text-left"
-                        [class]="expandedExplanations().has(q.id) ? 'bg-blue-50 border-blue-300 text-blue-900' : 'bg-white border-gray-100 text-gray-400 hover:border-blue-300 hover:text-blue-500'"
-                      >
-                        <div class="flex items-center gap-1.5 w-full">
-                          <span class="material-symbols-outlined text-[14px] shrink-0" [class.text-blue-500]="expandedExplanations().has(q.id)" [style.font-variation-settings]="expandedExplanations().has(q.id) ? '\'FILL\' 1' : ''">school</span>
-                          <span class="font-black uppercase tracking-wider text-[9px]" [class.opacity-50]="expandedExplanations().has(q.id)">Explanation</span>
-                        </div>
-                        @if (expandedExplanations().has(q.id)) {
-                          <p class="m-0 font-medium leading-relaxed text-[12px] mt-0.5 italic animate-in fade-in slide-in-from-top-1 duration-200">
-                            {{ q.explanation }}
-                          </p>
-                        }
-                      </button>
+
+                    @if (q.hint) {
+                      <div class="mt-3">
+                        <button
+                          (click)="toggleListHint(q.id)"
+                          class="flex w-full items-start gap-2 rounded-xl border px-3 py-2 text-left text-[11px] cursor-pointer transition-all"
+                          [class]="expandedHints().has(q.id) ? 'bg-amber-50 border-amber-300 text-amber-900' : 'bg-white border-gray-200 text-gray-400 hover:border-amber-300 hover:text-amber-500'"
+                        >
+                          <span
+                            class="material-symbols-outlined text-[14px] shrink-0"
+                            [class.text-amber-500]="expandedHints().has(q.id)"
+                            [style.font-variation-settings]="expandedHints().has(q.id) ? '\'FILL\' 1' : ''"
+                            >lightbulb</span
+                          >
+                          <span class="flex-1 min-w-0">
+                            @if (expandedHints().has(q.id)) {
+                              <span class="block font-medium leading-relaxed text-[12px] italic animate-in fade-in duration-200">
+                                {{ q.hint }}
+                              </span>
+                            } @else {
+                              <span class="font-black uppercase tracking-wider text-[9px]">Hint</span>
+                            }
+                          </span>
+                        </button>
+                      </div>
                     }
                   </div>
-                </div>
+
+                  <div class="min-w-0 rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
+                    <div class="flex items-center gap-2 mb-3">
+                      <span class="material-symbols-outlined text-[18px] text-[#4255FF]">task_alt</span>
+                      <span class="text-[11px] font-black uppercase tracking-[0.14em] text-[#4255FF]/60">
+                        Correct Answer
+                      </span>
+                    </div>
+
+                    <div class="flex flex-col gap-2">
+                      @for (ans of q.correctAnswers; track ans) {
+                        <div
+                          class="flex items-center gap-3 rounded-xl border border-green-200 bg-white px-3 py-2 text-[12px] font-bold text-gray-800"
+                        >
+                          <span
+                            class="material-symbols-outlined text-[18px] text-green-600"
+                            style="font-variation-settings: 'FILL' 1"
+                            >check_circle</span
+                          >
+                          <span>{{ ans }}</span>
+                        </div>
+                      }
+                    </div>
+
+                    @if (q.explanation) {
+                      <div class="mt-3">
+                        <button
+                          (click)="toggleListExplanation(q.id)"
+                          class="flex w-full items-start gap-2 rounded-xl border px-3 py-2 text-left text-[11px] cursor-pointer transition-all"
+                          [class]="expandedExplanations().has(q.id) ? 'bg-blue-50 border-blue-300 text-blue-900' : 'bg-white border-blue-100 text-[#4255FF]/60 hover:border-blue-300 hover:text-blue-500'"
+                        >
+                          <span
+                            class="material-symbols-outlined text-[14px] shrink-0"
+                            [class.text-blue-500]="expandedExplanations().has(q.id)"
+                            [style.font-variation-settings]="expandedExplanations().has(q.id) ? '\'FILL\' 1' : ''"
+                            >school</span
+                          >
+                          <span class="flex-1 min-w-0">
+                            @if (expandedExplanations().has(q.id)) {
+                              <span class="block font-medium leading-relaxed text-[12px] italic animate-in fade-in duration-200">
+                                {{ q.explanation }}
+                              </span>
+                            } @else {
+                              <span class="font-black uppercase tracking-wider text-[9px]">Explanation</span>
+                            }
+                          </span>
+                        </button>
+                      </div>
+                    }
+                  </div>
               </div>
             </div>
           }

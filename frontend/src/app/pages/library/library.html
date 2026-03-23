@@ -173,48 +173,51 @@
             <span class="terms-badge z-10">{{ deck.questionCount }} TERMS</span>
           </div>
           <div class="quiz-info">
-            <div class="quiz-badges">
+            <div class="quiz-header">
               <span class="visibility-badge" [class.private]="deck.visibility === 'Private'" [class.shared]="deck.visibility === 'Shared'">
                 <span class="material-symbols-outlined">{{ deck.visibility === 'Private' ? 'lock' : deck.visibility === 'Shared' ? 'group' : 'public' }}</span>
                 {{ deck.visibility }}
               </span>
-              @for (tag of deck.tags | slice:0:2; track tag) {
-              <span class="tag-badge">{{ tag }}</span>
-              }
-              @if (deck.tags.length > 2) {
-              <span class="tag-badge extra">+{{ deck.tags.length - 2 }}</span>
-              }
             </div>
 
             <h3 class="quiz-title">{{ deck.name }}</h3>
-            <p class="quiz-desc" [title]="deck.description">{{ deck.description }}</p>
 
-            <!-- Rating -->
-            <div class="deck-rating">
-              @if (deck.totalRatings) {
-              <span class="material-symbols-outlined star-icon">star</span>
-              <span class="rating-val">{{ (deck.averageRating ?? 0).toFixed(1) }}</span>
-              <span class="rating-count">({{ deck.totalRatings }})</span>
-              } @else {
-              <span class="text-[12px] text-gray-400">No ratings yet</span>
+            <div class="quiz-tags">
+              @for (tag of deck.tags | slice:0:3; track tag) {
+              <span class="tag-badge">{{ tag }}</span>
+              }
+              @if (deck.tags.length > 3) {
+              <span class="tag-badge extra">+{{ deck.tags.length - 3 }}</span>
+              }
+              @if (deck.tags.length === 0) {
+              <span class="no-tags">No tags</span>
               }
             </div>
 
-            <p class="quiz-date">{{ deck.createdAt | date:'dd/MM/yyyy' }}</p>
-
             <div class="quiz-footer">
-              <span class="text-[12px] text-gray-400 font-medium">{{ deck.questionCount }} questions</span>
-              <div class="quiz-actions">
-                @if (activeTab() !== 'shared') {
-                <button class="action-btn edit" (click)="$event.stopPropagation()" [routerLink]="['/edit-deck', deck.id]">
-                  <span class="material-symbols-outlined">edit</span>
-                  Edit
-                </button>
+              <!-- Rating -->
+              <div class="deck-rating">
+                <span class="material-symbols-outlined star-icon">star</span>
+                <span class="rating-val">{{ (deck.averageRating ?? 0).toFixed(1) }}</span>
+                @if (deck.totalRatings) {
+                <span class="rating-count">({{ deck.totalRatings }})</span>
                 }
+              </div>
+
+              <!-- Action Button -->
+              <div class="quiz-actions">
                 @if (deck.status === 'Published') {
                 <button class="action-btn study" (click)="$event.stopPropagation()" [routerLink]="['/deck', deck.id]">
                   <span class="material-symbols-outlined">play_arrow</span>
                   Study
+                </button>
+                } @else if (activeTab() === 'drafts') {
+                <button class="action-btn delete" (click)="$event.stopPropagation(); deleteDeck(deck)">
+                  <span class="material-symbols-outlined">delete</span>
+                </button>
+                <button class="action-btn edit" (click)="$event.stopPropagation()" [routerLink]="['/edit-deck', deck.id]">
+                  <span class="material-symbols-outlined">edit</span>
+                  Edit
                 </button>
                 }
               </div>

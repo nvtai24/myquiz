@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 import { DeckService } from '../../services/deck.service';
 import { DeckSummaryResponse } from '../../models/deck.models';
 import { PaginationMeta } from '../../models/api.models';
+import Swal from 'sweetalert2';
 
 const DECK_COLORS = ['#7c3aed', '#4255FF', '#059669', '#64748b', '#dc2626', '#d97706', '#0891b2'];
 const DECK_ICONS = ['style', 'code', 'api', 'webhook', 'school', 'menu_book', 'quiz'];
@@ -223,5 +224,35 @@ export class Library implements OnInit {
       this.currentPage.set(page);
       this.loadDecks();
     }
+  }
+
+  deleteDeck(deck: DeckSummaryResponse) {
+    Swal.fire({
+      title: 'Delete Draft',
+      text: `Are you sure you want to delete "${deck.name}"? This action cannot be undone.`,
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444',
+      cancelButtonColor: '#9ca3af',
+      confirmButtonText: 'Yes, delete it',
+      cancelButtonText: 'Cancel'
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.deckService.deleteDeck(deck.id).subscribe({
+          next: (res) => {
+            if (res.success) {
+              Swal.fire('Deleted!', 'Your draft has been deleted.', 'success');
+              this.loadDecks();
+              this.loadAllCounts();
+            } else {
+              Swal.fire('Error', res.message || 'Failed to delete deck', 'error');
+            }
+          },
+          error: (err) => {
+            Swal.fire('Error', err.error?.message || 'An error occurred while deleting', 'error');
+          }
+        });
+      }
+    });
   }
 }

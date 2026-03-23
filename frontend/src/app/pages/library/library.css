@@ -447,6 +447,27 @@
   flex-direction: column;
 }
 
+.quiz-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.quiz-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+  min-height: 24px;
+}
+
+.no-tags {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-style: italic;
+}
+
 .quiz-badges {
   display: flex;
   align-items: center;
@@ -565,21 +586,21 @@
 .deck-rating {
   display: flex;
   align-items: center;
-  gap: 3px;
-  margin-bottom: 4px;
+  gap: 4px;
 }
 .star-icon {
-  font-size: 15px;
+  font-size: 18px;
   color: #f59e0b;
 }
 .deck-rating .rating-val {
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 700;
   color: #1e1e2f;
 }
 .deck-rating .rating-count {
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   color: #9ca3af;
+  margin-left: 2px;
 }
 
 /* Active Filters Bar */
@@ -681,6 +702,17 @@
 }
 .action-btn.study:hover {
   background: #3345dd;
+}
+
+.action-btn.delete {
+  background: #fff;
+  color: #ef4444;
+  border: 1.5px solid #fecaca;
+  padding: 6px 10px;
+}
+.action-btn.delete:hover {
+  background: #fef2f2;
+  border-color: #ef4444;
 }
 
 /* Legacy buttons - kept for backwards compatibility */

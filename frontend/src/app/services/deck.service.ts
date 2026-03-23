@@ -117,6 +117,10 @@ export class DeckService {
     return this.http.post<ApiResponse<GeneratedDeckResponse>>(`${this.endpoint}/generate`, formData);
   }
 
+  deleteDeck(id: string): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(`${this.endpoint}/${id}`);
+  }
+
   invite(id: string, email: string): Observable<ApiResponse<string>> {
     return this.http.post<ApiResponse<string>>(`${this.endpoint}/${id}/invite`, { email });
   }

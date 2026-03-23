@@ -1,6 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, RouterModule } from '@angular/router';
 import { DeckService } from '../../services/deck.service';
 
 @Component({
@@ -53,7 +53,6 @@ import { DeckService } from '../../services/deck.service';
 })
 export class AcceptInvite implements OnInit {
   private route = inject(ActivatedRoute);
-  private router = inject(Router);
   private deckService = inject(DeckService);
 
   status = signal<'loading' | 'success' | 'error'>('loading');
@@ -64,17 +63,27 @@ export class AcceptInvite implements OnInit {
       const token = params.get('token');
       if (!token) {
         this.status.set('error');
-        this.errorMessage.set('Không tìm thấy mã mời hợp lệ chặn trong đường dẫn.');
+        this.errorMessage.set('Khong tim thay token loi moi hop le trong duong dan.');
         return;
       }
 
       this.deckService.acceptInvite(token).subscribe({
-        next: () => {
-          this.status.set('success');
+        next: (res) => {
+          if (res?.success) {
+            this.status.set('success');
+            return;
+          }
+
+          this.status.set('error');
+          this.errorMessage.set(
+            res?.message || 'Khong the chap nhan loi moi. Hay kiem tra lai tai khoan dang nhap.'
+          );
         },
         error: (err) => {
           this.status.set('error');
-          this.errorMessage.set(err?.error?.message || 'Đã xảy ra lỗi khi xác nhận lời mời.');
+          this.errorMessage.set(
+            err?.error?.message || 'Da xay ra loi khi xac nhan loi moi.'
+          );
         }
       });
     });

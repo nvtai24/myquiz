@@ -50,6 +50,7 @@ export const routes: Routes = [
       { path: 'learn/:id', loadComponent: () => import('./pages/learn/learn').then(m => m.Learn) },
       { path: 'quiz-result/:id', loadComponent: () => import('./pages/quiz-result/quiz-result').then(m => m.QuizResult) },
       { path: 'history', loadComponent: () => import('./pages/quiz-history/quiz-history').then(m => m.QuizHistory) },
+      { path: 'accept-invitation', loadComponent: () => import('./pages/accept-invite/accept-invite').then(m => m.AcceptInvite) },
       { path: 'invite/accept', loadComponent: () => import('./pages/accept-invite/accept-invite').then(m => m.AcceptInvite) },
       { path: 'profile', loadComponent: () => import('./pages/user-profile/user-profile').then(m => m.UserProfile) },
       { path: 'subscription', loadComponent: () => import('./pages/subscription-settings/subscription-settings').then(m => m.SubscriptionSettings) },

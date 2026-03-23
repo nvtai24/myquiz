@@ -3,7 +3,7 @@ import { AfterViewInit, Component, ElementRef, inject, OnDestroy, OnInit, PLATFO
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '../../services/auth.service';
 import { GoogleAuthService } from '../../services/google-auth.service';
-import { Router, RouterModule } from '@angular/router';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { finalize, Subscription } from 'rxjs';
 
 @Component({
@@ -15,6 +15,7 @@ import { finalize, Subscription } from 'rxjs';
 export class Login implements OnInit, AfterViewInit, OnDestroy {
   private authService = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   private googleAuthService = inject(GoogleAuthService);
   private platformId = inject(PLATFORM_ID);
   private valueChangesSub?: Subscription;
@@ -23,6 +24,11 @@ export class Login implements OnInit, AfterViewInit, OnDestroy {
   @ViewChild('googleBtnContainer') googleBtnContainer!: ElementRef<HTMLDivElement>;
 
   private readonly REMEMBER_KEY = 'myquiz_remember_email';
+
+  private get redirectUrl(): string {
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+    return returnUrl && returnUrl.startsWith('/') ? returnUrl : '/dashboard';
+  }
 
   ngOnInit() {
     this.loadRememberedEmail();
@@ -79,7 +85,7 @@ export class Login implements OnInit, AfterViewInit, OnDestroy {
       .pipe(finalize(() => this.isLoading.set(false)))
       .subscribe({
         next: () => {
-          this.router.navigate(['/dashboard']);
+          this.router.navigateByUrl(this.redirectUrl);
         },
         error: (err) => {
           this.errorMessage.set(err.error?.message || 'Google Login failed. Please try again.');
@@ -134,7 +140,7 @@ export class Login implements OnInit, AfterViewInit, OnDestroy {
       .subscribe({
         next: () => {
           this.saveOrClearRememberedEmail();
-          this.router.navigate(['/dashboard']);
+          this.router.navigateByUrl(this.redirectUrl);
         },
         error: (err) => {
           this.errorMessage.set(err.error?.message || 'Login failed. Please check your email and password.');

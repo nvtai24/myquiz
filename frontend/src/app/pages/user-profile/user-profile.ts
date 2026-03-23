@@ -2,10 +2,12 @@ import { Component, OnInit, inject, signal, computed } from '@angular/core';
 import { RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { HttpClient } from '@angular/common/http';
 import { AuthService } from '../../services/auth.service';
 import { PaymentService } from '../../services/payment.service';
 import { UserSubscriptionResponse } from '../../models/payment.models';
-import { HttpClient } from '@angular/common/http';
+import { ProfileResponse } from '../../models/profile.models';
+import { ApiResponse } from '../../models/api.models';
 
 @Component({
   selector: 'app-user-profile',
@@ -24,11 +26,16 @@ export class UserProfile implements OnInit {
   loadingSubscription = signal(true);
   subscriptionError = signal(false);
 
+  // Profile data
+  profile = signal<ProfileResponse | null>(null);
+  loadingProfile = signal(true);
+
   // Form state
   firstName = signal('');
   lastName = signal('');
   email = signal('');
   avatarUrl = signal<string | null>(null);
+  avatarFile = signal<File | null>(null);
 
   // Password state
   currentPassword = signal('');
@@ -78,6 +85,12 @@ export class UserProfile implements OnInit {
   }
 
   get displayName(): string {
+    const p = this.profile();
+    if (p) {
+      const first = p.firstName?.trim() ?? '';
+      const last = p.lastName?.trim() ?? '';
+      return [first, last].filter(Boolean).join(' ') || p.email;
+    }
     const u = this.currentUser();
     if (!u) return '';
     const first = u.firstName?.trim() ?? '';
@@ -85,13 +98,34 @@ export class UserProfile implements OnInit {
     return [first, last].filter(Boolean).join(' ') || u.email;
   }
 
-  get primaryRole(): string {
-    const u = this.currentUser();
-    if (!u || !u.roles?.length) return 'USER';
-    return u.roles[0].toUpperCase();
+  get badgeLabel(): string {
+    const p = this.profile();
+    const roles = p?.roles ?? this.currentUser()?.roles ?? [];
+
+    if (roles.some(r => r.toLowerCase() === 'admin')) {
+      return 'ADMIN';
+    }
+
+    if (p?.currentPlan) {
+      return p.currentPlan.toUpperCase();
+    }
+
+    return 'FREE';
+  }
+
+  get isAdmin(): boolean {
+    const p = this.profile();
+    const roles = p?.roles ?? this.currentUser()?.roles ?? [];
+    return roles.some(r => r.toLowerCase() === 'admin');
+  }
+
+  get userEmail(): string {
+    return this.profile()?.email ?? this.currentUser()?.email ?? '';
   }
 
   ngOnInit(): void {
+    this.loadProfile();
+
     this.paymentService.getMySubscription().subscribe({
       next: (data) => {
         this.subscription.set(data);
@@ -102,14 +136,32 @@ export class UserProfile implements OnInit {
         this.subscriptionError.set(true);
       }
     });
+  }
 
-    // Initialize form values
-    const u = this.currentUser();
-    if (u) {
-      this.firstName.set(u.firstName ?? '');
-      this.lastName.set(u.lastName ?? '');
-      this.email.set(u.email ?? '');
-    }
+  loadProfile(): void {
+    this.loadingProfile.set(true);
+    this.http.get<ApiResponse<ProfileResponse>>('/api/profile').subscribe({
+      next: (res) => {
+        const data = res.data;
+        if (data) {
+          this.profile.set(data);
+          this.firstName.set(data.firstName ?? '');
+          this.lastName.set(data.lastName ?? '');
+          this.email.set(data.email ?? '');
+          this.avatarUrl.set(data.avatarUrl ?? null);
+        }
+        this.loadingProfile.set(false);
+      },
+      error: () => {
+        this.loadingProfile.set(false);
+        const u = this.currentUser();
+        if (u) {
+          this.firstName.set(u.firstName ?? '');
+          this.lastName.set(u.lastName ?? '');
+          this.email.set(u.email ?? '');
+        }
+      }
+    });
   }
 
   formatDate(dateStr: string): string {
@@ -120,12 +172,13 @@ export class UserProfile implements OnInit {
   toggleEditMode() {
     this.editMode.update(v => !v);
     if (!this.editMode()) {
-      // Reset form values when canceling
-      const u = this.currentUser();
-      if (u) {
-        this.firstName.set(u.firstName ?? '');
-        this.lastName.set(u.lastName ?? '');
-        this.email.set(u.email ?? '');
+      const p = this.profile();
+      if (p) {
+        this.firstName.set(p.firstName ?? '');
+        this.lastName.set(p.lastName ?? '');
+        this.email.set(p.email ?? '');
+        this.avatarUrl.set(p.avatarUrl ?? null);
+        this.avatarFile.set(null);
       }
     }
   }
@@ -134,6 +187,7 @@ export class UserProfile implements OnInit {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
     if (file && file.type.startsWith('image/')) {
+      this.avatarFile.set(file);
       const reader = new FileReader();
       reader.onload = () => this.avatarUrl.set(reader.result as string);
       reader.readAsDataURL(file);
@@ -142,19 +196,41 @@ export class UserProfile implements OnInit {
 
   removeAvatar() {
     this.avatarUrl.set(null);
+    this.avatarFile.set(null);
   }
 
   saveChanges() {
     this.saveSuccess.set(null);
     this.saveError.set(null);
     this.saving.set(true);
-    // Profile update not yet in backend – just show success for now
-    setTimeout(() => {
-      this.saving.set(false);
-      this.saveSuccess.set('Thông tin đã được lưu thành công!');
-      this.editMode.set(false);
-      setTimeout(() => this.saveSuccess.set(null), 3000);
-    }, 600);
+
+    const formData = new FormData();
+    formData.append('FirstName', this.firstName());
+    formData.append('LastName', this.lastName());
+
+    const avatarFile = this.avatarFile();
+    if (avatarFile) {
+      formData.append('avatar', avatarFile);
+    }
+
+    this.http.put<ApiResponse<ProfileResponse>>('/api/profile', formData).subscribe({
+      next: (res) => {
+        if (res.data) {
+          this.profile.set(res.data);
+          this.avatarUrl.set(res.data.avatarUrl ?? null);
+        }
+        this.avatarFile.set(null);
+        this.saving.set(false);
+        this.saveSuccess.set('Thông tin đã được lưu thành công!');
+        this.editMode.set(false);
+        setTimeout(() => this.saveSuccess.set(null), 3000);
+      },
+      error: (err) => {
+        this.saving.set(false);
+        this.saveError.set(err?.error?.message ?? 'Không thể cập nhật thông tin.');
+        setTimeout(() => this.saveError.set(null), 3000);
+      }
+    });
   }
 
   togglePasswordSection() {
@@ -190,8 +266,7 @@ export class UserProfile implements OnInit {
     this.changingPassword.set(true);
     this.http.post('/api/Auth/change-password', {
       currentPassword: this.currentPassword(),
-      newPassword: this.newPassword(),
-      confirmNewPassword: this.confirmPassword()
+      newPassword: this.newPassword()
     }).subscribe({
       next: () => {
         this.changingPassword.set(false);
@@ -211,8 +286,33 @@ export class UserProfile implements OnInit {
     });
   }
 
+  // Forgot password state
+  sendingForgotPassword = signal(false);
+  forgotPasswordSuccess = signal<string | null>(null);
+  forgotPasswordError = signal<string | null>(null);
+
   forgotPassword() {
-    // Placeholder - will integrate with API later
-    alert('Chức năng quên mật khẩu sẽ được tích hợp sau.');
+    const email = this.userEmail;
+    if (!email) {
+      this.forgotPasswordError.set('Không tìm thấy email.');
+      return;
+    }
+
+    this.sendingForgotPassword.set(true);
+    this.forgotPasswordSuccess.set(null);
+    this.forgotPasswordError.set(null);
+
+    this.http.post('/api/Auth/forgot-password', { email }).subscribe({
+      next: () => {
+        this.sendingForgotPassword.set(false);
+        this.forgotPasswordSuccess.set('Email đặt lại mật khẩu đã được gửi. Vui lòng kiểm tra hộp thư.');
+        setTimeout(() => this.forgotPasswordSuccess.set(null), 5000);
+      },
+      error: (err) => {
+        this.sendingForgotPassword.set(false);
+        this.forgotPasswordError.set(err?.error?.message ?? 'Không thể gửi email đặt lại mật khẩu.');
+        setTimeout(() => this.forgotPasswordError.set(null), 5000);
+      }
+    });
   }
 }

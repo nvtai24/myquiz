@@ -112,6 +112,11 @@
   letter-spacing: 0.06em;
 }
 
+.role-badge.admin {
+  color: #dc2626;
+  background: #fef2f2;
+}
+
 .user-email {
   font-size: 0.82rem;
   color: #9ca3af;
@@ -328,15 +333,15 @@
 /* ===== Security Section ===== */
 .security-actions {
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  flex-direction: row;
+  gap: 16px;
 }
 
 .btn-security {
   display: flex;
   align-items: center;
-  gap: 16px;
-  width: 100%;
+  gap: 12px;
+  flex: 1;
   padding: 16px 20px;
   background: #f9fafb;
   border: 1px solid #e5e7eb;
@@ -351,13 +356,17 @@
   background: #f0f1ff;
 }
 
+.btn-security:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .btn-security > .material-symbols-outlined {
   font-size: 24px;
   color: #4255FF;
 }
 
 .btn-security-text {
-  flex: 1;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -371,11 +380,6 @@
 
 .btn-security-desc {
   font-size: 0.78rem;
-  color: #9ca3af;
-}
-
-.btn-security .arrow {
-  font-size: 20px;
   color: #9ca3af;
 }
 

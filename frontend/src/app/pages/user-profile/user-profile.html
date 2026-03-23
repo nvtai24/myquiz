@@ -31,9 +31,9 @@
       <div class="hero-info">
         <div class="name-row">
           <h1 class="user-name">{{ displayName }}</h1>
-          <span class="role-badge">{{ primaryRole }}</span>
+          <span class="role-badge" [class.admin]="isAdmin">{{ badgeLabel }}</span>
         </div>
-        <p class="user-email">{{ currentUser()?.email }}</p>
+        <p class="user-email">{{ userEmail }}</p>
       </div>
     </div>
     <div class="hero-actions">
@@ -88,16 +88,29 @@
       </div>
     } @else {
       <!-- View Mode -->
-      <div class="info-grid">
-        <div class="info-item">
-          <span class="info-label">Họ và tên</span>
-          <span class="info-value">{{ displayName || '–' }}</span>
+      @if (loadingProfile()) {
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Họ và tên</span>
+            <div class="skeleton-line" style="width: 150px;"></div>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Email</span>
+            <div class="skeleton-line" style="width: 200px;"></div>
+          </div>
         </div>
-        <div class="info-item">
-          <span class="info-label">Email</span>
-          <span class="info-value">{{ currentUser()?.email || '–' }}</span>
+      } @else {
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Họ và tên</span>
+            <span class="info-value">{{ displayName || '–' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Email</span>
+            <span class="info-value">{{ userEmail || '–' }}</span>
+          </div>
         </div>
-      </div>
+      }
     }
   </div>
 
@@ -114,18 +127,34 @@
           <span class="btn-security-title">Đổi mật khẩu</span>
           <span class="btn-security-desc">Cập nhật mật khẩu của bạn</span>
         </div>
-        <span class="material-symbols-outlined arrow">{{ showPasswordSection() ? 'expand_less' : 'expand_more' }}</span>
       </button>
 
-      <button class="btn-security" (click)="forgotPassword()">
-        <span class="material-symbols-outlined">help</span>
+      <button class="btn-security" (click)="forgotPassword()" [disabled]="sendingForgotPassword()">
+        @if (sendingForgotPassword()) {
+          <span class="material-symbols-outlined spin">progress_activity</span>
+        } @else {
+          <span class="material-symbols-outlined">help</span>
+        }
         <div class="btn-security-text">
           <span class="btn-security-title">Quên mật khẩu</span>
           <span class="btn-security-desc">Đặt lại mật khẩu qua email</span>
         </div>
-        <span class="material-symbols-outlined arrow">chevron_right</span>
       </button>
     </div>
+
+    <!-- Forgot Password Messages -->
+    @if (forgotPasswordSuccess()) {
+      <div class="toast success inline-toast" style="margin-top: 16px;">
+        <span class="material-symbols-outlined">check_circle</span>
+        {{ forgotPasswordSuccess() }}
+      </div>
+    }
+    @if (forgotPasswordError()) {
+      <div class="toast error inline-toast" style="margin-top: 16px;">
+        <span class="material-symbols-outlined">error</span>
+        {{ forgotPasswordError() }}
+      </div>
+    }
 
     <!-- Change Password Form -->
     @if (showPasswordSection()) {

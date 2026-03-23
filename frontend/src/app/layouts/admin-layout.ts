@@ -42,7 +42,7 @@ export class AdminLayout implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.checkStatus();
-    this.pingInterval = setInterval(() => this.checkStatus(), 60000); // Check every 60 seconds
+    this.pingInterval = setInterval(() => this.checkStatus(), 60000 * 14); // Check every 14 minutes
   }
 
   ngOnDestroy() {

@@ -18,7 +18,7 @@ const DECK_ICONS = ['style', 'code', 'api', 'webhook', 'school', 'menu_book', 'q
 export class Library implements OnInit {
   private deckService = inject(DeckService);
 
-  activeTab = signal<'all' | 'created' | 'studying'>('all');
+  activeTab = signal<'all' | 'drafts' | 'published'>('all');
   searchQuery = signal('');
   sortBy = signal('recent');
   isSortOpen = signal(false);
@@ -79,6 +79,13 @@ export class Library implements OnInit {
   get filteredSets(): DeckSummaryResponse[] {
     let decks = this.allDecks() || [];
 
+    // Filter by tab (Drafts vs Published)
+    if (this.activeTab() === 'drafts') {
+      decks = decks.filter(d => d.status === 'Draft');
+    } else if (this.activeTab() === 'published') {
+      decks = decks.filter(d => d.status === 'Published');
+    }
+
     // Search by name/description/tags
     if (this.searchQuery()) {
       const q = this.searchQuery().toLowerCase();
@@ -130,7 +137,7 @@ export class Library implements OnInit {
       this.sortBy() !== 'recent';
   }
 
-  setTab(tab: 'all' | 'created' | 'studying') {
+  setTab(tab: 'all' | 'drafts' | 'published') {
     this.activeTab.set(tab);
     this.currentPage.set(1);
   }

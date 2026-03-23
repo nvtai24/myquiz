@@ -9,6 +9,7 @@ import {
   CreatePaymentOrderRequest,
   PaymentOrderResponse
 } from '../models/payment.models';
+import { LimitAiGenerateResponse } from '../models/deck.models';
 
 @Injectable({
   providedIn: 'root'
@@ -28,6 +29,12 @@ export class PaymentService {
       .get<ApiResponse<UserSubscriptionResponse>>(`${this.baseUrl}/payments/my-subscription`)
       .pipe(map(res => res.data ?? null));
   }
+  
+  getMySubscriptionLimit(): Observable<LimitAiGenerateResponse | null> {
+    return this.http
+      .get<ApiResponse<LimitAiGenerateResponse>>(`${this.baseUrl}/Quota`)
+      .pipe(map(res => res.data ?? null));
+  } 
 
   createOrder(planId: string): Observable<PaymentOrderResponse> {
     const body: CreatePaymentOrderRequest = { subscriptionPlanId: planId };

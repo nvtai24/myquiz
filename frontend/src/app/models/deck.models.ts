@@ -103,3 +103,13 @@ export interface CreateDeckRatingRequest {
   rating: number;
   comment?: string;
 }
+
+export interface LimitAiGenerateResponse {
+  planName: string;
+  dailyGenerateLimit: number;
+  dailyGenerateUsed: number;
+  dailyGenerateRemaining: number;
+  numDeckLimit: number;
+  numDeckUsed: number;
+  numDeckRemaining: number;
+}

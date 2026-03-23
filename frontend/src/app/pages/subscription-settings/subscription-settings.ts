@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { PaymentService } from '../../services/payment.service';
 import { SubscriptionPlanResponse, UserSubscriptionResponse, PaymentOrderResponse } from '../../models/payment.models';
+import { forkJoin } from 'rxjs';
 
 @Component({
   selector: 'app-subscription-settings',
@@ -29,26 +30,24 @@ export class SubscriptionSettings implements OnInit {
   copySuccess = signal(false);
 
   ngOnInit(): void {
-    this.paymentService.getSubscriptionPlans().subscribe({
-      next: (data) => {
-        this.plans.set(data.sort((a, b) => a.order - b.order));
-        this.loadingPlans.set(false);
-      },
-      error: () => {
-        this.loadingPlans.set(false);
-        this.plansError.set(true);
-      }
-    });
-
-    this.paymentService.getMySubscription().subscribe({
-      next: (data) => {
-        this.mySubscription.set(data);
-        this.loadingSubscription.set(false);
-      },
-      error: () => {
-        this.loadingSubscription.set(false);
-      }
-    });
+    forkJoin({
+      plans: this.paymentService.getSubscriptionPlans(),
+      mySubscription:this.paymentService.getMySubscription()
+       }).subscribe({
+        next: ({plans ,mySubscription }) => {
+          this.mySubscription.set(mySubscription);
+          this.loadingPlans.set(false);
+          this.loadingSubscription.set(false);
+          const sorted = plans.sort((a, b) => a.order - b.order);
+          const currentOrder = (mySubscription?.isExpired || !mySubscription)?  0 : sorted.find(plan => plan.name === mySubscription?.planName)?.order || 0;
+          this.plans.set(sorted.filter(plan => plan.order >= currentOrder));
+        },
+        error: () => {
+          this.loadingPlans.set(false);
+          this.loadingSubscription.set(false);
+          this.plansError.set(true);
+        }
+      })
   }
 
   isCurrentPlan(plan: SubscriptionPlanResponse): boolean {
@@ -110,7 +109,7 @@ export class SubscriptionSettings implements OnInit {
   }
 
   formatPlanPrice(plan: SubscriptionPlanResponse): string {
-    if (plan.price === 0) return 'Miễn phí';
+    if (plan.price === 0) return 'Free';
     return plan.price.toLocaleString('vi-VN') + ' đ';
   }
 }

@@ -2,7 +2,9 @@
   <!-- Hero Top Bar -->
   <div class="sticky top-0 z-10 flex items-center justify-between pb-5 mb-5 bg-transparent pt-2">
     <div class="flex items-center gap-3.5">
-      <button class="w-10 h-10 rounded-xl border border-gray-200 bg-white text-gray-500 flex items-center justify-center cursor-pointer transition-all hover:bg-gray-100 hover:text-gray-900 hover:border-gray-300" (click)="cancel()">
+      <button
+        class="w-10 h-10 rounded-xl border border-gray-200 bg-white text-gray-500 flex items-center justify-center cursor-pointer transition-all hover:bg-gray-100 hover:text-gray-900 hover:border-gray-300"
+        (click)="cancel()">
         <span class="material-symbols-outlined">arrow_back</span>
       </button>
       <div class="flex flex-col">
@@ -15,9 +17,10 @@
       </div>
     </div>
     <div class="flex items-center gap-3">
-      <button class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-semibold cursor-pointer transition-all border"
-              [class]="visibility() === 'private' ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100' : 'bg-green-50 text-green-600 border-green-200 hover:bg-green-100'"
-              (click)="toggleVisibility()">
+      <button
+        class="flex items-center gap-1.5 px-4 py-2 rounded-xl text-[13px] font-semibold cursor-pointer transition-all border"
+        [class]="visibility() === 'private' ? 'bg-red-50 text-red-600 border-red-200 hover:bg-red-100' : 'bg-green-50 text-green-600 border-green-200 hover:bg-green-100'"
+        (click)="toggleVisibility()">
         <span class="material-symbols-outlined text-[16px]">{{ visibility() === 'private' ? 'lock' : 'public' }}</span>
         {{ visibility() === 'private' ? 'Private' : 'Public' }}
       </button>
@@ -25,34 +28,58 @@
         <span class="material-symbols-outlined text-[16px]">style</span>
         {{ cards().length }} Cards
       </span>
-      <button class="flex items-center gap-1.5 bg-white border border-gray-200 text-[13px] font-semibold cursor-pointer px-5 py-2.5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              [class]="canSaveDraft ? 'text-[#141118] hover:bg-gray-50 hover:border-gray-300' : 'text-gray-400'"
-              (click)="saveDraft()" [disabled]="savingDraft()">
+      <button
+        class="flex items-center gap-1.5 bg-white border border-gray-200 text-[13px] font-semibold cursor-pointer px-5 py-2.5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        [class]="canSaveDraft ? 'text-[#141118] hover:bg-gray-50 hover:border-gray-300' : 'text-gray-400'"
+        (click)="saveDraft()" [disabled]="savingDraft()">
         @if (savingDraft()) {
-          <span class="material-symbols-outlined text-[17px] animate-spin">progress_activity</span>
-          Saving...
+        <span class="material-symbols-outlined text-[17px] animate-spin">progress_activity</span>
+        Saving...
         } @else {
-          <span class="material-symbols-outlined text-[17px]">save</span>
-          Save draft
+        <span class="material-symbols-outlined text-[17px]">save</span>
+        Save draft
         }
       </button>
-      <button class="flex items-center gap-1.5 bg-gradient-to-r from-[#7C3AED] to-[#4255FF] border-none text-[13px] font-bold text-white cursor-pointer px-6 py-2.5 rounded-xl transition-all hover:shadow-[0_4px_16px_rgba(66,85,255,0.35)] hover:-translate-y-[1px] disabled:opacity-60 disabled:cursor-not-allowed" (click)="create()" [disabled]="creating()">
+      <button (click)="create()" [disabled]="creating() || checkLimit()" [class.bg-gradient-to-r]="!checkLimit()"
+        [class.from-[#7C3AED]]="!checkLimit()" [class.to-[#4255FF]]="!checkLimit()" [class.bg-white]="checkLimit()"
+        [class.text-gray-400]="checkLimit()" [class.border]="checkLimit()" [class.border-gray-300]="checkLimit()"
+        class="flex items-center gap-1.5 text-[13px] text-gray-300 font-bold px-6 py-2.5 rounded-xl transition-all hover:shadow-[0_4px_16px_rgba(66,85,255,0.35)] hover:-translate-y-[1px] disabled:opacity-60 disabled:cursor-not-allowed">
         @if (creating()) {
-          <span class="material-symbols-outlined text-[17px] animate-spin">progress_activity</span>
-          Publishing...
+        @if(checkLimit()){
+        <span class="material-symbols-outlined text-[17px] text-gray-400">publish</span>
+        Publish
         } @else {
-          <span class="material-symbols-outlined text-[17px]">publish</span>
-          Publish & Learn
+        <span class="material-symbols-outlined text-[17px] animate-spin">progress_activity</span>
+        Publishing...
+        }
+        } @else {
+        <span class="material-symbols-outlined text-[17px] text-gray-400">publish</span>
+        Publish
         }
       </button>
     </div>
   </div>
-
+  @if (mode() !=='ai') {
+  @if (checkLimit()) {
+  <div class="w-full mb-6 py-3 px-4 rounded-xl bg-red-50 border border-red-200 text-red-700 flex items-center gap-3">
+    <span class="material-symbols-outlined text-[24px]">block</span>
+    <div class="flex flex-col">
+      <span class="text-[14px] font-bold">Limit Reached</span>
+      <span class="text-[12px] font-medium mt-0.5">You have reached limit of create Decks. Upgrade your plan delete some
+        decks</span>
+    </div>
+    <a (click)="update()"
+      class="ml-auto px-4 py-2 bg-red-600 text-white text-[12px] font-bold rounded-lg cursor-pointer no-underline hover:bg-red-700">Upgrade
+      Plan</a>
+  </div>
+  }
+  }
   <!-- Mode Selector Cards -->
   <div class="grid grid-cols-2 gap-4 mb-6">
-    <button class="flex items-center gap-4 p-5 bg-white border-2 rounded-2xl cursor-pointer transition-all text-left relative"
-            [class]="mode() === 'manual' ? 'border-[#4255FF] bg-[#fafaff] shadow-md' : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'"
-            (click)="mode.set('manual')">
+    <button
+      class="flex items-center gap-4 p-5 bg-white border-2 rounded-2xl cursor-pointer transition-all text-left relative"
+      [class]="mode() === 'manual' ? 'border-[#4255FF] bg-[#fafaff] shadow-md' : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'"
+      (click)="mode.set('manual')">
       <div class="w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0 bg-[#eef0ff] text-[#4255FF]">
         <span class="material-symbols-outlined text-[24px]">edit_note</span>
       </div>
@@ -61,14 +88,16 @@
         <span class="text-[12px] text-[#726388] mt-0.5 font-medium">Write your own cards manually</span>
       </div>
       @if (mode() === 'manual') {
-        <span class="material-symbols-outlined text-[24px] text-[#4255FF] absolute right-5 top-1/2 -translate-y-1/2">check_circle</span>
+      <span
+        class="material-symbols-outlined text-[24px] text-[#4255FF] absolute right-5 top-1/2 -translate-y-1/2">check_circle</span>
       }
     </button>
-    <button class="flex items-center gap-4 p-5 bg-white border-2 rounded-2xl cursor-pointer transition-all text-left relative"
-            [class]="mode() === 'ai' ? 'border-[#4255FF] bg-[#fafaff] shadow-md' : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'"
-            (click)="mode.set('ai')">
+    <button
+      class="flex items-center gap-4 p-5 bg-white border-2 rounded-2xl cursor-pointer transition-all text-left relative"
+      [class]="mode() === 'ai' ? 'border-[#4255FF] bg-[#fafaff] shadow-md' : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'"
+      (click)="mode.set('ai')">
       <div class="w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0"
-           [class]="mode() === 'ai' ? 'bg-amber-100 text-amber-600' : 'bg-amber-50 text-amber-500'">
+        [class]="mode() === 'ai' ? 'bg-amber-100 text-amber-600' : 'bg-amber-50 text-amber-500'">
         <span class="material-symbols-outlined text-[24px]">auto_awesome</span>
       </div>
       <div class="flex flex-col flex-1">
@@ -76,7 +105,8 @@
         <span class="text-[12px] text-[#726388] mt-0.5 font-medium">Create from your materials instantly</span>
       </div>
       @if (mode() === 'ai') {
-        <span class="material-symbols-outlined text-[24px] text-[#4255FF] absolute right-5 top-1/2 -translate-y-1/2">check_circle</span>
+      <span
+        class="material-symbols-outlined text-[24px] text-[#4255FF] absolute right-5 top-1/2 -translate-y-1/2">check_circle</span>
       }
     </button>
   </div>
@@ -89,13 +119,10 @@
           <span class="material-symbols-outlined text-[16px]">title</span>
           TITLE
         </label>
-        <input
-          type="text"
+        <input type="text"
           class="border-none border-b-2 border-gray-200 py-3 text-[15px] text-[#141118] font-medium outline-none transition-colors bg-transparent placeholder-[#b0a3bf] focus:border-[#4255FF]"
-          placeholder="Enter a title, like 'Biology – Chapter 1'"
-          [ngModel]="title()"
-          (ngModelChange)="title.set($event)"
-        />
+          placeholder="Enter a title, like 'Biology – Chapter 1'" [ngModel]="title()"
+          (ngModelChange)="title.set($event)" />
       </div>
       <div class="flex flex-col gap-2">
         <label class="text-[11px] font-bold text-[#4255FF] tracking-widest flex items-center gap-1.5">
@@ -104,395 +131,394 @@
         </label>
         <textarea
           class="border-none border-b-2 border-gray-200 py-3 text-[15px] text-[#141118] outline-none resize-y transition-colors bg-transparent min-h-[70px] placeholder-[#b0a3bf] focus:border-[#4255FF]"
-          placeholder="Add a description..."
-          rows="2"
-          [ngModel]="description()"
-          (ngModelChange)="description.set($event)"
-        ></textarea>
+          placeholder="Add a description..." rows="2" [ngModel]="description()"
+          (ngModelChange)="description.set($event)"></textarea>
       </div>
     </div>
-    <div class="w-[200px] min-w-[200px] min-h-[160px] border-2 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all relative overflow-hidden bg-gray-50 hover:border-[#4255FF] hover:bg-[#f5f6ff]" (click)="coverInput.click()">
+    <div
+      class="w-[200px] min-w-[200px] min-h-[160px] border-2 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all relative overflow-hidden bg-gray-50 hover:border-[#4255FF] hover:bg-[#f5f6ff]"
+      (click)="coverInput.click()">
       @if (coverImage()) {
-        <img [src]="coverImage()" alt="Cover image" class="w-full h-full object-cover" />
-        <button class="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/60 border border-white/20 text-white flex items-center justify-center cursor-pointer transition-colors backdrop-blur-[2px] hover:bg-black/80" (click)="removeCoverImage(); $event.stopPropagation()">
-          <span class="material-symbols-outlined text-[16px]">close</span>
-        </button>
+      <img [src]="coverImage()" alt="Cover image" class="w-full h-full object-cover" />
+      <button
+        class="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/60 border border-white/20 text-white flex items-center justify-center cursor-pointer transition-colors backdrop-blur-[2px] hover:bg-black/80"
+        (click)="removeCoverImage(); $event.stopPropagation()">
+        <span class="material-symbols-outlined text-[16px]">close</span>
+      </button>
       } @else {
-        <div class="flex flex-col items-center gap-2 cursor-pointer p-4 text-center">
-          <span class="material-symbols-outlined text-[36px] text-gray-400">add_photo_alternate</span>
-          <span class="text-[14px] text-[#141118] font-bold m-0 leading-tight">Cover Image</span>
-          <span class="text-[11px] text-[#726388] font-medium">Click to upload</span>
-        </div>
+      <div class="flex flex-col items-center gap-2 cursor-pointer p-4 text-center">
+        <span class="material-symbols-outlined text-[36px] text-gray-400">add_photo_alternate</span>
+        <span class="text-[14px] text-[#141118] font-bold m-0 leading-tight">Cover Image</span>
+        <span class="text-[11px] text-[#726388] font-medium">Click to upload</span>
+      </div>
       }
-      <input
-        #coverInput
-        type="file"
-        accept="image/*"
-        hidden
-        (change)="onCoverImageSelect($event)"
-      />
+      <input #coverInput type="file" accept="image/*" hidden (change)="onCoverImageSelect($event)" />
     </div>
   </div>
 
   <!-- AI Generation Panel -->
   @if (mode() === 'ai') {
-    <div class="bg-white border border-gray-200 rounded-2xl p-7 mb-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)] relative overflow-hidden">
-      <!-- Gradient border top -->
-      <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#4255FF] via-purple-400 to-amber-500"></div>
-      
-      <div class="flex items-start gap-4 mb-6 mt-1">
-        <div class="w-12 h-12 rounded-[14px] bg-gradient-to-br from-[#4255FF] to-purple-500 text-white flex items-center justify-center shadow-md shrink-0">
-          <span class="material-symbols-outlined text-[28px]">auto_awesome</span>
-        </div>
-        <div>
-          <h3 class="text-xl font-bold text-[#141118] m-0">AI Card Generator</h3>
-          <p class="text-[13.5px] text-[#726388] mt-1 mb-0 font-medium">Upload study material or paste text — AI will create flashcards instantly</p>
-        </div>
-        
-        <div class="ml-auto text-right">
-          @if (aiLimitLoading()) {
-            <span class="text-[13px] text-gray-400 font-medium flex items-center gap-1">
-              <span class="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
-              Checking limit...
-            </span>
-          } @else if (aiUsageMax() > 0) {
-            <div class="bg-purple-50 px-3 py-1.5 rounded-lg border border-purple-100 flex flex-col items-end">
-              <span class="text-[11px] font-bold text-purple-600 uppercase">Daily Usage Limit</span>
-              <span class="text-[15px] font-black text-purple-900 leading-none mt-0.5">
-                {{ aiUsageCount() }}<span class="text-purple-400 text-[13px] font-bold">/{{ aiUsageMax() }}</span>
-              </span>
-            </div>
-          } @else {
-            <div class="bg-green-50 px-3 py-1.5 rounded-lg border border-green-100 flex flex-col items-end">
-              <span class="text-[11px] font-bold text-green-600 uppercase">Daily Usage Limit</span>
-              <span class="text-[15px] font-black text-green-900 leading-none mt-0.5">Unlimited</span>
-            </div>
-          }
-        </div>
+  <div
+    class="bg-white border border-gray-200 rounded-2xl p-7 mb-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)] relative overflow-hidden">
+    <!-- Gradient border top -->
+    <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#4255FF] via-purple-400 to-amber-500"></div>
+
+    <div class="flex items-start gap-4 mb-6 mt-1">
+      <div
+        class="w-12 h-12 rounded-[14px] bg-gradient-to-br from-[#4255FF] to-purple-500 text-white flex items-center justify-center shadow-md shrink-0">
+        <span class="material-symbols-outlined text-[28px]">auto_awesome</span>
+      </div>
+      <div>
+        <h3 class="text-xl font-bold text-[#141118] m-0">AI Card Generator</h3>
+        <p class="text-[13.5px] text-[#726388] mt-1 mb-0 font-medium">Upload study material or paste text — AI will
+          create flashcards instantly</p>
       </div>
 
-      <!-- Source Tabs -->
-      <div class="flex gap-2 border-b-2 border-gray-100 mb-6 pb-2">
-        <button class="flex items-center gap-2 py-2.5 px-5 bg-transparent border-none text-[13.5px] font-bold cursor-pointer rounded-lg transition-all"
-                [class]="aiSource() === 'upload' ? 'text-[#4255FF] bg-[#eef0ff]' : 'text-gray-500 hover:bg-gray-100'"
-                (click)="aiSource.set('upload')">
-          <span class="material-symbols-outlined text-[18px]">upload_file</span>
-          Upload File
-        </button>
-        <button class="flex items-center gap-2 py-2.5 px-5 bg-transparent border-none text-[13.5px] font-bold cursor-pointer rounded-lg transition-all"
-                [class]="aiSource() === 'paste' ? 'text-[#4255FF] bg-[#eef0ff]' : 'text-gray-500 hover:bg-gray-100'"
-                (click)="aiSource.set('paste')">
-          <span class="material-symbols-outlined text-[18px]">content_paste</span>
-          Paste Text
-        </button>
+      <div class="ml-auto text-right">
+        @if (aiLimitLoading()) {
+        <span class="text-[13px] text-gray-400 font-medium flex items-center gap-1">
+          <span class="material-symbols-outlined text-[16px] animate-spin">progress_activity</span>
+          Checking limit...
+        </span>
+        } @else if (aiUsageMax() > 0) {
+        <div class="bg-purple-50 px-3 py-1.5 rounded-lg border border-purple-100 flex flex-col items-end">
+          <span class="text-[11px] font-bold text-purple-600 uppercase">Daily Usage Limit</span>
+          <span class="text-[15px] font-black text-purple-900 leading-none mt-0.5">
+            {{ aiUsageCount() }}<span class="text-purple-400 text-[13px] font-bold">/{{ aiUsageMax() }}</span>
+          </span>
+        </div>
+        } @else {
+        <div class="bg-green-50 px-3 py-1.5 rounded-lg border border-green-100 flex flex-col items-end">
+          <span class="text-[11px] font-bold text-green-600 uppercase">Daily Usage Limit</span>
+          <span class="text-[15px] font-black text-green-900 leading-none mt-0.5">Unlimited</span>
+        </div>
+        }
       </div>
-
-      <!-- Upload Zone -->
-      @if (aiSource() === 'upload') {
-        <div class="border-2 border-dashed border-gray-300 rounded-2xl p-10 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all min-h-[200px] bg-white group hover:border-[#4255FF] hover:bg-[#f8f9ff]"
-             (dragover)="$event.preventDefault()"
-             (drop)="onAiFileDrop($event)"
-             (click)="aiFileInput.click()">
-          @if (aiFileName()) {
-            <div class="flex items-center gap-3 bg-white p-4 rounded-xl border border-gray-200 max-w-sm w-full mx-auto relative group shadow-sm">
-              <div class="w-10 h-10 rounded-lg bg-[#eef0ff] text-[#4255FF] flex items-center justify-center">
-                <span class="material-symbols-outlined">description</span>
-              </div>
-              <div class="flex flex-col overflow-hidden max-w-[200px]">
-                <span class="text-[13px] font-bold text-[#141118] truncate">{{ aiFileName() }}</span>
-                <span class="text-[11px] text-green-600 font-semibold mt-0.5">Ready for processing</span>
-              </div>
-              <button class="absolute top-1/2 -translate-y-1/2 right-3 w-8 h-8 rounded-full bg-white border border-gray-200 text-gray-500 flex items-center justify-center cursor-pointer transition-colors hover:bg-red-50 hover:text-red-500 hover:border-red-200" (click)="removeAiFile(); $event.stopPropagation()">
-                <span class="material-symbols-outlined text-[16px]">close</span>
-              </button>
-            </div>
-          } @else {
-            <div class="w-16 h-16 rounded-full bg-purple-50 text-indigo-500 flex items-center justify-center mb-2 transition-transform group-hover:-translate-y-1">
-              <span class="material-symbols-outlined text-[36px]">cloud_upload</span>
-            </div>
-            <p class="text-[15px] font-bold text-[#141118] m-0">Drag & drop your file here</p>
-            <p class="text-[13px] text-[#726388] m-0 font-medium">or</p>
-            <span class="mt-2 px-6 py-2.5 bg-white border border-gray-200 rounded-lg text-[13px] font-bold text-[#4255FF] shadow-sm transition-colors group-hover:border-[#4255FF]">Browse Files</span>
-            <span class="mt-4 text-[11px] text-gray-400 font-medium">PDF, DOCX, TXT, PPTX up to 25 MB</span>
-          }
-          <input #aiFileInput type="file" hidden accept=".pdf,.docx,.txt,.pptx" (change)="onAiFileSelect($event)" />
-        </div>
-      }
-
-      <!-- Paste Zone -->
-      @if (aiSource() === 'paste') {
-        <textarea
-          class="w-full min-h-[220px] p-5 border-2 border-gray-200 rounded-xl text-[14px] text-gray-900 outline-none resize-y transition-colors focus:border-[#4255FF] placeholder-gray-400 leading-relaxed font-sans"
-          rows="6"
-          placeholder="Paste your notes, textbook content, or any study material here..."
-          [ngModel]="aiPasteText()"
-          (ngModelChange)="aiPasteText.set($event)"
-        ></textarea>
-      }
-      <!-- Generate Button -->
-      @if (aiUsageMax() > 0 && aiUsageCount() >= aiUsageMax()) {
-        <div class="w-full mt-6 py-3 px-4 rounded-xl bg-red-50 border border-red-200 text-red-700 flex items-center gap-3">
-          <span class="material-symbols-outlined text-[24px]">block</span>
-          <div class="flex flex-col">
-            <span class="text-[14px] font-bold">Limit Reached</span>
-            <span class="text-[12px] font-medium mt-0.5">You have reached your daily limit of {{ aiUsageMax() }} requests. Upgrade your plan or try again tomorrow.</span>
-          </div>
-          <a routerLink="/subscription" class="ml-auto px-4 py-2 bg-red-600 text-white text-[12px] font-bold rounded-lg cursor-pointer no-underline hover:bg-red-700">Upgrade Plan</a>
-        </div>
-      } @else {
-        <button class="w-full mt-6 py-4 rounded-xl bg-gradient-to-r from-purple-600 to-[#4255FF] text-white font-bold text-[15px] border-none cursor-pointer flex justify-center items-center gap-2.5 transition-all shadow-md hover:shadow-lg hover:opacity-95 disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none" [disabled]="aiGenerating()" (click)="generateWithAi()">
-          @if (aiGenerating()) {
-            <span class="material-symbols-outlined animate-spin text-[22px]">progress_activity</span>
-            Generating your cards...
-          } @else {
-            <span class="material-symbols-outlined text-[22px]">auto_awesome</span>
-            Generate Cards with AI
-          }
-        </button>
-      }
     </div>
+
+    <!-- Source Tabs -->
+    <div class="flex gap-2 border-b-2 border-gray-100 mb-6 pb-2">
+      <button
+        class="flex items-center gap-2 py-2.5 px-5 bg-transparent border-none text-[13.5px] font-bold cursor-pointer rounded-lg transition-all"
+        [class]="aiSource() === 'upload' ? 'text-[#4255FF] bg-[#eef0ff]' : 'text-gray-500 hover:bg-gray-100'"
+        (click)="aiSource.set('upload')">
+        <span class="material-symbols-outlined text-[18px]">upload_file</span>
+        Upload File
+      </button>
+      <button
+        class="flex items-center gap-2 py-2.5 px-5 bg-transparent border-none text-[13.5px] font-bold cursor-pointer rounded-lg transition-all"
+        [class]="aiSource() === 'paste' ? 'text-[#4255FF] bg-[#eef0ff]' : 'text-gray-500 hover:bg-gray-100'"
+        (click)="aiSource.set('paste')">
+        <span class="material-symbols-outlined text-[18px]">content_paste</span>
+        Paste Text
+      </button>
+    </div>
+
+    <!-- Upload Zone -->
+    @if (aiSource() === 'upload') {
+    <div
+      class="border-2 border-dashed border-gray-300 rounded-2xl p-10 flex flex-col items-center justify-center gap-2 cursor-pointer transition-all min-h-[200px] bg-white group hover:border-[#4255FF] hover:bg-[#f8f9ff]"
+      (dragover)="$event.preventDefault()" (drop)="onAiFileDrop($event)" (click)="aiFileInput.click()">
+      @if (aiFileName()) {
+      <div
+        class="flex items-center gap-3 bg-white p-4 rounded-xl border border-gray-200 max-w-sm w-full mx-auto relative group shadow-sm">
+        <div class="w-10 h-10 rounded-lg bg-[#eef0ff] text-[#4255FF] flex items-center justify-center">
+          <span class="material-symbols-outlined">description</span>
+        </div>
+        <div class="flex flex-col overflow-hidden max-w-[200px]">
+          <span class="text-[13px] font-bold text-[#141118] truncate">{{ aiFileName() }}</span>
+          <span class="text-[11px] text-green-600 font-semibold mt-0.5">Ready for processing</span>
+        </div>
+        <button
+          class="absolute top-1/2 -translate-y-1/2 right-3 w-8 h-8 rounded-full bg-white border border-gray-200 text-gray-500 flex items-center justify-center cursor-pointer transition-colors hover:bg-red-50 hover:text-red-500 hover:border-red-200"
+          (click)="removeAiFile(); $event.stopPropagation()">
+          <span class="material-symbols-outlined text-[16px]">close</span>
+        </button>
+      </div>
+      } @else {
+      <div
+        class="w-16 h-16 rounded-full bg-purple-50 text-indigo-500 flex items-center justify-center mb-2 transition-transform group-hover:-translate-y-1">
+        <span class="material-symbols-outlined text-[36px]">cloud_upload</span>
+      </div>
+      <p class="text-[15px] font-bold text-[#141118] m-0">Drag & drop your file here</p>
+      <p class="text-[13px] text-[#726388] m-0 font-medium">or</p>
+      <span
+        class="mt-2 px-6 py-2.5 bg-white border border-gray-200 rounded-lg text-[13px] font-bold text-[#4255FF] shadow-sm transition-colors group-hover:border-[#4255FF]">Browse
+        Files</span>
+      <span class="mt-4 text-[11px] text-gray-400 font-medium">PDF, DOCX, TXT, PPTX up to 25 MB</span>
+      }
+      <input #aiFileInput type="file" hidden accept=".pdf,.docx,.txt,.pptx" (change)="onAiFileSelect($event)" />
+    </div>
+    }
+
+    <!-- Paste Zone -->
+    @if (aiSource() === 'paste') {
+    <textarea
+      class="w-full min-h-[220px] p-5 border-2 border-gray-200 rounded-xl text-[14px] text-gray-900 outline-none resize-y transition-colors focus:border-[#4255FF] placeholder-gray-400 leading-relaxed font-sans"
+      rows="6" placeholder="Paste your notes, textbook content, or any study material here..." [ngModel]="aiPasteText()"
+      (ngModelChange)="aiPasteText.set($event)"></textarea>
+    }
+    <!-- Generate Button -->
+    @if (aiUsageMax() > 0 && aiUsageCount() >= aiUsageMax()) {
+    <div class="w-full mt-6 py-3 px-4 rounded-xl bg-red-50 border border-red-200 text-red-700 flex items-center gap-3">
+      <span class="material-symbols-outlined text-[24px]">block</span>
+      <div class="flex flex-col">
+        <span class="text-[14px] font-bold">Limit Reached</span>
+        <span class="text-[12px] font-medium mt-0.5">You have reached your daily limit of {{ aiUsageMax() }} requests.
+          Upgrade your plan or try again tomorrow.</span>
+      </div>
+      <a (click)="update()"
+        class="ml-auto px-4 py-2 bg-red-600 text-white text-[12px] font-bold rounded-lg cursor-pointer no-underline hover:bg-red-700">Upgrade
+        Plan</a>
+    </div>
+    } @else {
+    <button
+      class="w-full mt-6 py-4 rounded-xl bg-gradient-to-r from-purple-600 to-[#4255FF] text-white font-bold text-[15px] border-none cursor-pointer flex justify-center items-center gap-2.5 transition-all shadow-md hover:shadow-lg hover:opacity-95 disabled:opacity-60 disabled:cursor-not-allowed disabled:shadow-none"
+      [disabled]="aiGenerating()" (click)="generateWithAi()">
+      @if (aiGenerating()) {
+      <span class="material-symbols-outlined animate-spin text-[22px]">progress_activity</span>
+      Generating your cards...
+      } @else {
+      <span class="material-symbols-outlined text-[22px]">auto_awesome</span>
+      Generate Cards with AI
+      }
+    </button>
+    }
+  </div>
   }
 
   <!-- Cards List -->
   @if (mode() === 'manual') {
-    <div class="flex flex-col gap-4">
-      <div class="flex items-center justify-between mb-2">
-        <h3 class="flex items-center gap-2 text-lg font-bold text-[#141118] m-0">
-          <span class="material-symbols-outlined text-[22px] text-[#4255FF]">style</span>
-          Your Cards
-        </h3>
-        <span class="text-[13px] font-bold text-[#726388]">{{ cards().length }} cards</span>
+  <div class="flex flex-col gap-4">
+    <div class="flex items-center justify-between mb-2">
+      <h3 class="flex items-center gap-2 text-lg font-bold text-[#141118] m-0">
+        <span class="material-symbols-outlined text-[22px] text-[#4255FF]">style</span>
+        Your Cards
+      </h3>
+      <span class="text-[13px] font-bold text-[#726388]">{{ cards().length }} cards</span>
+    </div>
+
+    @if (aiGenerated()) {
+    <div class="flex items-center gap-3 px-5 py-3.5 bg-amber-50 border border-amber-200 rounded-xl mb-1">
+      <span class="material-symbols-outlined text-[22px] text-amber-500">auto_awesome</span>
+      <div class="flex-1">
+        <p class="text-[13px] font-bold text-amber-800 m-0">Generated by AI</p>
+        <p class="text-[12px] text-amber-600 m-0 mt-0.5">Review and edit the cards below before saving. You can modify,
+          delete, or add new ones.</p>
       </div>
-
-      @if (aiGenerated()) {
-        <div class="flex items-center gap-3 px-5 py-3.5 bg-amber-50 border border-amber-200 rounded-xl mb-1">
-          <span class="material-symbols-outlined text-[22px] text-amber-500">auto_awesome</span>
-          <div class="flex-1">
-            <p class="text-[13px] font-bold text-amber-800 m-0">Generated by AI</p>
-            <p class="text-[12px] text-amber-600 m-0 mt-0.5">Review and edit the cards below before saving. You can modify, delete, or add new ones.</p>
-          </div>
-          <button class="bg-transparent border-none text-amber-400 cursor-pointer hover:text-amber-600 flex items-center" (click)="aiGenerated.set(false)">
-            <span class="material-symbols-outlined text-[18px]">close</span>
-          </button>
-        </div>
-      }
-
-      @for (card of cards(); track card.id; let i = $index) {
-        <div
-          class="bg-white border border-gray-200 rounded-2xl flex transition-all relative group overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.06)]"
-          [class.opacity-50]="dragIndex() === i"
-          [class.border-[#4255FF]]="dragIndex() === i"
-          [class.shadow-lg]="dragIndex() === i"
-          [class.shadow-sm]="dragIndex() !== i"
-          [attr.draggable]="grabIndex() === i ? 'true' : 'false'"
-          (dragstart)="onDragStart(i)"
-          (dragover)="onDragOver($event, i)"
-          (dragend)="onDragEnd(); onGrabEnd()"
-        >
-          <!-- Number Strip -->
-          <div class="w-12 shrink-0 bg-gray-50 border-r border-gray-100 flex flex-col items-center justify-center gap-2 py-4">
-            <span class="text-[14px] font-extrabold text-[#4255FF]">{{ i + 1 }}</span>
-            <span
-              class="material-symbols-outlined text-[20px] text-gray-300 cursor-grab transition-colors hover:text-gray-500 active:cursor-grabbing active:text-[#4255FF] select-none"
-              (mousedown)="onGrabStart(i)"
-              (mouseup)="onGrabEnd()"
-              (mouseleave)="onGrabEnd()"
-            >drag_indicator</span>
-          </div>
-
-          <!-- Card Content -->
-          <div class="flex-1 flex flex-col min-w-0 bg-white">
-            <!-- Tabs -->
-            <div class="flex gap-0 border-b border-gray-100 bg-gray-50/50 px-2 pt-1">
-              <button class="flex items-center gap-1.5 py-2.5 px-4 bg-transparent border-none border-b-[3px] text-[12.5px] font-bold cursor-pointer transition-colors"
-                      [class]="card.type === 'multiple-choice' ? 'text-[#4255FF] border-[#4255FF]' : 'text-gray-500 border-transparent hover:text-gray-800 hover:bg-gray-100'"
-                      (click)="updateCardType(i, 'multiple-choice')">
-                <span class="material-symbols-outlined text-[18px]">check_box</span>
-                <span>Multiple Choice</span>
-              </button>
-              <button class="flex items-center gap-1.5 py-2.5 px-4 bg-transparent border-none border-b-[3px] text-[12.5px] font-bold cursor-pointer transition-colors"
-                      [class]="card.type === 'true-false' ? 'text-[#4255FF] border-[#4255FF]' : 'text-gray-500 border-transparent hover:text-gray-800 hover:bg-gray-100'"
-                      (click)="updateCardType(i, 'true-false')">
-                <span class="material-symbols-outlined text-[18px]">rule</span>
-                <span>True / False</span>
-              </button>
-              <button class="flex items-center gap-1.5 py-2.5 px-4 bg-transparent border-none border-b-[3px] text-[12.5px] font-bold cursor-pointer transition-colors"
-                      [class]="card.type === 'fill-blank' ? 'text-[#4255FF] border-[#4255FF]' : 'text-gray-500 border-transparent hover:text-gray-800 hover:bg-gray-100'"
-                      (click)="updateCardType(i, 'fill-blank')">
-                <span class="material-symbols-outlined text-[18px]">edit_note</span>
-                <span>Fill in the Blank</span>
-              </button>
-            </div>
-
-            <!-- Card Body Fields -->
-            <div class="flex items-start gap-0 px-6 py-5 flex-1 relative w-full mb-12">
-              <div class="flex-1 flex flex-col gap-2 min-w-[30%]">
-                <label class="text-[11px] font-extrabold text-[#4255FF] tracking-widest">QUESTION / TERM</label>
-                <input
-                  type="text"
-                  class="border-none border-b-2 border-gray-100 py-2.5 text-[15px] font-medium text-[#141118] outline-none w-full bg-transparent transition-colors focus:border-[#4255FF] placeholder-[#b0a3bf]"
-                  placeholder="Enter term or question"
-                  [ngModel]="card.term"
-                  (ngModelChange)="updateTerm(i, $event)"
-                />
-              </div>
-              
-              <div class="w-px self-stretch bg-gray-200 mx-6 shrink-0"></div>
-              
-              <div class="flex-2 flex flex-col gap-2 w-full">
-                @if (card.type === 'fill-blank') {
-                  <label class="text-[11px] font-extrabold text-[#4255FF] tracking-widest">ANSWER</label>
-                  <input
-                    type="text"
-                    class="border-none border-b-2 border-gray-100 py-2.5 text-[15px] font-medium text-[#141118] outline-none w-full bg-transparent transition-colors focus:border-[#4255FF] placeholder-[#b0a3bf]"
-                    placeholder="Enter the correct answer for the blank"
-                    [ngModel]="card.blankAnswer"
-                    (ngModelChange)="updateBlankAnswer(i, $event)"
-                  />
-                }
-                
-                @if (card.type === 'multiple-choice') {
-                  <label class="text-[11px] font-extrabold text-[#4255FF] tracking-widest">OPTIONS <span class="text-gray-400 font-semibold">(Select multiple correct answers)</span></label>
-                  <div class="grid grid-cols-2 gap-3 mt-1.5 w-full">
-                    @for (opt of card.options; track $index; let optIdx = $index) {
-                      <div class="flex items-center gap-2.5 p-2 rounded-xl border-2 transition-all bg-white"
-                           [class]="card.correctAnswers?.includes(optIdx) ? 'border-green-400 bg-green-50/50' : 'border-gray-200 hover:border-gray-300'">
-                        <button class="w-7 h-7 bg-transparent border-none p-0 flex items-center justify-center cursor-pointer transition-colors rounded-full"
-                                [class]="card.correctAnswers?.includes(optIdx) ? 'text-green-500' : 'text-gray-300 hover:text-gray-400 hover:bg-gray-100'"
-                                (click)="toggleCorrectAnswer(i, optIdx)">
-                          <span class="material-symbols-outlined text-[24px]">{{ card.correctAnswers?.includes(optIdx) ? 'check_circle' : 'radio_button_unchecked' }}</span>
-                        </button>
-                        <input
-                          type="text"
-                          class="border-none bg-transparent outline-none text-[14px] font-medium w-full text-[#141118] placeholder-[#b0a3bf] py-1"
-                          placeholder="Option {{ optIdx + 1 }}"
-                          [ngModel]="opt"
-                          (ngModelChange)="updateOption(i, optIdx, $event)"
-                        />
-                      </div>
-                    }
-                  </div>
-                }
-
-                @if (card.type === 'true-false') {
-                  <label class="text-[11px] font-extrabold text-[#4255FF] tracking-widest">CORRECT ANSWER</label>
-                  <div class="flex gap-4 mt-1.5">
-                    <button class="flex-1 flex items-center justify-center gap-2 p-3.5 rounded-xl border-2 text-[14px] font-bold cursor-pointer transition-all"
-                            [class]="card.isTrue ? 'bg-green-50 border-green-500 text-green-700 shadow-sm' : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:border-gray-300'"
-                            (click)="updateIsTrue(i, true)">
-                      <span class="material-symbols-outlined text-[20px]" [class.text-green-600]="card.isTrue">check</span>
-                      True
-                    </button>
-                    <button class="flex-1 flex items-center justify-center gap-2 p-3.5 rounded-xl border-2 text-[14px] font-bold cursor-pointer transition-all"
-                            [class]="!card.isTrue ? 'bg-red-50 border-red-500 text-red-700 shadow-sm' : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:border-gray-300'"
-                            (click)="updateIsTrue(i, false)">
-                      <span class="material-symbols-outlined text-[20px]" [class.text-red-600]="!card.isTrue">close</span>
-                      False
-                    </button>
-                  </div>
-                }
-              </div>
-            </div>
-
-            <!-- Hint & Explanation Toggle -->
-            <div class="px-6 pb-4 mb-8">
-              <button class="flex items-center gap-1.5 text-[12px] font-semibold cursor-pointer bg-transparent border-none transition-colors p-0"
-                      [class]="card.showExtra ? 'text-[#4255FF]' : 'text-gray-400 hover:text-gray-600'"
-                      (click)="toggleExtra(i)">
-                <span class="material-symbols-outlined text-[16px] transition-transform" [class.rotate-180]="card.showExtra">expand_more</span>
-                {{ card.showExtra ? 'Hide' : 'Add' }} Hint & Explanation
-              </button>
-
-              @if (card.showExtra) {
-                <div class="grid grid-cols-2 gap-4 mt-3">
-                  <div class="flex flex-col gap-1.5">
-                    <label class="text-[10px] font-bold text-amber-500 tracking-widest flex items-center gap-1">
-                      <span class="material-symbols-outlined text-[14px]">lightbulb</span>
-                      HINT (optional)
-                    </label>
-                    <input
-                      type="text"
-                      class="border border-gray-200 rounded-lg px-3 py-2 text-[13px] font-medium text-[#141118] outline-none bg-amber-50/30 transition-colors focus:border-amber-400 placeholder-[#b0a3bf]"
-                      placeholder="Give a hint to help the learner..."
-                      [ngModel]="card.hint"
-                      (ngModelChange)="updateHint(i, $event)"
-                    />
-                  </div>
-                  <div class="flex flex-col gap-1.5">
-                    <label class="text-[10px] font-bold text-emerald-500 tracking-widest flex items-center gap-1">
-                      <span class="material-symbols-outlined text-[14px]">school</span>
-                      EXPLANATION (optional)
-                    </label>
-                    <input
-                      type="text"
-                      class="border border-gray-200 rounded-lg px-3 py-2 text-[13px] font-medium text-[#141118] outline-none bg-emerald-50/30 transition-colors focus:border-emerald-400 placeholder-[#b0a3bf]"
-                      placeholder="Explain why this is the correct answer..."
-                      [ngModel]="card.explanation"
-                      (ngModelChange)="updateExplanation(i, $event)"
-                    />
-                  </div>
-                </div>
-              }
-            </div>
-            
-            <div class="absolute bottom-3 right-4 flex items-center gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
-              <button class="w-9 h-9 rounded-xl bg-transparent border-none flex items-center justify-center cursor-pointer text-gray-400 font-bold transition-all hover:bg-[#eef0ff] hover:text-[#4255FF]" (click)="duplicateCard(i)" title="Duplicate">
-                <span class="material-symbols-outlined text-[20px]">content_copy</span>
-              </button>
-              <button
-                class="w-9 h-9 rounded-xl bg-transparent border-none flex items-center justify-center font-bold transition-all"
-                [class]="cards().length <= 2 ? 'opacity-30 cursor-not-allowed text-gray-400' : 'cursor-pointer text-gray-400 hover:bg-red-50 hover:text-red-500'"
-                (click)="deleteCard(i)"
-                title="Delete"
-              >
-                <span class="material-symbols-outlined text-[20px]">delete</span>
-              </button>
-            </div>
-          </div>
-        </div>
-      }
-
-      <!-- Add Card Button -->
-      <button class="w-full p-6 mt-3 bg-white border-2 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center gap-2 text-[14px] font-bold text-[#726388] cursor-pointer transition-all hover:border-[#4255FF] hover:text-[#4255FF] hover:bg-[#fafaff] group" (click)="addCard()">
-        <span class="material-symbols-outlined text-[32px] text-gray-300 transition-colors group-hover:text-[#4255FF]">add_circle</span>
-        <span>ADD NEW CARD</span>
+      <button class="bg-transparent border-none text-amber-400 cursor-pointer hover:text-amber-600 flex items-center"
+        (click)="aiGenerated.set(false)">
+        <span class="material-symbols-outlined text-[18px]">close</span>
       </button>
     </div>
+    }
+
+    @for (card of cards(); track card.id; let i = $index) {
+    <div
+      class="bg-white border border-gray-200 rounded-2xl flex transition-all relative group overflow-hidden shadow-[0_1px_3px_rgba(0,0,0,0.06)]"
+      [class.opacity-50]="dragIndex() === i" [class.border-[#4255FF]]="dragIndex() === i"
+      [class.shadow-lg]="dragIndex() === i" [class.shadow-sm]="dragIndex() !== i"
+      [attr.draggable]="grabIndex() === i ? 'true' : 'false'" (dragstart)="onDragStart(i)"
+      (dragover)="onDragOver($event, i)" (dragend)="onDragEnd(); onGrabEnd()">
+      <!-- Number Strip -->
+      <div
+        class="w-12 shrink-0 bg-gray-50 border-r border-gray-100 flex flex-col items-center justify-center gap-2 py-4">
+        <span class="text-[14px] font-extrabold text-[#4255FF]">{{ i + 1 }}</span>
+        <span
+          class="material-symbols-outlined text-[20px] text-gray-300 cursor-grab transition-colors hover:text-gray-500 active:cursor-grabbing active:text-[#4255FF] select-none"
+          (mousedown)="onGrabStart(i)" (mouseup)="onGrabEnd()" (mouseleave)="onGrabEnd()">drag_indicator</span>
+      </div>
+
+      <!-- Card Content -->
+      <div class="flex-1 flex flex-col min-w-0 bg-white">
+        <!-- Tabs -->
+        <div class="flex gap-0 border-b border-gray-100 bg-gray-50/50 px-2 pt-1">
+          <button
+            class="flex items-center gap-1.5 py-2.5 px-4 bg-transparent border-none border-b-[3px] text-[12.5px] font-bold cursor-pointer transition-colors"
+            [class]="card.type === 'multiple-choice' ? 'text-[#4255FF] border-[#4255FF]' : 'text-gray-500 border-transparent hover:text-gray-800 hover:bg-gray-100'"
+            (click)="updateCardType(i, 'multiple-choice')">
+            <span class="material-symbols-outlined text-[18px]">check_box</span>
+            <span>Multiple Choice</span>
+          </button>
+          <button
+            class="flex items-center gap-1.5 py-2.5 px-4 bg-transparent border-none border-b-[3px] text-[12.5px] font-bold cursor-pointer transition-colors"
+            [class]="card.type === 'true-false' ? 'text-[#4255FF] border-[#4255FF]' : 'text-gray-500 border-transparent hover:text-gray-800 hover:bg-gray-100'"
+            (click)="updateCardType(i, 'true-false')">
+            <span class="material-symbols-outlined text-[18px]">rule</span>
+            <span>True / False</span>
+          </button>
+          <button
+            class="flex items-center gap-1.5 py-2.5 px-4 bg-transparent border-none border-b-[3px] text-[12.5px] font-bold cursor-pointer transition-colors"
+            [class]="card.type === 'fill-blank' ? 'text-[#4255FF] border-[#4255FF]' : 'text-gray-500 border-transparent hover:text-gray-800 hover:bg-gray-100'"
+            (click)="updateCardType(i, 'fill-blank')">
+            <span class="material-symbols-outlined text-[18px]">edit_note</span>
+            <span>Fill in the Blank</span>
+          </button>
+        </div>
+
+        <!-- Card Body Fields -->
+        <div class="flex items-start gap-0 px-6 py-5 flex-1 relative w-full mb-12">
+          <div class="flex-1 flex flex-col gap-2 min-w-[30%]">
+            <label class="text-[11px] font-extrabold text-[#4255FF] tracking-widest">QUESTION / TERM</label>
+            <input type="text"
+              class="border-none border-b-2 border-gray-100 py-2.5 text-[15px] font-medium text-[#141118] outline-none w-full bg-transparent transition-colors focus:border-[#4255FF] placeholder-[#b0a3bf]"
+              placeholder="Enter term or question" [ngModel]="card.term" (ngModelChange)="updateTerm(i, $event)" />
+          </div>
+
+          <div class="w-px self-stretch bg-gray-200 mx-6 shrink-0"></div>
+
+          <div class="flex-2 flex flex-col gap-2 w-full">
+            @if (card.type === 'fill-blank') {
+            <label class="text-[11px] font-extrabold text-[#4255FF] tracking-widest">ANSWER</label>
+            <input type="text"
+              class="border-none border-b-2 border-gray-100 py-2.5 text-[15px] font-medium text-[#141118] outline-none w-full bg-transparent transition-colors focus:border-[#4255FF] placeholder-[#b0a3bf]"
+              placeholder="Enter the correct answer for the blank" [ngModel]="card.blankAnswer"
+              (ngModelChange)="updateBlankAnswer(i, $event)" />
+            }
+
+            @if (card.type === 'multiple-choice') {
+            <label class="text-[11px] font-extrabold text-[#4255FF] tracking-widest">OPTIONS <span
+                class="text-gray-400 font-semibold">(Select multiple correct answers)</span></label>
+            <div class="grid grid-cols-2 gap-3 mt-1.5 w-full">
+              @for (opt of card.options; track $index; let optIdx = $index) {
+              <div class="flex items-center gap-2.5 p-2 rounded-xl border-2 transition-all bg-white"
+                [class]="card.correctAnswers?.includes(optIdx) ? 'border-green-400 bg-green-50/50' : 'border-gray-200 hover:border-gray-300'">
+                <button
+                  class="w-7 h-7 bg-transparent border-none p-0 flex items-center justify-center cursor-pointer transition-colors rounded-full"
+                  [class]="card.correctAnswers?.includes(optIdx) ? 'text-green-500' : 'text-gray-300 hover:text-gray-400 hover:bg-gray-100'"
+                  (click)="toggleCorrectAnswer(i, optIdx)">
+                  <span class="material-symbols-outlined text-[24px]">{{ card.correctAnswers?.includes(optIdx) ?
+                    'check_circle' : 'radio_button_unchecked' }}</span>
+                </button>
+                <input type="text"
+                  class="border-none bg-transparent outline-none text-[14px] font-medium w-full text-[#141118] placeholder-[#b0a3bf] py-1"
+                  placeholder="Option {{ optIdx + 1 }}" [ngModel]="opt"
+                  (ngModelChange)="updateOption(i, optIdx, $event)" />
+              </div>
+              }
+            </div>
+            }
+
+            @if (card.type === 'true-false') {
+            <label class="text-[11px] font-extrabold text-[#4255FF] tracking-widest">CORRECT ANSWER</label>
+            <div class="flex gap-4 mt-1.5">
+              <button
+                class="flex-1 flex items-center justify-center gap-2 p-3.5 rounded-xl border-2 text-[14px] font-bold cursor-pointer transition-all"
+                [class]="card.isTrue ? 'bg-green-50 border-green-500 text-green-700 shadow-sm' : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:border-gray-300'"
+                (click)="updateIsTrue(i, true)">
+                <span class="material-symbols-outlined text-[20px]" [class.text-green-600]="card.isTrue">check</span>
+                True
+              </button>
+              <button
+                class="flex-1 flex items-center justify-center gap-2 p-3.5 rounded-xl border-2 text-[14px] font-bold cursor-pointer transition-all"
+                [class]="!card.isTrue ? 'bg-red-50 border-red-500 text-red-700 shadow-sm' : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50 hover:border-gray-300'"
+                (click)="updateIsTrue(i, false)">
+                <span class="material-symbols-outlined text-[20px]" [class.text-red-600]="!card.isTrue">close</span>
+                False
+              </button>
+            </div>
+            }
+          </div>
+        </div>
+
+        <!-- Hint & Explanation Toggle -->
+        <div class="px-6 pb-4 mb-8">
+          <button
+            class="flex items-center gap-1.5 text-[12px] font-semibold cursor-pointer bg-transparent border-none transition-colors p-0"
+            [class]="card.showExtra ? 'text-[#4255FF]' : 'text-gray-400 hover:text-gray-600'" (click)="toggleExtra(i)">
+            <span class="material-symbols-outlined text-[16px] transition-transform"
+              [class.rotate-180]="card.showExtra">expand_more</span>
+            {{ card.showExtra ? 'Hide' : 'Add' }} Hint & Explanation
+          </button>
+
+          @if (card.showExtra) {
+          <div class="grid grid-cols-2 gap-4 mt-3">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[10px] font-bold text-amber-500 tracking-widest flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">lightbulb</span>
+                HINT (optional)
+              </label>
+              <input type="text"
+                class="border border-gray-200 rounded-lg px-3 py-2 text-[13px] font-medium text-[#141118] outline-none bg-amber-50/30 transition-colors focus:border-amber-400 placeholder-[#b0a3bf]"
+                placeholder="Give a hint to help the learner..." [ngModel]="card.hint"
+                (ngModelChange)="updateHint(i, $event)" />
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[10px] font-bold text-emerald-500 tracking-widest flex items-center gap-1">
+                <span class="material-symbols-outlined text-[14px]">school</span>
+                EXPLANATION (optional)
+              </label>
+              <input type="text"
+                class="border border-gray-200 rounded-lg px-3 py-2 text-[13px] font-medium text-[#141118] outline-none bg-emerald-50/30 transition-colors focus:border-emerald-400 placeholder-[#b0a3bf]"
+                placeholder="Explain why this is the correct answer..." [ngModel]="card.explanation"
+                (ngModelChange)="updateExplanation(i, $event)" />
+            </div>
+          </div>
+          }
+        </div>
+
+        <div
+          class="absolute bottom-3 right-4 flex items-center gap-1 opacity-100 sm:opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            class="w-9 h-9 rounded-xl bg-transparent border-none flex items-center justify-center cursor-pointer text-gray-400 font-bold transition-all hover:bg-[#eef0ff] hover:text-[#4255FF]"
+            (click)="duplicateCard(i)" title="Duplicate">
+            <span class="material-symbols-outlined text-[20px]">content_copy</span>
+          </button>
+          <button
+            class="w-9 h-9 rounded-xl bg-transparent border-none flex items-center justify-center font-bold transition-all"
+            [class]="cards().length <= 2 ? 'opacity-30 cursor-not-allowed text-gray-400' : 'cursor-pointer text-gray-400 hover:bg-red-50 hover:text-red-500'"
+            (click)="deleteCard(i)" title="Delete">
+            <span class="material-symbols-outlined text-[20px]">delete</span>
+          </button>
+        </div>
+      </div>
+    </div>
+    }
+
+    <!-- Add Card Button -->
+    <button
+      class="w-full p-6 mt-3 bg-white border-2 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center gap-2 text-[14px] font-bold text-[#726388] cursor-pointer transition-all hover:border-[#4255FF] hover:text-[#4255FF] hover:bg-[#fafaff] group"
+      (click)="addCard()">
+      <span
+        class="material-symbols-outlined text-[32px] text-gray-300 transition-colors group-hover:text-[#4255FF]">add_circle</span>
+      <span>ADD NEW CARD</span>
+    </button>
+  </div>
   }
 </div>
 
 <!-- Floating Error Banner -->
 @if (errorMessage()) {
-  <div class="auth-error-banner">
-    <div class="auth-error-inner">
-      <div class="auth-error-icon-wrap">
-        <span class="material-symbols-outlined auth-error-icon">error</span>
-      </div>
-      <div class="auth-error-text">
-        <p class="auth-error-title">Something went wrong</p>
-        <p class="auth-error-msg">{{ errorMessage() }}</p>
-      </div>
-      <button class="auth-error-close" (click)="errorMessage.set(null)">
-        <span class="material-symbols-outlined">close</span>
-      </button>
+<div class="auth-error-banner">
+  <div class="auth-error-inner">
+    <div class="auth-error-icon-wrap">
+      <span class="material-symbols-outlined auth-error-icon">error</span>
     </div>
+    <div class="auth-error-text">
+      <p class="auth-error-title">Something went wrong</p>
+      <p class="auth-error-msg">{{ errorMessage() }}</p>
+    </div>
+    <button class="auth-error-close" (click)="errorMessage.set(null)">
+      <span class="material-symbols-outlined">close</span>
+    </button>
   </div>
+</div>
 }
 
 <!-- Floating Success Banner -->
 @if (successMessage()) {
-  <div class="auth-success-banner">
-    <div class="auth-success-inner">
-      <div class="auth-success-icon-wrap">
-        <span class="material-symbols-outlined auth-success-icon">check_circle</span>
-      </div>
-      <div class="auth-error-text">
-        <p class="auth-error-title">Success</p>
-        <p class="auth-error-msg">{{ successMessage() }}</p>
-      </div>
-      <button class="auth-error-close" (click)="successMessage.set(null)">
-        <span class="material-symbols-outlined">close</span>
-      </button>
+<div class="auth-success-banner">
+  <div class="auth-success-inner">
+    <div class="auth-success-icon-wrap">
+      <span class="material-symbols-outlined auth-success-icon">check_circle</span>
     </div>
+    <div class="auth-error-text">
+      <p class="auth-error-title">Success</p>
+      <p class="auth-error-msg">{{ successMessage() }}</p>
+    </div>
+    <button class="auth-error-close" (click)="successMessage.set(null)">
+      <span class="material-symbols-outlined">close</span>
+    </button>
   </div>
+</div>
 }

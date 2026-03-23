@@ -4,6 +4,7 @@ import { Router, ActivatedRoute } from '@angular/router';
 import { DeckService } from '../../services/deck.service';
 import { PaymentService } from '../../services/payment.service';
 import { CreateDeckRequest, CreateQuestionRequest, GeneratedDeckResponse, GeneratedQuestionResponse, QuestionType } from '../../models/deck.models';
+import { forkJoin } from 'rxjs';
 
 interface Card {
   id: number;
@@ -24,7 +25,6 @@ interface Card {
   standalone: true,
   imports: [FormsModule],
   templateUrl: './add-deck.html',
-  styleUrl: './add-deck.css',
 })
 export class AddDeck implements OnInit {
   title = signal('');
@@ -34,7 +34,7 @@ export class AddDeck implements OnInit {
   coverFile = signal<File | null>(null);
   savingDraft = signal(false);
   creating = signal(false);
-    errorMessage = signal<string | null>(null);
+  errorMessage = signal<string | null>(null);
   successMessage = signal<string | null>(null);
 
   isEditMode = signal(false);
@@ -43,6 +43,7 @@ export class AddDeck implements OnInit {
 
   /* ── Creation mode ── */
   mode = signal<'manual' | 'ai'>('manual');
+  checkLimit = signal(false);
 
   /* ── AI Generation ── */
   aiSource = signal<'upload' | 'paste'>('upload');
@@ -88,22 +89,29 @@ export class AddDeck implements OnInit {
 
   private loadSubscriptionLimits() {
     this.aiLimitLoading.set(true);
-    this.paymentService.getMySubscription().subscribe({
-      next: (sub) => {
+    forkJoin({
+      sub:  this.paymentService.getMySubscription(),
+      limit: this.paymentService.getMySubscriptionLimit()
+    }).subscribe({
+      next: ({sub, limit}) => {
         this.aiLimitLoading.set(false);
-        if (sub && !sub.isExpired) {
-          this.aiUsageMax.set(sub.dailyGenerateLimit);
-          this.aiUsageCount.set(sub.currentGenerateCount || 0);
+        if (limit && !sub?.isExpired) {
+          this.aiUsageMax.set(limit.dailyGenerateLimit);
+          this.aiUsageCount.set(limit.dailyGenerateUsed);
         } else {
           // No active plan
           this.aiUsageMax.set(0); 
           this.aiUsageCount.set(0); 
         }
+
+        if(limit && limit.numDeckUsed >= limit.numDeckLimit && limit.numDeckLimit !== 0){
+          this.checkLimit.set(true);
+        }
       },
       error: () => {
         this.aiLimitLoading.set(false);
       }
-    });
+    })
   }
 
   private loadDeck(id: string) {
@@ -387,7 +395,7 @@ export class AddDeck implements OnInit {
       },
     });
   }
-
+ 
   create() {
     if (this.creating()) return;
     if (!this.title().trim()) {
@@ -495,7 +503,9 @@ export class AddDeck implements OnInit {
   cancel() {
     this.router.navigate(['/library']);
   }
-
+  update() {
+    this.router.navigate(['/subscription']);
+  }
   /* ── AI Methods ── */
   onAiFileSelect(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -571,7 +581,6 @@ export class AddDeck implements OnInit {
           this.showError(res.message || 'AI generation failed');
           return;
         }
-        // Increment usage count locally to reflect the success
         if (this.aiUsageMax() > 0) {
           this.aiUsageCount.update(c => c + 1);
         }

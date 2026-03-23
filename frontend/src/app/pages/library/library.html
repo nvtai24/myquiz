@@ -5,28 +5,32 @@
   <div class="tabs-container">
     <div class="tabs">
       <button class="tab" [class.active]="activeTab() === 'all'" (click)="setTab('all')">All</button>
-      <button class="tab" [class.active]="activeTab() === 'created'" (click)="setTab('created')">Created</button>
-      <button class="tab" [class.active]="activeTab() === 'studying'" (click)="setTab('studying')">Studying</button>
+      <button class="tab" [class.active]="activeTab() === 'drafts'" (click)="setTab('drafts')">Drafts</button>
+      <button class="tab" [class.active]="activeTab() === 'published'" (click)="setTab('published')">Published</button>
     </div>
 
     <div class="search-bar">
       <span class="material-symbols-outlined search-icon">search</span>
-      <input type="text" placeholder="Search by name, description, tags..." [ngModel]="searchQuery()" (ngModelChange)="onSearchChange($event)" />
+      <input type="text" placeholder="Search by name, description, tags..." [ngModel]="searchQuery()"
+        (ngModelChange)="onSearchChange($event)" />
       @if (searchQuery()) {
-        <button class="clear-search-btn" (click)="onSearchChange('')">
-          <span class="material-symbols-outlined">close</span>
-        </button>
+      <button class="clear-search-btn" (click)="onSearchChange('')">
+        <span class="material-symbols-outlined">close</span>
+      </button>
       }
     </div>
   </div>
 
   <!-- Error Message -->
   @if (errorMessage()) {
-    <div class="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 text-[13px] font-medium px-4 py-3 rounded-xl mb-4">
-      <span class="material-symbols-outlined text-[18px]">error</span>
-      {{ errorMessage() }}
-      <button class="ml-auto text-red-500 hover:text-red-700 bg-transparent border-none cursor-pointer text-[13px] font-bold" (click)="loadDecks()">Try again</button>
-    </div>
+  <div
+    class="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 text-[13px] font-medium px-4 py-3 rounded-xl mb-4">
+    <span class="material-symbols-outlined text-[18px]">error</span>
+    {{ errorMessage() }}
+    <button
+      class="ml-auto text-red-500 hover:text-red-700 bg-transparent border-none cursor-pointer text-[13px] font-bold"
+      (click)="loadDecks()">Try again</button>
+  </div>
   }
 
   <div class="library-content">
@@ -35,7 +39,7 @@
       <div class="filters-header">
         <h3 class="filters-title">FILTERS</h3>
         @if (hasActiveFilters) {
-          <button class="clear-all-link" (click)="clearFilters()">Clear all</button>
+        <button class="clear-all-link" (click)="clearFilters()">Clear all</button>
         }
       </div>
 
@@ -45,17 +49,18 @@
         <div class="custom-select-wrapper">
           <div class="custom-select-header" (click)="toggleSort()">
             <span class="custom-select-value">
-              {{ sortBy() === 'recent' ? 'Newest' : sortBy() === 'terms' ? 'Most terms' : sortBy() === 'rating' ? 'Highest rated' : 'A → Z' }}
+              {{ sortBy() === 'recent' ? 'Newest' : sortBy() === 'terms' ? 'Most terms' : sortBy() === 'rating' ?
+              'Highest rated' : 'A → Z' }}
             </span>
             <span class="material-symbols-outlined dropdown-icon" [class.open]="isSortOpen()">expand_more</span>
           </div>
           @if (isSortOpen()) {
-            <ul class="custom-select-list">
-              <li [class.selected]="sortBy() === 'recent'" (click)="setSort('recent')">Newest</li>
-              <li [class.selected]="sortBy() === 'terms'" (click)="setSort('terms')">Most terms</li>
-              <li [class.selected]="sortBy() === 'rating'" (click)="setSort('rating')">Highest rated</li>
-              <li [class.selected]="sortBy() === 'alpha'" (click)="setSort('alpha')">A → Z</li>
-            </ul>
+          <ul class="custom-select-list">
+            <li [class.selected]="sortBy() === 'recent'" (click)="setSort('recent')">Newest</li>
+            <li [class.selected]="sortBy() === 'terms'" (click)="setSort('terms')">Most terms</li>
+            <li [class.selected]="sortBy() === 'rating'" (click)="setSort('rating')">Highest rated</li>
+            <li [class.selected]="sortBy() === 'alpha'" (click)="setSort('alpha')">A → Z</li>
+          </ul>
           }
         </div>
       </div>
@@ -68,37 +73,40 @@
             <span class="material-symbols-outlined">layers</span>
             All
           </button>
-          <button class="radio-btn" [class.active]="selectedVisibility() === 'Public'" (click)="setVisibility('Public')">
+          <button class="radio-btn" [class.active]="selectedVisibility() === 'Public'"
+            (click)="setVisibility('Public')">
             <span class="material-symbols-outlined">public</span>
             Public
           </button>
-          <button class="radio-btn" [class.active]="selectedVisibility() === 'Private'" (click)="setVisibility('Private')">
+          <button class="radio-btn" [class.active]="selectedVisibility() === 'Private'"
+            (click)="setVisibility('Private')">
             <span class="material-symbols-outlined">lock</span>
             Private
           </button>
-          <button class="radio-btn" [class.active]="selectedVisibility() === 'Shared'" (click)="setVisibility('Shared')">
+          <button class="radio-btn" [class.active]="selectedVisibility() === 'Shared'"
+            (click)="setVisibility('Shared')">
             <span class="material-symbols-outlined">group</span>
             Shared
           </button>
-          </div>
+        </div>
       </div>
 
       <!-- Tags Filter -->
       @if (allTags().length > 0) {
-        <div class="filter-group">
-          <h4 class="filter-label">Tags</h4>
-          <div class="tags-filter-list">
-            @for (tag of allTags(); track tag) {
-              <button class="tag-filter-btn" [class.active]="selectedTags().includes(tag)" (click)="toggleTag(tag)">
-                <span class="material-symbols-outlined">label</span>
-                {{ tag }}
-                @if (selectedTags().includes(tag)) {
-                  <span class="material-symbols-outlined check-icon">check</span>
-                }
-              </button>
+      <div class="filter-group">
+        <h4 class="filter-label">Tags</h4>
+        <div class="tags-filter-list">
+          @for (tag of allTags(); track tag) {
+          <button class="tag-filter-btn" [class.active]="selectedTags().includes(tag)" (click)="toggleTag(tag)">
+            <span class="material-symbols-outlined">label</span>
+            {{ tag }}
+            @if (selectedTags().includes(tag)) {
+            <span class="material-symbols-outlined check-icon">check</span>
             }
-          </div>
+          </button>
+          }
         </div>
+      </div>
       }
     </aside>
 
@@ -106,134 +114,143 @@
     <div class="main-content">
       <!-- Active filters summary -->
       @if (hasActiveFilters) {
-        <div class="active-filters-bar">
-          <span class="material-symbols-outlined text-[#4255FF]">filter_list</span>
-          <span class="text-[13px] font-semibold text-gray-600">
-            {{ filteredSets.length }} results
-          </span>
-          @for (tag of selectedTags(); track tag) {
-            <span class="active-filter-chip">
-              <span class="material-symbols-outlined">label</span>
-              {{ tag }}
-              <button (click)="toggleTag(tag)"><span class="material-symbols-outlined">close</span></button>
-            </span>
-          }
-          @if (selectedVisibility() !== 'all') {
-            <span class="active-filter-chip">
-              <span class="material-symbols-outlined">public</span>
-              {{ selectedVisibility() }}
-              <button (click)="setVisibility('all')"><span class="material-symbols-outlined">close</span></button>
-            </span>
-          }
-        </div>
+      <div class="active-filters-bar">
+        <span class="material-symbols-outlined text-[#4255FF]">filter_list</span>
+        <span class="text-[13px] font-semibold text-gray-600">
+          {{ filteredSets.length }} results
+        </span>
+        @for (tag of selectedTags(); track tag) {
+        <span class="active-filter-chip">
+          <span class="material-symbols-outlined">label</span>
+          {{ tag }}
+          <button (click)="toggleTag(tag)"><span class="material-symbols-outlined">close</span></button>
+        </span>
+        }
+        @if (selectedVisibility() !== 'all') {
+        <span class="active-filter-chip">
+          <span class="material-symbols-outlined">public</span>
+          {{ selectedVisibility() }}
+          <button (click)="setVisibility('all')"><span class="material-symbols-outlined">close</span></button>
+        </span>
+        }
+      </div>
       }
 
       <!-- Loading State -->
       @if (loading()) {
-        <div class="flex flex-col items-center justify-center py-20 text-gray-400">
-          <span class="material-symbols-outlined text-[48px] animate-spin mb-4">progress_activity</span>
-          <p class="text-[15px] font-medium">Loading study sets...</p>
-        </div>
+      <div class="flex flex-col items-center justify-center py-20 text-gray-400">
+        <span class="material-symbols-outlined text-[48px] animate-spin mb-4">progress_activity</span>
+        <p class="text-[15px] font-medium">Loading study sets...</p>
+      </div>
       }
 
       @if (!loading()) {
-        <div class="quiz-grid">
-          @for (deck of paginatedSets; track deck.id; let i = $index) {
-            <div class="quiz-card" [routerLink]="['/deck', deck.id]">
-               <div class="quiz-img relative overflow-hidden flex items-center justify-center">
-                 @if (deck.thumbnailUrl) {
-                   <img [src]="deck.thumbnailUrl" [alt]="deck.name" class="absolute inset-0 w-full h-full object-cover" />
-                 } @else {
-                   <img src="/images/default-deck.png" alt="Flashcards" class="absolute inset-0 w-full h-full object-cover" />
-                 }
-                 @if (deck.status === 'Published') {
-                   <span class="draft-badge z-10" style="background-color: #eef0ff; color: #4255FF;">
-                     <span class="material-symbols-outlined" style="font-size:14px">public</span>
-                     Published
-                   </span>
-                 }
-                 @if (deck.status === 'Draft') {
-                   <span class="draft-badge z-10">
-                     <span class="material-symbols-outlined" style="font-size:14px">edit_note</span>
-                     Draft
-                   </span>
-                 }
-                 <span class="terms-badge z-10">{{ deck.questionCount }} TERMS</span>
-               </div>
-              <div class="quiz-info">
-                <div class="quiz-badges">
-                   <span class="visibility-badge" [class.private]="deck.visibility === 'Private'">
-                     <span class="material-symbols-outlined">{{ deck.visibility === 'Private' ? 'lock' : deck.visibility === 'Shared' ? 'group' : 'public' }}</span>
-                     {{ deck.visibility }}
-                   </span>
-                  @for (tag of deck.tags | slice:0:2; track tag) {
-                    <span class="tag-badge">{{ tag }}</span>
-                  }
-                  @if (deck.tags.length > 2) {
-                    <span class="tag-badge extra">+{{ deck.tags.length - 2 }}</span>
-                  }
-                </div>
+      <div class="quiz-grid">
+        @for (deck of paginatedSets; track deck.id; let i = $index) {
+        <div class="quiz-card"
+          [routerLink]="deck.status === 'Published' ? ['/deck', deck.id] : ['/edit-deck', deck.id]">
+          <div class="quiz-img relative overflow-hidden flex items-center justify-center">
+            @if (deck.thumbnailUrl) {
+            <img [src]="deck.thumbnailUrl" [alt]="deck.name" class="absolute inset-0 w-full h-full object-cover" />
+            } @else {
+            <img src="/images/default-deck.png" alt="Flashcards" class="absolute inset-0 w-full h-full object-cover" />
+            }
+            @if (deck.status === 'Published') {
+            <span class="draft-badge z-10" style="background-color: #eef0ff; color: #4255FF;">
+              <span class="material-symbols-outlined" style="font-size:14px">public</span>
+              Published
+            </span>
+            }
+            @if (deck.status === 'Draft') {
+            <span class="draft-badge z-10">
+              <span class="material-symbols-outlined" style="font-size:14px">edit_note</span>
+              Draft
+            </span>
+            }
+            <span class="terms-badge z-10">{{ deck.questionCount }} TERMS</span>
+          </div>
+          <div class="quiz-info">
+            <div class="quiz-badges">
+              <span class="visibility-badge" [class.private]="deck.visibility === 'Private'">
+                <span class="material-symbols-outlined">{{ deck.visibility === 'Private' ? 'lock' : deck.visibility ===
+                  'Shared' ? 'group' : 'public' }}</span>
+                {{ deck.visibility }}
+              </span>
+              @for (tag of deck.tags | slice:0:2; track tag) {
+              <span class="tag-badge">{{ tag }}</span>
+              }
+              @if (deck.tags.length > 2) {
+              <span class="tag-badge extra">+{{ deck.tags.length - 2 }}</span>
+              }
+            </div>
 
-                <h3 class="quiz-title">{{ deck.name }}</h3>
-                <p class="quiz-desc" [title]="deck.description">{{ deck.description }}</p>
+            <h3 class="quiz-title">{{ deck.name }}</h3>
+            <p class="quiz-desc" [title]="deck.description">{{ deck.description }}</p>
 
-                <!-- Rating -->
-                @if (deck.totalRatings) {
-                  <div class="deck-rating">
-                    <span class="material-symbols-outlined star-icon">star</span>
-                    <span class="rating-val">{{ (deck.averageRating ?? 0).toFixed(1) }}</span>
-                    <span class="rating-count">({{ deck.totalRatings }})</span>
-                  </div>
+            <!-- Rating -->
+            @if (deck.totalRatings) {
+            <div class="deck-rating">
+              <span class="material-symbols-outlined star-icon">star</span>
+              <span class="rating-val">{{ (deck.averageRating ?? 0).toFixed(1) }}</span>
+              <span class="rating-count">({{ deck.totalRatings }})</span>
+            </div>
+            }
+
+            <p class="quiz-date">{{ deck.createdAt | date:'dd/MM/yyyy' }}</p>
+
+            <div class="quiz-footer">
+              <span class="text-[12px] text-gray-400 font-medium">{{ deck.questionCount }} questions</span>
+              <div style="display: flex; gap: 8px;">
+                @if (deck.visibility !== 'Shared') {
+                <button class="edit-published-btn" (click)="$event.stopPropagation()"
+                  [routerLink]="['/edit-deck', deck.id]">
+                  <span class="material-symbols-outlined"
+                    style="font-size:16px; margin-right:2px; vertical-align: middle;">edit</span>
+                  Edit
+                </button>
                 }
-
-                <p class="quiz-date">{{ deck.createdAt | date:'dd/MM/yyyy' }}</p>
-
-                 <div class="quiz-footer">
-                   <span class="text-[12px] text-gray-400 font-medium">{{ deck.questionCount }} questions</span>
-                   <div style="display: flex; gap: 8px;">
-                       @if (deck.visibility !== 'Shared') {
-                         <button class="edit-published-btn" (click)="$event.stopPropagation()" [routerLink]="['/edit-deck', deck.id]">
-                           <span class="material-symbols-outlined" style="font-size:16px; margin-right:2px; vertical-align: middle;">edit</span>
-                           Edit
-                         </button>
-                       }
-                       <button class="study-btn" (click)="$event.stopPropagation()" [routerLink]="['/deck', deck.id]">Study</button>
-                   </div>
-                 </div>
+                @if(deck.status === 'Published'){
+                <button class="study-btn" (click)="$event.stopPropagation()"
+                  [routerLink]="['/deck', deck.id]">Study</button>
+                }
               </div>
             </div>
-          }
+          </div>
+        </div>
+        }
 
-          @if (filteredSets.length === 0 && !loading()) {
-             <div class="empty-state">
-               <span class="material-symbols-outlined empty-icon">search_off</span>
-               <p>No study sets found.</p>
-               @if (hasActiveFilters) {
-                 <button class="mt-3 text-[13px] font-bold text-[#4255FF] bg-transparent border-none cursor-pointer" (click)="clearFilters()">Clear filters</button>
-               } @else {
-                 <a routerLink="/add-deck" class="mt-3 inline-flex items-center gap-1.5 px-5 py-2.5 bg-[#4255FF] text-white text-[13px] font-bold rounded-lg no-underline hover:bg-[#3345e0] transition-colors">
-                   <span class="material-symbols-outlined text-[18px]">add</span>
-                   Create study set
-                 </a>
-               }
-             </div>
+        @if (filteredSets.length === 0 && !loading()) {
+        <div class="empty-state">
+          <span class="material-symbols-outlined empty-icon">search_off</span>
+          <p>No study sets found.</p>
+          @if (hasActiveFilters) {
+          <button class="mt-3 text-[13px] font-bold text-[#4255FF] bg-transparent border-none cursor-pointer"
+            (click)="clearFilters()">Clear filters</button>
+          } @else {
+          <a routerLink="/add-deck"
+            class="mt-3 inline-flex items-center gap-1.5 px-5 py-2.5 bg-[#4255FF] text-white text-[13px] font-bold rounded-lg no-underline hover:bg-[#3345e0] transition-colors">
+            <span class="material-symbols-outlined text-[18px]">add</span>
+            Create study set
+          </a>
           }
         </div>
-
-        <!-- Pagination -->
-        @if (totalPages > 1) {
-          <div class="pagination">
-            <button class="page-btn" [disabled]="currentPage() === 1" (click)="changePage(currentPage() - 1)">
-              <span class="material-symbols-outlined">chevron_left</span>
-            </button>
-             <div class="page-info">
-               Page <span class="current-page">{{ currentPage() }}</span> / {{ totalPages }}
-             </div>
-            <button class="page-btn" [disabled]="currentPage() === totalPages" (click)="changePage(currentPage() + 1)">
-              <span class="material-symbols-outlined">chevron_right</span>
-            </button>
-          </div>
         }
+      </div>
+
+      <!-- Pagination -->
+      @if (totalPages > 1) {
+      <div class="pagination">
+        <button class="page-btn" [disabled]="currentPage() === 1" (click)="changePage(currentPage() - 1)">
+          <span class="material-symbols-outlined">chevron_left</span>
+        </button>
+        <div class="page-info">
+          Page <span class="current-page">{{ currentPage() }}</span> / {{ totalPages }}
+        </div>
+        <button class="page-btn" [disabled]="currentPage() === totalPages" (click)="changePage(currentPage() + 1)">
+          <span class="material-symbols-outlined">chevron_right</span>
+        </button>
+      </div>
+      }
       }
     </div>
   </div>

@@ -20,7 +20,6 @@ export interface UserSubscriptionResponse {
   startDate: string;
   endDate: string;
   isExpired: boolean;
-  currentGenerateCount: number;
 }
 
 export interface CreatePaymentOrderRequest {

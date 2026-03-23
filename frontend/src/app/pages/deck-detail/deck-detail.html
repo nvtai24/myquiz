@@ -113,6 +113,16 @@
             </p>
           }
 
+          <!-- Creator -->
+          <div class="flex items-center gap-2 mb-4">
+            <div class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-gray-50 border border-gray-100 rounded-xl text-[12px] text-gray-500">
+              <span class="material-symbols-outlined text-[18px] text-[#4255FF]">person</span>
+              <span class="font-bold text-gray-700">Created by</span>
+              <span class="font-black text-gray-900">{{ deck()!.ownerName }}</span>
+              <span class="opacity-60">({{ deck()!.ownerEmail }})</span>
+            </div>
+          </div>
+
           <!-- Tags -->
           @if (deck()!.tags?.length) {
             <div class="flex flex-wrap gap-1.5 mb-3">

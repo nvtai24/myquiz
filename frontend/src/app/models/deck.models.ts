@@ -18,6 +18,8 @@ export interface DeckSummaryResponse {
   thumbnailUrl?: string;
   averageRating?: number;
   totalRatings?: number;
+  ownerName: string;
+  ownerEmail: string;
   createdAt: string;
   updatedAt: string | null;
 }

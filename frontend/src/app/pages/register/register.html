@@ -5,7 +5,8 @@
     <div class="flex items-center gap-2">
       <img src="images/logo.png" alt="MyQuiz" style="height: 40px; width: auto;">
     </div>
-    <a class="text-sm font-medium text-[#726388] hover:text-primary transition-colors cursor-pointer" routerLink="/login">
+    <a class="text-sm font-medium text-[#726388] hover:text-primary transition-colors cursor-pointer"
+      routerLink="/login">
       Sign In
     </a>
   </div>
@@ -16,7 +17,7 @@
       <!-- Title -->
       <div class="flex flex-col gap-2">
         <h1 class="text-[#141118] text-[32px] font-black leading-tight tracking-[-0.033em]">
-         Create Account
+          Create Account
         </h1>
         <p class="text-[#726388] text-base font-normal">
           Join the smartest learning community today.
@@ -30,42 +31,36 @@
             <label class="block flex-1">
               <span class="text-[#141118] text-sm font-medium mb-1.5 block">First Name</span>
               <div class="relative group">
-                <input
-                  type="text"
-                  formControlName="firstName"
-                  placeholder="Enter your first name"
+                <input type="text" formControlName="firstName" placeholder="Enter your first name"
                   class="w-full h-12 rounded-xl border border-[#e0dce5] px-4 pl-11 text-base text-[#141118] placeholder:text-[#726388]/60 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all bg-white"
-              [class.border-red-500]="registerForm.get('firstName')?.invalid && showErrors()"
-              />
-              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#726388] group-focus-within:text-primary transition-colors text-[20px]">
-                person
-              </span>
-            </div>
-            @if (registerForm.get('firstName')?.invalid && showErrors()) {
+                  [class.border-red-500]="registerForm.get('firstName')?.invalid && showErrors()" />
+                <span
+                  class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#726388] group-focus-within:text-primary transition-colors text-[20px]">
+                  person
+                </span>
+              </div>
+              @if (registerForm.get('firstName')?.invalid && showErrors()) {
               <div class="mt-1 text-red-500 text-xs">
                 First name is required.
               </div>
-            }
+              }
             </label>
             <label class="block flex-1">
               <span class="text-[#141118] text-sm font-medium mb-1.5 block">Last Name</span>
               <div class="relative group">
-                <input
-                  type="text"
-                  formControlName="lastName"
-                  placeholder="Enter your last name"
+                <input type="text" formControlName="lastName" placeholder="Enter your last name"
                   class="w-full h-12 rounded-xl border border-[#e0dce5] px-4 pl-11 text-base text-[#141118] placeholder:text-[#726388]/60 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all bg-white"
-              [class.border-red-500]="registerForm.get('lastName')?.invalid && showErrors()"
-              />
-              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#726388] group-focus-within:text-primary transition-colors text-[20px]">
-                badge
-              </span>
-            </div>
-            @if (registerForm.get('lastName')?.invalid && showErrors()) {
+                  [class.border-red-500]="registerForm.get('lastName')?.invalid && showErrors()" />
+                <span
+                  class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#726388] group-focus-within:text-primary transition-colors text-[20px]">
+                  badge
+                </span>
+              </div>
+              @if (registerForm.get('lastName')?.invalid && showErrors()) {
               <div class="mt-1 text-red-500 text-xs">
                 Last name is required.
               </div>
-            }
+              }
             </label>
           </div>
 
@@ -73,26 +68,23 @@
           <label class="block">
             <span class="text-[#141118] text-sm font-medium mb-1.5 block">Email Address</span>
             <div class="relative group">
-              <input
-                type="email"
-                formControlName="email"
-                placeholder="name@example.com"
+              <input type="email" formControlName="email" placeholder="name@example.com"
                 class="w-full h-12 rounded-xl border border-[#e0dce5] px-4 pl-11 text-base text-[#141118] placeholder:text-[#726388]/60 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all bg-white"
-              [class.border-red-500]="registerForm.get('email')?.invalid && showErrors()"
-              />
-              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#726388] group-focus-within:text-primary transition-colors text-[20px]">
+                [class.border-red-500]="registerForm.get('email')?.invalid && showErrors()" />
+              <span
+                class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#726388] group-focus-within:text-primary transition-colors text-[20px]">
                 mail
               </span>
             </div>
             @if (registerForm.get('email')?.invalid && showErrors()) {
-              <div class="mt-1 text-red-500 text-xs">
-                @if (registerForm.get('email')?.errors?.['required']) {
-                  Email is required.
-                }
-                @if (registerForm.get('email')?.errors?.['email']) {
-                  Please enter a valid email address.
-                }
-              </div>
+            <div class="mt-1 text-red-500 text-xs">
+              @if (registerForm.get('email')?.errors?.['required']) {
+              Email is required.
+              }
+              @if (registerForm.get('email')?.errors?.['email']) {
+              Please enter a valid email address.
+              }
+            </div>
             }
           </label>
 
@@ -100,41 +92,36 @@
           <label class="block">
             <span class="text-[#141118] text-sm font-medium mb-1.5 block">Password</span>
             <div class="relative group">
-              <input
-                [type]="showPassword() ? 'text' : 'password'"
-                formControlName="password"
+              <input [type]="showPassword() ? 'text' : 'password'" formControlName="password"
                 placeholder="Enter your password"
                 class="w-full h-12 rounded-xl border border-[#e0dce5] px-4 pl-11 pr-10 text-base text-[#141118] placeholder:text-[#726388]/60 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all bg-white"
-                [class.border-red-500]="registerForm.get('password')?.invalid && showErrors()"
-              />
-              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#726388] group-focus-within:text-primary transition-colors text-[20px]">
+                [class.border-red-500]="registerForm.get('password')?.invalid && showErrors()" />
+              <span
+                class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#726388] group-focus-within:text-primary transition-colors text-[20px]">
                 lock
               </span>
-              <button
-                type="button"
-                (click)="togglePassword()"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-[#726388] hover:text-[#141118] transition-colors focus:outline-none cursor-pointer"
-              >
+              <button type="button" (click)="togglePassword()"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-[#726388] hover:text-[#141118] transition-colors focus:outline-none cursor-pointer">
                 <span class="material-symbols-outlined text-[20px]">
                   {{ showPassword() ? 'visibility_off' : 'visibility' }}
                 </span>
               </button>
             </div>
             @if (registerForm.get('password')?.invalid && showErrors()) {
-              <div class="mt-1 text-red-500 text-xs">
-                @if (registerForm.get('password')?.errors?.['required']) {
-                  Password is required.
-                }
-                @if (registerForm.get('password')?.errors?.['minlength']) {
-                  Password must be at least 8 characters.
-                }
-                @if (registerForm.get('password')?.errors?.['missingUpperCase']) {
-                  Must contain at least one uppercase letter (A-Z).
-                }
-                @if (registerForm.get('password')?.errors?.['missingSpecialChar']) {
-                  Must contain at least one special character (!&#64;#$...).
-                }
-              </div>
+            <div class="mt-1 text-red-500 text-xs">
+              @if (registerForm.get('password')?.errors?.['required']) {
+              Password is required.
+              }
+              @if (registerForm.get('password')?.errors?.['minlength']) {
+              Password must be at least 8 characters.
+              }
+              @if (registerForm.get('password')?.errors?.['missingUpperCase']) {
+              Must contain at least one uppercase letter (A-Z).
+              }
+              @if (registerForm.get('password')?.errors?.['missingSpecialChar']) {
+              Must contain at least one special character (!&#64;#$...).
+              }
+            </div>
             }
           </label>
 
@@ -142,50 +129,42 @@
           <label class="block">
             <span class="text-[#141118] text-sm font-medium mb-1.5 block">Confirm Password</span>
             <div class="relative group">
-              <input
-                [type]="showConfirmPassword() ? 'text' : 'password'"
-                formControlName="confirmPassword"
+              <input [type]="showConfirmPassword() ? 'text' : 'password'" formControlName="confirmPassword"
                 placeholder="Re-enter your password"
                 class="w-full h-12 rounded-xl border border-[#e0dce5] px-4 pl-11 pr-10 text-base text-[#141118] placeholder:text-[#726388]/60 focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all bg-white"
-                [class.border-red-500]="(registerForm.get('confirmPassword')?.invalid || registerForm.hasError('passwordMismatch')) && showErrors()"
-              />
-              <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#726388] group-focus-within:text-primary transition-colors text-[20px]">
+                [class.border-red-500]="(registerForm.get('confirmPassword')?.invalid || registerForm.hasError('passwordMismatch')) && showErrors()" />
+              <span
+                class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-[#726388] group-focus-within:text-primary transition-colors text-[20px]">
                 lock_reset
               </span>
-              <button
-                type="button"
-                (click)="toggleConfirmPassword()"
-                class="absolute right-3 top-1/2 -translate-y-1/2 text-[#726388] hover:text-[#141118] transition-colors focus:outline-none cursor-pointer"
-              >
+              <button type="button" (click)="toggleConfirmPassword()"
+                class="absolute right-3 top-1/2 -translate-y-1/2 text-[#726388] hover:text-[#141118] transition-colors focus:outline-none cursor-pointer">
                 <span class="material-symbols-outlined text-[20px]">
                   {{ showConfirmPassword() ? 'visibility_off' : 'visibility' }}
                 </span>
               </button>
             </div>
             @if (showErrors()) {
-              @if (registerForm.get('confirmPassword')?.errors?.['required']) {
-                <div class="mt-1 text-red-500 text-xs">Please confirm your password.</div>
-              } @else if (registerForm.hasError('passwordMismatch')) {
-                <div class="mt-1 text-red-500 text-xs">Passwords do not match.</div>
-              }
+            @if (registerForm.get('confirmPassword')?.errors?.['required']) {
+            <div class="mt-1 text-red-500 text-xs">Please confirm your password.</div>
+            } @else if (registerForm.hasError('passwordMismatch')) {
+            <div class="mt-1 text-red-500 text-xs">Passwords do not match.</div>
+            }
             }
           </label>
         </div>
 
         <!-- Create Account Button -->
-       <button
-          type="submit"
-          [disabled]="isLoading()"
-          class="w-full h-14 mt-2 rounded-xl bg-gradient-to-r from-brand-purple to-brand-blue text-white font-semibold text-lg hover:shadow-lg hover:shadow-primary/30 transition-all active:scale-[0.99] flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed"
-        >
+        <button type="submit" [disabled]="isLoading()"
+          class="w-full h-14 mt-2 rounded-xl bg-gradient-to-r from-brand-purple to-brand-blue text-white font-semibold text-lg hover:shadow-lg hover:shadow-primary/30 transition-all active:scale-[0.99] flex items-center justify-center gap-2 group cursor-pointer disabled:opacity-70 disabled:cursor-not-allowed">
           @if (isLoading()) {
-            <span class="animate-spin material-symbols-outlined">progress_activity</span>
-            Processing...
+          <span class="animate-spin material-symbols-outlined">progress_activity</span>
+          Processing...
           } @else {
-           Create Account
-            <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">
-              arrow_forward
-            </span>
+          Create Account
+          <span class="material-symbols-outlined group-hover:translate-x-1 transition-transform">
+            arrow_forward
+          </span>
           }
         </button>
 
@@ -199,29 +178,49 @@
           </div>
         </div>
 
-        <!-- Google Sign In Button Container -->
-        <div class="w-full flex justify-center mt-2">
-          <div #googleBtnContainer class="w-full" style="min-height: 48px;"></div>
+        <!-- Google Sign In — custom styled, matches register page -->
+        <div class="google-signin-wrapper">
+          <!-- Custom visual layer (visible to user) -->
+          <div class="google-signin-visual">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path
+                d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"
+                fill="#4285F4" />
+              <path
+                d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
+                fill="#34A853" />
+              <path
+                d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"
+                fill="#FBBC05" />
+              <path
+                d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"
+                fill="#EA4335" />
+            </svg>
+            <span class="text-sm font-medium text-[#141118]">Sign in with Google</span>
+          </div>
+          <!-- Google's actual rendered button (invisible overlay, catches clicks) -->
+          <div #googleBtnContainer class="google-signin-overlay"></div>
         </div>
-        <p class="text-xs text-center text-[#726388] mt-2"> By signing up, you agree to our <a class="underline hover:text-primary" href="#">Terms</a> and <a class="underline hover:text-primary" href="#">Privacy Policy</a>.</p>
+        <p class="text-xs text-center text-[#726388] mt-2"> By signing up, you agree to our <a
+            class="underline hover:text-primary" href="#">Terms</a> and <a class="underline hover:text-primary"
+            href="#">Privacy Policy</a>.</p>
       </form>
     </div>
   </div>
 </div>
 
 <!-- Right Panel: Decorative -->
-<div class="hidden md:flex flex-1 custom-gradient relative flex-col justify-center items-center overflow-hidden p-12 text-white">
+<div
+  class="hidden md:flex flex-1 custom-gradient relative flex-col justify-center items-center overflow-hidden p-12 text-white">
   <!-- Grid Pattern Background -->
   <div class="absolute inset-0 opacity-20 grid-pattern"></div>
 
   <!-- Hero Image Section -->
   <div class="relative w-full max-w-2xl h-[500px] flex items-center justify-center">
     <div class="relative z-10 w-full h-full flex items-center justify-center">
-      <img
-        alt="Students studying together"
+      <img alt="Students studying together"
         class="rounded-2xl shadow-2xl object-cover w-[400px] h-[300px] transform -rotate-3 hover:rotate-0 transition-transform duration-700 ease-out border-4 border-white/20"
-        src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80"
-      />
+        src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&q=80" />
 
       <!-- Floating Icons -->
       <div class="absolute -top-10 -right-4 glass-panel p-5 rounded-2xl floating-icon shadow-lg">
@@ -243,72 +242,78 @@
     </h2>
     <div class="flex items-center justify-center gap-3 mt-4">
       <div class="flex -space-x-2">
-        <div class="w-10 h-10 rounded-full border-2 border-primary bg-purple-300 flex items-center justify-center text-white text-xs font-bold">A</div>
-        <div class="w-10 h-10 rounded-full border-2 border-primary bg-blue-300 flex items-center justify-center text-white text-xs font-bold">B</div>
-        <div class="w-10 h-10 rounded-full border-2 border-primary bg-pink-300 flex items-center justify-center text-white text-xs font-bold">C</div>
+        <div
+          class="w-10 h-10 rounded-full border-2 border-primary bg-purple-300 flex items-center justify-center text-white text-xs font-bold">
+          A</div>
+        <div
+          class="w-10 h-10 rounded-full border-2 border-primary bg-blue-300 flex items-center justify-center text-white text-xs font-bold">
+          B</div>
+        <div
+          class="w-10 h-10 rounded-full border-2 border-primary bg-pink-300 flex items-center justify-center text-white text-xs font-bold">
+          C</div>
       </div>
       <p class="text-white/80 text-sm font-medium">Joined by 10k+ students</p>
     </div>
   </div>
 </div>
 
- @if (errorMessage()) {
-  <div class="auth-error-banner">
-    <div class="auth-error-inner">
-      <div class="auth-error-icon-wrap">
-        <span class="material-symbols-outlined auth-error-icon">error</span>
-      </div>
-      <div class="auth-error-text">
-        <p class="auth-error-title">Registration Failed</p>
-        <p class="auth-error-msg">{{ errorMessage() }}</p>
-      </div>
-      <button class="auth-error-close" (click)="errorMessage.set(null)">
-        <span class="material-symbols-outlined">close</span>
-      </button>
+@if (errorMessage()) {
+<div class="auth-error-banner">
+  <div class="auth-error-inner">
+    <div class="auth-error-icon-wrap">
+      <span class="material-symbols-outlined auth-error-icon">error</span>
     </div>
+    <div class="auth-error-text">
+      <p class="auth-error-title">Registration Failed</p>
+      <p class="auth-error-msg">{{ errorMessage() }}</p>
+    </div>
+    <button class="auth-error-close" (click)="errorMessage.set(null)">
+      <span class="material-symbols-outlined">close</span>
+    </button>
   </div>
+</div>
 }
 
 <!-- ===== VERIFY EMAIL OVERLAY ===== -->
 @if (showVerifyOverlay()) {
-  <!-- Backdrop: làm mờ register bên dưới -->
-  <div class="verify-overlay-backdrop"></div>
+<!-- Backdrop: làm mờ register bên dưới -->
+<div class="verify-overlay-backdrop"></div>
 
-  <!-- Modal card -->
-  <div class="verify-overlay-wrap">
-    <div class="verify-overlay-card">
-      <!-- Confetti dots -->
-      <span class="conf-dot conf-1"></span>
-      <span class="conf-dot conf-2"></span>
-      <span class="conf-dot conf-3"></span>
-      <span class="conf-dot conf-4"></span>
+<!-- Modal card -->
+<div class="verify-overlay-wrap">
+  <div class="verify-overlay-card">
+    <!-- Confetti dots -->
+    <span class="conf-dot conf-1"></span>
+    <span class="conf-dot conf-2"></span>
+    <span class="conf-dot conf-3"></span>
+    <span class="conf-dot conf-4"></span>
 
-      <!-- Icon -->
-      <div class="verify-icon-circle">
-        <span class="material-symbols-outlined verify-icon">forward_to_inbox</span>
-      </div>
-
-      <!-- Title -->
-      <h2 class="verify-title">Check your email</h2>
-      <p class="verify-sub">
-        We've sent a confirmation link to
-      </p>
-      <p class="verify-email-badge">{{ registeredEmail() }}</p>
-      <p class="verify-sub">
-        Click <strong>Confirm Email</strong> in the email to activate your account.
-      </p>
-
-      <!-- Info -->
-      <div class="verify-info-note">
-        <span class="material-symbols-outlined">info</span>
-        <span>Didn't receive it? Check your spam folder. Link expires in 24 hours.</span>
-      </div>
-
-      <!-- Sign in button -->
-      <button class="verify-signin-btn" (click)="goToLogin()">
-        <span class="material-symbols-outlined">login</span>
-        Go to Sign In
-      </button>
+    <!-- Icon -->
+    <div class="verify-icon-circle">
+      <span class="material-symbols-outlined verify-icon">forward_to_inbox</span>
     </div>
+
+    <!-- Title -->
+    <h2 class="verify-title">Check your email</h2>
+    <p class="verify-sub">
+      We've sent a confirmation link to
+    </p>
+    <p class="verify-email-badge">{{ registeredEmail() }}</p>
+    <p class="verify-sub">
+      Click <strong>Confirm Email</strong> in the email to activate your account.
+    </p>
+
+    <!-- Info -->
+    <div class="verify-info-note">
+      <span class="material-symbols-outlined">info</span>
+      <span>Didn't receive it? Check your spam folder. Link expires in 24 hours.</span>
+    </div>
+
+    <!-- Sign in button -->
+    <button class="verify-signin-btn" (click)="goToLogin()">
+      <span class="material-symbols-outlined">login</span>
+      Go to Sign In
+    </button>
   </div>
+</div>
 }

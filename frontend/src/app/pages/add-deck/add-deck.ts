@@ -64,7 +64,7 @@ export class AddDeck implements OnInit {
   /* ── Creation mode ── */
   mode = signal<'manual' | 'ai'>('manual');
   checkLimit = signal(false);
-
+  checkLimitDeck = signal(false);
   /* ── AI Generation ── */
   aiSource = signal<'upload' | 'paste'>('upload');
   aiPasteText = signal('');
@@ -134,6 +134,9 @@ export class AddDeck implements OnInit {
 
         if (limit && limit.numDeckUsed >= limit.numDeckLimit && limit.numDeckLimit !== 0) {
           this.checkLimit.set(true);
+        }
+        if(limit && limit.numDeckUsed > limit.numDeckLimit && limit.numDeckLimit !== 0){
+          this.checkLimitDeck.set(true);
         }
       },
       error: () => {

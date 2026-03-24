@@ -18,7 +18,7 @@
     </div>
     <div class="flex items-center gap-3">
 
-       @if (isEditMode()) {
+      @if (isEditMode()) {
       <button
         class="flex items-center gap-1.5 bg-white border border-red-200 text-red-500 text-[13px] font-semibold cursor-pointer px-5 py-2.5 rounded-xl transition-all hover:bg-red-50 hover:border-red-300 hover:text-red-600 disabled:opacity-50 disabled:cursor-not-allowed"
         (click)="deleteDeck()" [disabled]="deleting()">
@@ -43,29 +43,32 @@
           <option value="private">Private</option>
           <option value="shared">Shared</option>
         </select>
-        <span class="material-symbols-outlined text-[14px] absolute right-2 pointer-events-none text-gray-400">expand_more</span>
+        <span
+          class="material-symbols-outlined text-[14px] absolute right-2 pointer-events-none text-gray-400">expand_more</span>
       </div>
-     
+
       @if (canShowSaveDraft) {
-        <button
-          class="flex items-center gap-1.5 bg-white border border-gray-200 text-[13px] font-semibold cursor-pointer px-5 py-2.5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          [class]="canSaveDraft ? 'text-[#141118] hover:bg-gray-50 hover:border-gray-300' : 'text-gray-400'"
-          (click)="saveDraft()" [disabled]="savingDraft()">
-          @if (savingDraft()) {
-          <span class="material-symbols-outlined text-[17px] animate-spin">progress_activity</span>
-          Saving...
-          } @else {
-          <span class="material-symbols-outlined text-[17px]">save</span>
-          Save draft
-          }
-        </button>
+      <button
+        class="flex items-center gap-1.5 bg-white border border-gray-200 text-[13px] font-semibold cursor-pointer px-5 py-2.5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        [class]="canSaveDraft ? 'text-[#141118] hover:bg-gray-50 hover:border-gray-300' : 'text-gray-400'"
+        (click)="saveDraft()" [disabled]="savingDraft()">
+        @if (savingDraft()) {
+        <span class="material-symbols-outlined text-[17px] animate-spin">progress_activity</span>
+        Saving...
+        } @else {
+        <span class="material-symbols-outlined text-[17px]">save</span>
+        Save draft
+        }
+      </button>
       }
-      <button (click)="create()" [disabled]="creating() || checkLimit()" [class.bg-gradient-to-r]="!checkLimit()"
-        [class.from-[#7C3AED]]="!checkLimit()" [class.to-[#4255FF]]="!checkLimit()" [class.bg-white]="checkLimit()"
-        [class.text-gray-400]="checkLimit()" [class.border]="checkLimit()" [class.border-gray-300]="checkLimit()"
+      <button (click)="create()" [disabled]="creating() || checkLimitDeck()"
+        [class.bg-gradient-to-r]="!checkLimitDeck()" [class.from-[#7C3AED]]="!checkLimitDeck()"
+        [class.to-[#4255FF]]="!checkLimitDeck()" [class.bg-white]="checkLimitDeck()"
+        [class.text-gray-400]="checkLimitDeck()" [class.border]="checkLimitDeck()"
+        [class.border-gray-300]="checkLimitDeck()"
         class="flex items-center gap-1.5 text-[13px] text-gray-300 font-bold px-6 py-2.5 rounded-xl transition-all hover:shadow-[0_4px_16px_rgba(66,85,255,0.35)] hover:-translate-y-[1px] disabled:opacity-60 disabled:cursor-not-allowed">
         @if (creating()) {
-        @if(checkLimit()){
+        @if(checkLimitDeck()){
         <span class="material-symbols-outlined text-[17px] text-gray-400">publish</span>
         Publish
         } @else {

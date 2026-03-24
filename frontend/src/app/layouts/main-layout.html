@@ -109,6 +109,7 @@
         <div class="flex items-center bg-gray-100 rounded-full px-4 py-2 gap-2 min-w-[500px]">
           <span class="material-symbols-outlined text-gray-400 text-[20px]">search</span>
           <input type="text" placeholder="Search study sets, textbooks, questions..."
+            [value]="searchQuery()" (input)="onGlobalSearch($event)" (keyup.enter)="submitSearch($event)"
             class="border-none outline-none bg-transparent text-[0.9rem] w-full text-gray-500" />
         </div>
       </div>

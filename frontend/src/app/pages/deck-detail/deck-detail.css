@@ -17,14 +17,14 @@
 .card-flip-inner {
   position: relative;
   width: 100%;
-  min-height: 320px;
+  min-height: 420px;
   transform-style: preserve-3d;
   transition: transform 0.52s cubic-bezier(0.4, 0.2, 0.2, 1);
 }
 
 @media (min-width: 640px) {
   .card-flip-inner {
-    min-height: 360px;
+    min-height: 460px;
   }
 }
 

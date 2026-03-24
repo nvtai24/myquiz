@@ -115,7 +115,9 @@
 
           <!-- Creator -->
           <div class="flex items-center gap-2 mb-4">
-            <div class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-gray-50 border border-gray-100 rounded-xl text-[12px] text-gray-500">
+            <div
+              class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-gray-50 border border-gray-100 rounded-xl text-[12px] text-gray-500"
+            >
               <span class="material-symbols-outlined text-[18px] text-[#4255FF]">person</span>
               <span class="font-bold text-gray-700">Created by</span>
               <span class="font-black text-gray-900">{{ deck()!.ownerName }}</span>
@@ -199,7 +201,7 @@
       </div>
     </div>
 
-        <!-- ── Study Modes ── -->
+    <!-- ── Study Modes ── -->
     <div class="mb-6">
       <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
         <!-- Quiz -->
@@ -320,7 +322,11 @@
               (click)="shuffleCards()"
               title="Shuffle"
               class="w-9 h-9 rounded-xl border flex items-center justify-center cursor-pointer transition-all"
-              [class]="isShuffled() ? 'bg-[#eef0ff] border-[#4255FF] text-[#4255FF]' : 'bg-white border-gray-200 text-gray-400 hover:border-[#4255FF] hover:text-[#4255FF]'"
+              [class]="
+                isShuffled()
+                  ? 'bg-[#eef0ff] border-[#4255FF] text-[#4255FF]'
+                  : 'bg-white border-gray-200 text-gray-400 hover:border-[#4255FF] hover:text-[#4255FF]'
+              "
             >
               <span class="material-symbols-outlined text-[18px]">shuffle</span>
             </button>
@@ -356,16 +362,19 @@
           <!-- Card -->
           <div class="card-flip-scene flex-1">
             <div class="card-flip-inner" [class.flipped]="isFlipped()" (click)="flipCard()">
-
               <!-- Front: Question -->
               <div
                 class="card-flip-face bg-white border-2 border-gray-200 cursor-pointer shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:border-gray-300 transition-colors"
               >
                 <div class="flex-1 p-8 flex flex-col justify-center overflow-y-auto">
-                  <p class="text-[10px] font-black text-gray-300 uppercase tracking-[0.15em] mb-4 m-0">
+                  <p
+                    class="text-[10px] font-black text-gray-300 uppercase tracking-[0.15em] mb-4 m-0"
+                  >
                     Question / Term
                   </p>
-                  <p class="text-[18px] sm:text-[20px] font-bold text-gray-900 leading-snug m-0 mb-4">
+                  <p
+                    class="text-[18px] sm:text-[20px] font-bold text-gray-900 leading-snug m-0 mb-4"
+                  >
                     {{ q.content }}
                   </p>
                   @if (q.options.length) {
@@ -391,7 +400,9 @@
                   [class.pb-4]="showHint()"
                 >
                   <div class="flex items-center justify-between">
-                    <span class="flex items-center gap-1.5 text-[12px] text-gray-300 font-semibold select-none">
+                    <span
+                      class="flex items-center gap-1.5 text-[12px] text-gray-300 font-semibold select-none"
+                    >
                       <span class="material-symbols-outlined text-[15px]">touch_app</span>
                       Tap to flip
                     </span>
@@ -399,15 +410,27 @@
                       <button
                         (click)="showHint.update(v => !v); $event.stopPropagation()"
                         class="flex items-center gap-2 px-3 py-2 rounded-xl text-[12px] border cursor-pointer transition-all w-full text-left max-w-[300px]"
-                        [class]="showHint() ? 'bg-amber-50 border-amber-300 text-amber-900' : 'bg-white border-gray-200 text-gray-400 hover:border-amber-300 hover:text-amber-500'"
+                        [class]="
+                          showHint()
+                            ? 'bg-amber-50 border-amber-300 text-amber-900'
+                            : 'bg-white border-gray-200 text-gray-400 hover:border-amber-300 hover:text-amber-500'
+                        "
                       >
                         @if (showHint()) {
-                          <span class="material-symbols-outlined text-[16px] shrink-0 text-amber-500" style="font-variation-settings: 'FILL' 1">lightbulb</span>
-                          <span class="font-medium leading-relaxed text-[13px] italic animate-in fade-in duration-200">
+                          <span
+                            class="material-symbols-outlined text-[16px] shrink-0 text-amber-500"
+                            style="font-variation-settings: 'FILL' 1"
+                            >lightbulb</span
+                          >
+                          <span
+                            class="font-medium leading-relaxed text-[13px] italic animate-in fade-in duration-200"
+                          >
                             {{ q.hint }}
                           </span>
                         } @else {
-                          <span class="material-symbols-outlined text-[16px] shrink-0">lightbulb</span>
+                          <span class="material-symbols-outlined text-[16px] shrink-0"
+                            >lightbulb</span
+                          >
                           <span class="font-black uppercase tracking-wider text-[10px]">Hint</span>
                         }
                       </button>
@@ -448,7 +471,9 @@
                   [class.pb-4]="showExplanation()"
                 >
                   <div class="flex items-center justify-between">
-                    <span class="flex items-center gap-1.5 text-[12px] text-[#4255FF]/40 font-semibold select-none">
+                    <span
+                      class="flex items-center gap-1.5 text-[12px] text-[#4255FF]/40 font-semibold select-none"
+                    >
                       <span class="material-symbols-outlined text-[15px]">touch_app</span>
                       Tap to flip back
                     </span>
@@ -456,16 +481,28 @@
                       <button
                         (click)="showExplanation.update(v => !v); $event.stopPropagation()"
                         class="flex items-center gap-2 px-3 py-2 rounded-xl text-[12px] border cursor-pointer transition-all w-full text-left max-w-[400px]"
-                        [class]="showExplanation() ? 'bg-blue-50 border-blue-300 text-blue-900' : 'bg-white border-[#4255FF]/20 text-[#4255FF]/60 hover:border-blue-300 hover:text-blue-500'"
+                        [class]="
+                          showExplanation()
+                            ? 'bg-blue-50 border-blue-300 text-blue-900'
+                            : 'bg-white border-[#4255FF]/20 text-[#4255FF]/60 hover:border-blue-300 hover:text-blue-500'
+                        "
                       >
                         @if (showExplanation()) {
-                          <span class="material-symbols-outlined text-[16px] shrink-0 text-blue-500" style="font-variation-settings: 'FILL' 1">school</span>
-                          <span class="font-medium leading-relaxed text-[13px] italic animate-in fade-in duration-200">
+                          <span
+                            class="material-symbols-outlined text-[16px] shrink-0 text-blue-500"
+                            style="font-variation-settings: 'FILL' 1"
+                            >school</span
+                          >
+                          <span
+                            class="font-medium leading-relaxed text-[13px] italic animate-in fade-in duration-200"
+                          >
                             {{ q.explanation }}
                           </span>
                         } @else {
                           <span class="material-symbols-outlined text-[16px] shrink-0">school</span>
-                          <span class="font-black uppercase tracking-wider text-[10px]">Explanation</span>
+                          <span class="font-black uppercase tracking-wider text-[10px]"
+                            >Explanation</span
+                          >
                         }
                       </button>
                     }
@@ -484,12 +521,8 @@
             <span class="material-symbols-outlined text-[20px]">arrow_forward_ios</span>
           </button>
         </div>
-
-
       </div>
     }
-
-
 
     <!-- ── Bottom: Questions + Ratings ── -->
     <div class="flex flex-col lg:flex-row gap-6 items-start">
@@ -511,111 +544,133 @@
               class="bg-white border border-gray-100 rounded-2xl p-4 hover:border-indigo-200 hover:shadow-sm transition-all"
             >
               <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                  <div class="min-w-0 rounded-2xl border border-gray-100 bg-gray-50/60 p-4">
-                    <div class="flex items-center gap-2 mb-3">
-                      <span class="material-symbols-outlined text-[18px] text-[#4255FF]">help</span>
-                      <span class="text-[11px] font-black uppercase tracking-[0.14em] text-gray-400">
-                        Question
-                      </span>
-                    </div>
-
-                    <p class="text-[14px] font-bold text-gray-900 m-0 mb-3 leading-snug">
-                      {{ q.content }}
-                    </p>
-
-                    @if (q.options.length) {
-                      <div class="flex flex-col gap-2">
-                        @for (opt of q.options; track opt; let optionIndex = $index) {
-                          <div
-                            class="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-3 py-2 text-[12px] font-semibold text-gray-700"
-                          >
-                            <span
-                              class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-[10px] font-black text-gray-500"
-                            >
-                              {{ 'ABCD'[optionIndex] }}
-                            </span>
-                            <span class="min-w-0">{{ opt }}</span>
-                          </div>
-                        }
-                      </div>
-                    }
-
-                    @if (q.hint) {
-                      <div class="mt-3">
-                        <button
-                          (click)="toggleListHint(q.id)"
-                          class="flex w-full items-start gap-2 rounded-xl border px-3 py-2 text-left text-[11px] cursor-pointer transition-all"
-                          [class]="expandedHints().has(q.id) ? 'bg-amber-50 border-amber-300 text-amber-900' : 'bg-white border-gray-200 text-gray-400 hover:border-amber-300 hover:text-amber-500'"
-                        >
-                          <span
-                            class="material-symbols-outlined text-[14px] shrink-0"
-                            [class.text-amber-500]="expandedHints().has(q.id)"
-                            [style.font-variation-settings]="expandedHints().has(q.id) ? '\'FILL\' 1' : ''"
-                            >lightbulb</span
-                          >
-                          <span class="flex-1 min-w-0">
-                            @if (expandedHints().has(q.id)) {
-                              <span class="block font-medium leading-relaxed text-[12px] italic animate-in fade-in duration-200">
-                                {{ q.hint }}
-                              </span>
-                            } @else {
-                              <span class="font-black uppercase tracking-wider text-[9px]">Hint</span>
-                            }
-                          </span>
-                        </button>
-                      </div>
-                    }
+                <div class="min-w-0 rounded-2xl border border-gray-100 bg-gray-50/60 p-4">
+                  <div class="flex items-center gap-2 mb-3">
+                    <span class="material-symbols-outlined text-[18px] text-[#4255FF]">help</span>
+                    <span class="text-[11px] font-black uppercase tracking-[0.14em] text-gray-400">
+                      Question
+                    </span>
                   </div>
 
-                  <div class="min-w-0 rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
-                    <div class="flex items-center gap-2 mb-3">
-                      <span class="material-symbols-outlined text-[18px] text-[#4255FF]">task_alt</span>
-                      <span class="text-[11px] font-black uppercase tracking-[0.14em] text-[#4255FF]/60">
-                        Correct Answer
-                      </span>
-                    </div>
+                  <p class="text-[14px] font-bold text-gray-900 m-0 mb-3 leading-snug">
+                    {{ q.content }}
+                  </p>
 
+                  @if (q.options.length) {
                     <div class="flex flex-col gap-2">
-                      @for (ans of q.correctAnswers; track ans) {
+                      @for (opt of q.options; track opt; let optionIndex = $index) {
                         <div
-                          class="flex items-center gap-3 rounded-xl border border-green-200 bg-white px-3 py-2 text-[12px] font-bold text-gray-800"
+                          class="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-3 py-2 text-[12px] font-semibold text-gray-700"
                         >
                           <span
-                            class="material-symbols-outlined text-[18px] text-green-600"
-                            style="font-variation-settings: 'FILL' 1"
-                            >check_circle</span
+                            class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-[10px] font-black text-gray-500"
                           >
-                          <span>{{ ans }}</span>
+                            {{ 'ABCD'[optionIndex] }}
+                          </span>
+                          <span class="min-w-0">{{ opt }}</span>
                         </div>
                       }
                     </div>
+                  }
 
-                    @if (q.explanation) {
-                      <div class="mt-3">
-                        <button
-                          (click)="toggleListExplanation(q.id)"
-                          class="flex w-full items-start gap-2 rounded-xl border px-3 py-2 text-left text-[11px] cursor-pointer transition-all"
-                          [class]="expandedExplanations().has(q.id) ? 'bg-blue-50 border-blue-300 text-blue-900' : 'bg-white border-blue-100 text-[#4255FF]/60 hover:border-blue-300 hover:text-blue-500'"
+                  @if (q.hint) {
+                    <div class="mt-3">
+                      <button
+                        (click)="toggleListHint(q.id)"
+                        class="flex w-full items-start gap-2 rounded-xl border px-3 py-2 text-left text-[11px] cursor-pointer transition-all"
+                        [class]="
+                          expandedHints().has(q.id)
+                            ? 'bg-amber-50 border-amber-300 text-amber-900'
+                            : 'bg-white border-gray-200 text-gray-400 hover:border-amber-300 hover:text-amber-500'
+                        "
+                      >
+                        <span
+                          class="material-symbols-outlined text-[14px] shrink-0"
+                          [class.text-amber-500]="expandedHints().has(q.id)"
+                          [style.font-variation-settings]="
+                            expandedHints().has(q.id) ? '\'FILL\' 1' : ''
+                          "
+                          >lightbulb</span
                         >
-                          <span
-                            class="material-symbols-outlined text-[14px] shrink-0"
-                            [class.text-blue-500]="expandedExplanations().has(q.id)"
-                            [style.font-variation-settings]="expandedExplanations().has(q.id) ? '\'FILL\' 1' : ''"
-                            >school</span
-                          >
-                          <span class="flex-1 min-w-0">
-                            @if (expandedExplanations().has(q.id)) {
-                              <span class="block font-medium leading-relaxed text-[12px] italic animate-in fade-in duration-200">
-                                {{ q.explanation }}
-                              </span>
-                            } @else {
-                              <span class="font-black uppercase tracking-wider text-[9px]">Explanation</span>
-                            }
-                          </span>
-                        </button>
+                        <span class="flex-1 min-w-0">
+                          @if (expandedHints().has(q.id)) {
+                            <span
+                              class="block font-medium leading-relaxed text-[12px] italic animate-in fade-in duration-200"
+                            >
+                              {{ q.hint }}
+                            </span>
+                          } @else {
+                            <span class="font-black uppercase tracking-wider text-[9px]">Hint</span>
+                          }
+                        </span>
+                      </button>
+                    </div>
+                  }
+                </div>
+
+                <div class="min-w-0 rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
+                  <div class="flex items-center gap-2 mb-3">
+                    <span class="material-symbols-outlined text-[18px] text-[#4255FF]"
+                      >task_alt</span
+                    >
+                    <span
+                      class="text-[11px] font-black uppercase tracking-[0.14em] text-[#4255FF]/60"
+                    >
+                      Correct Answer
+                    </span>
+                  </div>
+
+                  <div class="flex flex-col gap-2">
+                    @for (ans of q.correctAnswers; track ans) {
+                      <div
+                        class="flex items-center gap-3 rounded-xl border border-green-200 bg-white px-3 py-2 text-[12px] font-bold text-gray-800"
+                      >
+                        <span
+                          class="material-symbols-outlined text-[18px] text-green-600"
+                          style="font-variation-settings: 'FILL' 1"
+                          >check_circle</span
+                        >
+                        <span>{{ ans }}</span>
                       </div>
                     }
                   </div>
+
+                  @if (q.explanation) {
+                    <div class="mt-3">
+                      <button
+                        (click)="toggleListExplanation(q.id)"
+                        class="flex w-full items-start gap-2 rounded-xl border px-3 py-2 text-left text-[11px] cursor-pointer transition-all"
+                        [class]="
+                          expandedExplanations().has(q.id)
+                            ? 'bg-blue-50 border-blue-300 text-blue-900'
+                            : 'bg-white border-blue-100 text-[#4255FF]/60 hover:border-blue-300 hover:text-blue-500'
+                        "
+                      >
+                        <span
+                          class="material-symbols-outlined text-[14px] shrink-0"
+                          [class.text-blue-500]="expandedExplanations().has(q.id)"
+                          [style.font-variation-settings]="
+                            expandedExplanations().has(q.id) ? '\'FILL\' 1' : ''
+                          "
+                          >school</span
+                        >
+                        <span class="flex-1 min-w-0">
+                          @if (expandedExplanations().has(q.id)) {
+                            <span
+                              class="block font-medium leading-relaxed text-[12px] italic animate-in fade-in duration-200"
+                            >
+                              {{ q.explanation }}
+                            </span>
+                          } @else {
+                            <span class="font-black uppercase tracking-wider text-[9px]"
+                              >Explanation</span
+                            >
+                          }
+                        </span>
+                      </button>
+                    </div>
+                  }
+                </div>
               </div>
             </div>
           }
@@ -921,17 +976,13 @@
   </div>
 }
 
-
 <!-- ── Quiz Config Modal ── -->
 @if (isQuizConfigOpen()) {
   <div
     class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
     (click)="closeQuizConfig()"
   >
-    <div
-      class="bg-white w-full max-w-lg rounded-2xl shadow-2xl"
-      (click)="$event.stopPropagation()"
-    >
+    <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl" (click)="$event.stopPropagation()">
       <!-- Header -->
       <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-gray-100">
         <div>
@@ -947,27 +998,35 @@
       </div>
 
       <div class="px-6 py-5 flex flex-col gap-5">
-
         <!-- Question Count -->
         <div class="bg-gray-50 rounded-xl p-4">
           <div class="flex items-center justify-between mb-3">
             <span class="text-[13px] font-black text-gray-700">Number of Questions</span>
-            <div class="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-2 py-1">
+            <div
+              class="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-2 py-1"
+            >
               <button
                 class="w-6 h-6 rounded flex items-center justify-center font-black text-[15px] text-gray-500 border-none bg-transparent cursor-pointer hover:text-gray-900 disabled:opacity-30 leading-none"
                 [disabled]="quizConfig().questionCount <= 1"
                 (click)="setQuizConfigQuestionCount(quizConfig().questionCount - 1)"
-              >−</button>
-              <span class="w-8 text-center text-[14px] font-black text-gray-900 tabular-nums">{{ quizConfig().questionCount }}</span>
+              >
+                −
+              </button>
+              <span class="w-8 text-center text-[14px] font-black text-gray-900 tabular-nums">{{
+                quizConfig().questionCount
+              }}</span>
               <button
                 class="w-6 h-6 rounded flex items-center justify-center font-black text-[15px] text-gray-500 border-none bg-transparent cursor-pointer hover:text-gray-900 disabled:opacity-30 leading-none"
                 [disabled]="quizConfig().questionCount >= (deck()?.questionCount ?? 10)"
                 (click)="setQuizConfigQuestionCount(quizConfig().questionCount + 1)"
-              >+</button>
+              >
+                +
+              </button>
             </div>
           </div>
           <input
-            type="range" min="1"
+            type="range"
+            min="1"
             [max]="deck()?.questionCount ?? 10"
             [value]="quizConfig().questionCount"
             (input)="setQuizConfigQuestionCount(+$any($event.target).value)"
@@ -981,23 +1040,32 @@
 
         <!-- Question Types -->
         <div>
-          <p class="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2.5 m-0">Question Types</p>
+          <p class="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2.5 m-0">
+            Question Types
+          </p>
           <div class="grid grid-cols-3 gap-2">
-            @for (type of [
-              { key: 'MultipleChoice', label: 'Multiple Choice', icon: 'checklist' },
-              { key: 'TrueFalse', label: 'True / False', icon: 'check_circle' },
-              { key: 'FillInTheBlank', label: 'Fill in Blank', icon: 'edit_note' }
-            ]; track type.key) {
+            @for (
+              type of [
+                { key: 'MultipleChoice', label: 'Multiple Choice', icon: 'checklist' },
+                { key: 'TrueFalse', label: 'True / False', icon: 'check_circle' },
+                { key: 'FillInTheBlank', label: 'Fill in Blank', icon: 'edit_note' },
+              ];
+              track type.key
+            ) {
               <button
                 class="flex flex-col items-center gap-2 py-3.5 px-2 rounded-xl border-2 cursor-pointer transition-all select-none text-center"
-                [class]="isTypeEnabled(type.key)
-                  ? 'border-[#4255FF] bg-indigo-50/50 text-[#4255FF]'
-                  : 'border-gray-100 bg-white text-gray-400 hover:border-gray-200'"
+                [class]="
+                  isTypeEnabled(type.key)
+                    ? 'border-[#4255FF] bg-indigo-50/50 text-[#4255FF]'
+                    : 'border-gray-100 bg-white text-gray-400 hover:border-gray-200'
+                "
                 (click)="toggleQuizConfigType($any(type.key))"
               >
-                <span class="material-symbols-outlined text-[22px]"
+                <span
+                  class="material-symbols-outlined text-[22px]"
                   [style.font-variation-settings]="isTypeEnabled(type.key) ? '\'FILL\' 1' : ''"
-                >{{ type.icon }}</span>
+                  >{{ type.icon }}</span
+                >
                 <span class="text-[11px] font-bold leading-tight">{{ type.label }}</span>
               </button>
             }
@@ -1006,28 +1074,51 @@
 
         <!-- Options -->
         <div>
-          <p class="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2.5 m-0">Options</p>
-          <div class="flex flex-col divide-y divide-gray-50 border border-gray-100 rounded-xl overflow-hidden">
-            @for (opt of [
-              { key: 'shuffle', label: 'Shuffle Questions', desc: 'Randomize order', icon: 'shuffle' },
-              { key: 'showTimer', label: 'Show Timer', desc: 'Track duration', icon: 'timer' },
-              { key: 'enableHints', label: 'Enable Hints', desc: 'Allow hints during quiz', icon: 'lightbulb' }
-            ]; track opt.key) {
+          <p class="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2.5 m-0">
+            Options
+          </p>
+          <div
+            class="flex flex-col divide-y divide-gray-50 border border-gray-100 rounded-xl overflow-hidden"
+          >
+            @for (
+              opt of [
+                {
+                  key: 'shuffle',
+                  label: 'Shuffle Questions',
+                  desc: 'Randomize order',
+                  icon: 'shuffle',
+                },
+                { key: 'showTimer', label: 'Show Timer', desc: 'Track duration', icon: 'timer' },
+                {
+                  key: 'enableHints',
+                  label: 'Enable Hints',
+                  desc: 'Allow hints during quiz',
+                  icon: 'lightbulb',
+                },
+              ];
+              track opt.key
+            ) {
               <div
                 class="flex items-center gap-3 px-4 py-3 cursor-pointer select-none hover:bg-gray-50 transition-colors"
                 (click)="toggleQuizConfigOption($any(opt.key))"
               >
-                <span class="material-symbols-outlined text-[20px] shrink-0"
+                <span
+                  class="material-symbols-outlined text-[20px] shrink-0"
                   [class]="isOptionEnabled($any(opt.key)) ? 'text-[#4255FF]' : 'text-gray-300'"
-                >{{ opt.icon }}</span>
+                  >{{ opt.icon }}</span
+                >
                 <div class="flex-1 min-w-0">
                   <div class="text-[13px] font-bold text-gray-800">{{ opt.label }}</div>
                   <div class="text-[11px] text-gray-400">{{ opt.desc }}</div>
                 </div>
-                <div class="w-9 h-5 rounded-full transition-all shrink-0 relative"
-                  [class]="isOptionEnabled($any(opt.key)) ? 'bg-[#4255FF]' : 'bg-gray-200'">
-                  <div class="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all duration-200"
-                    [class]="isOptionEnabled($any(opt.key)) ? 'left-4' : 'left-0.5'"></div>
+                <div
+                  class="w-9 h-5 rounded-full transition-all shrink-0 relative"
+                  [class]="isOptionEnabled($any(opt.key)) ? 'bg-[#4255FF]' : 'bg-gray-200'"
+                >
+                  <div
+                    class="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all duration-200"
+                    [class]="isOptionEnabled($any(opt.key)) ? 'left-4' : 'left-0.5'"
+                  ></div>
                 </div>
               </div>
             }
@@ -1040,10 +1131,16 @@
         <button
           class="px-5 py-2.5 rounded-xl bg-gray-100 border-none text-gray-600 font-bold text-[13px] cursor-pointer hover:bg-gray-200 transition-colors"
           (click)="closeQuizConfig()"
-        >Cancel</button>
+        >
+          Cancel
+        </button>
         <button
           class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border-none text-white font-black text-[14px] cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-          [class]="quizConfigValid ? 'bg-[#4255FF] hover:bg-[#3345e0] shadow-[0_4px_14px_rgba(66,85,255,0.25)]' : 'bg-gray-300'"
+          [class]="
+            quizConfigValid
+              ? 'bg-[#4255FF] hover:bg-[#3345e0] shadow-[0_4px_14px_rgba(66,85,255,0.25)]'
+              : 'bg-gray-300'
+          "
           [disabled]="!quizConfigValid"
           (click)="closeQuizConfig(); startStudy()"
         >

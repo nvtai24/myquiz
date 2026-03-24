@@ -33,10 +33,10 @@ export class QuizResult implements OnInit {
 
   get greeting(): string {
     const s = this.score();
-    if (s >= 90) return 'Xuất sắc!';
-    if (s >= 70) return 'Làm tốt lắm!';
-    if (s >= 50) return 'Tiếp tục cố gắng!';
-    return 'Hãy ôn luyện thêm!';
+    if (s >= 90) return 'Outstanding!';
+    if (s >= 70) return 'Great job!';
+    if (s >= 50) return 'Keep it up!';
+    return 'Keep practicing!';
   }
 
   get starsCount(): number {

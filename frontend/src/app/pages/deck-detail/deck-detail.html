@@ -1022,12 +1022,15 @@
               track type.key
             ) {
               <button
-                class="flex flex-col items-center gap-2 py-3.5 px-2 rounded-xl border-2 cursor-pointer transition-all select-none text-center"
+                class="flex flex-col items-center gap-1.5 py-3.5 px-2 rounded-xl border-2 transition-all select-none text-center"
                 [class]="
-                  isTypeEnabled(type.key)
-                    ? 'border-[#4255FF] bg-indigo-50/50 text-[#4255FF]'
-                    : 'border-gray-100 bg-white text-gray-400 hover:border-gray-200'
+                  !isTypeAvailable(type.key)
+                    ? 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed opacity-60'
+                    : isTypeEnabled(type.key)
+                      ? 'border-[#4255FF] bg-indigo-50/50 text-[#4255FF] cursor-pointer'
+                      : 'border-gray-100 bg-white text-gray-400 hover:border-gray-200 cursor-pointer'
                 "
+                [disabled]="!isTypeAvailable(type.key)"
                 (click)="toggleQuizConfigType($any(type.key))"
               >
                 <span
@@ -1036,6 +1039,11 @@
                   >{{ type.icon }}</span
                 >
                 <span class="text-[11px] font-bold leading-tight">{{ type.label }}</span>
+                @if (isTypeAvailable(type.key)) {
+                  <span class="text-[10px] font-semibold opacity-60">{{ getTypeCount(type.key) }} qs</span>
+                } @else {
+                  <span class="text-[10px] font-semibold">None</span>
+                }
               </button>
             }
           </div>

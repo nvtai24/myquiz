@@ -149,9 +149,36 @@ export class DeckDetail implements OnInit {
     enableHints: true,
   });
 
+  availableTypes = computed(() => {
+    const questions = this.deck()?.questions ?? [];
+    return {
+      MultipleChoice: questions.some(q => q.type === 'MultipleChoice'),
+      TrueFalse: questions.some(q => q.type === 'TrueFalse'),
+      FillInTheBlank: questions.some(q => q.type === 'FillInTheBlank'),
+    };
+  });
+
+  typeCounts = computed(() => {
+    const questions = this.deck()?.questions ?? [];
+    return {
+      MultipleChoice: questions.filter(q => q.type === 'MultipleChoice').length,
+      TrueFalse: questions.filter(q => q.type === 'TrueFalse').length,
+      FillInTheBlank: questions.filter(q => q.type === 'FillInTheBlank').length,
+    };
+  });
+
   openQuizConfig() {
     const total = this.deck()?.questionCount ?? 10;
-    this.quizConfig.update(c => ({ ...c, questionCount: Math.min(c.questionCount, total) }));
+    const available = this.availableTypes();
+    this.quizConfig.update(c => ({
+      ...c,
+      questionCount: Math.min(c.questionCount, total),
+      types: {
+        MultipleChoice: available.MultipleChoice,
+        TrueFalse: available.TrueFalse,
+        FillInTheBlank: available.FillInTheBlank,
+      },
+    }));
     this.isQuizConfigOpen.set(true);
   }
 
@@ -163,6 +190,7 @@ export class DeckDetail implements OnInit {
   }
 
   toggleQuizConfigType(type: 'MultipleChoice' | 'TrueFalse' | 'FillInTheBlank') {
+    if (!this.availableTypes()[type]) return;
     this.quizConfig.update(c => ({
       ...c,
       types: { ...c.types, [type]: !c.types[type] }
@@ -175,12 +203,23 @@ export class DeckDetail implements OnInit {
 
   get quizConfigValid(): boolean {
     const t = this.quizConfig().types;
-    return t.MultipleChoice || t.TrueFalse || t.FillInTheBlank;
+    const a = this.availableTypes();
+    return (t.MultipleChoice && a.MultipleChoice) ||
+           (t.TrueFalse && a.TrueFalse) ||
+           (t.FillInTheBlank && a.FillInTheBlank);
   }
 
   isTypeEnabled(key: string): boolean {
     const types = this.quizConfig().types;
     return types[key as keyof typeof types];
+  }
+
+  isTypeAvailable(key: string): boolean {
+    return this.availableTypes()[key as keyof ReturnType<typeof this.availableTypes>];
+  }
+
+  getTypeCount(key: string): number {
+    return this.typeCounts()[key as keyof ReturnType<typeof this.typeCounts>];
   }
 
   isOptionEnabled(key: 'shuffle' | 'showTimer' | 'enableHints'): boolean {

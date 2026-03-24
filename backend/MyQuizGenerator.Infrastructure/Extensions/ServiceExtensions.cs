@@ -45,6 +45,7 @@ public static class ServiceExtensions
 
         services.AddScoped<IFileService, S3FileService>();
         services.AddScoped<IDocumentService, DocumentService>();
+        services.AddScoped<IPdfService, PdfService>();
         services.AddScoped<IAiService, OpenAiService>();
 
         return services;

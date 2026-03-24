@@ -3,8 +3,10 @@ using MyQuizGenerator.Application;
 using MyQuizGenerator.Infrastructure;
 using MyQuizGenerator.Infrastructure.Persistence;
 using MyQuizGenerator.Presentation.Middlewares;
+using QuestPDF.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
+QuestPDF.Settings.License = LicenseType.Community;
 
 // Service Configuration
 builder.Services.AddControllers().AddJsonOptions(options =>

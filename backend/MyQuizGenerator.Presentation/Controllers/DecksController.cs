@@ -16,6 +16,7 @@ using SearchDecks = MyQuizGenerator.Application.Decks.Queries.SearchPublicDecks;
 using MyQuizGenerator.Application.DeckInvitations.DTOs;
 using MyQuizGenerator.Application.DeckInvitations.Commands.CreateDeckInvitation;
 using DeckMembers = MyQuizGenerator.Application.Decks.Queries.GetDeckMembers;
+using ExportDeckPdf = MyQuizGenerator.Application.Decks.Queries.ExportDeckPdf;
 
 namespace MyQuizGenerator.Presentation.Controllers;
 
@@ -220,6 +221,20 @@ public class DecksController : BaseApiController
     }
 
     /// <summary>
+    /// Exports a deck to PDF.
+    /// Requires an active subscription plan with PDF export enabled.
+    /// </summary>
+    /// <param name="id">The deck ID.</param>
+    /// <returns>PDF file.</returns>
+    [HttpGet("{id}/export-pdf")]
+    public async Task<IActionResult> ExportDeckToPdf(Guid id)
+    {
+        var query = new ExportDeckPdf.ExportDeckPdfQuery(id);
+        var result = await _mediator.Send(query);
+        return File(result.Content, result.ContentType, result.FileName);
+    }
+
+    /// <summary>
     /// Gets all members of a deck with their full name, email, and join date.
     /// </summary>
     /// <param name="id">The deck ID.</param>
@@ -258,4 +273,3 @@ public class DecksController : BaseApiController
         return ApiOk(memberId, "Invitation accepted successfully");
     }
 }
-

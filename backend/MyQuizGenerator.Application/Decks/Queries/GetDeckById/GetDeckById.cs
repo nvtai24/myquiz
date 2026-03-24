@@ -4,6 +4,7 @@ using MyQuizGenerator.Application.Common.Interfaces;
 using MyQuizGenerator.Application.Common.Interfaces.Repositories;
 using MyQuizGenerator.Application.Decks.DTOs;
 using MyQuizGenerator.Domain.Entities;
+using MyQuizGenerator.Domain.Enums;
 
 namespace MyQuizGenerator.Application.Decks.Queries.GetDeckById;
 
@@ -13,11 +14,16 @@ public class GetDeckByIdQueryHandler : IRequestHandler<GetDeckByIdQuery, DeckDet
 {
     private readonly IDeckRepository _deckRepository;
     private readonly IUserService _userService;
+    private readonly ICurrentUserService _currentUserService;
 
-    public GetDeckByIdQueryHandler(IDeckRepository deckRepository, IUserService userService)
+    public GetDeckByIdQueryHandler(
+        IDeckRepository deckRepository,
+        IUserService userService,
+        ICurrentUserService currentUserService)
     {
         _deckRepository = deckRepository;
         _userService = userService;
+        _currentUserService = currentUserService;
     }
 
     public async Task<DeckDetailResponse> Handle(GetDeckByIdQuery request, CancellationToken cancellationToken)
@@ -29,8 +35,37 @@ public class GetDeckByIdQueryHandler : IRequestHandler<GetDeckByIdQuery, DeckDet
             throw new NotFoundException(nameof(Deck), request.Id);
         }
 
-        // Note: Access control logic (e.g. user != owner && visibility == Private) should go here if needed.
-        // For now, valid deck ID returns keys.
+        // Access control based on visibility
+        if (deck.Visibility != DeckVisibility.Public)
+        {
+            var userId = _currentUserService.UserId;
+
+            if (string.IsNullOrEmpty(userId))
+            {
+                throw new ForbiddenException("You do not have access to this deck.");
+            }
+
+            if (deck.Visibility == DeckVisibility.Private)
+            {
+                // Private: only owner can view
+                if (deck.OwnerId != userId)
+                {
+                    throw new ForbiddenException("You do not have access to this deck.");
+                }
+            }
+            else if (deck.Visibility == DeckVisibility.Shared)
+            {
+                // Shared: owner or member
+                if (deck.OwnerId != userId)
+                {
+                    var isMember = await _deckRepository.IsMemberAsync(deck.Id, userId, cancellationToken);
+                    if (!isMember)
+                    {
+                        throw new ForbiddenException("You do not have access to this deck.");
+                    }
+                }
+            }
+        }
 
         var ownerInfo = await _userService.GetUserInfoAsync(deck.OwnerId);
 
@@ -64,3 +99,4 @@ public class GetDeckByIdQueryHandler : IRequestHandler<GetDeckByIdQuery, DeckDet
         };
     }
 }
+

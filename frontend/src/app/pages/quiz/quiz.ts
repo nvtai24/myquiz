@@ -57,10 +57,28 @@ export class Quiz implements OnInit, OnDestroy {
   questions: QuizQuestion[] = [];
   fillBlankInput = signal('');
 
+  private configFromParams: { count: number; types: Set<LocalQuestionType>; shuffle: boolean; timer: boolean; hints: boolean } | null = null;
+
   ngOnInit(): void {
     this.route.params.subscribe(params => {
       this.deckId = params['id'] || '';
-      if (this.deckId) this.loadDeck();
+      if (this.deckId) {
+        const qp = this.route.snapshot.queryParams;
+        if (qp['count']) {
+          const typeMap: Record<string, LocalQuestionType> = { mc: 'multiple_choice', tf: 'true_false', fb: 'fill_blank' };
+          const types = new Set<LocalQuestionType>(
+            (qp['types'] as string).split(',').map((t: string) => typeMap[t]).filter(Boolean)
+          );
+          this.configFromParams = {
+            count: +qp['count'],
+            types,
+            shuffle: qp['shuffle'] === 'true',
+            timer: qp['timer'] === 'true',
+            hints: qp['hints'] === 'true',
+          };
+        }
+        this.loadDeck();
+      }
     });
   }
 
@@ -71,7 +89,20 @@ export class Quiz implements OnInit, OnDestroy {
       next: (res) => {
         this.deckTitle.set(res.data!.name);
         this.allQuestions = this.convertToQuizQuestions(res.data!.questions || []);
-        this.quizState.set('setup');
+
+        if (this.configFromParams) {
+          const cfg = this.configFromParams;
+          this.selectedQuestionTypes.set(cfg.types);
+          this.questionCount.set(Math.min(cfg.count, this.allQuestions.filter(q => cfg.types.has(q.type)).length));
+          this.shuffleQuestions.set(cfg.shuffle);
+          this.showTimer.set(cfg.timer);
+          this.showHintsOption.set(cfg.hints);
+          this.configFromParams = null;
+        } else {
+          // No config params — use defaults, start with all questions
+          this.questionCount.set(this.allQuestions.length);
+        }
+        this.startQuiz();
       },
       error: (err) => {
         this.apiError.set(err?.error?.message ?? 'Không thể tải bộ câu hỏi.');

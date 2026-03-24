@@ -139,6 +139,54 @@ export class DeckDetail implements OnInit {
   ratingSuccess = signal(false);
   ratingError = signal<string | null>(null);
 
+  // Quiz config modal
+  isQuizConfigOpen = signal(false);
+  quizConfig = signal({
+    questionCount: 10,
+    types: { MultipleChoice: true, TrueFalse: true, FillInTheBlank: true },
+    shuffle: true,
+    showTimer: false,
+    enableHints: true,
+  });
+
+  openQuizConfig() {
+    const total = this.deck()?.questionCount ?? 10;
+    this.quizConfig.update(c => ({ ...c, questionCount: Math.min(c.questionCount, total) }));
+    this.isQuizConfigOpen.set(true);
+  }
+
+  closeQuizConfig() { this.isQuizConfigOpen.set(false); }
+
+  setQuizConfigQuestionCount(val: number) {
+    const max = this.deck()?.questionCount ?? 10;
+    this.quizConfig.update(c => ({ ...c, questionCount: Math.max(1, Math.min(val, max)) }));
+  }
+
+  toggleQuizConfigType(type: 'MultipleChoice' | 'TrueFalse' | 'FillInTheBlank') {
+    this.quizConfig.update(c => ({
+      ...c,
+      types: { ...c.types, [type]: !c.types[type] }
+    }));
+  }
+
+  toggleQuizConfigOption(key: 'shuffle' | 'showTimer' | 'enableHints') {
+    this.quizConfig.update(c => ({ ...c, [key]: !c[key] }));
+  }
+
+  get quizConfigValid(): boolean {
+    const t = this.quizConfig().types;
+    return t.MultipleChoice || t.TrueFalse || t.FillInTheBlank;
+  }
+
+  isTypeEnabled(key: string): boolean {
+    const types = this.quizConfig().types;
+    return types[key as keyof typeof types];
+  }
+
+  isOptionEnabled(key: 'shuffle' | 'showTimer' | 'enableHints'): boolean {
+    return this.quizConfig()[key];
+  }
+
   // Rating modal
   isRatingModalOpen = signal(false);
 
@@ -294,8 +342,19 @@ export class DeckDetail implements OnInit {
 
   startStudy() {
     const mode = this.studyMode();
-    if (mode === 'quiz') this.router.navigate(['/quiz', this.deckId]);
-    else if (mode === 'learn') this.router.navigate(['/learn', this.deckId]);
+    if (mode === 'quiz') {
+      const cfg = this.quizConfig();
+      const types = [
+        cfg.types.MultipleChoice ? 'mc' : null,
+        cfg.types.TrueFalse ? 'tf' : null,
+        cfg.types.FillInTheBlank ? 'fb' : null,
+      ].filter(Boolean).join(',');
+      this.router.navigate(['/quiz', this.deckId], {
+        queryParams: { count: cfg.questionCount, types, shuffle: cfg.shuffle, timer: cfg.showTimer, hints: cfg.enableHints }
+      });
+    } else if (mode === 'learn') {
+      this.router.navigate(['/learn', this.deckId]);
+    }
   }
 
   setMyRating(value: number) { this.myRating.set(value); }

@@ -294,7 +294,7 @@
       </div>
 
       <button
-        (click)="startStudy()"
+        (click)="studyMode() === 'quiz' ? openQuizConfig() : startStudy()"
         class="w-full flex items-center justify-center gap-2 py-3 bg-[#4255FF] border-none rounded-xl text-white font-black text-[15px] cursor-pointer transition-all shadow-[0_4px_14px_rgba(66,85,255,0.25)] hover:bg-[#3345e0] hover:shadow-[0_6px_18px_rgba(66,85,255,0.35)]"
       >
         <span class="material-symbols-outlined text-[22px]">play_arrow</span>
@@ -921,3 +921,164 @@
   </div>
 }
 
+
+<!-- ── Quiz Config Modal ── -->
+@if (isQuizConfigOpen()) {
+  <div
+    class="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-black/50 p-0 sm:p-4"
+    (click)="closeQuizConfig()"
+  >
+    <div
+      class="bg-white w-full sm:max-w-md rounded-t-3xl sm:rounded-2xl shadow-2xl overflow-hidden"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- Header -->
+      <div class="flex items-center justify-between px-6 pt-6 pb-4 border-b border-gray-100">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-xl bg-indigo-50 flex items-center justify-center">
+            <span class="material-symbols-outlined text-[22px] text-[#4255FF]">tune</span>
+          </div>
+          <div>
+            <h3 class="text-[17px] font-black text-gray-900 m-0 leading-tight">Quiz Settings</h3>
+            <p class="text-[12px] text-gray-400 m-0">Tuỳ chỉnh bài kiểm tra của bạn</p>
+          </div>
+        </div>
+        <button
+          class="w-8 h-8 rounded-full bg-gray-100 border-none text-gray-400 flex items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors"
+          (click)="closeQuizConfig()"
+        >
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
+      <div class="px-6 py-5 flex flex-col gap-6 max-h-[70vh] overflow-y-auto">
+
+        <!-- Số lượng câu hỏi -->
+        <div>
+          <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center gap-2">
+              <span class="material-symbols-outlined text-[18px] text-gray-400">format_list_numbered</span>
+              <span class="text-[14px] font-black text-gray-800">Số câu hỏi</span>
+            </div>
+            <div class="flex items-center gap-2">
+              <button
+                class="w-7 h-7 rounded-lg bg-gray-100 border-none text-gray-600 font-black text-[16px] flex items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors disabled:opacity-40"
+                [disabled]="quizConfig().questionCount <= 1"
+                (click)="setQuizConfigQuestionCount(quizConfig().questionCount - 1)"
+              >-</button>
+              <span class="w-10 text-center text-[16px] font-black text-gray-900 tabular-nums">
+                {{ quizConfig().questionCount }}
+              </span>
+              <button
+                class="w-7 h-7 rounded-lg bg-gray-100 border-none text-gray-600 font-black text-[16px] flex items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors disabled:opacity-40"
+                [disabled]="quizConfig().questionCount >= (deck()?.questionCount ?? 10)"
+                (click)="setQuizConfigQuestionCount(quizConfig().questionCount + 1)"
+              >+</button>
+            </div>
+          </div>
+          <input
+            type="range"
+            min="1"
+            [max]="deck()?.questionCount ?? 10"
+            [value]="quizConfig().questionCount"
+            (input)="setQuizConfigQuestionCount(+$any($event.target).value)"
+            class="w-full accent-[#4255FF] h-2 cursor-pointer"
+          />
+          <div class="flex justify-between text-[11px] text-gray-300 font-semibold mt-1">
+            <span>1</span>
+            <span>{{ deck()?.questionCount ?? 10 }} câu</span>
+          </div>
+        </div>
+
+        <!-- Loại câu hỏi -->
+        <div>
+          <div class="flex items-center gap-2 mb-3">
+            <span class="material-symbols-outlined text-[18px] text-gray-400">category</span>
+            <span class="text-[14px] font-black text-gray-800">Loại câu hỏi</span>
+          </div>
+          <div class="flex flex-col gap-2">
+            @for (type of [
+              { key: 'MultipleChoice', label: 'Multiple Choice', icon: 'radio_button_checked', color: 'text-[#4255FF] bg-indigo-50' },
+              { key: 'TrueFalse', label: 'True / False', icon: 'check_circle', color: 'text-emerald-600 bg-emerald-50' },
+              { key: 'FillInTheBlank', label: 'Fill in the Blank', icon: 'edit_note', color: 'text-amber-600 bg-amber-50' }
+            ]; track type.key) {
+              <label
+                class="flex items-center gap-3 p-3 rounded-xl border-2 cursor-pointer transition-all select-none"
+                [class]="isTypeEnabled(type.key) ? 'border-[#4255FF] bg-indigo-50/40' : 'border-gray-100 bg-white hover:border-gray-200'"
+                (click)="toggleQuizConfigType($any(type.key))"
+              >
+                <div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" [class]="type.color">
+                  <span class="material-symbols-outlined text-[18px]">{{ type.icon }}</span>
+                </div>
+                <span class="flex-1 text-[13px] font-bold text-gray-800">{{ type.label }}</span>
+                <div
+                  class="w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all shrink-0"
+                  [class]="isTypeEnabled(type.key) ? 'bg-[#4255FF] border-[#4255FF]' : 'border-gray-300 bg-white'"
+                >
+                  @if (isTypeEnabled(type.key)) {
+                    <span class="material-symbols-outlined text-white text-[14px]" style="font-variation-settings:'FILL' 1">check</span>
+                  }
+                </div>
+              </label>
+            }
+          </div>
+        </div>
+
+        <!-- Cài đặt thêm -->
+        <div>
+          <div class="flex items-center gap-2 mb-3">
+            <span class="material-symbols-outlined text-[18px] text-gray-400">settings</span>
+            <span class="text-[14px] font-black text-gray-800">Cài đặt thêm</span>
+          </div>
+          <div class="flex flex-col gap-2">
+            @for (opt of [
+              { key: 'shuffle', label: 'Xáo trộn câu hỏi', desc: 'Câu hỏi sẽ hiện theo thứ tự ngẫu nhiên', icon: 'shuffle' },
+              { key: 'showTimer', label: 'Hiển thị đồng hồ', desc: 'Đếm thời gian làm bài', icon: 'timer' },
+              { key: 'enableHints', label: 'Cho phép dùng gợi ý', desc: 'Hiện hint khi làm bài', icon: 'lightbulb' }
+            ]; track opt.key) {
+              <div
+                class="flex items-center gap-3 p-3 rounded-xl border cursor-pointer transition-all select-none"
+                [class]="isOptionEnabled($any(opt.key)) ? 'border-[#4255FF]/30 bg-indigo-50/30' : 'border-gray-100 bg-white hover:border-gray-200'"
+                (click)="toggleQuizConfigOption($any(opt.key))"
+              >
+                <span class="material-symbols-outlined text-[20px] shrink-0"
+                  [class]="isOptionEnabled($any(opt.key)) ? 'text-[#4255FF]' : 'text-gray-300'"
+                >{{ opt.icon }}</span>
+                <div class="flex-1 min-w-0">
+                  <div class="text-[13px] font-bold text-gray-800">{{ opt.label }}</div>
+                  <div class="text-[11px] text-gray-400">{{ opt.desc }}</div>
+                </div>
+                <div
+                  class="w-10 h-6 rounded-full transition-all shrink-0 relative"
+                  [class]="isOptionEnabled($any(opt.key)) ? 'bg-[#4255FF]' : 'bg-gray-200'"
+                >
+                  <div
+                    class="absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-all duration-200"
+                    [class]="isOptionEnabled($any(opt.key)) ? 'left-5' : 'left-1'"
+                  ></div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="px-6 py-4 border-t border-gray-100 flex gap-3">
+        <button
+          class="flex-1 py-3 rounded-xl bg-gray-100 border-none text-gray-600 font-bold text-[14px] cursor-pointer hover:bg-gray-200 transition-colors"
+          (click)="closeQuizConfig()"
+        >Huỷ</button>
+        <button
+          class="flex-[2] flex items-center justify-center gap-2 py-3 rounded-xl border-none text-white font-black text-[14px] cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          [class]="quizConfigValid ? 'bg-[#4255FF] hover:bg-[#3345e0] shadow-[0_4px_14px_rgba(66,85,255,0.3)]' : 'bg-gray-300'"
+          [disabled]="!quizConfigValid"
+          (click)="closeQuizConfig(); startStudy()"
+        >
+          <span class="material-symbols-outlined text-[20px]">play_arrow</span>
+          Bắt đầu Quiz
+        </button>
+      </div>
+    </div>
+  </div>
+}

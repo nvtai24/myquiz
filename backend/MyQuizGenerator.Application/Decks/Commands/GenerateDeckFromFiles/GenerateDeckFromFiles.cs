@@ -70,37 +70,36 @@ public class GenerateDeckFromFilesCommandHandler : IRequestHandler<GenerateDeckF
 
         // 3. Chunk text and generate questions
         var chunks = ChunkText(text, ChunkSize);
-        GeneratedDeckResponse generatedDeck;
+        var maxQuestions = activePlan?.MaxQuestionsPerGenerate ?? -1; // -1 = unlimited
 
-        if (chunks.Count == 1)
-        {
-            generatedDeck = await _aiService.GenerateDeckAsync(chunks[0], cancellationToken);
-        }
-        else
-        {
-            generatedDeck = await _aiService.GenerateDeckAsync(chunks[0], cancellationToken);
+        GeneratedDeckResponse generatedDeck = await _aiService.GenerateDeckAsync(chunks[0], cancellationToken);
 
-            for (int i = 1; i < chunks.Count; i++)
+        // 4. Process additional chunks with early stop when limit reached
+        for (int i = 1; i < chunks.Count; i++)
+        {
+            // Early stop: skip remaining chunks if already have enough questions
+            if (maxQuestions >= 0 && generatedDeck.Questions.Count >= maxQuestions)
             {
-                var additionalQuestions = await _aiService.GenerateQuestionsFromChunkAsync(chunks[i], i, cancellationToken);
-                generatedDeck.Questions.AddRange(additionalQuestions);
+                break;
             }
+
+            var additionalQuestions = await _aiService.GenerateQuestionsFromChunkAsync(chunks[i], i, cancellationToken);
+            generatedDeck.Questions.AddRange(additionalQuestions);
         }
 
-        // 4. Limit questions based on MaxQuestionsPerGenerate from subscription plan (-1 = unlimited)
-        var maxQuestions = activePlan?.MaxQuestionsPerGenerate ?? 0;
+        // 5. Final trim if exceeded limit (last chunk may have pushed over)
         if (maxQuestions >= 0 && generatedDeck.Questions.Count > maxQuestions)
         {
             generatedDeck.Questions = generatedDeck.Questions.Take(maxQuestions).ToList();
         }
 
-        // 5. Increment counter only after successful generation (AI errors don't consume quota, -1 = unlimited)
+        // 6. Increment counter only after successful generation (AI errors don't consume quota, -1 = unlimited)
         if (activePlan != null && activePlan.DailyGenerateLimit >= 0)
         {
             await _rateLimitService.IncrementDailyGenerateCountAsync(userId, cancellationToken);
         }
 
-        // 6. Return generated deck (no DB save - FE will call save API separately)
+        // 7. Return generated deck (no DB save - FE will call save API separately)
         return generatedDeck;
     }
 

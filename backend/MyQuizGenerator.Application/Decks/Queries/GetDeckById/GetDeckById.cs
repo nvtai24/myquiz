@@ -35,6 +35,16 @@ public class GetDeckByIdQueryHandler : IRequestHandler<GetDeckByIdQuery, DeckDet
             throw new NotFoundException(nameof(Deck), request.Id);
         }
 
+        // Draft decks: only owner can view
+        if (deck.Status == DeckStatus.Draft)
+        {
+            var userId = _currentUserService.UserId;
+            if (string.IsNullOrEmpty(userId) || deck.OwnerId != userId)
+            {
+                throw new ForbiddenException("This deck is not published yet.");
+            }
+        }
+
         // Access control based on visibility
         if (deck.Visibility != DeckVisibility.Public)
         {

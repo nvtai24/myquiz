@@ -336,30 +336,32 @@ export class AddDeck implements OnInit {
       documentUrl: this.documentUrl() || undefined,
     };
 
-    const thumbnail$ = this.coverFile()
-      ? this.deckService.uploadFile(this.coverFile()!).pipe(
+    const newCoverFile = this.coverFile();
+    const newAiFile = (this.aiGenerated() && this.lastUsedAiFile()) ? this.lastUsedAiFile() : null;
+
+    const thumbnail$ = newCoverFile
+      ? this.deckService.uploadFile(newCoverFile).pipe(
           map((res) => {
             if (res.success && res.data?.url) return res.data.url;
             throw new Error(res.message || 'Failed to upload thumbnail');
           }),
         )
-      : of(createRequest.thumbnailUrl);
+      : of(this.coverImage());
 
-    const document$ =
-      this.aiGenerated() && this.lastUsedAiFile()
-        ? this.deckService.uploadFile(this.lastUsedAiFile()!).pipe(
-            map((res) => {
-              if (res.success && res.data?.url) return res.data.url;
-              throw new Error(res.message || 'Failed to upload AI document');
-            }),
-          )
-        : of(createRequest.documentUrl);
+    const document$ = newAiFile
+      ? this.deckService.uploadFile(newAiFile).pipe(
+          map((res) => {
+            if (res.success && res.data?.url) return res.data.url;
+            throw new Error(res.message || 'Failed to upload AI document');
+          }),
+        )
+      : of(this.documentUrl());
 
     forkJoin({ thumbnail: thumbnail$, document: document$ })
       .pipe(
         switchMap(({ thumbnail, document }) => {
-          createRequest.thumbnailUrl = thumbnail;
-          createRequest.documentUrl = document;
+          createRequest.thumbnailUrl = thumbnail ?? undefined;
+          createRequest.documentUrl = document ?? undefined;
           return this.deckService.createDeck(createRequest);
         }),
         finalize(() => {

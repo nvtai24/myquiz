@@ -368,14 +368,18 @@ export class EditDeck implements OnInit {
     const visibility: DeckVisibility = visMap[this.visibility()] ?? 'Public';
     const targetStatus = status ?? this.editingStatus() ?? 'Published';
 
-    const thumbnail$ = this.coverFile()
-      ? this.deckService.uploadFile(this.coverFile()!).pipe(
+    const currentCoverImage = this.coverImage();
+    const newCoverFile = this.coverFile();
+
+    // Only upload if there's a new file (not just an existing URL)
+    const thumbnail$ = newCoverFile
+      ? this.deckService.uploadFile(newCoverFile).pipe(
           map((res) => {
             if (res.success && res.data?.url) return res.data.url;
             throw new Error(res.message || 'Failed to upload thumbnail');
           }),
         )
-      : of(this.coverImage());
+      : of(currentCoverImage);
 
     thumbnail$
       .pipe(
@@ -386,7 +390,7 @@ export class EditDeck implements OnInit {
             visibility,
             status: targetStatus,
             tags: this.tags(),
-            thumbnailUrl: thumbnail || undefined,
+            thumbnailUrl: thumbnail ?? undefined,
             ...this.buildQuestionDiff(),
           };
           return this.deckService.updateDeck(this.editingId()!, updateRequest);

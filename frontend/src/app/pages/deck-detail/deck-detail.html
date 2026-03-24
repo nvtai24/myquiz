@@ -124,7 +124,7 @@
           </div>
 
           <!-- Tags -->
-          @if (deck()!.tags?.length) {
+          @if (deck()!.tags.length) {
             <div class="flex flex-wrap gap-1.5 mb-3">
               @for (tag of deck()!.tags; track tag) {
                 <span
@@ -368,7 +368,7 @@
                   <p class="text-[18px] sm:text-[20px] font-bold text-gray-900 leading-snug m-0 mb-4">
                     {{ q.content }}
                   </p>
-                  @if (q.options?.length) {
+                  @if (q.options.length) {
                     <div class="flex flex-col gap-2 mt-1">
                       @for (opt of q.options; track opt; let i = $index) {
                         <div
@@ -523,7 +523,7 @@
                       {{ q.content }}
                     </p>
 
-                    @if (q.options?.length) {
+                    @if (q.options.length) {
                       <div class="flex flex-col gap-2">
                         @for (opt of q.options; track opt; let optionIndex = $index) {
                           <div

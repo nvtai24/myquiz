@@ -13,18 +13,15 @@ public class CreateQuizAttemptCommandHandler : IRequestHandler<CreateQuizAttempt
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IQuizAttemptRepository _quizAttemptRepository;
-    private readonly IDeckRepository _deckRepository;
     private readonly ICurrentUserService _currentUserService;
 
     public CreateQuizAttemptCommandHandler(
         IUnitOfWork unitOfWork,
         IQuizAttemptRepository quizAttemptRepository,
-        IDeckRepository deckRepository,
         ICurrentUserService currentUserService)
     {
         _unitOfWork = unitOfWork;
         _quizAttemptRepository = quizAttemptRepository;
-        _deckRepository = deckRepository;
         _currentUserService = currentUserService;
     }
 
@@ -33,27 +30,18 @@ public class CreateQuizAttemptCommandHandler : IRequestHandler<CreateQuizAttempt
         var userId = _currentUserService.UserId
             ?? throw new UnauthorizedException("User is not authenticated.");
 
-        // Verify deck exists and load questions for snapshots
-        var deck = await _deckRepository.GetDeckByIdWithQuestionsAsync(command.Request.DeckId, cancellationToken)
-            ?? throw new NotFoundException("Deck", command.Request.DeckId);
-
-        var questionsMap = deck.Questions.ToDictionary(q => q.Id);
-
         var attemptId = Guid.NewGuid();
 
         var userAnswers = command.Request.UserAnswers.Select(ua =>
         {
-            var question = questionsMap.GetValueOrDefault(ua.QuestionId)
-                ?? throw new NotFoundException("Question", ua.QuestionId);
-
             return new UserAnswer
             {
                 Id = Guid.NewGuid(),
                 QuizAttemptId = attemptId,
                 QuestionId = ua.QuestionId,
-                QuestionSnapshot = question.Content,
-                OptionsSnapshot = question.Options,
-                CorrectAnswersSnapshot = question.CorrectAnswers,
+                QuestionSnapshot = ua.QuestionSnapshot,
+                OptionsSnapshot = ua.OptionsSnapshot,
+                CorrectAnswersSnapshot = ua.CorrectAnswersSnapshot,
                 Answer = ua.Answer,
                 IsCorrect = ua.IsCorrect
             };

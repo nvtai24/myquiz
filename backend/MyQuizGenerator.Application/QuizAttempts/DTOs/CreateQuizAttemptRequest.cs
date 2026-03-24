@@ -12,6 +12,9 @@ public class CreateQuizAttemptRequest
 public class UserAnswerRequest
 {
     public int QuestionId { get; set; }
+    public string QuestionSnapshot { get; set; } = string.Empty;
+    public string[] OptionsSnapshot { get; set; } = [];
+    public string[] CorrectAnswersSnapshot { get; set; } = [];
     public string[] Answer { get; set; } = [];
     public bool IsCorrect { get; set; }
 }

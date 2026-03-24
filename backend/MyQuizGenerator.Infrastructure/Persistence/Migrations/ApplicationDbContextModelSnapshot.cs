@@ -469,8 +469,14 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                     b.Property<int>("Duration")
                         .HasColumnType("integer");
 
+                    b.Property<bool>("HasExportToPdf")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean");
+
+                    b.Property<int>("MaxQuestionsPerGenerate")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Name")
                         .IsRequired()

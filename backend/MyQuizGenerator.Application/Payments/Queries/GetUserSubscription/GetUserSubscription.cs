@@ -37,6 +37,8 @@ public class GetUserSubscriptionQueryHandler : IRequestHandler<GetUserSubscripti
             PlanName = subscription.SubscriptionPlan.Name,
             PlanDescription = subscription.SubscriptionPlan.Description,
             DailyGenerateLimit = subscription.SubscriptionPlan.DailyGenerateLimit,
+            MaxQuestionsPerGenerate = subscription.SubscriptionPlan.MaxQuestionsPerGenerate,
+            HasExportToPdf = subscription.SubscriptionPlan.HasExportToPdf,
             Price = subscription.SubscriptionPlan.Price,
             StartDate = subscription.StartDate,
             EndDate = subscription.EndDate,

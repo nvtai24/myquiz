@@ -29,6 +29,8 @@ public class UpdateSubscriptionPlanCommandHandler : IRequestHandler<UpdateSubscr
         if (command.Request.Name is not null) plan.Name = command.Request.Name;
         if (command.Request.Description is not null) plan.Description = command.Request.Description;
         if (command.Request.DailyGenerateLimit.HasValue) plan.DailyGenerateLimit = command.Request.DailyGenerateLimit.Value;
+        if (command.Request.MaxQuestionsPerGenerate.HasValue) plan.MaxQuestionsPerGenerate = command.Request.MaxQuestionsPerGenerate.Value;
+        if (command.Request.HasExportToPdf.HasValue) plan.HasExportToPdf = command.Request.HasExportToPdf.Value;
         if (command.Request.Price.HasValue) plan.Price = command.Request.Price.Value;
         if (command.Request.Duration.HasValue) plan.Duration = command.Request.Duration.Value;
         if (command.Request.IsActive.HasValue) plan.IsActive = command.Request.IsActive.Value;
@@ -45,6 +47,8 @@ public class UpdateSubscriptionPlanCommandHandler : IRequestHandler<UpdateSubscr
             Name = plan.Name,
             Description = plan.Description,
             DailyGenerateLimit = plan.DailyGenerateLimit,
+            MaxQuestionsPerGenerate = plan.MaxQuestionsPerGenerate,
+            HasExportToPdf = plan.HasExportToPdf,
             Price = plan.Price,
             Duration = plan.Duration,
             IsActive = plan.IsActive,

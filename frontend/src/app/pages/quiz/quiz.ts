@@ -3,6 +3,7 @@ import { DecimalPipe, CommonModule } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { DeckService } from '../../services/deck.service';
+import { QuizService } from '../../services/quiz.service';
 import { QuestionResponse } from '../../models/deck.models';
 
 type LocalQuestionType = 'multiple_choice' | 'true_false' | 'fill_blank';
@@ -32,6 +33,7 @@ export class Quiz implements OnInit, OnDestroy {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private deckService = inject(DeckService);
+  private quizService = inject(QuizService);
 
   deckTitle = signal('');
   deckId = '';
@@ -56,6 +58,8 @@ export class Quiz implements OnInit, OnDestroy {
   allQuestions: QuizQuestion[] = [];  // built from API
   questions: QuizQuestion[] = [];
   fillBlankInput = signal('');
+  submitting = signal(false);
+  private startedAt: Date = new Date();
 
   private configFromParams: { count: number; types: Set<LocalQuestionType>; shuffle: boolean; timer: boolean; hints: boolean } | null = null;
 
@@ -211,6 +215,7 @@ export class Quiz implements OnInit, OnDestroy {
     this.showHint.set(false);
     this.fillBlankInput.set('');
 
+    this.startedAt = new Date();
     if (this.showTimer()) {
       this.timerSeconds.set(0);
       this.timerInterval = setInterval(() => this.timerSeconds.update(v => v + 1), 1000);
@@ -298,61 +303,64 @@ export class Quiz implements OnInit, OnDestroy {
       this.timerInterval = null;
     }
 
-    // Calculate results and pass via navigation state
-    let correct = 0;
-    this.questions.forEach((q, i) => {
+    const endedAt = new Date();
+    const totalTime = endedAt.getTime() - this.startedAt.getTime();
+
+    const userAnswers = this.questions.map((q, i) => {
       const ans = this.selectedAnswers()[i];
-      if (q.type === 'multiple_choice' && ans === q.correctOption) correct++;
-      else if (q.type === 'true_false' && ans === q.correctBool) correct++;
-      else if (q.type === 'fill_blank') {
-        const ansStr = String(ans ?? '').toLowerCase().trim();
-        const corrStr = q.correctText.toLowerCase().trim();
-        if (ansStr === corrStr) correct++;
+
+      let answer: string[];
+      let isCorrect: boolean;
+
+      if (q.type === 'multiple_choice') {
+        answer = typeof ans === 'number' ? [q.options[ans]?.text ?? ''] : [];
+        isCorrect = ans === q.correctOption;
+      } else if (q.type === 'true_false') {
+        answer = ans === true ? ['True'] : ans === false ? ['False'] : [];
+        isCorrect = ans === q.correctBool;
+      } else {
+        answer = ans ? [String(ans)] : [];
+        isCorrect = String(ans ?? '').toLowerCase().trim() === q.correctText.toLowerCase().trim();
       }
+
+      const correctAnswersSnapshot = q.type === 'multiple_choice'
+        ? [q.options[q.correctOption]?.text ?? '']
+        : q.type === 'true_false'
+          ? [q.correctBool ? 'True' : 'False']
+          : [q.correctText];
+
+      return {
+        questionId: q.originalId,
+        questionSnapshot: q.text,
+        optionsSnapshot: q.options.map(o => o.text),
+        correctAnswersSnapshot,
+        answer,
+        isCorrect,
+      };
     });
 
-    const state = {
+    this.submitting.set(true);
+    this.quizService.submitAttempt({
       deckId: this.deckId,
-      deckTitle: this.deckTitle(),
-      totalQuestions: this.totalQuestions,
-      correctAnswers: correct,
-      timeTaken: this.formattedTime,
-      questions: this.questions.map((q, i) => {
-        const ans = this.selectedAnswers()[i];
-        let userAnswerText: string;
-        let correctAnswerText: string;
-        let isCorrect = false;
-
-        if (q.type === 'multiple_choice') {
-          userAnswerText = typeof ans === 'number' ? (q.options[ans]?.text ?? '--') : '--';
-          correctAnswerText = q.options[q.correctOption]?.text ?? '--';
-          isCorrect = ans === q.correctOption;
-        } else if (q.type === 'true_false') {
-          userAnswerText = ans === true ? 'True' : ans === false ? 'False' : '--';
-          correctAnswerText = q.correctBool ? 'True' : 'False';
-          isCorrect = ans === q.correctBool;
-        } else {
-          userAnswerText = String(ans ?? '--');
-          correctAnswerText = q.correctText;
-          isCorrect = String(ans ?? '').toLowerCase().trim() === q.correctText.toLowerCase().trim();
-        }
-
-        return {
-          number: i + 1,
-          text: q.text,
-          type: q.type,
-          userAnswer: userAnswerText,
-          correctAnswer: correctAnswerText,
-          isCorrect,
-          explanation: q.hint || '',
-          options: q.options.map(opt => opt.text),
-          correctOptionIndex: q.correctOption,
-          userSelectedIndex: typeof ans === 'number' ? ans : null,
-        };
-      })
-    };
-
-    this.router.navigate(['/quiz-result', this.deckId], { state });
+      startedAt: this.startedAt.toISOString(),
+      endedAt: endedAt.toISOString(),
+      totalTime,
+      userAnswers,
+    }).subscribe({
+      next: (res) => {
+        this.submitting.set(false);
+        this.router.navigate(['/quiz-result', this.deckId], {
+          state: { attempt: res.data, deckTitle: this.deckTitle() }
+        });
+      },
+      error: () => {
+        this.submitting.set(false);
+        // fallback: navigate without server data
+        this.router.navigate(['/quiz-result', this.deckId], {
+          state: { deckTitle: this.deckTitle() }
+        });
+      }
+    });
   }
 
   get unansweredCount(): number {

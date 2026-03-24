@@ -1,238 +1,209 @@
-<div class="result-page">
-  <!-- Header -->
-  <div class="result-header">
-    <h1 class="result-title">Quiz Complete! 🎉</h1>
-    @if (score() >= 90) {
-      <div class="perfect-badge">
-        <span class="material-symbols-outlined badge-icon">emoji_events</span>
-        <span>PERFECT STREAK!</span>
-      </div>
-    }
+@if (!attempt()) {
+  <div class="flex items-center justify-center min-h-[65vh]">
+    <div class="flex flex-col items-center gap-4 text-gray-400">
+      <span class="material-symbols-outlined text-[48px]">quiz</span>
+      <p class="font-semibold text-[15px]">Không có dữ liệu kết quả.</p>
+      <button (click)="goBack()" class="px-6 py-2.5 bg-[#4255FF] text-white rounded-xl font-bold border-none cursor-pointer">Quay lại</button>
+    </div>
   </div>
+} @else {
+<div class="max-w-3xl mx-auto px-4 sm:px-6 py-8 pb-20">
 
-  <!-- Score Card -->
-  <div class="score-card">
-    <div class="score-ring">
-      <svg viewBox="0 0 120 120" class="ring-svg">
-        <circle cx="60" cy="60" r="52" class="ring-bg" />
-        <circle cx="60" cy="60" r="52" class="ring-fill"
-          [style.stroke-dasharray]="326.7"
-          [style.stroke-dashoffset]="326.7 - (326.7 * score() / 100)"
-          [style.stroke]="score() >= 70 ? '#16a34a' : score() >= 40 ? '#d97706' : '#ef4444'" />
+  <!-- ── Hero Score Card ── -->
+  <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 mb-6 flex flex-col sm:flex-row items-center gap-6">
+    <!-- Ring -->
+    <div class="relative shrink-0 w-32 h-32">
+      <svg viewBox="0 0 120 120" class="w-full h-full -rotate-90">
+        <circle cx="60" cy="60" r="52" fill="none" stroke="#f3f4f6" stroke-width="10" />
+        <circle cx="60" cy="60" r="52" fill="none" stroke-width="10"
+          stroke-linecap="round"
+          [attr.stroke]="scoreColor"
+          [attr.stroke-dasharray]="326.7"
+          [attr.stroke-dashoffset]="ringOffset"
+          class="transition-all duration-1000"
+        />
       </svg>
-      <div class="ring-text">
-        <span class="ring-percent" [style.color]="score() >= 70 ? '#16a34a' : score() >= 40 ? '#d97706' : '#ef4444'">{{ score() }}%</span>
-        <span class="ring-label">SCORE</span>
+      <div class="absolute inset-0 flex flex-col items-center justify-center">
+        <span class="text-[26px] font-black leading-none" [style.color]="scoreColor">{{ score() | number:'1.0-0' }}%</span>
+        <span class="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-0.5">Score</span>
       </div>
     </div>
-    <div class="score-info">
-      <h2 class="greeting">{{ greeting }}</h2>
-      <p class="performance-text">{{ performanceText }}</p>
-      <div class="stars-row">
+
+    <!-- Info -->
+    <div class="flex-1 text-center sm:text-left">
+      <div class="flex items-center justify-center sm:justify-start gap-1.5 mb-1">
         @for (s of [1,2,3,4,5]; track s) {
-          <span class="material-symbols-outlined" [class.star-filled]="s <= starsCount" [class.star-empty]="s > starsCount">star</span>
+          <span class="material-symbols-outlined text-[22px]"
+            [style.font-variation-settings]="s <= starsCount ? '\'FILL\' 1' : ''"
+            [class]="s <= starsCount ? 'text-amber-400' : 'text-gray-200'"
+          >star</span>
         }
       </div>
-      <p class="correct-summary">{{ totalCorrect() }} / {{ totalQuestions() }} correct · {{ timeTaken() }}</p>
+      <h1 class="text-[22px] font-black text-gray-900 m-0 mb-1">{{ greeting }}</h1>
+      <p class="text-[14px] text-gray-400 font-medium m-0 mb-4">
+        {{ deckTitle() || 'Quiz' }}
+      </p>
+      <div class="flex items-center justify-center sm:justify-start gap-4 flex-wrap">
+        <div class="flex items-center gap-1.5 text-green-600 font-bold text-[13px]">
+          <span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 1">check_circle</span>
+          {{ totalCorrect() }} đúng
+        </div>
+        <div class="flex items-center gap-1.5 text-red-500 font-bold text-[13px]">
+          <span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 1">cancel</span>
+          {{ totalIncorrect() }} sai
+        </div>
+        <div class="flex items-center gap-1.5 text-gray-400 font-bold text-[13px]">
+          <span class="material-symbols-outlined text-[18px]">timer</span>
+          {{ formattedTime }}
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- Stats Row -->
-  <div class="stats-row">
-    <div class="result-stat">
-      <span class="stat-title">CORRECT</span>
-      <span class="material-symbols-outlined stat-icon green">check_circle</span>
-      <span class="stat-val green">{{ totalCorrect() < 10 ? '0' + totalCorrect() : totalCorrect() }}</span>
+  <!-- ── Stats Bar ── -->
+  <div class="grid grid-cols-3 gap-3 mb-6">
+    <div class="bg-white border border-gray-200 rounded-2xl p-4 flex flex-col items-center gap-1 shadow-sm">
+      <span class="material-symbols-outlined text-[24px] text-green-500" style="font-variation-settings:'FILL' 1">check_circle</span>
+      <span class="text-[22px] font-black text-gray-900">{{ totalCorrect() }}</span>
+      <span class="text-[10px] font-black uppercase tracking-wider text-gray-400">Đúng</span>
     </div>
-    <div class="result-stat">
-      <span class="stat-title">WRONG</span>
-      <span class="material-symbols-outlined stat-icon red">cancel</span>
-      <span class="stat-val red">{{ totalIncorrect() < 10 ? '0' + totalIncorrect() : totalIncorrect() }}</span>
+    <div class="bg-white border border-gray-200 rounded-2xl p-4 flex flex-col items-center gap-1 shadow-sm">
+      <span class="material-symbols-outlined text-[24px] text-red-400" style="font-variation-settings:'FILL' 1">cancel</span>
+      <span class="text-[22px] font-black text-gray-900">{{ totalIncorrect() }}</span>
+      <span class="text-[10px] font-black uppercase tracking-wider text-gray-400">Sai</span>
     </div>
-    <div class="result-stat">
-      <span class="stat-title">TIME</span>
-      <span class="material-symbols-outlined stat-icon blue">schedule</span>
-      <span class="stat-val">{{ timeTaken() }}</span>
+    <div class="bg-white border border-gray-200 rounded-2xl p-4 flex flex-col items-center gap-1 shadow-sm">
+      <span class="material-symbols-outlined text-[24px] text-[#4255FF]">timer</span>
+      <span class="text-[18px] font-black text-gray-900 tabular-nums">{{ formattedTime }}</span>
+      <span class="text-[10px] font-black uppercase tracking-wider text-gray-400">Thời gian</span>
     </div>
   </div>
 
-  <!-- Question Review -->
-  <div class="section-card">
-    <div class="section-heading-row">
-      <h3 class="section-heading">
-        <span class="material-symbols-outlined">rate_review</span>
-        Review Questions
-      </h3>
-      <button class="expand-all-btn" (click)="expandAll()">
-        {{ expandedQuestion() === -1 ? 'Collapse' : 'Expand All' }}
-      </button>
+  <!-- ── Question Review ── -->
+  <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden mb-6">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <h2 class="text-[15px] font-black text-gray-900 m-0 flex items-center gap-2">
+        <span class="material-symbols-outlined text-[20px] text-[#4255FF]">rate_review</span>
+        Xem lại bài làm ({{ totalQuestions() }} câu)
+      </h2>
+      <button
+        class="text-[12px] font-bold text-[#4255FF] bg-indigo-50 px-3 py-1.5 rounded-lg border border-indigo-100 cursor-pointer hover:bg-indigo-100 transition-colors"
+        (click)="expandAll()"
+      >{{ expandedIndex() === -1 ? 'Thu gọn' : 'Mở rộng tất cả' }}</button>
     </div>
 
-    @for (q of questions; track q.number) {
-      <div class="review-item" [class.incorrect]="!q.isCorrect" [class.correct-item]="q.isCorrect">
-        <div class="review-row" (click)="toggleQuestion(q.number)">
-          <span class="material-symbols-outlined review-status" [class.correct]="q.isCorrect" [class.wrong]="!q.isCorrect">
-            {{ q.isCorrect ? 'check_circle' : 'cancel' }}
-          </span>
-          <div class="review-content">
-            <span class="review-q">{{ q.number }}. {{ q.text }}</span>
-            <div class="review-answer-summary">
-              <span class="answer-label">Your answer:</span>
-              <strong [class.text-green-600]="q.isCorrect" [class.text-red-500]="!q.isCorrect">{{ q.userAnswer }}</strong>
-              @if (!q.isCorrect) {
-                <span class="answer-divider">·</span>
-                <span class="answer-label">Answer:</span>
-                <strong class="text-green-600">{{ q.correctAnswer }}</strong>
+    <div class="divide-y divide-gray-50">
+      @for (ans of attempt()!.userAnswers; track ans.id; let i = $index) {
+        <div>
+          <!-- Row header -->
+          <div
+            class="flex items-start gap-4 px-6 py-4 cursor-pointer hover:bg-gray-50/60 transition-colors"
+            (click)="toggleQuestion(i)"
+          >
+            <div class="shrink-0 mt-0.5">
+              @if (ans.isCorrect) {
+                <span class="material-symbols-outlined text-[22px] text-green-500" style="font-variation-settings:'FILL' 1">check_circle</span>
+              } @else {
+                <span class="material-symbols-outlined text-[22px] text-red-400" style="font-variation-settings:'FILL' 1">cancel</span>
               }
             </div>
-          </div>
-          <span class="material-symbols-outlined expand-icon">
-            {{ isExpanded(q.number) ? 'expand_less' : 'expand_more' }}
-          </span>
-        </div>
-
-        <!-- Expanded Detail -->
-        @if (isExpanded(q.number)) {
-          <div class="review-detail">
-            <!-- Multiple Choice: show all options -->
-            @if (q.type === 'multiple_choice' && q.options && q.options.length > 0) {
-              <div class="options-grid">
-                @for (opt of q.options; track opt; let j = $index) {
-                  <div class="option-item"
-                    [class.option-correct]="j === q.correctOptionIndex"
-                    [class.option-user-wrong]="j === q.userSelectedIndex && j !== q.correctOptionIndex"
-                    [class.option-neutral]="j !== q.correctOptionIndex && j !== q.userSelectedIndex">
-                    <span class="option-label"
-                      [class.label-correct]="j === q.correctOptionIndex"
-                      [class.label-wrong]="j === q.userSelectedIndex && j !== q.correctOptionIndex"
-                    >{{ getOptionLabel(j) }}</span>
-                    <span class="option-text">{{ opt }}</span>
-                    @if (j === q.correctOptionIndex) {
-                      <span class="material-symbols-outlined option-icon correct">check_circle</span>
-                    }
-                    @if (j === q.userSelectedIndex && j !== q.correctOptionIndex) {
-                      <span class="material-symbols-outlined option-icon wrong">cancel</span>
-                    }
-                    @if (j === q.userSelectedIndex && j === q.correctOptionIndex) {
-                      <span class="material-symbols-outlined option-icon correct">verified</span>
-                    }
-                  </div>
-                }
-              </div>
-            }
-
-            <!-- True/False -->
-            @if (q.type === 'true_false') {
-              <div class="tf-options">
-                <div class="tf-option"
-                  [class.option-correct]="q.correctAnswer === 'True'"
-                  [class.option-user-wrong]="q.userAnswer === 'True' && q.correctAnswer !== 'True'">
-                  <span class="material-symbols-outlined" style="font-size:20px"
-                    [class.text-green-600]="q.correctAnswer === 'True'"
-                    [class.text-red-500]="q.userAnswer === 'True' && q.correctAnswer !== 'True'"
-                  >check_circle</span>
-                  <span>True</span>
-                  @if (q.userAnswer === 'True') {
-                    <span class="tf-user-tag">You chose</span>
+            <div class="flex-1 min-w-0">
+              <p class="text-[14px] font-bold text-gray-900 m-0 leading-snug">
+                <span class="text-gray-400 font-black mr-1">{{ i + 1 }}.</span>{{ ans.question }}
+              </p>
+              @if (!isExpanded(i)) {
+                <div class="flex items-center gap-2 mt-1 text-[12px] font-medium flex-wrap">
+                  <span class="text-gray-400">Bạn chọn:</span>
+                  <span [class]="ans.isCorrect ? 'text-green-600 font-bold' : 'text-red-500 font-bold'">
+                    {{ ans.answer.length ? ans.answer.join(', ') : '--' }}
+                  </span>
+                  @if (!ans.isCorrect) {
+                    <span class="text-gray-300">·</span>
+                    <span class="text-gray-400">Đáp án:</span>
+                    <span class="text-green-600 font-bold">{{ ans.correctAnswers.join(', ') }}</span>
                   }
                 </div>
-                <div class="tf-option"
-                  [class.option-correct]="q.correctAnswer === 'False'"
-                  [class.option-user-wrong]="q.userAnswer === 'False' && q.correctAnswer !== 'False'">
-                  <span class="material-symbols-outlined" style="font-size:20px"
-                    [class.text-green-600]="q.correctAnswer === 'False'"
-                    [class.text-red-500]="q.userAnswer === 'False' && q.correctAnswer !== 'False'"
-                  >cancel</span>
-                  <span>False</span>
-                  @if (q.userAnswer === 'False') {
-                    <span class="tf-user-tag">You chose</span>
+              }
+            </div>
+            <span class="material-symbols-outlined text-[20px] text-gray-300 shrink-0 mt-0.5 transition-transform"
+              [class.rotate-180]="isExpanded(i)">expand_more</span>
+          </div>
+
+          <!-- Expanded detail -->
+          @if (isExpanded(i)) {
+            <div class="px-6 pb-5 pt-1">
+              @if (hasOptions(ans)) {
+                <!-- Options grid -->
+                <div class="flex flex-col gap-2">
+                  @for (opt of ans.options; track opt; let j = $index) {
+                    <div
+                      class="flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-colors"
+                      [class]="getOptionClass(ans, opt)"
+                    >
+                      <span class="w-7 h-7 rounded-lg flex items-center justify-center text-[12px] font-black border shrink-0"
+                        [class]="isOptionCorrect(ans, opt) ? 'bg-green-500 border-green-500 text-white' : isOptionUserAnswer(ans, opt) ? 'bg-red-400 border-red-400 text-white' : 'bg-white border-gray-200 text-gray-400'"
+                      >{{ getOptionLabel(j) }}</span>
+                      <span class="flex-1 text-[13px] font-semibold">{{ opt }}</span>
+                      @if (isOptionCorrect(ans, opt) && isOptionUserAnswer(ans, opt)) {
+                        <span class="material-symbols-outlined text-[18px] text-green-500" style="font-variation-settings:'FILL' 1">verified</span>
+                      } @else if (isOptionCorrect(ans, opt)) {
+                        <span class="material-symbols-outlined text-[18px] text-green-500" style="font-variation-settings:'FILL' 1">check_circle</span>
+                      } @else if (isOptionUserAnswer(ans, opt)) {
+                        <span class="material-symbols-outlined text-[18px] text-red-400" style="font-variation-settings:'FILL' 1">cancel</span>
+                      }
+                    </div>
                   }
                 </div>
-              </div>
-            }
-
-            <!-- Fill blank -->
-            @if (q.type === 'fill_blank') {
-              <div class="fill-result">
-                <div class="fill-row">
-                  <span class="fill-label">Bạn trả lời:</span>
-                  <span class="fill-value" [class.fill-wrong]="!q.isCorrect" [class.fill-correct]="q.isCorrect">{{ q.userAnswer }}</span>
-                </div>
-                @if (!q.isCorrect) {
-                  <div class="fill-row">
-                    <span class="fill-label">Correct answer:</span>
-                    <span class="fill-value fill-correct">{{ q.correctAnswer }}</span>
+              } @else {
+                <!-- Fill blank / text answer -->
+                <div class="flex flex-col gap-2">
+                  <div class="flex items-start gap-3 p-3 rounded-xl border"
+                    [class]="ans.isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'">
+                    <span class="material-symbols-outlined text-[16px] mt-0.5 shrink-0"
+                      [class]="ans.isCorrect ? 'text-green-500' : 'text-red-400'">person</span>
+                    <div>
+                      <span class="text-[10px] font-black uppercase tracking-wider block mb-0.5"
+                        [class]="ans.isCorrect ? 'text-green-600' : 'text-red-500'">Bạn trả lời</span>
+                      <span class="text-[13px] font-bold" [class]="ans.isCorrect ? 'text-green-800' : 'text-red-700'">
+                        {{ ans.answer.length ? ans.answer.join(', ') : '--' }}
+                      </span>
+                    </div>
                   </div>
-                }
-              </div>
-            }
-
-            <!-- Explanation -->
-            @if (q.explanation) {
-              <div class="review-explanation">
-                <span class="material-symbols-outlined explain-icon">lightbulb</span>
-                <div>
-                  <strong>Tip</strong>
-                  <p>{{ q.explanation }}</p>
+                  @if (!ans.isCorrect) {
+                    <div class="flex items-start gap-3 p-3 rounded-xl border border-green-200 bg-green-50">
+                      <span class="material-symbols-outlined text-[16px] mt-0.5 text-green-500 shrink-0" style="font-variation-settings:'FILL' 1">check_circle</span>
+                      <div>
+                        <span class="text-[10px] font-black uppercase tracking-wider text-green-600 block mb-0.5">Đáp án đúng</span>
+                        <span class="text-[13px] font-bold text-green-800">{{ ans.correctAnswers.join(', ') }}</span>
+                      </div>
+                    </div>
+                  }
                 </div>
-              </div>
-            }
-          </div>
-        }
-      </div>
-    }
-  </div>
-
-  <!-- Quiz History -->
-  @if (pastAttempts().length > 1) {
-    <div class="section-card">
-      <div class="section-heading-row">
-        <h3 class="section-heading">
-          <span class="material-symbols-outlined">history</span>
-          Recent History
-        </h3>
-      </div>
-
-        <div class="history-list mt-4">
-          @for (attempt of pastAttempts(); track attempt.id; let i = $index) {
-            <div class="history-item" [class.history-current]="i === 0">
-              <div class="history-rank">
-                @if (i === 0) {
-                  <span class="material-symbols-outlined text-[#4255FF]" style="font-size:20px">radio_button_checked</span>
-                } @else {
-                  <span class="history-number">{{ i + 1 }}</span>
-                }
-              </div>
-              <div class="history-info">
-                <span class="history-date">{{ formatDate(attempt.date) }}</span>
-                <span class="history-time">
-                  <span class="material-symbols-outlined" style="font-size:14px">schedule</span>
-                  {{ attempt.timeTaken }}
-                </span>
-              </div>
-              <div class="history-score">
-                <span class="history-score-val" [style.color]="getScoreColor(attempt.score)">{{ attempt.score }}%</span>
-                <span class="history-score-detail">{{ attempt.totalCorrect }}/{{ attempt.totalQuestions }} correct</span>
-              </div>
+              }
             </div>
           }
         </div>
+      }
     </div>
-  }
+  </div>
 
-  <!-- CTA Buttons -->
-  <div class="result-cta">
-    <button class="cta-learn" (click)="goToLearn()">
-      <span class="material-symbols-outlined">style</span>
-      Learn Again
+  <!-- ── Action Buttons ── -->
+  <div class="flex gap-3">
+    <button
+      (click)="goBack()"
+      class="flex-1 flex items-center justify-center gap-2 py-3.5 rounded-xl bg-white border border-gray-200 text-gray-700 font-bold text-[14px] cursor-pointer hover:bg-gray-50 transition-colors"
+    >
+      <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+      Quay lại deck
     </button>
-    <button class="cta-retry" (click)="goToQuiz()">
-      <span class="material-symbols-outlined">quiz</span>
-      Retry Quiz
-    </button>
-    <button class="cta-dashboard" routerLink="/dashboard">
-      Dashboard
-      <span class="material-symbols-outlined">arrow_forward</span>
+    <button
+      (click)="retryQuiz()"
+      class="flex-[2] flex items-center justify-center gap-2 py-3.5 rounded-xl bg-[#4255FF] border-none text-white font-black text-[14px] cursor-pointer shadow-[0_4px_14px_rgba(66,85,255,0.3)] hover:bg-[#3345e0] hover:shadow-[0_6px_18px_rgba(66,85,255,0.4)] transition-all"
+    >
+      <span class="material-symbols-outlined text-[20px]">replay</span>
+      Làm lại
     </button>
   </div>
+
 </div>
+}

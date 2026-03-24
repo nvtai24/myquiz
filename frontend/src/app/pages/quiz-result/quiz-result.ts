@@ -1,32 +1,7 @@
-import { Component, signal, OnInit, inject, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { Component, signal, OnInit, inject, computed } from '@angular/core';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-
-interface QuestionReview {
-  number: number;
-  text: string;
-  type: string;
-  userAnswer: string;
-  correctAnswer: string;
-  isCorrect: boolean;
-  explanation?: string;
-  options?: string[];
-  correctOptionIndex?: number;
-  userSelectedIndex?: number | null;
-}
-
-interface QuizAttempt {
-  id: string;
-  deckId: string;
-  deckTitle: string;
-  score: number;
-  totalCorrect: number;
-  totalQuestions: number;
-  timeTaken: string;
-  date: string;
-  questions: QuestionReview[];
-}
+import { QuizAttemptResponse, UserAnswerResponse } from '../../models/quiz.models';
 
 @Component({
   selector: 'app-quiz-result',
@@ -38,72 +13,30 @@ interface QuizAttempt {
 export class QuizResult implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
-  private platformId = inject(PLATFORM_ID);
 
   deckId = signal('');
   deckTitle = signal('');
-  score = signal(0);
-  totalCorrect = signal(0);
-  totalIncorrect = signal(0);
-  totalQuestions = signal(0);
-  timeTaken = signal('00:00');
+  attempt = signal<QuizAttemptResponse | null>(null);
+  expandedIndex = signal<number | null>(null);
 
-  questions: QuestionReview[] = [];
-  expandedQuestion = signal<number | null>(null);
+  score = computed(() => this.attempt()?.score ?? 0);
+  totalCorrect = computed(() => this.attempt()?.correctAnswers ?? 0);
+  totalQuestions = computed(() => this.attempt()?.totalQuestions ?? 0);
+  totalIncorrect = computed(() => this.totalQuestions() - this.totalCorrect());
 
-  // History
-  pastAttempts = signal<QuizAttempt[]>([]);
-  showHistory = signal(false);
-
-  ngOnInit(): void {
-    const nav = this.router.getCurrentNavigation();
-    const state = nav?.extras?.state ?? history.state;
-
-    if (state && state['totalQuestions']) {
-      const correct = state['correctAnswers'] ?? 0;
-      const total = state['totalQuestions'] ?? 0;
-      const incorrect = total - correct;
-
-      this.deckId.set(state['deckId'] ?? '');
-      this.deckTitle.set(state['deckTitle'] ?? 'Quiz');
-      this.totalQuestions.set(total);
-      this.totalCorrect.set(correct);
-      this.totalIncorrect.set(incorrect);
-      this.score.set(total > 0 ? Math.round((correct / total) * 100) : 0);
-      this.timeTaken.set(state['timeTaken'] ?? '00:00');
-      this.questions = (state['questions'] ?? []).map((q: any) => ({
-        number: q.number,
-        text: q.text,
-        type: q.type,
-        userAnswer: q.userAnswer ?? q.answer ?? '--',
-        correctAnswer: q.correctAnswer ?? '--',
-        isCorrect: q.isCorrect,
-        explanation: q.explanation,
-        options: q.options ?? [],
-        correctOptionIndex: q.correctOptionIndex ?? null,
-        userSelectedIndex: q.userSelectedIndex ?? null,
-      }));
-
-      // Save this attempt to history
-      this.saveAttempt();
-    } else {
-      this.route.params.subscribe(p => this.deckId.set(p['id'] ?? ''));
-    }
-
-    // Load history
-    this.loadHistory();
+  get formattedTime(): string {
+    const ms = this.attempt()?.totalTime ?? 0;
+    const mins = Math.floor(ms / 60000);
+    const secs = Math.floor((ms % 60000) / 1000);
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   }
 
   get greeting(): string {
     const s = this.score();
-    if (s >= 90) return 'Xuất sắc! 🏆';
-    if (s >= 70) return 'Làm tốt lắm! 🎉';
-    if (s >= 50) return 'Tiếp tục cố gắng! 💪';
-    return 'Hãy ôn luyện thêm! 📚';
-  }
-
-  get performanceText(): string {
-    return `${this.totalCorrect()} / ${this.totalQuestions()} câu đúng`;
+    if (s >= 90) return 'Xuất sắc!';
+    if (s >= 70) return 'Làm tốt lắm!';
+    if (s >= 50) return 'Tiếp tục cố gắng!';
+    return 'Hãy ôn luyện thêm!';
   }
 
   get starsCount(): number {
@@ -115,76 +48,74 @@ export class QuizResult implements OnInit {
     return 1;
   }
 
-  toggleQuestion(num: number) {
-    this.expandedQuestion.update(v => v === num ? null : num);
+  get scoreColor(): string {
+    const s = this.score();
+    if (s >= 70) return '#16a34a';
+    if (s >= 40) return '#d97706';
+    return '#ef4444';
+  }
+
+  get ringOffset(): number {
+    return 326.7 - (326.7 * this.score() / 100);
+  }
+
+  ngOnInit(): void {
+    const nav = this.router.getCurrentNavigation();
+    const state = nav?.extras?.state ?? history.state;
+
+    this.route.params.subscribe(p => this.deckId.set(p['id'] ?? ''));
+
+    if (state?.['attempt']) {
+      this.attempt.set(state['attempt'] as QuizAttemptResponse);
+      this.deckId.set(state['attempt'].deckId);
+    }
+    if (state?.['deckTitle']) {
+      this.deckTitle.set(state['deckTitle']);
+    }
+  }
+
+  toggleQuestion(index: number) {
+    this.expandedIndex.update(v => v === index ? null : index);
+  }
+
+  isExpanded(index: number): boolean {
+    return this.expandedIndex() === index || this.expandedIndex() === -1;
   }
 
   expandAll() {
-    this.expandedQuestion.set(this.expandedQuestion() === -1 ? null : -1);
+    this.expandedIndex.update(v => v === -1 ? null : -1);
   }
 
-  goToQuiz() {
-    this.router.navigate(['/quiz', this.deckId()]);
+  isOptionUserAnswer(ans: UserAnswerResponse, opt: string): boolean {
+    return ans.answer.includes(opt);
   }
 
-  goToLearn() {
-    this.router.navigate(['/learn', this.deckId()]);
+  isOptionCorrect(ans: UserAnswerResponse, opt: string): boolean {
+    return ans.correctAnswers.includes(opt);
   }
 
-  isExpanded(num: number): boolean {
-    return this.expandedQuestion() === num || this.expandedQuestion() === -1;
+  getOptionClass(ans: UserAnswerResponse, opt: string): string {
+    const isCorrect = this.isOptionCorrect(ans, opt);
+    const isUser = this.isOptionUserAnswer(ans, opt);
+    if (isCorrect && isUser) return 'border-green-500 bg-green-50 text-green-800';
+    if (isCorrect) return 'border-green-400 bg-green-50/60 text-green-700';
+    if (isUser) return 'border-red-400 bg-red-50 text-red-700';
+    return 'border-gray-100 bg-gray-50/50 text-gray-500';
   }
 
-  getOptionLabel(index: number): string {
-    return String.fromCharCode(65 + index); // A, B, C, D...
+  getOptionLabel(i: number): string {
+    return String.fromCharCode(65 + i);
   }
 
-  // ── History Management ──
-
-  toggleHistory() {
-    this.showHistory.update(v => !v);
+  hasOptions(ans: UserAnswerResponse): boolean {
+    return ans.options.length > 0;
   }
 
-  private saveAttempt() {
-    if (!isPlatformBrowser(this.platformId)) return;
-    if (!this.deckId() || this.totalQuestions() === 0) return;
-
-    const attempt: QuizAttempt = {
-      id: Date.now().toString(36) + Math.random().toString(36).substring(2, 5),
-      deckId: this.deckId(),
-      deckTitle: this.deckTitle(),
-      score: this.score(),
-      totalCorrect: this.totalCorrect(),
-      totalQuestions: this.totalQuestions(),
-      timeTaken: this.timeTaken(),
-      date: new Date().toISOString(),
-      questions: this.questions,
-    };
-
-    const key = `quiz_history_${this.deckId()}`;
-    const existing: QuizAttempt[] = JSON.parse(localStorage.getItem(key) ?? '[]');
-    existing.unshift(attempt); // newest first
-    // Keep max 20 attempts per deck
-    const trimmed = existing.slice(0, 20);
-    localStorage.setItem(key, JSON.stringify(trimmed));
+  retryQuiz() {
+    this.router.navigate(['/deck', this.deckId()]);
   }
 
-  private loadHistory() {
-    if (!isPlatformBrowser(this.platformId)) return;
-    if (!this.deckId()) return;
-    const key = `quiz_history_${this.deckId()}`;
-    const data: QuizAttempt[] = JSON.parse(localStorage.getItem(key) ?? '[]');
-    this.pastAttempts.set(data);
-  }
-
-  formatDate(dateStr: string): string {
-    const d = new Date(dateStr);
-    return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-  }
-
-  getScoreColor(score: number): string {
-    if (score >= 80) return '#16a34a';
-    if (score >= 50) return '#d97706';
-    return '#ef4444';
+  goBack() {
+    this.router.navigate(['/deck', this.deckId()]);
   }
 }

@@ -353,9 +353,18 @@
           <span class="material-symbols-outlined text-[24px]">chevron_right</span>
         </button>
       } @else {
-        <button class="flex items-center gap-2 px-10 py-4 rounded-[20px] bg-green-600 border-none text-white font-black text-[15px] cursor-pointer transition-all shadow-[0_8px_20px_rgba(22,163,74,0.3)] hover:translate-y-[-1px] hover:shadow-[0_12px_28px_rgba(22,163,74,0.4)] active:scale-[0.98]" (click)="finishQuiz()">
-          <span class="material-symbols-outlined text-[22px]">check</span>
-          Finish Quiz
+        <button
+          class="flex items-center gap-2 px-10 py-4 rounded-[20px] bg-green-600 border-none text-white font-black text-[15px] cursor-pointer transition-all shadow-[0_8px_20px_rgba(22,163,74,0.3)] hover:translate-y-[-1px] hover:shadow-[0_12px_28px_rgba(22,163,74,0.4)] active:scale-[0.98] disabled:opacity-70 disabled:cursor-not-allowed"
+          (click)="finishQuiz()"
+          [disabled]="submitting()"
+        >
+          @if (submitting()) {
+            <span class="material-symbols-outlined text-[20px] animate-spin">progress_activity</span>
+            Submitting...
+          } @else {
+            <span class="material-symbols-outlined text-[22px]">check</span>
+            Finish Quiz
+          }
         </button>
       }
     </div>

@@ -47,12 +47,7 @@ public class CreateDeckRatingCommandHandler : IRequestHandler<CreateDeckRatingCo
         var existingRating = await _deckRatingRepository.GetUserRatingForDeckAsync(request.DeckId, userId, cancellationToken);
         if (existingRating != null)
         {
-            // Update existing rating
-            existingRating.Rating = request.Request.Rating;
-            existingRating.Comment = request.Request.Comment;
-            _deckRatingRepository.Update(existingRating);
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
-            return existingRating.Id;
+            throw new BadRequestException("You have already rated this deck.");
         }
 
         // Create new rating

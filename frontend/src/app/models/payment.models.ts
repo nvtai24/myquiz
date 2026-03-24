@@ -3,7 +3,7 @@ export interface SubscriptionPlanResponse {
   name: string;
   description: string;
   dailyGenerateLimit: number;
-  numDeckLimit: number;
+  maxQuestionsPerGenerate: number;
   price: number;
   duration: number; // days
   isActive: boolean;
@@ -15,7 +15,7 @@ export interface UserSubscriptionResponse {
   planName: string;
   planDescription: string;
   dailyGenerateLimit: number;
-  numDeckLimit: number;
+  maxQuestionsPerGenerate: number;
   price: number;
   startDate: string;
   endDate: string;

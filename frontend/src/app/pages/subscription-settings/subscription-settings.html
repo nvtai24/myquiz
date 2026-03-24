@@ -72,16 +72,8 @@
 
       <ul class="feature-list">
         <li class="feature-item">
-          <span class="material-symbols-outlined feature-icon">style</span>
-          @if (plan.numDeckLimit > 0) {
-          Up to <strong>{{ plan.numDeckLimit }}</strong> study sets
-          } @else {
-          <strong>Unlimited</strong> study sets
-          }
-        </li>
-        <li class="feature-item">
           <span class="material-symbols-outlined feature-icon">auto_awesome</span>
-          @if (plan.dailyGenerateLimit > 0) {
+          @if (plan.dailyGenerateLimit !== -1) {
           <strong>{{ plan.dailyGenerateLimit }}</strong> AI generations / day
           } @else {
           <strong>Unlimited</strong> AI generations

@@ -131,13 +131,6 @@ export class AddDeck implements OnInit {
           this.aiUsageMax.set(0);
           this.aiUsageCount.set(0);
         }
-
-        if (limit && limit.numDeckUsed >= limit.numDeckLimit && limit.numDeckLimit !== 0) {
-          this.checkLimit.set(true);
-        }
-        if(limit && limit.numDeckUsed > limit.numDeckLimit && limit.numDeckLimit !== 0){
-          this.checkLimitDeck.set(true);
-        }
       },
       error: () => {
         this.aiLimitLoading.set(false);
@@ -156,7 +149,11 @@ export class AddDeck implements OnInit {
           this.title.set(deck.name);
           this.description.set(deck.description || '');
           this.tags.set(deck.tags ?? []);
-          const visRevMap: Record<string, 'public' | 'private' | 'shared'> = { Public: 'public', Private: 'private', Shared: 'shared' };
+          const visRevMap: Record<string, 'public' | 'private' | 'shared'> = {
+            Public: 'public',
+            Private: 'private',
+            Shared: 'shared',
+          };
           this.visibility.set(visRevMap[deck.visibility] ?? 'public');
           this.coverImage.set(deck.thumbnailUrl || null);
 
@@ -451,7 +448,11 @@ export class AddDeck implements OnInit {
 
     this.errorMessage.set(null);
 
-    const visMap: Record<string, DeckVisibility> = { public: 'Public', private: 'Private', shared: 'Shared' };
+    const visMap: Record<string, DeckVisibility> = {
+      public: 'Public',
+      private: 'Private',
+      shared: 'Shared',
+    };
     const visibility: DeckVisibility = visMap[this.visibility()] ?? 'Public';
     const isEdit = this.isEditMode() && !!this.editingId();
 
@@ -498,8 +499,8 @@ export class AddDeck implements OnInit {
               description: createRequest.description,
               visibility,
               status,
-            tags: this.tags(),
-            thumbnailUrl: thumbnail,
+              tags: this.tags(),
+              thumbnailUrl: thumbnail,
               ...this.buildQuestionDiff(),
             };
             return this.deckService.updateDeck(this.editingId()!, updateRequest);
@@ -651,7 +652,9 @@ export class AddDeck implements OnInit {
     return body?.message || 'An error occurred';
   }
 
-  private normalizeDeckStatus(status: DeckStatus | number | string | null | undefined): DeckStatus | null {
+  private normalizeDeckStatus(
+    status: DeckStatus | number | string | null | undefined,
+  ): DeckStatus | null {
     if (status === 'Draft' || status === 0 || status === '0') return 'Draft';
     if (status === 'Published' || status === 1 || status === '1') return 'Published';
     return null;
@@ -799,7 +802,7 @@ export class AddDeck implements OnInit {
           this.showError(res.message || 'AI generation failed');
           return;
         }
-        if (this.aiUsageMax() > 0) {
+        if (this.aiUsageMax() !== -1) {
           this.aiUsageCount.update((c) => c + 1);
         }
         this.applyGeneratedDeckResponse(res.data);

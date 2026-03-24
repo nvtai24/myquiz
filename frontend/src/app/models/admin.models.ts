@@ -5,7 +5,6 @@ export interface AdminSubscriptionPlanResponse {
   name: string;
   description: string;
   dailyGenerateLimit: number;
-  numDeckLimit: number;
   price: number;
   duration: number;
   isActive: boolean;
@@ -77,7 +76,7 @@ export interface CreatePlanRequest {
   name: string;
   description: string;
   dailyGenerateLimit: number;
-  numDeckLimit: number;
+  maxQuestionsPerGenerate: number;
   price: number;
   duration: number;
   isActive: boolean;
@@ -88,7 +87,7 @@ export interface UpdatePlanRequest {
   name: string;
   description: string;
   dailyGenerateLimit: number;
-  numDeckLimit: number;
+  maxQuestionsPerGenerate: number;
   price: number;
   duration: number;
   isActive: boolean;

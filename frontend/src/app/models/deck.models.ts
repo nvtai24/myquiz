@@ -149,7 +149,5 @@ export interface LimitAiGenerateResponse {
   dailyGenerateLimit: number;
   dailyGenerateUsed: number;
   dailyGenerateRemaining: number;
-  numDeckLimit: number;
-  numDeckUsed: number;
-  numDeckRemaining: number;
+  maxQuestionsPerGenerate: number;
 }

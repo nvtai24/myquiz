@@ -74,11 +74,7 @@
               </li>
               <li class="flex items-center gap-2 text-[13px] text-gray-700 font-medium">
                 <span class="material-symbols-outlined text-[16px] text-indigo-500 shrink-0">auto_awesome</span>
-                Gen AI limit: {{ plan.dailyGenerateLimit === 0 ? 'Unlimited' : (plan.dailyGenerateLimit + ' times/day') }}
-              </li>
-              <li class="flex items-center gap-2 text-[13px] text-gray-700 font-medium">
-                <span class="material-symbols-outlined text-[16px] text-indigo-500 shrink-0">library_books</span>
-                Deck limit: {{ plan.numDeckLimit === 0 ? 'Unlimited' : (plan.numDeckLimit + ' decks (creator)') }}
+                Gen AI limit: {{ plan.dailyGenerateLimit === -1 ? 'Unlimited' : (plan.dailyGenerateLimit + ' times/day') }}
               </li>
             </ul>
           </div>

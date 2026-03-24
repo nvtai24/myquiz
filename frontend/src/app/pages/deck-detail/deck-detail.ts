@@ -247,6 +247,10 @@ export class DeckDetail implements OnInit {
   inviteError = signal<string | null>(null);
 
   isLoggedIn = computed(() => this.authService.isLoggedIn());
+  isOwner = computed(() => {
+    const user = this.authService.currentUser();
+    return !!user && user.email === this.deck()?.ownerEmail;
+  });
 
   openInviteModal() {
     this.isInviteModalOpen.set(true);

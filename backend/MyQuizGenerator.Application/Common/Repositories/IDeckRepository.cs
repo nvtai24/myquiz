@@ -14,6 +14,7 @@ public interface IDeckRepository : IRepository<Guid, Deck>
     Task AddInvitationAsync(DeckInvitation invitation, CancellationToken cancellationToken = default);
     Task AddDeckMemberAsync(DeckMember deckMember, CancellationToken cancellationToken = default);
     Task<bool> IsMemberAsync(Guid deckId, string userId, CancellationToken cancellationToken = default);
+    Task<List<DeckMember>> GetDeckMembersAsync(Guid deckId, CancellationToken cancellationToken = default);
     Task<(List<Deck> Items, int TotalCount)> GetSharedDecksAsync(string userId, int page, int size, CancellationToken cancellationToken = default);
     Task<(List<Deck> Items, int TotalCount)> GetAttemptedDecksAsync(string userId, int page, int size, CancellationToken cancellationToken = default);
     Task<(List<Deck> Items, int TotalCount)> SearchPublicDecksAsync(string? searchTerm, int page, int size, CancellationToken cancellationToken = default);

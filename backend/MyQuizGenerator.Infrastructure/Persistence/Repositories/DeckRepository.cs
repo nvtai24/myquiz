@@ -105,6 +105,15 @@ public class DeckRepository : Repository<Guid, Deck>, IDeckRepository
             .AnyAsync(dm => dm.DeckId == deckId && dm.UserId == userId, cancellationToken);
     }
 
+    public async Task<List<DeckMember>> GetDeckMembersAsync(Guid deckId, CancellationToken cancellationToken = default)
+    {
+        return await _context.DeckMembers
+            .AsNoTracking()
+            .Where(dm => dm.DeckId == deckId)
+            .OrderByDescending(dm => dm.JoinedAt)
+            .ToListAsync(cancellationToken);
+    }
+
     public async Task<(List<Deck> Items, int TotalCount)> GetSharedDecksAsync(string userId, int page, int size, CancellationToken cancellationToken = default)
     {
         var query = _context.Decks

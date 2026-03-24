@@ -15,6 +15,7 @@ using DeckDetails = MyQuizGenerator.Application.Decks.Queries.GetDeckById;
 using SearchDecks = MyQuizGenerator.Application.Decks.Queries.SearchPublicDecks;
 using MyQuizGenerator.Application.DeckInvitations.DTOs;
 using MyQuizGenerator.Application.DeckInvitations.Commands.CreateDeckInvitation;
+using DeckMembers = MyQuizGenerator.Application.Decks.Queries.GetDeckMembers;
 
 namespace MyQuizGenerator.Presentation.Controllers;
 
@@ -219,6 +220,19 @@ public class DecksController : BaseApiController
     }
 
     /// <summary>
+    /// Gets all members of a deck with their full name, email, and join date.
+    /// </summary>
+    /// <param name="id">The deck ID.</param>
+    /// <returns>List of deck members.</returns>
+    [HttpGet("{id}/members")]
+    public async Task<IActionResult> GetDeckMembers(Guid id)
+    {
+        var query = new DeckMembers.GetDeckMembersQuery(id);
+        var result = await _mediator.Send(query);
+        return ApiOk(result);
+    }
+
+    /// <summary>
     /// Invites a user to a deck.
     /// </summary>
     /// <param name="id">The deck ID.</param>
@@ -244,3 +258,4 @@ public class DecksController : BaseApiController
         return ApiOk(memberId, "Invitation accepted successfully");
     }
 }
+

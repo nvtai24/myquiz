@@ -37,7 +37,7 @@ public class GenerateDeckFromFilesCommandHandler : IRequestHandler<GenerateDeckF
     {
         var userId = _currentUserService.UserId ?? string.Empty;
 
-        // 1. Check DailyGenerateLimit from user's active subscription plan
+        // 1. Check DailyGenerateLimit from user's active subscription plan (-1 = unlimited)
         var now = DateTime.UtcNow;
         var activePlan = await _userSubscriptionRepository.GetQueryable()
             .Include(usp => usp.SubscriptionPlan)
@@ -46,7 +46,7 @@ public class GenerateDeckFromFilesCommandHandler : IRequestHandler<GenerateDeckF
             .Select(usp => usp.SubscriptionPlan)
             .FirstOrDefaultAsync(cancellationToken);
 
-        if (activePlan != null && activePlan.DailyGenerateLimit > 0)
+        if (activePlan != null && activePlan.DailyGenerateLimit >= 0)
         {
             var currentCount = await _rateLimitService.GetDailyGenerateCountAsync(userId, cancellationToken);
             if (currentCount >= activePlan.DailyGenerateLimit)
@@ -87,13 +87,20 @@ public class GenerateDeckFromFilesCommandHandler : IRequestHandler<GenerateDeckF
             }
         }
 
-        // 4. Increment counter only after successful generation (AI errors don't consume quota)
-        if (activePlan != null && activePlan.DailyGenerateLimit > 0)
+        // 4. Limit questions based on MaxQuestionsPerGenerate from subscription plan (-1 = unlimited)
+        var maxQuestions = activePlan?.MaxQuestionsPerGenerate ?? 0;
+        if (maxQuestions >= 0 && generatedDeck.Questions.Count > maxQuestions)
+        {
+            generatedDeck.Questions = generatedDeck.Questions.Take(maxQuestions).ToList();
+        }
+
+        // 5. Increment counter only after successful generation (AI errors don't consume quota, -1 = unlimited)
+        if (activePlan != null && activePlan.DailyGenerateLimit >= 0)
         {
             await _rateLimitService.IncrementDailyGenerateCountAsync(userId, cancellationToken);
         }
 
-        // 5. Return generated deck (no DB save - FE will call save API separately)
+        // 6. Return generated deck (no DB save - FE will call save API separately)
         return generatedDeck;
     }
 

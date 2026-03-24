@@ -47,7 +47,8 @@ public class GetUserQuotaQueryHandler : IRequestHandler<GetUserQuotaQuery, UserQ
             PlanName = activePlan?.Name ?? "Free",
             DailyGenerateLimit = dailyLimit,
             DailyGenerateUsed = dailyUsed,
-            DailyGenerateRemaining = dailyLimit > 0 ? Math.Max(0, dailyLimit - dailyUsed) : 0
+            // -1 = unlimited, otherwise calculate remaining
+            DailyGenerateRemaining = dailyLimit < 0 ? -1 : Math.Max(0, dailyLimit - dailyUsed)
         };
     }
 }

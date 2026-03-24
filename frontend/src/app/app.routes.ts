@@ -44,7 +44,7 @@ export const routes: Routes = [
       { path: 'library', loadComponent: () => import('./pages/library/library').then(m => m.Library) },
       { path: 'search', loadComponent: () => import('./pages/search/search').then(m => m.Search) },
       { path: 'add-deck', loadComponent: () => import('./pages/add-deck/add-deck').then(m => m.AddDeck) },
-      { path: 'edit-deck/:id', loadComponent: () => import('./pages/add-deck/add-deck').then(m => m.AddDeck) },
+      { path: 'edit-deck/:id', loadComponent: () => import('./pages/edit-deck/edit-deck').then(m => m.EditDeck) },
       { path: 'deck/:id', loadComponent: () => import('./pages/deck-detail/deck-detail').then(m => m.DeckDetail) },
       { path: 'quiz/:id', loadComponent: () => import('./pages/quiz/quiz').then(m => m.Quiz) },
       { path: 'learn/:id', loadComponent: () => import('./pages/learn/learn').then(m => m.Learn) },

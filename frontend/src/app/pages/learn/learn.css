@@ -1,38 +1,48 @@
 :host {
   display: block;
   width: 100%;
-  padding: 24px 32px 80px;
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes fadeSlide {
-  from { opacity: 0; transform: translateY(12px); }
-  to { opacity: 1; transform: translateY(0); }
+/* ── 3D Flashcard Flip (same as deck-detail) ── */
+.card-flip-scene {
+  perspective: 1400px;
+  width: 100%;
 }
 
-@keyframes slideOutLeft {
-  to { opacity: 0; transform: translateX(-80px) scale(0.94); }
+.card-flip-inner {
+  position: relative;
+  width: 100%;
+  min-height: 520px;
+  transform-style: preserve-3d;
+  transition: transform 0.52s cubic-bezier(0.4, 0.2, 0.2, 1);
 }
 
-@keyframes slideOutRight {
-  to { opacity: 0; transform: translateX(80px) scale(0.94); }
+@media (min-width: 640px) {
+  .card-flip-inner {
+    min-height: 580px;
+  }
 }
 
-@keyframes bounceIn {
-  0% { transform: scale(0.6); opacity: 0; }
-  60% { transform: scale(1.05); }
-  100% { transform: scale(1); opacity: 1; }
+.card-flip-inner.flipped {
+  transform: rotateY(180deg);
 }
 
-@keyframes float {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-8px); }
+.card-flip-face {
+  position: absolute;
+  inset: 0;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: 20px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
-.rotate-y-180 {
+.card-flip-back {
   transform: rotateY(180deg);
 }

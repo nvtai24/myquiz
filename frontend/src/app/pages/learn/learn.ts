@@ -1,8 +1,8 @@
-import { Component, OnInit, OnDestroy, signal, computed, inject } from '@angular/core';
+import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { DeckService } from '../../services/deck.service';
-import { DeckDetailResponse, QuestionResponse } from '../../models/deck.models';
+import { QuestionResponse } from '../../models/deck.models';
 
 type CardStatus = 'new' | 'learning' | 'mastered';
 
@@ -25,22 +25,19 @@ export class Learn implements OnInit {
   error = signal<string | null>(null);
 
   isFlipped = signal(false);
+  showHint = signal(false);
+  showExplanation = signal(false);
   currentIndex = signal(0);
   cardStatuses = signal<CardStatus[]>([]);
   isAnimating = signal(false);
-  slideDirection = signal<'left' | 'right' | ''>('');
   showCompleteScreen = signal(false);
-  showAllTerms = signal(false);
 
-  readonly MAX_DOTS = 12;
-  readonly TERMS_PAGE_SIZE = 10;
+  readonly MAX_DOTS = 15;
 
   ngOnInit(): void {
     this.route.params.subscribe(params => {
       this.deckId = params['id'] || '';
-      if (this.deckId) {
-        this.loadDeck();
-      }
+      if (this.deckId) this.loadDeck();
     });
   }
 
@@ -56,7 +53,7 @@ export class Learn implements OnInit {
         this.loading.set(false);
       },
       error: (err) => {
-        this.error.set(err?.error?.message ?? 'Không thể tải bộ thẻ.');
+        this.error.set(err?.error?.message ?? 'Failed to load deck.');
         this.loading.set(false);
       }
     });
@@ -65,38 +62,24 @@ export class Learn implements OnInit {
   get totalCards() { return this.cards().length; }
   get useDots(): boolean { return this.totalCards <= this.MAX_DOTS; }
 
-  get visibleTerms(): QuestionResponse[] {
-    const all = this.cards();
-    if (this.showAllTerms() || all.length <= this.TERMS_PAGE_SIZE) return all;
-    return all.slice(0, this.TERMS_PAGE_SIZE);
-  }
-
-  get hasMoreTerms(): boolean {
-    return this.totalCards > this.TERMS_PAGE_SIZE && !this.showAllTerms();
-  }
-
-  get remainingTermsCount(): number {
-    return this.totalCards - this.TERMS_PAGE_SIZE;
-  }
-
-  toggleShowAll() { this.showAllTerms.update(v => !v); }
-
   currentCard = computed(() => this.cards()[this.currentIndex()]);
-
-  progress = computed(() => {
-    const statuses = this.cardStatuses();
-    if (statuses.length === 0) return 0;
-    const mastered = statuses.filter(s => s === 'mastered').length;
-    return Math.round((mastered / statuses.length) * 100);
-  });
-
   masteredCount = computed(() => this.cardStatuses().filter(s => s === 'mastered').length);
   learningCount = computed(() => this.cardStatuses().filter(s => s === 'learning').length);
   newCount = computed(() => this.cardStatuses().filter(s => s === 'new').length);
 
+  private resetCardState() {
+    this.isFlipped.set(false);
+    this.showHint.set(false);
+    this.showExplanation.set(false);
+  }
+
   flipCard() {
     if (this.isAnimating()) return;
     this.isFlipped.update(v => !v);
+    if (!this.isFlipped()) {
+      this.showHint.set(false);
+      this.showExplanation.set(false);
+    }
   }
 
   markCard(status: CardStatus) {
@@ -118,11 +101,9 @@ export class Learn implements OnInit {
   goNext() {
     if (this.currentIndex() >= this.totalCards - 1 || this.isAnimating()) return;
     this.isAnimating.set(true);
-    this.slideDirection.set('left');
     setTimeout(() => {
       this.currentIndex.update(i => i + 1);
-      this.isFlipped.set(false);
-      this.slideDirection.set('');
+      this.resetCardState();
       this.isAnimating.set(false);
     }, 250);
   }
@@ -130,11 +111,9 @@ export class Learn implements OnInit {
   goPrev() {
     if (this.currentIndex() <= 0 || this.isAnimating()) return;
     this.isAnimating.set(true);
-    this.slideDirection.set('right');
     setTimeout(() => {
       this.currentIndex.update(i => i - 1);
-      this.isFlipped.set(false);
-      this.slideDirection.set('');
+      this.resetCardState();
       this.isAnimating.set(false);
     }, 250);
   }
@@ -142,11 +121,9 @@ export class Learn implements OnInit {
   goToCard(index: number) {
     if (index === this.currentIndex() || this.isAnimating()) return;
     this.isAnimating.set(true);
-    this.slideDirection.set(index > this.currentIndex() ? 'left' : 'right');
     setTimeout(() => {
       this.currentIndex.set(index);
-      this.isFlipped.set(false);
-      this.slideDirection.set('');
+      this.resetCardState();
       this.isAnimating.set(false);
     }, 250);
   }
@@ -158,7 +135,7 @@ export class Learn implements OnInit {
   resetProgress() {
     this.cardStatuses.set(new Array(this.totalCards).fill('new'));
     this.currentIndex.set(0);
-    this.isFlipped.set(false);
+    this.resetCardState();
     this.showCompleteScreen.set(false);
   }
 
@@ -184,16 +161,5 @@ export class Learn implements OnInit {
         this.goPrev();
         break;
     }
-  }
-
-  /** Get front content of a card (question text) */
-  getCardFront(q: QuestionResponse): string {
-    return q.content;
-  }
-
-  /** Get back content (correct answers + explanation) */
-  getCardBack(q: QuestionResponse): string {
-    const answers = q.correctAnswers?.join(', ') ?? '';
-    return answers || q.explanation || '';
   }
 }

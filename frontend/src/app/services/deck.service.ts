@@ -117,4 +117,11 @@ export class DeckService {
       params: { searchTerm, page: page.toString(), size: size.toString() }
     });
   }
+
+  exportPdf(deckId: string): Observable<any> {
+    return this.http.get(`${this.endpoint}/${deckId}/export-pdf`, {
+      responseType: 'blob',
+      observe: 'response',
+    });
+  }
 }

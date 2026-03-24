@@ -47,6 +47,21 @@
             Invite
           </button>
         }
+        @if (hasExportToPdf()) {
+          <button
+            (click)="exportPdf()"
+            [disabled]="exportingPdf()"
+            class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 text-[13px] font-bold cursor-pointer hover:bg-rose-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            @if (exportingPdf()) {
+              <span class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+              Exporting...
+            } @else {
+              <span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+              Export PDF
+            }
+          </button>
+        }
       </div>
     </div>
 

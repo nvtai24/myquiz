@@ -17,6 +17,7 @@ export interface UserSubscriptionResponse {
   planDescription: string;
   dailyGenerateLimit: number;
   maxQuestionsPerGenerate: number;
+  hasExportToPdf: boolean;
   price: number;
   startDate: string;
   endDate: string;

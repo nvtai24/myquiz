@@ -5,6 +5,7 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { DeckService } from '../../services/deck.service';
 import { AuthService } from '../../services/auth.service';
+import { PaymentService } from '../../services/payment.service';
 
 interface QuizAttemptSummary {
   id: string;
@@ -33,6 +34,7 @@ export class DeckDetail implements OnInit {
   private router = inject(Router);
   private deckService = inject(DeckService);
   private authService = inject(AuthService);
+  private paymentService = inject(PaymentService);
   private platformId = inject(PLATFORM_ID);
 
   // State
@@ -41,6 +43,10 @@ export class DeckDetail implements OnInit {
   loadingDeck = signal(true);
   loadingRatings = signal(true);
   deckError = signal<string | null>(null);
+
+  // Export PDF
+  hasExportToPdf = signal(false);
+  exportingPdf = signal(false);
 
   // UI
   studyMode = signal<string>('quiz');
@@ -368,6 +374,13 @@ export class DeckDetail implements OnInit {
         },
         error: () => {},
       });
+
+      this.paymentService.getMySubscription().subscribe({
+        next: (sub) => {
+          this.hasExportToPdf.set(sub?.hasExportToPdf ?? false);
+        },
+        error: () => {},
+      });
     }
 
     this.loadQuizHistory(id);
@@ -543,5 +556,40 @@ export class DeckDetail implements OnInit {
 
   getInitial(name: string): string {
     return name ? name.charAt(0).toUpperCase() : '?';
+  }
+
+  exportPdf() {
+    if (this.exportingPdf()) return;
+    this.exportingPdf.set(true);
+    this.deckService.exportPdf(this.deckId).subscribe({
+      next: (response: any) => {
+        const blob = response.body;
+        const contentDisposition = response.headers.get('content-disposition');
+        let filename = `${this.deck()?.name ?? 'deck'}.pdf`;
+
+        if (contentDisposition) {
+          const fileNameStarMatch = /filename\*=UTF-8''([^;]+)/i.exec(contentDisposition);
+          if (fileNameStarMatch && fileNameStarMatch[1]) {
+            filename = decodeURIComponent(fileNameStarMatch[1]);
+          } else {
+            const fileNameMatch = /filename="?([^;"]+)"?/i.exec(contentDisposition);
+            if (fileNameMatch && fileNameMatch[1]) {
+              filename = fileNameMatch[1].trim();
+            }
+          }
+        }
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        window.URL.revokeObjectURL(url);
+        this.exportingPdf.set(false);
+      },
+      error: () => {
+        this.exportingPdf.set(false);
+      },
+    });
   }
 }

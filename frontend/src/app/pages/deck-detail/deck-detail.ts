@@ -340,6 +340,10 @@ export class DeckDetail implements OnInit {
     this.filterText.set(input.value);
   }
 
+  goToLearn() {
+    this.router.navigate(['/learn', this.deckId]);
+  }
+
   startStudy() {
     const mode = this.studyMode();
     if (mode === 'quiz') {

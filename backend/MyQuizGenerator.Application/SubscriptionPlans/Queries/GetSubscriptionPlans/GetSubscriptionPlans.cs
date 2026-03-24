@@ -26,7 +26,6 @@ public class GetSubscriptionPlansQueryHandler : IRequestHandler<GetSubscriptionP
             Name = p.Name,
             Description = p.Description,
             DailyGenerateLimit = p.DailyGenerateLimit,
-            NumDeckLimit = p.NumDeckLimit,
             Price = p.Price,
             Duration = p.Duration,
             IsActive = p.IsActive,

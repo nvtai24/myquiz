@@ -476,9 +476,6 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("NumDeckLimit")
-                        .HasColumnType("integer");
-
                     b.Property<int>("Order")
                         .HasColumnType("integer");
 

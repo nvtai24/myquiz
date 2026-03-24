@@ -37,7 +37,6 @@ public class GetUserSubscriptionQueryHandler : IRequestHandler<GetUserSubscripti
             PlanName = subscription.SubscriptionPlan.Name,
             PlanDescription = subscription.SubscriptionPlan.Description,
             DailyGenerateLimit = subscription.SubscriptionPlan.DailyGenerateLimit,
-            NumDeckLimit = subscription.SubscriptionPlan.NumDeckLimit,
             Price = subscription.SubscriptionPlan.Price,
             StartDate = subscription.StartDate,
             EndDate = subscription.EndDate,

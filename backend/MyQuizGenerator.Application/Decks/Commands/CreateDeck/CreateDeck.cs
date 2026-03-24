@@ -1,9 +1,6 @@
 using MediatR;
-using Microsoft.EntityFrameworkCore;
-using MyQuizGenerator.Application.Common.Exceptions;
 using MyQuizGenerator.Application.Common.Interfaces;
 using MyQuizGenerator.Application.Common.Interfaces.Repositories;
-using MyQuizGenerator.Application.Common.Services;
 using MyQuizGenerator.Application.Decks.DTOs;
 using MyQuizGenerator.Domain.Entities;
 
@@ -16,47 +13,20 @@ public class CreateDeckCommandHandler : IRequestHandler<CreateDeckCommand, Guid>
     private readonly IUnitOfWork _unitOfWork;
     private readonly IDeckRepository _deckRepository;
     private readonly ICurrentUserService _currentUserService;
-    private readonly IFileService _fileService;
-    private readonly IRepository<Guid, UserSubscriptionPlan> _userSubscriptionRepository;
 
     public CreateDeckCommandHandler(
         IUnitOfWork unitOfWork,
         IDeckRepository deckRepository,
-        ICurrentUserService currentUserService,
-        IFileService fileService,
-        IRepository<Guid, UserSubscriptionPlan> userSubscriptionRepository)
+        ICurrentUserService currentUserService)
     {
         _unitOfWork = unitOfWork;
         _deckRepository = deckRepository;
         _currentUserService = currentUserService;
-        _fileService = fileService;
-        _userSubscriptionRepository = userSubscriptionRepository;
     }
 
     public async Task<Guid> Handle(CreateDeckCommand request, CancellationToken cancellationToken)
     {
         var userId = _currentUserService.UserId ?? string.Empty;
-
-        // Get user's active subscription plan with highest priority (Order)
-        var now = DateTime.UtcNow;
-        var activePlan = await _userSubscriptionRepository.GetQueryable()
-            .Include(usp => usp.SubscriptionPlan)
-            .Where(usp => usp.UserId == userId && usp.StartDate <= now && usp.EndDate > now)
-            .OrderByDescending(usp => usp.SubscriptionPlan.Order)
-            .Select(usp => usp.SubscriptionPlan)
-            .FirstOrDefaultAsync(cancellationToken);
-
-        if (activePlan != null && activePlan.NumDeckLimit > 0)
-        {
-            var currentDeckCount = await _deckRepository.GetQueryable()
-                .CountAsync(d => d.OwnerId == userId, cancellationToken);
-
-            if (currentDeckCount >= activePlan.NumDeckLimit)
-            {
-                throw new BadRequestException(
-                    $"You have reached the maximum number of decks ({activePlan.NumDeckLimit}) allowed by your current plan ({activePlan.Name}). Please upgrade your plan to create more decks.");
-            }
-        }
 
         var listQuestions = new List<Question>();
         var deckId = Guid.NewGuid();

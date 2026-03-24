@@ -147,7 +147,6 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, IdentityRole, str
             entity.Property(s => s.Name).IsRequired();
             entity.Property(s => s.Description).IsRequired();
             entity.Property(s => s.DailyGenerateLimit).IsRequired();
-            entity.Property(s => s.NumDeckLimit).IsRequired();
             entity.Property(s => s.Price).IsRequired();
             entity.Property(s => s.Duration).IsRequired();
             entity.Property(s => s.IsActive).IsRequired();

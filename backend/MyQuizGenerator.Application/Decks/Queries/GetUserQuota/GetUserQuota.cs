@@ -1,7 +1,6 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using MyQuizGenerator.Application.Common.Interfaces;
-using MyQuizGenerator.Application.Common.Interfaces.Repositories;
 using MyQuizGenerator.Application.Decks.DTOs;
 using MyQuizGenerator.Domain.Entities;
 
@@ -13,18 +12,15 @@ public class GetUserQuotaQueryHandler : IRequestHandler<GetUserQuotaQuery, UserQ
 {
     private readonly ICurrentUserService _currentUserService;
     private readonly IRateLimitService _rateLimitService;
-    private readonly IDeckRepository _deckRepository;
     private readonly IRepository<Guid, UserSubscriptionPlan> _userSubscriptionRepository;
 
     public GetUserQuotaQueryHandler(
         ICurrentUserService currentUserService,
         IRateLimitService rateLimitService,
-        IDeckRepository deckRepository,
         IRepository<Guid, UserSubscriptionPlan> userSubscriptionRepository)
     {
         _currentUserService = currentUserService;
         _rateLimitService = rateLimitService;
-        _deckRepository = deckRepository;
         _userSubscriptionRepository = userSubscriptionRepository;
     }
 
@@ -44,22 +40,14 @@ public class GetUserQuotaQueryHandler : IRequestHandler<GetUserQuotaQuery, UserQ
         // Get daily generate usage from Redis
         var dailyUsed = (int)await _rateLimitService.GetDailyGenerateCountAsync(userId, cancellationToken);
 
-        // Count current decks owned by user
-        var deckCount = await _deckRepository.GetQueryable()
-            .CountAsync(d => d.OwnerId == userId, cancellationToken);
-
         var dailyLimit = activePlan?.DailyGenerateLimit ?? 0;
-        var deckLimit = activePlan?.NumDeckLimit ?? 0;
 
         return new UserQuotaResponse
         {
             PlanName = activePlan?.Name ?? "Free",
             DailyGenerateLimit = dailyLimit,
             DailyGenerateUsed = dailyUsed,
-            DailyGenerateRemaining = dailyLimit > 0 ? Math.Max(0, dailyLimit - dailyUsed) : 0,
-            NumDeckLimit = deckLimit,
-            NumDeckUsed = deckCount,
-            NumDeckRemaining = deckLimit > 0 ? Math.Max(0, deckLimit - deckCount) : 0
+            DailyGenerateRemaining = dailyLimit > 0 ? Math.Max(0, dailyLimit - dailyUsed) : 0
         };
     }
 }

@@ -109,7 +109,8 @@ public class DeckRepository : Repository<Guid, Deck>, IDeckRepository
     {
         var query = _context.Decks
             .AsNoTracking()
-            .Where(d => d.DeckMembers.Any(dm => dm.UserId == userId));
+            .Where(d => d.Visibility == Domain.Enums.DeckVisibility.Shared
+                        && d.DeckMembers.Any(dm => dm.UserId == userId));
 
         var totalCount = await query.CountAsync(cancellationToken);
 

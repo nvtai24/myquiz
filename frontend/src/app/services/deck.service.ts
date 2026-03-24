@@ -6,6 +6,7 @@ import {
   CreateDeckRequest,
   CreateDeckRatingRequest,
   DeckDetailResponse,
+  DeckRatingCheckResponse,
   DeckRatingSummaryResponse,
   DeckSummaryResponse,
   GeneratedDeckResponse,
@@ -48,6 +49,10 @@ export class DeckService {
 
   submitRating(deckId: string, request: CreateDeckRatingRequest): Observable<ApiResponse<string>> {
     return this.http.post<ApiResponse<string>>(`${this.endpoint}/${deckId}/ratings`, request);
+  }
+
+  checkRating(deckId: string): Observable<ApiResponse<DeckRatingCheckResponse>> {
+    return this.http.get<ApiResponse<DeckRatingCheckResponse>>(`${this.endpoint}/${deckId}/ratings/check`);
   }
 
   uploadFile(file: File): Observable<ApiResponse<{ url: string }>> {

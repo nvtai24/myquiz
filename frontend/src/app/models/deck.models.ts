@@ -130,6 +130,12 @@ export interface CreateDeckRatingRequest {
   comment?: string;
 }
 
+export interface DeckRatingCheckResponse {
+  hasRated: boolean;
+  rating: number | null;
+  comment: string | null;
+}
+
 export interface LimitAiGenerateResponse {
   planName: string;
   dailyGenerateLimit: number;

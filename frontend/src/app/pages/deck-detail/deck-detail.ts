@@ -131,8 +131,13 @@ export class DeckDetail implements OnInit {
   // Quiz history
   quizHistory = signal<QuizAttemptSummary[]>([]);
 
+  // Rating check
+  hasRated = signal(false);
+  existingRatingValue = signal<number | null>(null);
+  existingRatingComment = signal<string | null>(null);
+
   // Rating form
-  myRating = signal(0);
+  myRating = signal(5);
   myComment = signal('');
   hoverRating = signal(0);
   submittingRating = signal(false);
@@ -231,6 +236,8 @@ export class DeckDetail implements OnInit {
 
   openRatingModal() {
     this.isRatingModalOpen.set(true);
+    this.myRating.set(5);
+    this.myComment.set('');
     this.ratingSuccess.set(false);
     this.ratingError.set(null);
   }
@@ -315,6 +322,20 @@ export class DeckDetail implements OnInit {
       },
       error: () => this.loadingRatings.set(false)
     });
+
+    if (this.authService.isLoggedIn()) {
+      this.deckService.checkRating(id).subscribe({
+        next: (res) => {
+          const data = res.data;
+          if (data?.hasRated) {
+            this.hasRated.set(true);
+            this.existingRatingValue.set(data.rating);
+            this.existingRatingComment.set(data.comment);
+          }
+        },
+        error: () => {}
+      });
+    }
 
     this.loadQuizHistory(id);
   }

@@ -62,7 +62,8 @@ builder.Services.AddCors(options =>
         policy.WithOrigins("http://localhost:5173", "http://localhost:3000", "http://localhost:4200", "https://learn.myquiz.fun", "https://play.myquiz.fun", "https://myquiz-fu.vercel.app")
         .AllowAnyHeader()
         .AllowAnyMethod()
-        .AllowCredentials();
+        .AllowCredentials()
+        .WithExposedHeaders("Content-Disposition");
     });
 });
 

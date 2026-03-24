@@ -6,6 +6,7 @@ import {
   CreateDeckRequest,
   CreateDeckRatingRequest,
   DeckDetailResponse,
+  DeckMemberResponse,
   DeckRatingCheckResponse,
   DeckRatingSummaryResponse,
   DeckSummaryResponse,
@@ -101,6 +102,10 @@ export class DeckService {
 
   invite(id: string, email: string): Observable<ApiResponse<string>> {
     return this.http.post<ApiResponse<string>>(`${this.endpoint}/${id}/invite`, { email });
+  }
+
+  getMembers(deckId: string): Observable<ApiResponse<DeckMemberResponse[]>> {
+    return this.http.get<ApiResponse<DeckMemberResponse[]>>(`${this.endpoint}/${deckId}/members`);
   }
 
   acceptInvite(token: string): Observable<ApiResponse<string>> {

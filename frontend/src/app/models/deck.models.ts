@@ -136,6 +136,14 @@ export interface DeckRatingCheckResponse {
   comment: string | null;
 }
 
+export interface DeckMemberResponse {
+  id: string;
+  userId: string;
+  fullName: string;
+  email: string;
+  joinedAt: string;
+}
+
 export interface LimitAiGenerateResponse {
   planName: string;
   dailyGenerateLimit: number;

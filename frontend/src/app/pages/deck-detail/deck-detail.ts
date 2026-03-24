@@ -16,6 +16,7 @@ interface QuizAttemptSummary {
 }
 import {
   DeckDetailResponse,
+  DeckMemberResponse,
   DeckRatingSummaryResponse,
   QuestionResponse,
 } from '../../models/deck.models';
@@ -82,19 +83,21 @@ export class DeckDetail implements OnInit {
     return questions[this.currentCardIndex()] ?? null;
   });
 
-  flipCard() { this.isFlipped.update(v => !v); }
+  flipCard() {
+    this.isFlipped.update((v) => !v);
+  }
 
   nextCard() {
     const total = this.displayQuestions().length;
     if (this.currentCardIndex() < total - 1) {
-      this.currentCardIndex.update(i => i + 1);
+      this.currentCardIndex.update((i) => i + 1);
       this.resetCard();
     }
   }
 
   prevCard() {
     if (this.currentCardIndex() > 0) {
-      this.currentCardIndex.update(i => i - 1);
+      this.currentCardIndex.update((i) => i - 1);
       this.resetCard();
     }
   }
@@ -157,25 +160,25 @@ export class DeckDetail implements OnInit {
   availableTypes = computed(() => {
     const questions = this.deck()?.questions ?? [];
     return {
-      MultipleChoice: questions.some(q => q.type === 'MultipleChoice'),
-      TrueFalse: questions.some(q => q.type === 'TrueFalse'),
-      FillInTheBlank: questions.some(q => q.type === 'FillInTheBlank'),
+      MultipleChoice: questions.some((q) => q.type === 'MultipleChoice'),
+      TrueFalse: questions.some((q) => q.type === 'TrueFalse'),
+      FillInTheBlank: questions.some((q) => q.type === 'FillInTheBlank'),
     };
   });
 
   typeCounts = computed(() => {
     const questions = this.deck()?.questions ?? [];
     return {
-      MultipleChoice: questions.filter(q => q.type === 'MultipleChoice').length,
-      TrueFalse: questions.filter(q => q.type === 'TrueFalse').length,
-      FillInTheBlank: questions.filter(q => q.type === 'FillInTheBlank').length,
+      MultipleChoice: questions.filter((q) => q.type === 'MultipleChoice').length,
+      TrueFalse: questions.filter((q) => q.type === 'TrueFalse').length,
+      FillInTheBlank: questions.filter((q) => q.type === 'FillInTheBlank').length,
     };
   });
 
   openQuizConfig() {
     const total = this.deck()?.questionCount ?? 10;
     const available = this.availableTypes();
-    this.quizConfig.update(c => ({
+    this.quizConfig.update((c) => ({
       ...c,
       questionCount: Math.min(c.questionCount, total),
       types: {
@@ -187,31 +190,35 @@ export class DeckDetail implements OnInit {
     this.isQuizConfigOpen.set(true);
   }
 
-  closeQuizConfig() { this.isQuizConfigOpen.set(false); }
+  closeQuizConfig() {
+    this.isQuizConfigOpen.set(false);
+  }
 
   setQuizConfigQuestionCount(val: number) {
     const max = this.deck()?.questionCount ?? 10;
-    this.quizConfig.update(c => ({ ...c, questionCount: Math.max(1, Math.min(val, max)) }));
+    this.quizConfig.update((c) => ({ ...c, questionCount: Math.max(1, Math.min(val, max)) }));
   }
 
   toggleQuizConfigType(type: 'MultipleChoice' | 'TrueFalse' | 'FillInTheBlank') {
     if (!this.availableTypes()[type]) return;
-    this.quizConfig.update(c => ({
+    this.quizConfig.update((c) => ({
       ...c,
-      types: { ...c.types, [type]: !c.types[type] }
+      types: { ...c.types, [type]: !c.types[type] },
     }));
   }
 
   toggleQuizConfigOption(key: 'shuffle' | 'showTimer' | 'enableHints') {
-    this.quizConfig.update(c => ({ ...c, [key]: !c[key] }));
+    this.quizConfig.update((c) => ({ ...c, [key]: !c[key] }));
   }
 
   get quizConfigValid(): boolean {
     const t = this.quizConfig().types;
     const a = this.availableTypes();
-    return (t.MultipleChoice && a.MultipleChoice) ||
-           (t.TrueFalse && a.TrueFalse) ||
-           (t.FillInTheBlank && a.FillInTheBlank);
+    return (
+      (t.MultipleChoice && a.MultipleChoice) ||
+      (t.TrueFalse && a.TrueFalse) ||
+      (t.FillInTheBlank && a.FillInTheBlank)
+    );
   }
 
   isTypeEnabled(key: string): boolean {
@@ -252,6 +259,8 @@ export class DeckDetail implements OnInit {
   isInviting = signal(false);
   inviteSuccess = signal<string | null>(null);
   inviteError = signal<string | null>(null);
+  deckMembers = signal<DeckMemberResponse[]>([]);
+  loadingMembers = signal(false);
 
   isLoggedIn = computed(() => this.authService.isLoggedIn());
   isOwner = computed(() => {
@@ -264,6 +273,14 @@ export class DeckDetail implements OnInit {
     this.inviteEmail.set('');
     this.inviteSuccess.set(null);
     this.inviteError.set(null);
+    this.loadingMembers.set(true);
+    this.deckService.getMembers(this.deckId).subscribe({
+      next: (res) => {
+        this.deckMembers.set(res.data ?? []);
+        this.loadingMembers.set(false);
+      },
+      error: () => this.loadingMembers.set(false),
+    });
   }
 
   closeInviteModal() {
@@ -279,20 +296,36 @@ export class DeckDetail implements OnInit {
     this.deckService.invite(this.deckId, this.inviteEmail().trim()).subscribe({
       next: () => {
         this.isInviting.set(false);
-        this.inviteSuccess.set('Đã gửi lời mời thành công!');
+        this.inviteSuccess.set('Invitation sent successfully!');
         this.inviteEmail.set('');
+        this.deckService.getMembers(this.deckId).subscribe({
+          next: (res) => this.deckMembers.set(res.data ?? []),
+          error: () => {},
+        });
         setTimeout(() => this.closeInviteModal(), 2000);
       },
       error: (err) => {
         this.isInviting.set(false);
-        this.inviteError.set(err?.error?.message ?? 'Đã xảy ra lỗi khi gửi lời mời.');
-      }
+        this.inviteError.set(err?.error?.message ?? 'Failed to send invitation.');
+      },
     });
   }
 
   studyModes = [
-    { key: 'learn', label: 'Learn', icon: 'auto_stories', desc: 'Lộ trình học cá nhân hóa', gradient: 'linear-gradient(135deg, #f093fb, #f5576c)' },
-    { key: 'quiz', label: 'Quiz', icon: 'quiz', desc: 'Kiểm tra kiến thức', gradient: 'linear-gradient(135deg, #4255FF, #6366f1)' },
+    {
+      key: 'learn',
+      label: 'Learn',
+      icon: 'auto_stories',
+      desc: 'Lộ trình học cá nhân hóa',
+      gradient: 'linear-gradient(135deg, #f093fb, #f5576c)',
+    },
+    {
+      key: 'quiz',
+      label: 'Quiz',
+      icon: 'quiz',
+      desc: 'Kiểm tra kiến thức',
+      gradient: 'linear-gradient(135deg, #4255FF, #6366f1)',
+    },
   ];
 
   ngOnInit(): void {
@@ -312,7 +345,7 @@ export class DeckDetail implements OnInit {
       error: (err) => {
         this.deckError.set(err?.error?.message ?? 'Không thể tải bộ thẻ này.');
         this.loadingDeck.set(false);
-      }
+      },
     });
 
     this.deckService.getRatings(id).subscribe({
@@ -320,7 +353,7 @@ export class DeckDetail implements OnInit {
         this.ratingSummary.set(res.data ?? null);
         this.loadingRatings.set(false);
       },
-      error: () => this.loadingRatings.set(false)
+      error: () => this.loadingRatings.set(false),
     });
 
     if (this.authService.isLoggedIn()) {
@@ -333,7 +366,7 @@ export class DeckDetail implements OnInit {
             this.existingRatingComment.set(data.comment);
           }
         },
-        error: () => {}
+        error: () => {},
       });
     }
 
@@ -349,7 +382,13 @@ export class DeckDetail implements OnInit {
 
   formatHistoryDate(dateStr: string): string {
     const d = new Date(dateStr);
-    return d.toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+    return d.toLocaleDateString('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
   }
 
   getScoreColor(score: number): string {
@@ -365,9 +404,10 @@ export class DeckDetail implements OnInit {
   get visibleTerms(): QuestionResponse[] {
     const all = this.deck()?.questions ?? [];
     const filtered = this.filterText()
-      ? all.filter(q =>
-          q.content.toLowerCase().includes(this.filterText().toLowerCase()) ||
-          q.explanation?.toLowerCase().includes(this.filterText().toLowerCase())
+      ? all.filter(
+          (q) =>
+            q.content.toLowerCase().includes(this.filterText().toLowerCase()) ||
+            q.explanation?.toLowerCase().includes(this.filterText().toLowerCase()),
         )
       : all;
     return this.showAllTerms() ? filtered : filtered.slice(0, 4);
@@ -376,28 +416,33 @@ export class DeckDetail implements OnInit {
   get totalFilteredTerms(): number {
     const all = this.deck()?.questions ?? [];
     if (!this.filterText()) return all.length;
-    return all.filter(q =>
-      q.content.toLowerCase().includes(this.filterText().toLowerCase()) ||
-      q.explanation?.toLowerCase().includes(this.filterText().toLowerCase())
+    return all.filter(
+      (q) =>
+        q.content.toLowerCase().includes(this.filterText().toLowerCase()) ||
+        q.explanation?.toLowerCase().includes(this.filterText().toLowerCase()),
     ).length;
   }
 
   get ratingBreakdown(): { stars: number; count: number }[] {
     const ratings = this.ratingSummary()?.ratings ?? [];
-    return [5, 4, 3, 2, 1].map(stars => ({
+    return [5, 4, 3, 2, 1].map((stars) => ({
       stars,
-      count: ratings.filter(r => r.rating === stars).length
+      count: ratings.filter((r) => r.rating === stars).length,
     }));
   }
 
   getBarWidth(count: number): string {
-    const max = Math.max(...this.ratingBreakdown.map(r => r.count), 1);
-    return (count / max * 100) + '%';
+    const max = Math.max(...this.ratingBreakdown.map((r) => r.count), 1);
+    return (count / max) * 100 + '%';
   }
 
-  selectMode(key: string) { this.studyMode.set(key); }
+  selectMode(key: string) {
+    this.studyMode.set(key);
+  }
 
-  toggleTerms() { this.showAllTerms.update(v => !v); }
+  toggleTerms() {
+    this.showAllTerms.update((v) => !v);
+  }
 
   onFilterInput(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -416,18 +461,32 @@ export class DeckDetail implements OnInit {
         cfg.types.MultipleChoice ? 'mc' : null,
         cfg.types.TrueFalse ? 'tf' : null,
         cfg.types.FillInTheBlank ? 'fb' : null,
-      ].filter(Boolean).join(',');
+      ]
+        .filter(Boolean)
+        .join(',');
       this.router.navigate(['/quiz', this.deckId], {
-        queryParams: { count: cfg.questionCount, types, shuffle: cfg.shuffle, timer: cfg.showTimer, hints: cfg.enableHints }
+        queryParams: {
+          count: cfg.questionCount,
+          types,
+          shuffle: cfg.shuffle,
+          timer: cfg.showTimer,
+          hints: cfg.enableHints,
+        },
       });
     } else if (mode === 'learn') {
       this.router.navigate(['/learn', this.deckId]);
     }
   }
 
-  setMyRating(value: number) { this.myRating.set(value); }
-  setHoverRating(value: number) { this.hoverRating.set(value); }
-  clearHover() { this.hoverRating.set(0); }
+  setMyRating(value: number) {
+    this.myRating.set(value);
+  }
+  setHoverRating(value: number) {
+    this.hoverRating.set(value);
+  }
+  clearHover() {
+    this.hoverRating.set(0);
+  }
 
   getStarState(star: number): 'filled' | 'empty' {
     const active = this.hoverRating() || this.myRating();
@@ -438,26 +497,28 @@ export class DeckDetail implements OnInit {
     if (!this.myRating()) return;
     this.submittingRating.set(true);
     this.ratingError.set(null);
-    this.deckService.submitRating(this.deckId, {
-      rating: this.myRating(),
-      comment: this.myComment() || undefined
-    }).subscribe({
-      next: () => {
-        this.submittingRating.set(false);
-        this.ratingSuccess.set(true);
-        this.deckService.getRatings(this.deckId).subscribe(res => {
-          this.ratingSummary.set(res.data ?? null);
-        });
-        setTimeout(() => {
-          this.ratingSuccess.set(false);
-          this.closeRatingModal();
-        }, 1500);
-      },
-      error: (err) => {
-        this.submittingRating.set(false);
-        this.ratingError.set(err?.error?.message ?? 'Không thể gửi đánh giá.');
-      }
-    });
+    this.deckService
+      .submitRating(this.deckId, {
+        rating: this.myRating(),
+        comment: this.myComment() || undefined,
+      })
+      .subscribe({
+        next: () => {
+          this.submittingRating.set(false);
+          this.ratingSuccess.set(true);
+          this.deckService.getRatings(this.deckId).subscribe((res) => {
+            this.ratingSummary.set(res.data ?? null);
+          });
+          setTimeout(() => {
+            this.ratingSuccess.set(false);
+            this.closeRatingModal();
+          }, 1500);
+        },
+        error: (err) => {
+          this.submittingRating.set(false);
+          this.ratingError.set(err?.error?.message ?? 'Không thể gửi đánh giá.');
+        },
+      });
   }
 
   getStarArray(rating: number): string[] {

@@ -38,13 +38,15 @@
             Edit
           </button>
         }
-        <button
-          (click)="openInviteModal()"
-          class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-50 border border-indigo-200 text-[#4255FF] text-[13px] font-bold cursor-pointer hover:bg-indigo-100 transition-colors"
-        >
-          <span class="material-symbols-outlined text-[18px]">person_add</span>
-          Share
-        </button>
+        @if (isOwner()) {
+          <button
+            (click)="openInviteModal()"
+            class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-50 border border-indigo-200 text-[#4255FF] text-[13px] font-bold cursor-pointer hover:bg-indigo-100 transition-colors"
+          >
+            <span class="material-symbols-outlined text-[18px]">person_add</span>
+            Invite
+          </button>
+        }
       </div>
     </div>
 
@@ -777,27 +779,21 @@
         <span class="material-symbols-outlined text-[18px]">close</span>
       </button>
 
-      <div class="flex items-center gap-3 mb-4">
-        <div>
-          <h3 class="text-[17px] font-black text-gray-900 m-0">How helpful was this deck?</h3>
+      @if (!hasRated()) {
+        <div class="flex items-center gap-3 mb-4">
+          <div>
+            <h3 class="text-[17px] font-black text-gray-900 m-0">How helpful was this deck?</h3>
+          </div>
         </div>
-      </div>
+      }
 
       @if (hasRated()) {
         <!-- Already rated state -->
         <div class="flex flex-col items-center gap-3 py-4 text-center">
-          <div class="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center">
-            <span
-              class="material-symbols-outlined text-[28px] text-amber-400"
-              style="font-variation-settings: 'FILL' 1"
-              >star</span
-            >
-          </div>
           <div>
             <p class="text-[15px] font-black text-gray-900 m-0 mb-1">
               You've already rated this deck
             </p>
-            <p class="text-[12px] text-gray-400 m-0">Each user can only rate a deck once.</p>
           </div>
           <div class="flex gap-1 my-1">
             @for (star of [1, 2, 3, 4, 5]; track star) {
@@ -975,10 +971,31 @@
         </button>
       </div>
 
-      <p class="text-[11px] text-gray-400 m-0 leading-relaxed">
+      <p class="text-[11px] text-gray-400 m-0 leading-relaxed mb-4">
         The invited user will receive access to view this deck. Only the deck owner can invite
         others.
       </p>
+
+      <!-- Members list -->
+      @if (loadingMembers()) {
+        <div class="flex items-center justify-center py-4 text-gray-300">
+          <span class="material-symbols-outlined text-[22px] animate-spin">progress_activity</span>
+        </div>
+      } @else if (deckMembers().length > 0) {
+        <div>
+          <p class="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2 m-0">
+            Members ({{ deckMembers().length }})
+          </p>
+          <div class="flex flex-col gap-1 max-h-[200px] overflow-y-auto">
+            @for (member of deckMembers(); track member.id) {
+              <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-gray-50">
+                <span class="material-symbols-outlined text-[16px] text-gray-400">person</span>
+                <span class="text-[13px] text-gray-700 truncate">{{ member.email }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
     </div>
   </div>
 }

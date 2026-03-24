@@ -5,6 +5,8 @@ export interface AdminSubscriptionPlanResponse {
   name: string;
   description: string;
   dailyGenerateLimit: number;
+  maxQuestionsPerGenerate: number;
+  hasExportToPdf: boolean;
   price: number;
   duration: number;
   isActive: boolean;
@@ -77,6 +79,7 @@ export interface CreatePlanRequest {
   description: string;
   dailyGenerateLimit: number;
   maxQuestionsPerGenerate: number;
+  hasExportToPdf: boolean;
   price: number;
   duration: number;
   isActive: boolean;
@@ -88,6 +91,7 @@ export interface UpdatePlanRequest {
   description: string;
   dailyGenerateLimit: number;
   maxQuestionsPerGenerate: number;
+  hasExportToPdf: boolean;
   price: number;
   duration: number;
   isActive: boolean;

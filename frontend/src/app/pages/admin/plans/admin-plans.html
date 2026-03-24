@@ -74,7 +74,15 @@
               </li>
               <li class="flex items-center gap-2 text-[13px] text-gray-700 font-medium">
                 <span class="material-symbols-outlined text-[16px] text-indigo-500 shrink-0">auto_awesome</span>
-                Gen AI limit: {{ plan.dailyGenerateLimit === -1 ? 'Unlimited' : (plan.dailyGenerateLimit + ' times/day') }}
+                Gen AI: {{ plan.dailyGenerateLimit === -1 ? 'Unlimited' : (plan.dailyGenerateLimit + ' times/day') }}
+              </li>
+              <li class="flex items-center gap-2 text-[13px] text-gray-700 font-medium">
+                <span class="material-symbols-outlined text-[16px] text-indigo-500 shrink-0">quiz</span>
+                Max questions/gen: {{ plan.maxQuestionsPerGenerate === -1 ? 'Unlimited' : plan.maxQuestionsPerGenerate }}
+              </li>
+              <li class="flex items-center gap-2 text-[13px] font-medium" [class]="plan.hasExportToPdf ? 'text-gray-700' : 'text-gray-400'">
+                <span class="material-symbols-outlined text-[16px] shrink-0" [class]="plan.hasExportToPdf ? 'text-indigo-500' : 'text-gray-300'">picture_as_pdf</span>
+                Export to PDF: {{ plan.hasExportToPdf ? 'Yes' : 'No' }}
               </li>
             </ul>
           </div>
@@ -156,22 +164,29 @@
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-[11px] font-bold text-indigo-600 uppercase tracking-wider mb-1.5">Daily AI Limit</label>
+              <label class="block text-[11px] font-bold text-indigo-600 uppercase tracking-wider mb-1.5">Daily AI Limit (-1 = Unlimited)</label>
               <input type="number" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-[13px] outline-none focus:border-indigo-400"
                 [ngModel]="editForm().dailyGenerateLimit" (ngModelChange)="editForm.update(f => ({...f, dailyGenerateLimit: +$event}))" />
             </div>
             <div>
-              <label class="block text-[11px] font-bold text-indigo-600 uppercase tracking-wider mb-1.5">Max Decks Limit</label>
+              <label class="block text-[11px] font-bold text-indigo-600 uppercase tracking-wider mb-1.5">Max Questions/Gen (-1 = Unlimited)</label>
               <input type="number" class="w-full px-3 py-2.5 border border-gray-200 rounded-xl text-[13px] outline-none focus:border-indigo-400 bg-white"
-                [ngModel]="editForm().numDeckLimit" (ngModelChange)="editForm.update(f => ({...f, numDeckLimit: +$event}))" />
+                [ngModel]="editForm().maxQuestionsPerGenerate" (ngModelChange)="editForm.update(f => ({...f, maxQuestionsPerGenerate: +$event}))" />
             </div>
           </div>
 
-          <label class="flex items-center gap-2 cursor-pointer mt-4">
-            <input type="checkbox" class="w-4 h-4 accent-indigo-500"
-              [ngModel]="editForm().isActive" (ngModelChange)="editForm.update(f => ({...f, isActive: $event}))" />
-            <span class="text-[13px] font-semibold text-gray-700">Activate this plan immediately</span>
-          </label>
+          <div class="flex items-center gap-4 mt-2">
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" class="w-4 h-4 accent-indigo-500"
+                [ngModel]="editForm().isActive" (ngModelChange)="editForm.update(f => ({...f, isActive: $event}))" />
+              <span class="text-[13px] font-semibold text-gray-700">Active</span>
+            </label>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" class="w-4 h-4 accent-indigo-500"
+                [ngModel]="editForm().hasExportToPdf" (ngModelChange)="editForm.update(f => ({...f, hasExportToPdf: $event}))" />
+              <span class="text-[13px] font-semibold text-gray-700">Export to PDF</span>
+            </label>
+          </div>
         </div>
 
         <div class="px-6 pb-6 flex gap-3 justify-end border-t border-gray-50 pt-4">

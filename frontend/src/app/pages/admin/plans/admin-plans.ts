@@ -23,7 +23,7 @@ export class AdminPlans implements OnInit {
   // Edit modal
   editingPlan = signal<AdminSubscriptionPlanResponse | null>(null);
   editForm = signal<UpdatePlanRequest>({
-    name: '', description: '', dailyGenerateLimit: 0, price: 0, duration: 30, isActive: true, order: 1
+    name: '', description: '', dailyGenerateLimit: 0, maxQuestionsPerGenerate: 20, hasExportToPdf: false, price: 0, duration: 30, isActive: true, order: 1
   });
   showCreateModal = signal(false);
 
@@ -49,6 +49,8 @@ export class AdminPlans implements OnInit {
       name: plan.name,
       description: plan.description,
       dailyGenerateLimit: plan.dailyGenerateLimit,
+      maxQuestionsPerGenerate: plan.maxQuestionsPerGenerate,
+      hasExportToPdf: plan.hasExportToPdf,
       price: plan.price,
       duration: plan.duration,
       isActive: plan.isActive,
@@ -153,7 +155,7 @@ export class AdminPlans implements OnInit {
 
   openCreate() {
     this.editingPlan.set(null);
-    this.editForm.set({ name: '', description: '', dailyGenerateLimit: 0, price: 0, duration: 30, isActive: true, order: 1 });
+    this.editForm.set({ name: '', description: '', dailyGenerateLimit: 0, maxQuestionsPerGenerate: 20, hasExportToPdf: false, price: 0, duration: 30, isActive: true, order: 1 });
     this.showCreateModal.set(true);
   }
 }

@@ -4,6 +4,7 @@ export interface SubscriptionPlanResponse {
   description: string;
   dailyGenerateLimit: number;
   maxQuestionsPerGenerate: number;
+  hasExportToPdf: boolean;
   price: number;
   duration: number; // days
   isActive: boolean;

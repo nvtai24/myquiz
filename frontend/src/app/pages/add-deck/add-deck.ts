@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
 import { DeckService } from '../../services/deck.service';
 import { PaymentService } from '../../services/payment.service';
+import { AuthService } from '../../services/auth.service';
 import {
   CreateDeckRequest,
   CreateQuestionRequest,
@@ -95,6 +96,7 @@ export class AddDeck implements OnInit {
 
   private deckService = inject(DeckService);
   private paymentService = inject(PaymentService);
+  private authService = inject(AuthService);
 
   constructor(
     private router: Router,
@@ -155,7 +157,8 @@ export class AddDeck implements OnInit {
           this.visibility.set(visRevMap[deck.visibility] ?? 'public');
           this.coverImage.set(deck.thumbnailUrl || null);
 
-          if (deck.visibility === 'Shared') {
+          const currentUserEmail = this.authService.currentUser()?.email;
+          if (deck.visibility === 'Shared' && deck.ownerEmail !== currentUserEmail) {
             this.showError('You cannot edit a shared study set');
             this.router.navigate(['/library']);
             return;

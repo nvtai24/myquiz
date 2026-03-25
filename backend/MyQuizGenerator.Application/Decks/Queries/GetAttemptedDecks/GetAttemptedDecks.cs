@@ -5,9 +5,9 @@ using MyQuizGenerator.Application.Decks.DTOs;
 
 namespace MyQuizGenerator.Application.Decks.Queries.GetAttemptedDecks;
 
-public record GetAttemptedDecksQuery(string UserId, int Page = 1, int Size = 10) : IRequest<PagedResult<DeckSummaryResponse>>;
+public record GetAttemptedDecksQuery(string UserId, int Page = 1, int Size = 10) : IRequest<PagedResult<QuizAttemptHistoryResponse>>;
 
-public class GetAttemptedDecksQueryHandler : IRequestHandler<GetAttemptedDecksQuery, PagedResult<DeckSummaryResponse>>
+public class GetAttemptedDecksQueryHandler : IRequestHandler<GetAttemptedDecksQuery, PagedResult<QuizAttemptHistoryResponse>>
 {
     private readonly IDeckRepository _deckRepository;
 
@@ -16,26 +16,26 @@ public class GetAttemptedDecksQueryHandler : IRequestHandler<GetAttemptedDecksQu
         _deckRepository = deckRepository;
     }
 
-    public async Task<PagedResult<DeckSummaryResponse>> Handle(GetAttemptedDecksQuery request, CancellationToken cancellationToken)
+    public async Task<PagedResult<QuizAttemptHistoryResponse>> Handle(GetAttemptedDecksQuery request, CancellationToken cancellationToken)
     {
-        var (decks, totalCount) = await _deckRepository.GetAttemptedDecksAsync(request.UserId, request.Page, request.Size, cancellationToken);
+        var (attempts, totalCount) = await _deckRepository.GetAttemptedDecksAsync(request.UserId, request.Page, request.Size, cancellationToken);
 
-        var items = decks.Select(d => new DeckSummaryResponse
+        var items = attempts.Select(qa => new QuizAttemptHistoryResponse
         {
-            Id = d.Id,
-            Name = d.Name,
-            Description = d.Description,
-            Visibility = d.Visibility,
-            Status = d.Status,
-            Tags = d.Tags ?? [],
-            QuestionCount = d.Questions.Count,
-            ThumbnailUrl = d.ThumbnailUrl ?? string.Empty,
-            CreatedAt = d.CreatedAt,
-            UpdatedAt = d.UpdatedAt,
-            AverageRating = d.DeckRatings.Count != 0 ? Math.Round(d.DeckRatings.Average(r => r.Rating), 1) : 0,
-            TotalRatings = d.DeckRatings.Count
+            AttemptId = qa.Id,
+            DeckId = qa.DeckId,
+            DeckName = qa.Deck.Name,
+            DeckThumbnailUrl = qa.Deck.ThumbnailUrl ?? string.Empty,
+            TotalQuestions = qa.TotalQuestions,
+            CorrectAnswers = qa.CorrectAnswers,
+            ScorePercent = qa.TotalQuestions > 0
+                ? Math.Round((double)qa.CorrectAnswers / qa.TotalQuestions * 100, 1)
+                : 0,
+            TotalTime = qa.TotalTime,
+            StartedAt = qa.StartedAt,
+            EndedAt = qa.EndedAt,
         }).ToList();
 
-        return new PagedResult<DeckSummaryResponse>(items, request.Page, request.Size, totalCount);
+        return new PagedResult<QuizAttemptHistoryResponse>(items, request.Page, request.Size, totalCount);
     }
 }

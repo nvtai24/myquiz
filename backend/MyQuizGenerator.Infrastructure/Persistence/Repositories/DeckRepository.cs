@@ -135,36 +135,22 @@ public class DeckRepository : Repository<Guid, Deck>, IDeckRepository
         return (items, totalCount);
     }
 
-    public async Task<(List<Deck> Items, int TotalCount)> GetAttemptedDecksAsync(string userId, int page, int size, CancellationToken cancellationToken = default)
+    public async Task<(List<QuizAttempt> Items, int TotalCount)> GetAttemptedDecksAsync(string userId, int page, int size, CancellationToken cancellationToken = default)
     {
-        var baseQuery = _context.QuizAttempts
+        var query = _context.QuizAttempts
             .AsNoTracking()
-            .Where(qa => qa.UserId == userId)
-            .GroupBy(qa => qa.DeckId)
-            .Select(g => new { DeckId = g.Key, LatestAttempt = g.Max(qa => qa.StartedAt) });
+            .Where(qa => qa.UserId == userId);
 
-        var totalCount = await baseQuery.CountAsync(cancellationToken);
+        var totalCount = await query.CountAsync(cancellationToken);
 
-        var deckIds = await baseQuery
-            .OrderByDescending(x => x.LatestAttempt)
+        var items = await query
+            .Include(qa => qa.Deck)
+            .OrderByDescending(qa => qa.StartedAt)
             .Skip((page - 1) * size)
             .Take(size)
-            .Select(x => x.DeckId)
             .ToListAsync(cancellationToken);
 
-        var items = await _context.Decks
-            .AsNoTracking()
-            .Where(d => deckIds.Contains(d.Id))
-            .Include(d => d.Questions)
-            .Include(d => d.DeckRatings)
-            .ToListAsync(cancellationToken);
-
-        // Preserve the order from deckIds
-        var orderedItems = deckIds
-            .Select(id => items.First(d => d.Id == id))
-            .ToList();
-
-        return (orderedItems, totalCount);
+        return (items, totalCount);
     }
 
     public async Task<(List<Deck> Items, int TotalCount)> SearchPublicDecksAsync(string? searchTerm, int page, int size, CancellationToken cancellationToken = default)

@@ -283,6 +283,7 @@ public class DecksController : BaseApiController
     /// <param name="size">Page size (default: 10).</param>
     /// <returns>Paginated list of saved deck summaries.</returns>
     [HttpGet("saved")]
+    [Authorize]
     public async Task<IActionResult> GetSavedDecks([FromQuery] int page = 1, [FromQuery] int size = 10)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -301,6 +302,7 @@ public class DecksController : BaseApiController
     /// </summary>
     /// <param name="id">The deck ID.</param>
     [HttpPost("{id}/save")]
+    [Authorize]
     public async Task<IActionResult> SaveDeck(Guid id)
     {
         var command = new SaveDeck.SaveDeckCommand(id);
@@ -313,6 +315,7 @@ public class DecksController : BaseApiController
     /// </summary>
     /// <param name="id">The deck ID.</param>
     [HttpDelete("{id}/save")]
+    [Authorize]
     public async Task<IActionResult> UnsaveDeck(Guid id)
     {
         var command = new UnsaveDeck.UnsaveDeckCommand(id);

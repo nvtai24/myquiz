@@ -98,7 +98,7 @@ public class DeckRepository : Repository<Guid, Deck>, IDeckRepository
     {
         await _context.DeckMembers.AddAsync(deckMember, cancellationToken);
     }
-    
+
     public async Task<bool> IsMemberAsync(Guid deckId, string userId, CancellationToken cancellationToken = default)
     {
         return await _context.DeckMembers
@@ -118,8 +118,8 @@ public class DeckRepository : Repository<Guid, Deck>, IDeckRepository
     {
         var query = _context.Decks
             .AsNoTracking()
-            .Where(d => d.OwnerId != userId 
-                        && d.Visibility != Domain.Enums.DeckVisibility.Private 
+            .Where(d => d.OwnerId != userId
+                        && d.Visibility != Domain.Enums.DeckVisibility.Private
                         && d.DeckMembers.Any(dm => dm.UserId == userId));
 
         var totalCount = await query.CountAsync(cancellationToken);
@@ -246,14 +246,20 @@ public class DeckRepository : Repository<Guid, Deck>, IDeckRepository
 
         var items = await _context.Decks
             .AsNoTracking()
-            .Where(d => deckIds.Contains(d.Id))
+            .Where(d => deckIds.Contains(d.Id) && (
+                d.Visibility == Domain.Enums.DeckVisibility.Public ||
+                (d.Visibility == Domain.Enums.DeckVisibility.Shared && d.DeckMembers.Any(dm => dm.UserId == userId))
+            ))
             .Include(d => d.Questions)
             .Include(d => d.DeckRatings)
+            .Include(d => d.DeckMembers)
             .ToListAsync(cancellationToken);
 
-        // Preserve the order from deckIds (by SavedAt descending)
+        // Preserve the order from deckIds (by SavedAt descending), skip any filtered-out decks
         var orderedItems = deckIds
-            .Select(id => items.First(d => d.Id == id))
+            .Select(id => items.FirstOrDefault(d => d.Id == id))
+            .Where(d => d is not null)
+            .Select(d => d!)
             .ToList();
 
         return (orderedItems, totalCount);

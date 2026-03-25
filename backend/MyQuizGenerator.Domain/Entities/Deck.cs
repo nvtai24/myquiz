@@ -9,7 +9,6 @@ public class Deck
     public string Description { get; set; } = string.Empty;
     public DeckVisibility Visibility { get; set; }
     public DeckStatus Status { get; set; }
-    public DeckSource Source { get; set; }
     public string? ThumbnailUrl { get; set; }
     public string[]? Tags { get; set; } = Array.Empty<string>();
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;

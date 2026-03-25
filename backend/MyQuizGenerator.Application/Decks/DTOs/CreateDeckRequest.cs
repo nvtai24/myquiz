@@ -14,7 +14,6 @@ public class CreateDeckRequest
 
     public DeckStatus Status { get; set; } = DeckStatus.Draft;
 
-    public DeckSource Source { get; set; } = DeckSource.AiGenerated;
 
     public string[] Tags { get; set; } = Array.Empty<string>();
 

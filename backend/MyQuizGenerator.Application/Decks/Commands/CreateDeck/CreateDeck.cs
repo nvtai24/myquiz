@@ -52,7 +52,6 @@ public class CreateDeckCommandHandler : IRequestHandler<CreateDeckCommand, Guid>
             Description = request.Request.Description,
             Visibility = request.Request.Visibility,
             Status = request.Request.Status,
-            Source = request.Request.Source,
             Tags = request.Request.Tags,
             OwnerId = userId,
             Questions = listQuestions,

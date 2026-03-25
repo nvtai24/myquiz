@@ -7,7 +7,7 @@ import { QuizAttemptResponse, SubmitQuizAttemptRequest } from '../models/quiz.mo
 @Injectable({ providedIn: 'root' })
 export class QuizService {
   private http = inject(HttpClient);
-  private endpoint = '/api/QuizAttempts';
+  private endpoint = '/api/decks/attempts';
 
   submitAttempt(request: SubmitQuizAttemptRequest): Observable<ApiResponse<QuizAttemptResponse>> {
     return this.http.post<ApiResponse<QuizAttemptResponse>>(this.endpoint, request);

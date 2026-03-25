@@ -20,6 +20,10 @@ using ExportDeckPdf = MyQuizGenerator.Application.Decks.Queries.ExportDeckPdf;
 using SavedDecks = MyQuizGenerator.Application.Decks.Queries.GetSavedDecks;
 using SaveDeck = MyQuizGenerator.Application.Decks.Commands.SaveDeck;
 using UnsaveDeck = MyQuizGenerator.Application.Decks.Commands.UnsaveDeck;
+using MyQuizGenerator.Application.QuizAttempts.Commands.CreateQuizAttempt;
+using MyQuizGenerator.Application.QuizAttempts.DTOs;
+using MyQuizGenerator.Application.QuizAttempts.Queries.GetQuizAttemptsByDeckId;
+using MyQuizGenerator.Application.QuizAttempts.Queries.GetQuizAttemptById;
 
 namespace MyQuizGenerator.Presentation.Controllers;
 
@@ -321,5 +325,37 @@ public class DecksController : BaseApiController
         var command = new UnsaveDeck.UnsaveDeckCommand(id);
         await _mediator.Send(command);
         return ApiNoContent("Deck unsaved successfully");
+    }
+
+    // ── Quiz Attempts ────────────────────────────────────────────────────────
+
+    /// <summary>
+    /// Submits a quiz attempt with user answers.
+    /// </summary>
+    [HttpPost("attempts")]
+    public async Task<IActionResult> CreateAttempt([FromBody] CreateQuizAttemptRequest request)
+    {
+        var result = await _mediator.Send(new CreateQuizAttemptCommand(request));
+        return ApiCreated(result, "Quiz attempt saved successfully");
+    }
+
+    /// <summary>
+    /// Gets all quiz attempts for a specific deck by the current user.
+    /// </summary>
+    [HttpGet("{deckId}/attempts")]
+    public async Task<IActionResult> GetAttemptsByDeckId(Guid deckId)
+    {
+        var result = await _mediator.Send(new GetQuizAttemptsByDeckIdQuery(deckId));
+        return ApiOk(result);
+    }
+
+    /// <summary>
+    /// Gets details of a specific quiz attempt with all user answers.
+    /// </summary>
+    [HttpGet("attempts/{id}")]
+    public async Task<IActionResult> GetAttemptById(Guid id)
+    {
+        var result = await _mediator.Send(new GetQuizAttemptByIdQuery(id));
+        return ApiOk(result);
     }
 }

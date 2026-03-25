@@ -65,8 +65,12 @@ export class AddDeck implements OnInit {
   aiFocusInput = signal('');
   aiFocusTopics = signal<string[]>([]);
   aiGenerating = signal(false);
-  aiGenerated = signal(false); 
+  aiGenerated = signal(false);
   lastUsedAiFile = signal<File | null>(null);
+
+  /* ── AI Confirm Dialog ── */
+  showAiConfirm = signal(false);
+  pendingAiCards = signal<Card[]>([]);
 
   aiUsageCount = signal<number>(0);
   aiUsageMax = signal<number>(0); 
@@ -560,17 +564,47 @@ export class AddDeck implements OnInit {
       return card;
     });
 
-    this.cards.set(mapped.length > 0 ? mapped : this.getInitialCards());
-    this.showAiPanel.set(false);
-    this.aiGenerated.set(true);
-    this.showSuccess(`${mapped.length} cards generated!`);
+    if (mapped.length === 0) return;
+
+    // Check if there are existing non-empty cards
+    const existingCards = this.cards().filter(card => card.term.trim());
+    if (existingCards.length > 0) {
+      // Show confirmation dialog
+      this.pendingAiCards.set(mapped);
+      this.showAiConfirm.set(true);
+    } else {
+      // No existing cards, just set the new ones
+      this.cards.set(mapped);
+      this.showAiPanel.set(false);
+      this.aiGenerated.set(true);
+      this.showSuccess(`${mapped.length} cards generated!`);
+    }
   }
 
-  private getInitialCards(): Card[] {
-    return [
-      { id: this.nextId++, type: 'multiple-choice', term: '', options: ['', '', '', ''], correctAnswers: [0] },
-      { id: this.nextId++, type: 'multiple-choice', term: '', options: ['', '', '', ''], correctAnswers: [0] },
-    ];
+  confirmAiReplace() {
+    const pending = this.pendingAiCards();
+    this.cards.set(pending);
+    this.pendingAiCards.set([]);
+    this.showAiConfirm.set(false);
+    this.showAiPanel.set(false);
+    this.aiGenerated.set(true);
+    this.showSuccess(`${pending.length} cards generated!`);
+  }
+
+  confirmAiAppend() {
+    const pending = this.pendingAiCards();
+    const existingCards = this.cards().filter(card => card.term.trim());
+    this.cards.set([...existingCards, ...pending]);
+    this.pendingAiCards.set([]);
+    this.showAiConfirm.set(false);
+    this.showAiPanel.set(false);
+    this.aiGenerated.set(true);
+    this.showSuccess(`${pending.length} cards added!`);
+  }
+
+  cancelAiConfirm() {
+    this.pendingAiCards.set([]);
+    this.showAiConfirm.set(false);
   }
 
   private mapQuestionTypeToCardType(type: QuestionType): 'multiple-choice' | 'true-false' | 'fill-blank' {

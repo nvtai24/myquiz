@@ -147,7 +147,7 @@
   <div class="bg-white border border-gray-200 rounded-2xl mb-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)] relative overflow-hidden">
     <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#4255FF] via-purple-400 to-amber-500"></div>
     <button class="w-full flex items-center gap-4 p-5 cursor-pointer text-left" (click)="showAiPanel.set(!showAiPanel())">
-      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-500 text-white flex items-center justify-center shadow-sm">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#7C3AED] to-[#4255FF] text-white flex items-center justify-center shadow-sm">
         <span class="material-symbols-outlined text-[22px]">auto_awesome</span>
       </div>
       <div class="flex-1">
@@ -197,10 +197,10 @@
           placeholder="Paste your content here..." [ngModel]="aiPasteText()" (ngModelChange)="aiPasteText.set($event)"></textarea>
       }
 
-      <button class="w-full mt-4 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-white font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 hover:shadow-lg"
+      <button class="w-full mt-4 py-3 rounded-xl bg-gradient-to-r from-[#7C3AED] to-[#4255FF] text-white font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 hover:shadow-lg"
         [disabled]="aiGenerating() || (aiUsageMax() !== -1 && aiUsageCount() >= aiUsageMax())" (click)="generateWithAi()">
         <span class="material-symbols-outlined text-[18px]" [class.animate-spin]="aiGenerating()">{{ aiGenerating() ? 'progress_activity' : 'auto_awesome' }}</span>
-        {{ aiGenerating() ? 'Generating...' : 'Generate Cards with AI' }}
+        {{ aiGenerating() ? 'Generating...' : 'Generate' }}
       </button>
 
       @if (aiUsageMax() !== -1 && aiUsageCount() >= aiUsageMax()) {
@@ -325,6 +325,43 @@
     <span class="material-symbols-outlined text-green-500">check_circle</span>
     <p class="auth-error-msg flex-1">{{ successMessage() }}</p>
     <button (click)="successMessage.set(null)"><span class="material-symbols-outlined">close</span></button>
+  </div>
+</div>
+}
+
+<!-- AI Confirm Dialog -->
+@if (showAiConfirm()) {
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+    <div class="p-6">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#7C3AED] to-[#4255FF] text-white flex items-center justify-center">
+          <span class="material-symbols-outlined text-[24px]">auto_awesome</span>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-[#141118] m-0">{{ pendingAiCards().length }} cards generated!</h3>
+          <p class="text-[13px] text-[#726388] mt-0.5 mb-0">You have {{ cards().length }} existing cards</p>
+        </div>
+      </div>
+      <p class="text-[14px] text-gray-600 mb-6">How would you like to handle the new cards?</p>
+
+      <div class="flex flex-col gap-3">
+        <button (click)="confirmAiAppend()"
+          class="w-full py-3.5 px-4 rounded-xl bg-[#4255FF] text-white font-bold text-[14px] flex items-center justify-center gap-2 hover:bg-[#3344dd] transition-colors">
+          <span class="material-symbols-outlined text-[20px]">playlist_add</span>
+          Add to existing cards
+        </button>
+        <button (click)="confirmAiReplace()"
+          class="w-full py-3.5 px-4 rounded-xl bg-white border-2 border-gray-200 text-gray-700 font-bold text-[14px] flex items-center justify-center gap-2 hover:bg-gray-50 hover:border-gray-300 transition-colors">
+          <span class="material-symbols-outlined text-[20px]">sync</span>
+          Replace all cards
+        </button>
+        <button (click)="cancelAiConfirm()"
+          class="w-full py-2.5 text-gray-500 font-medium text-[13px] hover:text-gray-700 transition-colors">
+          Cancel
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 }

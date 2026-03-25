@@ -124,4 +124,12 @@ export class DeckService {
       observe: 'response',
     });
   }
+
+  saveDeck(deckId: string): Observable<ApiResponse<void>> {
+    return this.http.post<ApiResponse<void>>(`${this.endpoint}/${deckId}/save`, {});
+  }
+
+  unsaveDeck(deckId: string): Observable<ApiResponse<void>> {
+    return this.http.delete<ApiResponse<void>>(`${this.endpoint}/${deckId}/save`);
+  }
 }

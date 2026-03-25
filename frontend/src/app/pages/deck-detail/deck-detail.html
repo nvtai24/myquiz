@@ -47,6 +47,24 @@
             Invite
           </button>
         }
+        @if (isLoggedIn() && !isOwner()) {
+          <button
+            (click)="toggleSave()"
+            [disabled]="savingDeck()"
+            class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[13px] font-bold cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            [class]="isSaved() ? 'bg-emerald-50 border border-emerald-200 text-emerald-600 hover:bg-emerald-100' : 'bg-gray-50 border border-gray-200 text-gray-600 hover:bg-gray-100'"
+          >
+            @if (savingDeck()) {
+              <span class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+            } @else {
+              <span
+                class="material-symbols-outlined text-[18px]"
+                [style.font-variation-settings]="isSaved() ? '\'FILL\' 1' : ''"
+              >bookmark</span>
+            }
+            {{ isSaved() ? 'Saved' : 'Save' }}
+          </button>
+        }
         @if (hasExportToPdf()) {
           <button
             (click)="exportPdf()"

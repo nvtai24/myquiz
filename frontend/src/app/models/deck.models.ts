@@ -45,6 +45,7 @@ export interface DeckDocumentResponse {
 export interface DeckDetailResponse extends DeckSummaryResponse {
   questions: QuestionResponse[];
   documents: DeckDocumentResponse[];
+  isSaved?: boolean;
 }
 
 export interface DeckRatingResponse {

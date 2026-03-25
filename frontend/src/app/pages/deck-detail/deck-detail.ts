@@ -48,6 +48,10 @@ export class DeckDetail implements OnInit {
   hasExportToPdf = signal(false);
   exportingPdf = signal(false);
 
+  // Save deck
+  isSaved = signal(false);
+  savingDeck = signal(false);
+
   // UI
   studyMode = signal<string>('quiz');
   showAllTerms = signal(false);
@@ -346,6 +350,7 @@ export class DeckDetail implements OnInit {
       next: (res) => {
         this.deck.set(res.data ?? null);
         this.displayQuestions.set(res.data?.questions ?? []);
+        this.isSaved.set(res.data?.isSaved ?? false);
         this.loadingDeck.set(false);
       },
       error: (err) => {
@@ -620,5 +625,32 @@ export class DeckDetail implements OnInit {
         this.exportingPdf.set(false);
       },
     });
+  }
+
+  toggleSave() {
+    if (this.savingDeck() || !this.deckId) return;
+    this.savingDeck.set(true);
+
+    if (this.isSaved()) {
+      this.deckService.unsaveDeck(this.deckId).subscribe({
+        next: () => {
+          this.isSaved.set(false);
+          this.savingDeck.set(false);
+        },
+        error: () => {
+          this.savingDeck.set(false);
+        },
+      });
+    } else {
+      this.deckService.saveDeck(this.deckId).subscribe({
+        next: () => {
+          this.isSaved.set(true);
+          this.savingDeck.set(false);
+        },
+        error: () => {
+          this.savingDeck.set(false);
+        },
+      });
+    }
   }
 }

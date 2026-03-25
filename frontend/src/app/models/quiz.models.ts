@@ -19,6 +19,9 @@ export interface UserAnswerResponse {
   id: string;
   questionId: number;
   question: string;
+  type: string;
+  hint: string | null;
+  explanation: string | null;
   options: string[];
   correctAnswers: string[];
   answer: string[];
@@ -27,6 +30,7 @@ export interface UserAnswerResponse {
 
 export interface QuizAttemptResponse {
   id: string;
+  deckName: string;
   deckId: string;
   userId: string;
   startedAt: string;

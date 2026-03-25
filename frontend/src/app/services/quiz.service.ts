@@ -12,4 +12,8 @@ export class QuizService {
   submitAttempt(request: SubmitQuizAttemptRequest): Observable<ApiResponse<QuizAttemptResponse>> {
     return this.http.post<ApiResponse<QuizAttemptResponse>>(this.endpoint, request);
   }
+
+  getAttemptById(attemptId: string): Observable<ApiResponse<QuizAttemptResponse>> {
+    return this.http.get<ApiResponse<QuizAttemptResponse>>(`${this.endpoint}/${attemptId}`);
+  }
 }

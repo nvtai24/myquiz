@@ -1,6 +1,6 @@
 <div class="max-w-[1400px] mx-auto px-6 py-6" style="font-family: 'Inter', sans-serif;">
   <!-- Header -->
-  <div class="flex items-center justify-between mb-8">
+  <!-- <div class="flex items-center justify-between mb-8">
     <div class="flex items-center gap-3">
       <div class="w-12 h-12 bg-indigo-50 text-[#4255FF] rounded-xl flex items-center justify-center">
         <span class="material-symbols-outlined text-[28px]">history</span>
@@ -17,7 +17,7 @@
       {{ totalItems() }} attempts
     </div>
     }
-  </div>
+  </div> -->
 
   <!-- Loading State -->
   @if (loading()) {
@@ -51,7 +51,7 @@
 
     <!-- Table Rows -->
     @for (attempt of attempts(); track attempt.attemptId) {
-    <a [routerLink]="['/deck', attempt.deckId]"
+    <a [routerLink]="['/attempt', attempt.attemptId]"
       class="grid grid-cols-[1fr_100px_120px_100px_160px] gap-4 px-5 py-4 border-b border-gray-100 last:border-b-0 hover:bg-gray-50 transition-colors no-underline items-center">
       <!-- Deck Info -->
       <div class="flex items-center gap-3 min-w-0">

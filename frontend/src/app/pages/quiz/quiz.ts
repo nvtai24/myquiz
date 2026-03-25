@@ -310,32 +310,17 @@ export class Quiz implements OnInit, OnDestroy {
       const ans = this.selectedAnswers()[i];
 
       let answer: string[];
-      let isCorrect: boolean;
-
       if (q.type === 'multiple_choice') {
         answer = typeof ans === 'number' ? [q.options[ans]?.text ?? ''] : [];
-        isCorrect = ans === q.correctOption;
       } else if (q.type === 'true_false') {
         answer = ans === true ? ['True'] : ans === false ? ['False'] : [];
-        isCorrect = ans === q.correctBool;
       } else {
         answer = ans ? [String(ans)] : [];
-        isCorrect = String(ans ?? '').toLowerCase().trim() === q.correctText.toLowerCase().trim();
       }
-
-      const correctAnswersSnapshot = q.type === 'multiple_choice'
-        ? [q.options[q.correctOption]?.text ?? '']
-        : q.type === 'true_false'
-          ? [q.correctBool ? 'True' : 'False']
-          : [q.correctText];
 
       return {
         questionId: q.originalId,
-        questionSnapshot: q.text,
-        optionsSnapshot: q.options.map(o => o.text),
-        correctAnswersSnapshot,
         answer,
-        isCorrect,
       };
     });
 

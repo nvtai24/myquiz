@@ -2,11 +2,7 @@
 
 export interface UserAnswerRequest {
   questionId: number;
-  questionSnapshot: string;
-  optionsSnapshot: string[];
-  correctAnswersSnapshot: string[];
   answer: string[];
-  isCorrect: boolean;
 }
 
 export interface SubmitQuizAttemptRequest {

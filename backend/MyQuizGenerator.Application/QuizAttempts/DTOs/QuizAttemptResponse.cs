@@ -6,6 +6,7 @@ public class QuizAttemptResponse
 {
     public Guid Id { get; set; }
     public Guid DeckId { get; set; }
+    public string DeckName { get; set; } = string.Empty;
     public string UserId { get; set; } = string.Empty;
     public DateTime StartedAt { get; set; }
     public DateTime EndedAt { get; set; }

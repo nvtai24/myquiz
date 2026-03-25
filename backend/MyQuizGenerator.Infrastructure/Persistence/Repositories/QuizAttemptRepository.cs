@@ -24,6 +24,7 @@ public class QuizAttemptRepository : Repository<Guid, QuizAttempt>, IQuizAttempt
     {
         return await _context.QuizAttempts
             .AsNoTracking()
+            .Include(qa => qa.Deck)
             .Include(qa => qa.UserAnswers)
                 .ThenInclude(ua => ua.Question)
             .FirstOrDefaultAsync(qa => qa.Id == attemptId, cancellationToken);

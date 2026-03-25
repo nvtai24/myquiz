@@ -36,6 +36,7 @@ public class GetQuizAttemptByIdQueryHandler : IRequestHandler<GetQuizAttemptById
         {
             Id = attempt.Id,
             DeckId = attempt.DeckId,
+            DeckName = attempt.Deck.Name,
             UserId = attempt.UserId,
             StartedAt = attempt.StartedAt,
             EndedAt = attempt.EndedAt,

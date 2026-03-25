@@ -17,6 +17,9 @@ using MyQuizGenerator.Application.DeckInvitations.DTOs;
 using MyQuizGenerator.Application.DeckInvitations.Commands.CreateDeckInvitation;
 using DeckMembers = MyQuizGenerator.Application.Decks.Queries.GetDeckMembers;
 using ExportDeckPdf = MyQuizGenerator.Application.Decks.Queries.ExportDeckPdf;
+using SavedDecks = MyQuizGenerator.Application.Decks.Queries.GetSavedDecks;
+using SaveDeck = MyQuizGenerator.Application.Decks.Commands.SaveDeck;
+using UnsaveDeck = MyQuizGenerator.Application.Decks.Commands.UnsaveDeck;
 
 namespace MyQuizGenerator.Presentation.Controllers;
 
@@ -271,5 +274,49 @@ public class DecksController : BaseApiController
         var command = new MyQuizGenerator.Application.DeckInvitations.Commands.AcceptDeckInvitation.AcceptDeckInvitationCommand(token);
         var memberId = await _mediator.Send(command);
         return ApiOk(memberId, "Invitation accepted successfully");
+    }
+
+    /// <summary>
+    /// Gets a paginated list of saved decks for the current user.
+    /// </summary>
+    /// <param name="page">Page number (default: 1).</param>
+    /// <param name="size">Page size (default: 10).</param>
+    /// <returns>Paginated list of saved deck summaries.</returns>
+    [HttpGet("saved")]
+    public async Task<IActionResult> GetSavedDecks([FromQuery] int page = 1, [FromQuery] int size = 10)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (string.IsNullOrEmpty(userId))
+        {
+            return ApiUnauthorized();
+        }
+
+        var query = new SavedDecks.GetSavedDecksQuery(userId, page, size);
+        var result = await _mediator.Send(query);
+        return ApiPaged(result.Items, result.Page, result.Size, result.TotalRecords);
+    }
+
+    /// <summary>
+    /// Saves a deck for the current user.
+    /// </summary>
+    /// <param name="id">The deck ID.</param>
+    [HttpPost("{id}/save")]
+    public async Task<IActionResult> SaveDeck(Guid id)
+    {
+        var command = new SaveDeck.SaveDeckCommand(id);
+        await _mediator.Send(command);
+        return ApiOk("Deck saved successfully");
+    }
+
+    /// <summary>
+    /// Unsaves a deck for the current user.
+    /// </summary>
+    /// <param name="id">The deck ID.</param>
+    [HttpDelete("{id}/save")]
+    public async Task<IActionResult> UnsaveDeck(Guid id)
+    {
+        var command = new UnsaveDeck.UnsaveDeckCommand(id);
+        await _mediator.Send(command);
+        return ApiNoContent("Deck unsaved successfully");
     }
 }

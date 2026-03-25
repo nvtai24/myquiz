@@ -21,6 +21,7 @@ public class Deck
     public ICollection<DeckMember> DeckMembers { get; set; } = new List<DeckMember>();
     public ICollection<QuizAttempt> QuizAttempts { get; set; } = new List<QuizAttempt>();
     public ICollection<DeckRating> DeckRatings { get; set; } = new List<DeckRating>();
+    public ICollection<SavedDeck> SavedByUsers { get; set; } = new List<SavedDeck>();
 }
 
 

@@ -206,4 +206,46 @@ public class DeckRepository : Repository<Guid, Deck>, IDeckRepository
     {
         await _context.Questions.AddRangeAsync(questions, cancellationToken);
     }
+
+    public async Task<bool> IsSavedAsync(Guid deckId, string userId, CancellationToken cancellationToken = default)
+    {
+        return await _context.SavedDecks
+            .AnyAsync(s => s.DeckId == deckId && s.UserId == userId, cancellationToken);
+    }
+
+    public async Task<SavedDeck?> GetSavedDeckAsync(Guid deckId, string userId, CancellationToken cancellationToken = default)
+    {
+        return await _context.SavedDecks
+            .FirstOrDefaultAsync(s => s.DeckId == deckId && s.UserId == userId, cancellationToken);
+    }
+
+    public async Task AddSavedDeckAsync(SavedDeck savedDeck, CancellationToken cancellationToken = default)
+    {
+        await _context.SavedDecks.AddAsync(savedDeck, cancellationToken);
+    }
+
+    public void RemoveSavedDeck(SavedDeck savedDeck)
+    {
+        _context.SavedDecks.Remove(savedDeck);
+    }
+
+    public async Task<(List<Deck> Items, int TotalCount)> GetSavedDecksAsync(string userId, int page, int size, CancellationToken cancellationToken = default)
+    {
+        var query = _context.SavedDecks
+            .AsNoTracking()
+            .Where(s => s.UserId == userId)
+            .OrderByDescending(s => s.SavedAt)
+            .Select(s => s.Deck);
+
+        var totalCount = await query.CountAsync(cancellationToken);
+
+        var items = await query
+            .Include(d => d.Questions)
+            .Include(d => d.DeckRatings)
+            .Skip((page - 1) * size)
+            .Take(size)
+            .ToListAsync(cancellationToken);
+
+        return (items, totalCount);
+    }
 }

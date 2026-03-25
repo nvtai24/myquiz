@@ -19,4 +19,5 @@ public class AppUser : IdentityUser
     public ICollection<QuizAttempt> QuizAttempts { get; set; } = new List<QuizAttempt>();
     public ICollection<UserSubscriptionPlan> UserSubscriptionPlans { get; set; } = new List<UserSubscriptionPlan>();
     public ICollection<DeckRating> DeckRatings { get; set; } = new List<DeckRating>();
+    public ICollection<SavedDeck> SavedDecks { get; set; } = new List<SavedDeck>();
 }

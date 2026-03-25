@@ -1,0 +1,53 @@
+using MediatR;
+using MyQuizGenerator.Application.Common.DTOs;
+using MyQuizGenerator.Application.Common.Interfaces;
+using MyQuizGenerator.Application.Common.Interfaces.Repositories;
+using MyQuizGenerator.Application.Decks.DTOs;
+
+namespace MyQuizGenerator.Application.Decks.Queries.GetSavedDecks;
+
+public record GetSavedDecksQuery(string UserId, int Page = 1, int Size = 10) : IRequest<PagedResult<SharedDeckResponse>>;
+
+public class GetSavedDecksQueryHandler : IRequestHandler<GetSavedDecksQuery, PagedResult<SharedDeckResponse>>
+{
+    private readonly IDeckRepository _deckRepository;
+    private readonly IUserService _userService;
+
+    public GetSavedDecksQueryHandler(IDeckRepository deckRepository, IUserService userService)
+    {
+        _deckRepository = deckRepository;
+        _userService = userService;
+    }
+
+    public async Task<PagedResult<SharedDeckResponse>> Handle(GetSavedDecksQuery request, CancellationToken cancellationToken)
+    {
+        var (decks, totalCount) = await _deckRepository.GetSavedDecksAsync(request.UserId, request.Page, request.Size, cancellationToken);
+
+        var items = new List<SharedDeckResponse>();
+
+        foreach (var d in decks)
+        {
+            var ownerInfo = await _userService.GetUserInfoAsync(d.OwnerId);
+
+            items.Add(new SharedDeckResponse
+            {
+                Id = d.Id,
+                Name = d.Name,
+                Description = d.Description,
+                Visibility = d.Visibility,
+                Status = d.Status,
+                Tags = d.Tags ?? [],
+                QuestionCount = d.Questions.Count,
+                ThumbnailUrl = d.ThumbnailUrl ?? string.Empty,
+                CreatedAt = d.CreatedAt,
+                UpdatedAt = d.UpdatedAt,
+                OwnerName = ownerInfo?.FullName ?? string.Empty,
+                OwnerEmail = ownerInfo?.Email ?? string.Empty,
+                AverageRating = d.DeckRatings.Count != 0 ? Math.Round(d.DeckRatings.Average(r => r.Rating), 1) : 0,
+                TotalRatings = d.DeckRatings.Count
+            });
+        }
+
+        return new PagedResult<SharedDeckResponse>(items, request.Page, request.Size, totalCount);
+    }
+}

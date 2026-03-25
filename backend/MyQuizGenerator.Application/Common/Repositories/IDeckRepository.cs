@@ -22,4 +22,11 @@ public interface IDeckRepository : IRepository<Guid, Deck>
     // Question management
     Task<List<Question>> GetQuestionsByIdsAsync(IEnumerable<int> ids, Guid deckId, CancellationToken cancellationToken = default);
     Task AddQuestionsAsync(IEnumerable<Question> questions, CancellationToken cancellationToken = default);
+
+    // Saved decks
+    Task<bool> IsSavedAsync(Guid deckId, string userId, CancellationToken cancellationToken = default);
+    Task<SavedDeck?> GetSavedDeckAsync(Guid deckId, string userId, CancellationToken cancellationToken = default);
+    Task AddSavedDeckAsync(SavedDeck savedDeck, CancellationToken cancellationToken = default);
+    void RemoveSavedDeck(SavedDeck savedDeck);
+    Task<(List<Deck> Items, int TotalCount)> GetSavedDecksAsync(string userId, int page, int size, CancellationToken cancellationToken = default);
 }

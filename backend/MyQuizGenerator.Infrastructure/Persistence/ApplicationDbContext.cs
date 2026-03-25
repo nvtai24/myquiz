@@ -25,6 +25,7 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, IdentityRole, str
     public DbSet<UserSubscriptionPlan> UserSubscriptionPlans { get; set; }
     public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
     public DbSet<DeckRating> DeckRatings { get; set; }
+    public DbSet<SavedDeck> SavedDecks { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -217,6 +218,27 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, IdentityRole, str
 
             // Ensure one rating per user per deck
             entity.HasIndex(r => new { r.DeckId, r.UserId }).IsUnique();
+        });
+
+        modelBuilder.Entity<SavedDeck>(entity =>
+        {
+            entity.HasKey(s => s.Id);
+            entity.Property(s => s.DeckId).IsRequired();
+            entity.Property(s => s.UserId).IsRequired();
+            entity.Property(s => s.SavedAt).IsRequired();
+
+            entity.HasOne(s => s.Deck)
+                .WithMany(d => d.SavedByUsers)
+                .HasForeignKey(s => s.DeckId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne<AppUser>()
+                .WithMany(u => u.SavedDecks)
+                .HasForeignKey(s => s.UserId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            // Ensure one save per user per deck
+            entity.HasIndex(s => new { s.DeckId, s.UserId }).IsUnique();
         });
     }
 

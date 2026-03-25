@@ -13,15 +13,18 @@ public class CreateQuizAttemptCommandHandler : IRequestHandler<CreateQuizAttempt
 {
     private readonly IUnitOfWork _unitOfWork;
     private readonly IQuizAttemptRepository _quizAttemptRepository;
+    private readonly IDeckRepository _deckRepository;
     private readonly ICurrentUserService _currentUserService;
 
     public CreateQuizAttemptCommandHandler(
         IUnitOfWork unitOfWork,
         IQuizAttemptRepository quizAttemptRepository,
+        IDeckRepository deckRepository,
         ICurrentUserService currentUserService)
     {
         _unitOfWork = unitOfWork;
         _quizAttemptRepository = quizAttemptRepository;
+        _deckRepository = deckRepository;
         _currentUserService = currentUserService;
     }
 
@@ -30,20 +33,34 @@ public class CreateQuizAttemptCommandHandler : IRequestHandler<CreateQuizAttempt
         var userId = _currentUserService.UserId
             ?? throw new UnauthorizedException("User is not authenticated.");
 
+        var questionIds = command.Request.UserAnswers.Select(ua => ua.QuestionId).ToList();
+        var questions = await _deckRepository.GetQuestionsByIdsAsync(questionIds, command.Request.DeckId, cancellationToken);
+        var questionMap = questions.ToDictionary(q => q.Id);
+
         var attemptId = Guid.NewGuid();
 
         var userAnswers = command.Request.UserAnswers.Select(ua =>
         {
+            if (!questionMap.TryGetValue(ua.QuestionId, out var question))
+                throw new NotFoundException("Question", ua.QuestionId);
+
+            var isCorrect = question.CorrectAnswers
+                .OrderBy(a => a)
+                .SequenceEqual(ua.Answer.OrderBy(a => a));
+
             return new UserAnswer
             {
                 Id = Guid.NewGuid(),
                 QuizAttemptId = attemptId,
-                QuestionId = ua.QuestionId,
-                QuestionSnapshot = ua.QuestionSnapshot,
-                OptionsSnapshot = ua.OptionsSnapshot,
-                CorrectAnswersSnapshot = ua.CorrectAnswersSnapshot,
+                QuestionId = question.Id,
+                QuestionSnapshot = question.Content,
+                TypeSnapshot = question.Type,
+                HintSnapshot = question.Hint,
+                ExplanationSnapshot = question.Explanation,
+                OptionsSnapshot = question.Options,
+                CorrectAnswersSnapshot = question.CorrectAnswers,
                 Answer = ua.Answer,
-                IsCorrect = ua.IsCorrect
+                IsCorrect = isCorrect
             };
         }).ToList();
 
@@ -83,6 +100,9 @@ public class CreateQuizAttemptCommandHandler : IRequestHandler<CreateQuizAttempt
                 Id = ua.Id,
                 QuestionId = ua.QuestionId,
                 Question = ua.QuestionSnapshot,
+                Type = ua.TypeSnapshot,
+                Hint = ua.HintSnapshot,
+                Explanation = ua.ExplanationSnapshot,
                 Options = ua.OptionsSnapshot,
                 CorrectAnswers = ua.CorrectAnswersSnapshot,
                 Answer = ua.Answer,

@@ -1,3 +1,5 @@
+using MyQuizGenerator.Domain.Enums;
+
 namespace MyQuizGenerator.Application.QuizAttempts.DTOs;
 
 public class QuizAttemptResponse
@@ -19,6 +21,9 @@ public class UserAnswerResponse
     public Guid Id { get; set; }
     public int QuestionId { get; set; }
     public string Question { get; set; } = string.Empty;
+    public QuestionType Type { get; set; }
+    public string Hint { get; set; } = string.Empty;
+    public string Explanation { get; set; } = string.Empty;
     public string[] Options { get; set; } = [];
     public string[] CorrectAnswers { get; set; } = [];
     public string[] Answer { get; set; } = [];

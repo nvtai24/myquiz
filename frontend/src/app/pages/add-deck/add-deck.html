@@ -62,7 +62,7 @@
     </div>
   </div>
 
-  @if (checkLimit() && mode() !== 'ai') {
+  @if (checkLimit()) {
   <div class="w-full mb-6 py-3 px-4 rounded-xl bg-red-50 border border-red-200 text-red-700 flex items-center gap-3">
     <span class="material-symbols-outlined text-[24px]">block</span>
     <div class="flex flex-col">
@@ -73,41 +73,6 @@
       class="ml-auto px-4 py-2 bg-red-600 text-white text-[12px] font-bold rounded-lg cursor-pointer no-underline hover:bg-red-700">Upgrade</a>
   </div>
   }
-
-  <!-- Mode Selector -->
-  <div class="grid grid-cols-2 gap-4 mb-6">
-    <button
-      class="flex items-center gap-4 p-5 bg-white border-2 rounded-2xl cursor-pointer transition-all text-left relative"
-      [class]="mode() === 'manual' ? 'border-[#4255FF] bg-[#fafaff] shadow-md' : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'"
-      (click)="mode.set('manual')">
-      <div class="w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0 bg-[#eef0ff] text-[#4255FF]">
-        <span class="material-symbols-outlined text-[24px]">edit_note</span>
-      </div>
-      <div class="flex flex-col flex-1">
-        <span class="text-[15px] font-bold text-[#141118]">Manual Entry</span>
-        <span class="text-[12px] text-[#726388] mt-0.5 font-medium">Write your own cards manually</span>
-      </div>
-      @if (mode() === 'manual') {
-      <span class="material-symbols-outlined text-[24px] text-[#4255FF] absolute right-5 top-1/2 -translate-y-1/2">check_circle</span>
-      }
-    </button>
-    <button
-      class="flex items-center gap-4 p-5 bg-white border-2 rounded-2xl cursor-pointer transition-all text-left relative"
-      [class]="mode() === 'ai' ? 'border-[#4255FF] bg-[#fafaff] shadow-md' : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'"
-      (click)="mode.set('ai')">
-      <div class="w-12 h-12 rounded-[14px] flex items-center justify-center shrink-0"
-        [class]="mode() === 'ai' ? 'bg-amber-100 text-amber-600' : 'bg-amber-50 text-amber-500'">
-        <span class="material-symbols-outlined text-[24px]">auto_awesome</span>
-      </div>
-      <div class="flex flex-col flex-1">
-        <span class="text-[15px] font-bold text-[#141118]">AI Generate</span>
-        <span class="text-[12px] text-[#726388] mt-0.5 font-medium">Create from your materials instantly</span>
-      </div>
-      @if (mode() === 'ai') {
-      <span class="material-symbols-outlined text-[24px] text-[#4255FF] absolute right-5 top-1/2 -translate-y-1/2">check_circle</span>
-      }
-    </button>
-  </div>
 
   <!-- Meta Section -->
   <div class="flex gap-6 bg-white border border-gray-200 rounded-2xl p-7 mb-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
@@ -178,73 +143,74 @@
     </div>
   </div>
 
-  <!-- AI Panel -->
-  @if (mode() === 'ai') {
-  <div class="bg-white border border-gray-200 rounded-2xl p-7 mb-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)] relative overflow-hidden">
+  <!-- AI Generator (Optional) -->
+  <div class="bg-white border border-gray-200 rounded-2xl mb-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)] relative overflow-hidden">
     <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#4255FF] via-purple-400 to-amber-500"></div>
-    <div class="flex items-start gap-4 mb-6 mt-1">
-      <div class="w-12 h-12 rounded-[14px] bg-gradient-to-br from-[#4255FF] to-purple-500 text-white flex items-center justify-center shadow-md">
-        <span class="material-symbols-outlined text-[28px]">auto_awesome</span>
+    <button class="w-full flex items-center gap-4 p-5 cursor-pointer text-left" (click)="showAiPanel.set(!showAiPanel())">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-400 to-amber-500 text-white flex items-center justify-center shadow-sm">
+        <span class="material-symbols-outlined text-[22px]">auto_awesome</span>
       </div>
-      <div>
-        <h3 class="text-xl font-bold text-[#141118] m-0">AI Card Generator</h3>
-        <p class="text-[13.5px] text-[#726388] mt-1 mb-0 font-medium">Create flashcards instantly from your materials</p>
+      <div class="flex-1">
+        <h3 class="text-[15px] font-bold text-[#141118] m-0">AI Card Generator</h3>
+        <p class="text-[12px] text-[#726388] mt-0.5 mb-0 font-medium">Optional: Generate cards from your materials</p>
       </div>
-      <div class="ml-auto">
+      <div class="flex items-center gap-3">
         @if (aiLimitLoading()) {
-          <span class="text-[13px] text-gray-400 animate-pulse">Checking limit...</span>
-        } @else if (aiUsageMax() !== -1) {
-          <div class="bg-purple-50 px-3 py-1.5 rounded-lg border border-purple-100 flex flex-col items-end">
-            <span class="text-[11px] font-bold text-purple-600 uppercase tracking-wider">Usage</span>
-            <span class="text-[15px] font-black text-purple-900">{{ aiUsageCount() }}/{{ aiUsageMax() }}</span>
+          <span class="text-[12px] text-gray-400 animate-pulse">Loading...</span>
+        } @else if (aiUsageMax() !== -1 && aiUsageMax() > 0) {
+          <div class="bg-purple-50 px-2.5 py-1 rounded-lg border border-purple-100 flex items-center gap-1.5">
+            <span class="text-[11px] font-bold text-purple-600">{{ aiUsageCount() }}/{{ aiUsageMax() }}</span>
           </div>
         }
+        <span class="material-symbols-outlined text-[20px] text-gray-400 transition-transform" [class.rotate-180]="showAiPanel()">expand_more</span>
       </div>
-    </div>
-
-    <div class="flex gap-2 border-b-2 border-gray-100 mb-6 pb-2">
-      <button class="flex items-center gap-2 py-2.5 px-5 rounded-lg text-[13.5px] font-bold transition-all"
-        [class]="aiSource() === 'upload' ? 'text-[#4255FF] bg-[#eef0ff]' : 'text-gray-500 hover:bg-gray-100'"
-        (click)="aiSource.set('upload')">
-        <span class="material-symbols-outlined text-[18px]">upload_file</span> Upload
-      </button>
-      <button class="flex items-center gap-2 py-2.5 px-5 rounded-lg text-[13.5px] font-bold transition-all"
-        [class]="aiSource() === 'paste' ? 'text-[#4255FF] bg-[#eef0ff]' : 'text-gray-500 hover:bg-gray-100'"
-        (click)="aiSource.set('paste')">
-        <span class="material-symbols-outlined text-[18px]">content_paste</span> Paste
-      </button>
-    </div>
-
-    @if (aiSource() === 'upload') {
-      <div class="border-2 border-dashed border-gray-300 rounded-2xl p-10 flex flex-col items-center justify-center gap-2 cursor-pointer bg-white hover:border-[#4255FF] hover:bg-[#f8f9ff]"
-        (dragover)="$event.preventDefault()" (drop)="onAiFileDrop($event)" (click)="aiFileInput.click()">
-        @if (aiFileName()) {
-          <span class="font-bold text-[#4255FF]">{{ aiFileName() }}</span>
-        } @else {
-          <span class="material-symbols-outlined text-[36px] text-gray-300">cloud_upload</span>
-          <p class="font-bold text-[#141118]">Click or drag file to upload</p>
-        }
-        <input #aiFileInput type="file" hidden (change)="onAiFileSelect($event)" />
-      </div>
-    } @else {
-      <textarea class="w-full min-h-[220px] p-5 border-2 border-gray-200 rounded-xl outline-none focus:border-[#4255FF]"
-        placeholder="Paste your content here..." [ngModel]="aiPasteText()" (ngModelChange)="aiPasteText.set($event)"></textarea>
-    }
-
-    <button class="w-full mt-6 py-4 rounded-xl bg-gradient-to-r from-purple-600 to-[#4255FF] text-white font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-      [disabled]="aiGenerating() || (aiUsageMax() !== -1 && aiUsageCount() >= aiUsageMax())" (click)="generateWithAi()">
-      <span class="material-symbols-outlined" [class.animate-spin]="aiGenerating()">{{ aiGenerating() ? 'progress_activity' : 'auto_awesome' }}</span>
-      {{ aiGenerating() ? 'Generating...' : 'Generate Cards with AI' }}
     </button>
-    
-    @if (aiUsageMax() !== -1 && aiUsageCount() >= aiUsageMax()) {
-      <p class="text-center text-red-500 text-[12px] font-bold mt-2">Daily limit reached. Upgrade to continue.</p>
+
+    @if (showAiPanel()) {
+    <div class="px-5 pb-5 border-t border-gray-100">
+      <div class="flex gap-2 mt-4 mb-4">
+        <button class="flex items-center gap-2 py-2 px-4 rounded-lg text-[13px] font-bold transition-all"
+          [class]="aiSource() === 'upload' ? 'text-[#4255FF] bg-[#eef0ff]' : 'text-gray-500 hover:bg-gray-100'"
+          (click)="aiSource.set('upload')">
+          <span class="material-symbols-outlined text-[16px]">upload_file</span> Upload
+        </button>
+        <button class="flex items-center gap-2 py-2 px-4 rounded-lg text-[13px] font-bold transition-all"
+          [class]="aiSource() === 'paste' ? 'text-[#4255FF] bg-[#eef0ff]' : 'text-gray-500 hover:bg-gray-100'"
+          (click)="aiSource.set('paste')">
+          <span class="material-symbols-outlined text-[16px]">content_paste</span> Paste
+        </button>
+      </div>
+
+      @if (aiSource() === 'upload') {
+        <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center gap-2 cursor-pointer bg-gray-50 hover:border-[#4255FF] hover:bg-[#f8f9ff]"
+          (dragover)="$event.preventDefault()" (drop)="onAiFileDrop($event)" (click)="aiFileInput.click()">
+          @if (aiFileName()) {
+            <span class="font-bold text-[#4255FF]">{{ aiFileName() }}</span>
+          } @else {
+            <span class="material-symbols-outlined text-[32px] text-gray-300">cloud_upload</span>
+            <p class="font-bold text-[#141118] text-[14px]">Click or drag file to upload</p>
+          }
+          <input #aiFileInput type="file" hidden (change)="onAiFileSelect($event)" />
+        </div>
+      } @else {
+        <textarea class="w-full min-h-[160px] p-4 border-2 border-gray-200 rounded-xl outline-none focus:border-[#4255FF] text-[14px]"
+          placeholder="Paste your content here..." [ngModel]="aiPasteText()" (ngModelChange)="aiPasteText.set($event)"></textarea>
+      }
+
+      <button class="w-full mt-4 py-3 rounded-xl bg-gradient-to-r from-amber-500 to-amber-600 text-white font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 hover:shadow-lg"
+        [disabled]="aiGenerating() || (aiUsageMax() !== -1 && aiUsageCount() >= aiUsageMax())" (click)="generateWithAi()">
+        <span class="material-symbols-outlined text-[18px]" [class.animate-spin]="aiGenerating()">{{ aiGenerating() ? 'progress_activity' : 'auto_awesome' }}</span>
+        {{ aiGenerating() ? 'Generating...' : 'Generate Cards with AI' }}
+      </button>
+
+      @if (aiUsageMax() !== -1 && aiUsageCount() >= aiUsageMax()) {
+        <p class="text-center text-red-500 text-[12px] font-bold mt-2">Daily limit reached. Upgrade to continue.</p>
+      }
+    </div>
     }
   </div>
-  }
 
   <!-- Cards List -->
-  @if (mode() === 'manual') {
   <div class="flex flex-col gap-4">
     <div class="flex items-center justify-between mb-2">
       <h3 class="flex items-center gap-2 text-lg font-bold text-[#141118] m-0">
@@ -340,7 +306,6 @@
       <span>ADD NEW CARD</span>
     </button>
   </div>
-  }
 </div>
 
 <!-- Floating Banners -->

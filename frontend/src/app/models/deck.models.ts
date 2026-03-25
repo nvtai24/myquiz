@@ -2,7 +2,6 @@
 
 export type DeckVisibility = 'Public' | 'Private' | 'Shared';
 export type DeckStatus = 'Draft' | 'Published';
-export type DeckSource = 'AiGenerated' | 'Manual';
 export type QuestionType = 'MultipleChoice' | 'TrueFalse' | 'FillInTheBlank';
 
 // ── Response DTOs ──
@@ -97,7 +96,6 @@ export interface CreateDeckRequest {
   description: string;
   visibility: DeckVisibility;
   status: DeckStatus;
-  source: DeckSource;
   tags: string[];
   questions: CreateQuestionRequest[];
   thumbnailUrl?: string;

@@ -20,7 +20,7 @@ const DECK_ICONS = ['style', 'code', 'api', 'webhook', 'school', 'menu_book', 'q
 export class Library implements OnInit {
   private deckService = inject(DeckService);
 
-  activeTab = signal<'owned' | 'shared' | 'drafts'>('owned');
+  activeTab = signal<'owned' | 'shared' | 'saved' | 'drafts'>('owned');
   searchQuery = signal('');
   sortBy = signal('recent');
   isSortOpen = signal(false);
@@ -44,6 +44,7 @@ export class Library implements OnInit {
   // Tab counts
   ownedDecksCount = signal(0);
   sharedDecksCount = signal(0);
+  savedDecksCount = signal(0);
   draftsCount = signal(0);
 
   // All unique tags from decks
@@ -82,6 +83,9 @@ export class Library implements OnInit {
     this.deckService.getSharedDecks(1, 1).subscribe(res => {
       if (res.pagination) this.sharedDecksCount.set(res.pagination.totalRecords);
     });
+    this.deckService.getSavedDecks(1, 1).subscribe(res => {
+      if (res.pagination) this.savedDecksCount.set(res.pagination.totalRecords);
+    });
     this.deckService.getDraftDecks(1, 1).subscribe(res => {
       if (res.pagination) this.draftsCount.set(res.pagination.totalRecords);
     });
@@ -99,7 +103,9 @@ export class Library implements OnInit {
       ? this.deckService.getMyDecks(page, size)
       : tab === 'shared'
         ? this.deckService.getSharedDecks(page, size)
-        : this.deckService.getDraftDecks(page, size);
+        : tab === 'saved'
+          ? this.deckService.getSavedDecks(page, size)
+          : this.deckService.getDraftDecks(page, size);
 
     apiCall.subscribe({
       next: (res) => {
@@ -111,6 +117,7 @@ export class Library implements OnInit {
           if (res.pagination) {
             if (tab === 'owned') this.ownedDecksCount.set(res.pagination.totalRecords);
             else if (tab === 'shared') this.sharedDecksCount.set(res.pagination.totalRecords);
+            else if (tab === 'saved') this.savedDecksCount.set(res.pagination.totalRecords);
             else this.draftsCount.set(res.pagination.totalRecords);
           }
         } else {
@@ -177,7 +184,7 @@ export class Library implements OnInit {
       this.sortBy() !== 'recent';
   }
 
-  setTab(tab: 'owned' | 'shared' | 'drafts') {
+  setTab(tab: 'owned' | 'shared' | 'saved' | 'drafts') {
     if (this.activeTab() !== tab) {
       this.activeTab.set(tab);
     }

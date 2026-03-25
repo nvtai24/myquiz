@@ -51,12 +51,11 @@ export class AddDeck implements OnInit {
 
   documentUrl = signal<string | null>(null);
 
-  /* ── Creation mode ── */
-  mode = signal<'manual' | 'ai'>('manual');
   checkLimit = signal(false);
   checkLimitDeck = signal(false);
 
-  /* ── AI Generation ── */
+  /* ── AI Generation (Optional) ── */
+  showAiPanel = signal(false);
   aiSource = signal<'upload' | 'paste'>('upload');
   aiPasteText = signal('');
   aiFile = signal<File | null>(null);
@@ -329,7 +328,6 @@ export class AddDeck implements OnInit {
       description: this.description().trim(),
       visibility,
       status,
-      source: this.aiGenerated() ? 'AiGenerated' : 'Manual',
       tags: this.tags(),
       questions: this.buildQuestions(),
       thumbnailUrl: this.coverImage() || undefined,
@@ -563,7 +561,7 @@ export class AddDeck implements OnInit {
     });
 
     this.cards.set(mapped.length > 0 ? mapped : this.getInitialCards());
-    this.mode.set('manual');
+    this.showAiPanel.set(false);
     this.aiGenerated.set(true);
     this.showSuccess(`${mapped.length} cards generated!`);
   }

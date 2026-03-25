@@ -40,6 +40,11 @@ export class DeckService {
     return this.http.get<PagedResponse<DeckSummaryResponse>>(`${this.endpoint}/shared`, { params });
   }
 
+  getSavedDecks(page = 1, size = 6): Observable<PagedResponse<DeckSummaryResponse>> {
+    const params = new HttpParams().set('page', page).set('size', size);
+    return this.http.get<PagedResponse<DeckSummaryResponse>>(`${this.endpoint}/saved`, { params });
+  }
+
   getDeckById(id: string): Observable<ApiResponse<DeckDetailResponse>> {
     return this.http.get<ApiResponse<DeckDetailResponse>>(`${this.endpoint}/${id}`);
   }
@@ -80,13 +85,11 @@ export class DeckService {
   private mapRequestToDto(request: CreateDeckRequest) {
     const visibilityMap: Record<string, number> = { 'Public': 0, 'Private': 1, 'Shared': 2 };
     const statusMap: Record<string, number> = { 'Draft': 0, 'Published': 1 };
-    const sourceMap: Record<string, number> = { 'Manual': 0, 'AiGenerated': 1 };
 
     return {
       ...request,
       visibility: visibilityMap[request.visibility] ?? 0,
       status: statusMap[request.status] ?? 0,
-      source: sourceMap[request.source] ?? 0
     };
   }
 

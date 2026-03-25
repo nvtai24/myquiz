@@ -13,6 +13,11 @@
         Shared with me
         <span class="tab-count">{{ sharedDecksCount() }}</span>
       </button>
+      <button class="tab" [class.active]="activeTab() === 'saved'" (click)="setTab('saved')">
+        <span class="material-symbols-outlined text-[18px]">bookmark</span>
+        Saved
+        <span class="tab-count">{{ savedDecksCount() }}</span>
+      </button>
       <button class="tab" [class.active]="activeTab() === 'drafts'" (click)="setTab('drafts')">
         <span class="material-symbols-outlined text-[18px]">edit_note</span>
         Drafts

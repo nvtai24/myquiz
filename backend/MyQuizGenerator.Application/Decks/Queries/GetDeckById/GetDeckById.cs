@@ -79,6 +79,10 @@ public class GetDeckByIdQueryHandler : IRequestHandler<GetDeckByIdQuery, DeckDet
 
         var ownerInfo = await _userService.GetUserInfoAsync(deck.OwnerId);
 
+        var currentUserId = _currentUserService.UserId;
+        var isSaved = !string.IsNullOrEmpty(currentUserId)
+            && await _deckRepository.IsSavedAsync(deck.Id, currentUserId, cancellationToken);
+
         return new DeckDetailResponse
         {
             Id = deck.Id,
@@ -105,7 +109,8 @@ public class GetDeckByIdQueryHandler : IRequestHandler<GetDeckByIdQuery, DeckDet
                 Options = q.Options,
                 CorrectAnswers = q.CorrectAnswers
             }).ToList(),
-            DocumentUrl = deck.DocumentUrl
+            DocumentUrl = deck.DocumentUrl,
+            IsSaved = isSaved
         };
     }
 }

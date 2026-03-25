@@ -6,4 +6,5 @@ public class DeckDetailResponse : DeckSummaryResponse
     public string OwnerEmail { get; set; } = string.Empty;
     public List<QuestionResponse> Questions { get; set; } = new();
     public string? DocumentUrl { get; set; }
+    public bool IsSaved { get; set; }
 }

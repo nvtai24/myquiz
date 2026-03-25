@@ -356,7 +356,9 @@ export class DeckDetail implements OnInit {
 
     this.deckService.getRatings(id).subscribe({
       next: (res) => {
-        this.ratingSummary.set(res.data ?? null);
+        const summary = res.data ?? null;
+        this.ratingSummary.set(summary);
+        this.syncDeckRatingStats(summary);
         this.loadingRatings.set(false);
       },
       error: () => this.loadingRatings.set(false),
@@ -506,22 +508,49 @@ export class DeckDetail implements OnInit {
     return star <= active ? 'filled' : 'empty';
   }
 
+  private syncDeckRatingStats(summary: DeckRatingSummaryResponse | null) {
+    if (!summary) return;
+    this.deck.update((current) =>
+      current
+        ? {
+            ...current,
+            averageRating: summary.averageRating,
+            totalRatings: summary.totalRatings,
+          }
+        : current,
+    );
+  }
+
+  private refreshRatings(deckId: string) {
+    this.deckService.getRatings(deckId).subscribe({
+      next: (res) => {
+        const summary = res.data ?? null;
+        this.ratingSummary.set(summary);
+        this.syncDeckRatingStats(summary);
+      },
+      error: () => {},
+    });
+  }
+
   submitRating() {
     if (!this.myRating()) return;
+    const submittedRating = this.myRating();
+    const submittedComment = this.myComment().trim();
     this.submittingRating.set(true);
     this.ratingError.set(null);
     this.deckService
       .submitRating(this.deckId, {
-        rating: this.myRating(),
-        comment: this.myComment() || undefined,
+        rating: submittedRating,
+        comment: submittedComment || undefined,
       })
       .subscribe({
         next: () => {
           this.submittingRating.set(false);
           this.ratingSuccess.set(true);
-          this.deckService.getRatings(this.deckId).subscribe((res) => {
-            this.ratingSummary.set(res.data ?? null);
-          });
+          this.hasRated.set(true);
+          this.existingRatingValue.set(submittedRating);
+          this.existingRatingComment.set(submittedComment || null);
+          this.refreshRatings(this.deckId);
           setTimeout(() => {
             this.ratingSuccess.set(false);
             this.closeRatingModal();

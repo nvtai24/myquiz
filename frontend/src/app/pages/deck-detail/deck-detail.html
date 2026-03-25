@@ -802,7 +802,13 @@
         </div>
       }
 
-      @if (hasRated()) {
+      @if (ratingSuccess()) {
+        <div class="flex flex-col items-center gap-3 py-6 text-center">
+          <span class="material-symbols-outlined text-[48px] text-green-500">check_circle</span>
+          <p class="text-[15px] font-black text-gray-900 m-0">Thanks for your rating!</p>
+          <p class="text-[13px] text-gray-400 m-0">Your review has been submitted.</p>
+        </div>
+      } @else if (hasRated()) {
         <!-- Already rated state -->
         <div class="flex flex-col items-center gap-3 py-4 text-center">
           <div>
@@ -834,12 +840,6 @@
         >
           Close
         </button>
-      } @else if (ratingSuccess()) {
-        <div class="flex flex-col items-center gap-3 py-6 text-center">
-          <span class="material-symbols-outlined text-[48px] text-green-500">check_circle</span>
-          <p class="text-[15px] font-black text-gray-900 m-0">Thanks for your rating!</p>
-          <p class="text-[13px] text-gray-400 m-0">Your review has been submitted.</p>
-        </div>
       } @else {
         <!-- Stars -->
         <div class="flex justify-center gap-2 mb-5">

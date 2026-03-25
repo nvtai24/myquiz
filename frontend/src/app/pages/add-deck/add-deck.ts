@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, HostListener } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DeckService } from '../../services/deck.service';
@@ -12,8 +12,9 @@ import {
   GeneratedQuestionResponse,
   QuestionType,
 } from '../../models/deck.models';
-import { forkJoin, of, switchMap, map, finalize } from 'rxjs';
+import { forkJoin, of, switchMap, map, finalize, Subject } from 'rxjs';
 import { CommonModule } from '@angular/common';
+import { CanComponentDeactivate } from '../../guards/unsaved-changes.guard';
 
 interface Card {
   id: number;
@@ -35,7 +36,7 @@ interface Card {
   imports: [FormsModule, CommonModule],
   templateUrl: './add-deck.html',
 })
-export class AddDeck implements OnInit {
+export class AddDeck implements OnInit, CanComponentDeactivate {
   title = signal('');
   description = signal('');
   visibility = signal<'public' | 'private' | 'shared'>('public');
@@ -85,6 +86,11 @@ export class AddDeck implements OnInit {
   dragIndex = signal<number | null>(null);
   grabIndex = signal<number | null>(null);
 
+  /* ── Leave Confirmation ── */
+  showLeaveConfirm = signal(false);
+  private leaveConfirmSubject = new Subject<boolean>();
+  private allowNavigation = false;
+
   private deckService = inject(DeckService);
   private paymentService = inject(PaymentService);
   private authService = inject(AuthService);
@@ -93,6 +99,42 @@ export class AddDeck implements OnInit {
 
   ngOnInit() {
     this.loadSubscriptionLimits();
+  }
+
+  @HostListener('window:beforeunload', ['$event'])
+  onBeforeUnload(event: BeforeUnloadEvent) {
+    if (this.hasUnsavedData()) {
+      event.preventDefault();
+      return '';
+    }
+    return;
+  }
+
+  hasUnsavedData(): boolean {
+    const hasTitle = !!this.title().trim();
+    const hasDescription = !!this.description().trim();
+    const hasTags = this.tags().length > 0;
+    const hasCover = !!this.coverImage();
+    const hasCards = this.cards().some(card => card.term.trim());
+    return hasTitle || hasDescription || hasTags || hasCover || hasCards;
+  }
+
+  canDeactivate() {
+    if (!this.hasUnsavedData() || this.allowNavigation) {
+      return true;
+    }
+    this.showLeaveConfirm.set(true);
+    return this.leaveConfirmSubject.asObservable();
+  }
+
+  confirmLeave() {
+    this.showLeaveConfirm.set(false);
+    this.leaveConfirmSubject.next(true);
+  }
+
+  cancelLeave() {
+    this.showLeaveConfirm.set(false);
+    this.leaveConfirmSubject.next(false);
   }
 
   private loadSubscriptionLimits() {
@@ -374,6 +416,7 @@ export class AddDeck implements OnInit {
       .subscribe({
         next: (res) => {
           if (res.success) {
+            this.allowNavigation = true;
             this.router.navigate(['/library']);
           } else {
             this.showError(res.message || `Failed to ${isDraft ? 'save draft' : 'create deck'}`);

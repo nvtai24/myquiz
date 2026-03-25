@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { authGuard } from './guards/auth.guard';
 import { noAuthGuard } from './guards/no-auth.guard';
 import { adminGuard } from './guards/admin.guard';
+import { unsavedChangesGuard } from './guards/unsaved-changes.guard';
 import { MainLayout } from './layouts/main-layout';
 import { AdminLayout } from './layouts/admin-layout';
 
@@ -43,7 +44,7 @@ export const routes: Routes = [
       { path: 'dashboard', loadComponent: () => import('./pages/dashboard/dashboard').then(m => m.Dashboard) },
       { path: 'library', loadComponent: () => import('./pages/library/library').then(m => m.Library) },
       { path: 'search', loadComponent: () => import('./pages/search/search').then(m => m.Search) },
-      { path: 'add-deck', loadComponent: () => import('./pages/add-deck/add-deck').then(m => m.AddDeck) },
+      { path: 'add-deck', loadComponent: () => import('./pages/add-deck/add-deck').then(m => m.AddDeck), canDeactivate: [unsavedChangesGuard] },
       { path: 'edit-deck/:id', loadComponent: () => import('./pages/edit-deck/edit-deck').then(m => m.EditDeck) },
       { path: 'deck/:id', loadComponent: () => import('./pages/deck-detail/deck-detail').then(m => m.DeckDetail) },
       { path: 'quiz/:id', loadComponent: () => import('./pages/quiz/quiz').then(m => m.Quiz) },

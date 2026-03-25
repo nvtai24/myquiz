@@ -231,21 +231,31 @@ public class DeckRepository : Repository<Guid, Deck>, IDeckRepository
 
     public async Task<(List<Deck> Items, int TotalCount)> GetSavedDecksAsync(string userId, int page, int size, CancellationToken cancellationToken = default)
     {
-        var query = _context.SavedDecks
+        var baseQuery = _context.SavedDecks
             .AsNoTracking()
-            .Where(s => s.UserId == userId)
+            .Where(s => s.UserId == userId);
+
+        var totalCount = await baseQuery.CountAsync(cancellationToken);
+
+        var deckIds = await baseQuery
             .OrderByDescending(s => s.SavedAt)
-            .Select(s => s.Deck);
-
-        var totalCount = await query.CountAsync(cancellationToken);
-
-        var items = await query
-            .Include(d => d.Questions)
-            .Include(d => d.DeckRatings)
             .Skip((page - 1) * size)
             .Take(size)
+            .Select(s => s.DeckId)
             .ToListAsync(cancellationToken);
 
-        return (items, totalCount);
+        var items = await _context.Decks
+            .AsNoTracking()
+            .Where(d => deckIds.Contains(d.Id))
+            .Include(d => d.Questions)
+            .Include(d => d.DeckRatings)
+            .ToListAsync(cancellationToken);
+
+        // Preserve the order from deckIds (by SavedAt descending)
+        var orderedItems = deckIds
+            .Select(id => items.First(d => d.Id == id))
+            .ToList();
+
+        return (orderedItems, totalCount);
     }
 }

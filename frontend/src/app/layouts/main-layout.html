@@ -56,7 +56,17 @@
       </a>
       <div class="h-px bg-[#1e1636] mx-2 my-3"></div>
 
-      <!-- Quiz History hidden temporarily -->
+      <a routerLink="/history" routerLinkActive="!bg-[#4255FF] !text-white"
+        [class]="sidebarCollapsed()
+          ? 'flex items-center justify-center px-0 py-2.5 rounded-xl text-slate-300 font-semibold text-[13.5px] no-underline transition-all hover:bg-white/10 hover:text-white'
+          : 'flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-300 font-semibold text-[13.5px] no-underline transition-all hover:bg-white/10 hover:text-white'"
+        [title]="sidebarCollapsed() ? 'Quiz History' : ''">
+        <span class="material-symbols-outlined shrink-0">history</span>
+        <span
+          [class]="sidebarCollapsed() ? 'opacity-0 w-0 overflow-hidden whitespace-nowrap transition-all duration-200' : 'transition-all duration-200'">
+          Quiz History
+        </span>
+      </a>
       <div class="h-px bg-[#1e1636] mx-2 my-3"></div>
 
       <a routerLink="/subscription" routerLinkActive="!bg-[#4255FF] !text-white"

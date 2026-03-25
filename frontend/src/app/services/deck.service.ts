@@ -11,6 +11,7 @@ import {
   DeckRatingSummaryResponse,
   DeckSummaryResponse,
   GeneratedDeckResponse,
+  QuizAttemptHistoryResponse,
   UpdateDeckRequest
 } from '../models/deck.models';
 
@@ -134,5 +135,10 @@ export class DeckService {
 
   unsaveDeck(deckId: string): Observable<ApiResponse<void>> {
     return this.http.delete<ApiResponse<void>>(`${this.endpoint}/${deckId}/save`);
+  }
+
+  getAttemptedDecks(page = 1, size = 10): Observable<PagedResponse<QuizAttemptHistoryResponse>> {
+    const params = new HttpParams().set('page', page).set('size', size);
+    return this.http.get<PagedResponse<QuizAttemptHistoryResponse>>(`${this.endpoint}/attempted`, { params });
   }
 }

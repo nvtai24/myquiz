@@ -150,3 +150,16 @@ export interface LimitAiGenerateResponse {
   dailyGenerateRemaining: number;
   maxQuestionsPerGenerate: number;
 }
+
+export interface QuizAttemptHistoryResponse {
+  attemptId: string;
+  deckId: string;
+  deckName: string;
+  deckThumbnailUrl: string | null;
+  totalQuestions: number;
+  correctAnswers: number;
+  scorePercent: number;
+  totalTime: number;
+  startedAt: string;
+  endedAt: string;
+}

@@ -62,18 +62,19 @@ public class GenerateDeckFromFilesCommandHandler : IRequestHandler<GenerateDeckF
         await request.FileStream.CopyToAsync(memoryStream, cancellationToken);
         memoryStream.Position = 0;
 
-        if (extension == ".pdf")
-        {
-            var maxQuestionsForPdf = activePlan?.MaxQuestionsPerGenerate ?? -1;
-            var pdfDeck = await _aiService.GenerateDeckFromPdfAsync(memoryStream, request.FileName, maxQuestionsForPdf, cancellationToken);
+        // Optional: If you want to handle PDFs differently (e.g., use a specialized PDF parsing service), you can do that here.
+        // if (extension == ".pdf")
+        // {
+        //     var maxQuestionsForPdf = activePlan?.MaxQuestionsPerGenerate ?? -1;
+        //     var pdfDeck = await _aiService.GenerateDeckFromPdfAsync(memoryStream, request.FileName, maxQuestionsForPdf, cancellationToken);
 
-            if (activePlan != null && activePlan.DailyGenerateLimit >= 0)
-            {
-                await _rateLimitService.IncrementDailyGenerateCountAsync(userId, cancellationToken);
-            }
+        //     if (activePlan != null && activePlan.DailyGenerateLimit >= 0)
+        //     {
+        //         await _rateLimitService.IncrementDailyGenerateCountAsync(userId, cancellationToken);
+        //     }
 
-            return pdfDeck;
-        }
+        //     return pdfDeck;
+        // }
 
         var text = await _documentService.ExtractTextAsync(memoryStream, request.FileName, cancellationToken);
 

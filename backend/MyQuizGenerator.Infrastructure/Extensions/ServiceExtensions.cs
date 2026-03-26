@@ -17,6 +17,7 @@ public static class ServiceExtensions
 {
     public static IServiceCollection AddApplicationServices(this IServiceCollection services)
     {
+        services.AddHttpClient();
 
         // Repositories
         services.AddScoped(typeof(IRepository<,>), typeof(Repository<,>));

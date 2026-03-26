@@ -36,6 +36,7 @@ public class GenerateDeckFromFilesCommandHandler : IRequestHandler<GenerateDeckF
     public async Task<GeneratedDeckResponse> Handle(GenerateDeckFromFilesCommand request, CancellationToken cancellationToken)
     {
         var userId = _currentUserService.UserId ?? string.Empty;
+        var extension = Path.GetExtension(request.FileName).ToLowerInvariant();
 
         // 1. Check DailyGenerateLimit from user's active subscription plan (-1 = unlimited)
         var now = DateTime.UtcNow;
@@ -60,6 +61,19 @@ public class GenerateDeckFromFilesCommandHandler : IRequestHandler<GenerateDeckF
         using var memoryStream = new MemoryStream();
         await request.FileStream.CopyToAsync(memoryStream, cancellationToken);
         memoryStream.Position = 0;
+
+        if (extension == ".pdf")
+        {
+            var maxQuestionsForPdf = activePlan?.MaxQuestionsPerGenerate ?? -1;
+            var pdfDeck = await _aiService.GenerateDeckFromPdfAsync(memoryStream, request.FileName, maxQuestionsForPdf, cancellationToken);
+
+            if (activePlan != null && activePlan.DailyGenerateLimit >= 0)
+            {
+                await _rateLimitService.IncrementDailyGenerateCountAsync(userId, cancellationToken);
+            }
+
+            return pdfDeck;
+        }
 
         var text = await _documentService.ExtractTextAsync(memoryStream, request.FileName, cancellationToken);
 

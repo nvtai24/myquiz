@@ -4,7 +4,9 @@
 
 /* ── Search Header ── */
 .search-header {
-  background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #4255FF 100%);
+  background:
+    linear-gradient(135deg, rgba(10, 16, 36, 0.82) 0%, rgba(39, 65, 143, 0.68) 100%),
+    url('/images/community.png') center/cover no-repeat;
   padding: 48px 32px 56px;
   position: relative;
   overflow: hidden;
@@ -13,12 +15,10 @@
 .search-header::before {
   content: '';
   position: absolute;
-  top: -80px;
-  right: -80px;
-  width: 300px;
-  height: 300px;
-  background: radial-gradient(circle, rgba(255,255,255,0.06) 0%, transparent 70%);
-  border-radius: 50%;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(7, 11, 24, 0.18) 0%, rgba(7, 11, 24, 0.42) 100%),
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.12) 0%, transparent 32%);
 }
 
 .search-header::after {
@@ -26,10 +26,11 @@
   position: absolute;
   bottom: -60px;
   left: -40px;
-  width: 200px;
-  height: 200px;
-  background: radial-gradient(circle, rgba(66,85,255,0.2) 0%, transparent 70%);
+  width: 240px;
+  height: 240px;
+  background: radial-gradient(circle, rgba(99, 102, 241, 0.22) 0%, transparent 72%);
   border-radius: 50%;
+  filter: blur(4px);
 }
 
 .search-header-inner {
@@ -145,7 +146,7 @@
 }
 
 .info-icon {
-  color: #4255FF;
+  color: #4255ff;
   font-size: 20px;
 }
 
@@ -170,15 +171,15 @@
   padding: 6px 12px;
   font-size: 0.8rem;
   font-weight: 600;
-  color: #4255FF;
+  color: #4255ff;
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .clear-search-btn:hover {
-  background: #4255FF;
+  background: #4255ff;
   color: #fff;
-  border-color: #4255FF;
+  border-color: #4255ff;
 }
 
 .clear-search-btn .material-symbols-outlined {
@@ -215,8 +216,12 @@
   margin-bottom: 10px;
 }
 
-.skeleton-line.short { width: 40%; }
-.skeleton-line.long { width: 80%; }
+.skeleton-line.short {
+  width: 40%;
+}
+.skeleton-line.long {
+  width: 80%;
+}
 
 .shimmer {
   background: linear-gradient(90deg, #e5e7eb 25%, #f3f4f6 50%, #e5e7eb 75%);
@@ -225,8 +230,12 @@
 }
 
 @keyframes shimmer {
-  0% { background-position: 200% 0; }
-  100% { background-position: -200% 0; }
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 /* ── Results Grid ── */
@@ -348,8 +357,13 @@
 }
 
 @keyframes pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.1); }
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.1);
+  }
 }
 
 .new-badge {
@@ -381,7 +395,7 @@
 
 .tag {
   background: #f0f1ff;
-  color: #4255FF;
+  color: #4255ff;
   font-size: 0.68rem;
   font-weight: 700;
   padding: 3px 8px;
@@ -459,7 +473,7 @@
   align-items: center;
   gap: 3px;
   background: #eef0ff;
-  color: #4255FF;
+  color: #4255ff;
   font-size: 0.75rem;
   font-weight: 700;
   padding: 5px 12px;
@@ -468,7 +482,7 @@
 }
 
 .deck-card:hover .study-chip {
-  background: #4255FF;
+  background: #4255ff;
   color: #fff;
 }
 
@@ -507,12 +521,12 @@
 
 .section-title .material-symbols-outlined {
   font-size: 24px;
-  color: #4255FF;
+  color: #4255ff;
 }
 
 .section-badge {
   background: #f0f1ff;
-  color: #4255FF;
+  color: #4255ff;
   font-size: 0.7rem;
   font-weight: 700;
   padding: 4px 12px;
@@ -598,7 +612,7 @@
 }
 
 .category-card:hover .category-arrow {
-  color: #4255FF;
+  color: #4255ff;
   transform: translateX(3px);
 }
 
@@ -647,7 +661,7 @@
 .featured-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(0,0,0,0.5) 0%, transparent 50%);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.5) 0%, transparent 50%);
   display: flex;
   align-items: flex-end;
   padding: 16px;
@@ -775,12 +789,12 @@
 .page-btn:not([disabled]):hover {
   background: #f0f1ff;
   border-color: #c7d2fe;
-  color: #4255FF;
+  color: #4255ff;
 }
 
 .page-btn.active {
-  background: #4255FF;
-  border-color: #4255FF;
+  background: #4255ff;
+  border-color: #4255ff;
   color: #fff;
   box-shadow: 0 2px 8px rgba(66, 85, 255, 0.3);
 }
@@ -844,7 +858,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  background: #4255FF;
+  background: #4255ff;
   color: #fff;
   border: none;
   border-radius: 12px;

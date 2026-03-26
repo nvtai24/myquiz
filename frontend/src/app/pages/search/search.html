@@ -205,14 +205,12 @@
     <!-- Explore Content (no search yet) -->
     @if (!loading() && !hasSearched()) {
       <div class="explore-content">
-        <!-- Recommended -->
         <section class="explore-section">
           <div class="section-header">
             <h2 class="section-title">
               <span class="material-symbols-outlined">auto_awesome</span>
               Recommended for You
             </h2>
-            <!-- <span class="section-badge recommended">Picks for you</span> -->
           </div>
           <div class="decks-grid">
             @for (deck of recommendedDecks; track deck.id) {
@@ -226,25 +224,30 @@
                   <span class="terms-chip">{{ deck.questionCount }} TERMS</span>
                   <span class="rating-chip">
                     <span class="material-symbols-outlined">star</span>
-                    {{ deck.averageRating }}
-                  </span>
-                  <span class="recommended-badge">
-                    <span class="material-symbols-outlined">auto_awesome</span>
+                    {{ deck.averageRating.toFixed(1) }}
                   </span>
                 </div>
                 <div class="deck-body">
-                  <div class="deck-tags">
-                    @for (tag of deck.tags | slice: 0 : 2; track tag) {
-                      <span class="tag">{{ tag }}</span>
-                    }
-                  </div>
                   <h3 class="deck-name">{{ deck.name }}</h3>
-                  <p class="deck-desc">{{ deck.description }}</p>
-                  <div class="deck-footer">
-                    <div class="deck-stats">
-                      <span class="material-symbols-outlined">recommend</span>
-                      Good match
+                  <div class="deck-meta-bottom">
+                    <div class="quiz-tags deck-tags-results">
+                      @for (tag of deck.tags | slice: 0 : 3; track tag) {
+                        <span class="tag-badge">{{ tag }}</span>
+                      }
+                      @if (deck.tags.length > 3) {
+                        <span class="tag-badge extra">+{{ deck.tags.length - 3 }}</span>
+                      }
+                      @if (deck.tags.length === 0) {
+                        <span class="no-tags">No tags</span>
+                      }
                     </div>
+                  </div>
+                  <div class="deck-owner-row">
+                    <span class="material-symbols-outlined deck-owner-icon">person</span>
+                    <p class="deck-owner-inline">{{ deck.ownerName }} ({{ deck.ownerEmail }})</p>
+                  </div>
+                  <div class="deck-footer">
+                    <span class="deck-date">{{ deck.createdAt | date: 'dd MMM yyyy' }}</span>
                     <span class="study-chip">
                       <span class="material-symbols-outlined">play_arrow</span>
                       Study
@@ -256,14 +259,12 @@
           </div>
         </section>
 
-        <!-- Trending -->
         <section class="explore-section">
           <div class="section-header">
             <h2 class="section-title">
-              <span class="material-symbols-outlined">visibility</span>
+              <span class="material-symbols-outlined">trending_up</span>
               Trending Now
             </h2>
-            <span class="section-badge">Most viewed decks</span>
           </div>
           <div class="decks-grid">
             @for (deck of trendingDecks; track deck.id) {
@@ -277,65 +278,28 @@
                   <span class="terms-chip">{{ deck.questionCount }} TERMS</span>
                   <span class="rating-chip">
                     <span class="material-symbols-outlined">star</span>
-                    {{ deck.averageRating }}
-                  </span>
-                  <span class="trending-badge">
-                    <span class="material-symbols-outlined">visibility</span>
+                    {{ deck.averageRating.toFixed(1) }}
                   </span>
                 </div>
                 <div class="deck-body">
-                  <div class="deck-tags">
-                    @for (tag of deck.tags | slice: 0 : 2; track tag) {
-                      <span class="tag">{{ tag }}</span>
-                    }
-                  </div>
                   <h3 class="deck-name">{{ deck.name }}</h3>
-                  <p class="deck-desc">{{ deck.description }}</p>
-                  <div class="deck-footer">
-                    <div class="deck-stats">
-                      <span class="material-symbols-outlined">visibility</span>
-                      {{ formatStudyCount(deck.viewCount) }} views
+                  <div class="deck-meta-bottom">
+                    <div class="quiz-tags deck-tags-results">
+                      @for (tag of deck.tags | slice: 0 : 3; track tag) {
+                        <span class="tag-badge">{{ tag }}</span>
+                      }
+                      @if (deck.tags.length > 3) {
+                        <span class="tag-badge extra">+{{ deck.tags.length - 3 }}</span>
+                      }
+                      @if (deck.tags.length === 0) {
+                        <span class="no-tags">No tags</span>
+                      }
                     </div>
-                    <span class="study-chip">
-                      <span class="material-symbols-outlined">play_arrow</span>
-                      Study
-                    </span>
                   </div>
-                </div>
-              </a>
-            }
-          </div>
-        </section>
-
-        <!-- New Arrivals -->
-        <section class="explore-section">
-          <div class="section-header">
-            <h2 class="section-title">
-              <span class="material-symbols-outlined">new_releases</span>
-              New Arrivals
-            </h2>
-            <span class="section-badge new">Just added</span>
-          </div>
-          <div class="decks-grid four-cols">
-            @for (deck of newDecks; track deck.id) {
-              <a class="deck-card compact" [routerLink]="['/deck', deck.id]">
-                <div class="deck-img">
-                  @if (deck.thumbnailUrl) {
-                    <img [src]="deck.thumbnailUrl" [alt]="deck.name" />
-                  } @else {
-                    <img src="/images/thumbnail_default.png" alt="Deck" />
-                  }
-                  <span class="terms-chip">{{ deck.questionCount }} TERMS</span>
-                  <span class="new-badge">NEW</span>
-                </div>
-                <div class="deck-body">
-                  <div class="deck-tags">
-                    @for (tag of deck.tags | slice: 0 : 2; track tag) {
-                      <span class="tag">{{ tag }}</span>
-                    }
+                  <div class="deck-owner-row">
+                    <span class="material-symbols-outlined deck-owner-icon">person</span>
+                    <p class="deck-owner-inline">{{ deck.ownerName }} ({{ deck.ownerEmail }})</p>
                   </div>
-                  <h3 class="deck-name">{{ deck.name }}</h3>
-                  <p class="deck-desc">{{ deck.description }}</p>
                   <div class="deck-footer">
                     <span class="deck-date">{{ deck.createdAt | date: 'dd MMM yyyy' }}</span>
                     <span class="study-chip">

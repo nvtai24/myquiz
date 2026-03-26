@@ -11,6 +11,7 @@ import {
   DeckRatingCheckResponse,
   DeckRatingSummaryResponse,
   DeckSummaryResponse,
+  ExploreDeckResponse,
   GeneratedDeckResponse,
   QuizAttemptHistoryResponse,
   RecentDeckResponse,
@@ -156,5 +157,20 @@ export class DeckService {
   getRecentDecks(limit = 4): Observable<ApiResponse<RecentDeckResponse[]>> {
     const params = new HttpParams().set('limit', limit);
     return this.http.get<ApiResponse<RecentDeckResponse[]>>('/api/user/dashboard/recent-decks', { params });
+  }
+
+  getExploreHotTags(limit = 15): Observable<ApiResponse<string[]>> {
+    const params = new HttpParams().set('limit', limit);
+    return this.http.get<ApiResponse<string[]>>(`${this.endpoint}/explore/hot-tags`, { params });
+  }
+
+  getExploreRecommended(limit = 8): Observable<ApiResponse<ExploreDeckResponse[]>> {
+    const params = new HttpParams().set('limit', limit);
+    return this.http.get<ApiResponse<ExploreDeckResponse[]>>(`${this.endpoint}/explore/recommended`, { params });
+  }
+
+  getExploreTrending(limit = 8): Observable<ApiResponse<ExploreDeckResponse[]>> {
+    const params = new HttpParams().set('limit', limit);
+    return this.http.get<ApiResponse<ExploreDeckResponse[]>>(`${this.endpoint}/explore/trending`, { params });
   }
 }

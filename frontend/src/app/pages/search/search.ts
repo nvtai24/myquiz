@@ -11,9 +11,9 @@ import {
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
-import { Subject, debounceTime, distinctUntilChanged, takeUntil } from 'rxjs';
+import { Subject, debounceTime, distinctUntilChanged, forkJoin, takeUntil } from 'rxjs';
 import { DeckService } from '../../services/deck.service';
-import { DeckSummaryResponse } from '../../models/deck.models';
+import { DeckSummaryResponse, ExploreDeckResponse } from '../../models/deck.models';
 import { PaginationMeta } from '../../models/api.models';
 
 interface ExploreDeck {
@@ -24,14 +24,15 @@ interface ExploreDeck {
   tags: string[];
   questionCount: number;
   averageRating: number;
-  viewCount: number;
+  totalRatings: number;
   ownerName: string;
+  ownerEmail: string;
   createdAt: string;
+  updatedAt: string | null;
 }
 
 interface HotTag {
   name: string;
-  count: number;
 }
 
 @Component({
@@ -59,145 +60,16 @@ export class Search implements OnInit, OnDestroy, AfterViewInit {
   pageSize = 12;
   hasSearched = signal(false);
   compactSearch = signal(false);
+  exploreLoading = signal(false);
 
   private searchSubject = new Subject<string>();
-
-  exploreDecks: ExploreDeck[] = [
-    {
-      id: '1',
-      name: 'Biology 101: Cell Structure',
-      description: 'Complete guide to cell biology, organelles, and cellular processes',
-      thumbnailUrl: null,
-      tags: ['Biology', 'Science', 'Cells'],
-      questionCount: 85,
-      averageRating: 4.9,
-      viewCount: 12500,
-      ownerName: 'Dr. Sarah Chen',
-      createdAt: '2026-03-10T08:30:00Z',
-    },
-    {
-      id: '2',
-      name: 'JavaScript Fundamentals',
-      description: 'Master JavaScript basics: variables, functions, arrays, and objects',
-      thumbnailUrl: null,
-      tags: ['Programming', 'JavaScript', 'Web Dev'],
-      questionCount: 120,
-      averageRating: 4.8,
-      viewCount: 9800,
-      ownerName: 'Code Academy',
-      createdAt: '2026-03-08T10:15:00Z',
-    },
-    {
-      id: '3',
-      name: 'Spanish Vocabulary - Beginner',
-      description: 'Essential Spanish words and phrases for beginners',
-      thumbnailUrl: null,
-      tags: ['Spanish', 'Language', 'Beginner'],
-      questionCount: 200,
-      averageRating: 4.7,
-      viewCount: 8500,
-      ownerName: 'Maria Garcia',
-      createdAt: '2026-03-18T09:00:00Z',
-    },
-    {
-      id: '4',
-      name: 'World War II Timeline',
-      description: 'Key events, battles, and figures of World War II',
-      thumbnailUrl: null,
-      tags: ['History', 'WWII', 'World History'],
-      questionCount: 95,
-      averageRating: 4.8,
-      viewCount: 7200,
-      ownerName: 'History Hub',
-      createdAt: '2026-03-05T06:20:00Z',
-    },
-    {
-      id: '5',
-      name: 'Organic Chemistry Reactions',
-      description: 'All major organic chemistry reactions with mechanisms',
-      thumbnailUrl: null,
-      tags: ['Chemistry', 'Organic', 'Reactions'],
-      questionCount: 150,
-      averageRating: 4.9,
-      viewCount: 5600,
-      ownerName: 'Prof. Johnson',
-      createdAt: '2026-03-23T13:00:00Z',
-    },
-    {
-      id: '6',
-      name: 'SAT Vocabulary Master',
-      description: 'Top 500 SAT vocabulary words with examples',
-      thumbnailUrl: null,
-      tags: ['SAT', 'Vocabulary', 'Test Prep'],
-      questionCount: 500,
-      averageRating: 4.8,
-      viewCount: 15000,
-      ownerName: 'Test Prep Pro',
-      createdAt: '2026-03-12T12:45:00Z',
-    },
-    {
-      id: '7',
-      name: 'Human Anatomy',
-      description: 'Complete human anatomy: bones, muscles, organs',
-      thumbnailUrl: null,
-      tags: ['Anatomy', 'Medicine', 'Biology'],
-      questionCount: 280,
-      averageRating: 4.9,
-      viewCount: 11200,
-      ownerName: 'Med School Help',
-      createdAt: '2026-03-19T07:40:00Z',
-    },
-    {
-      id: '8',
-      name: 'Machine Learning Basics',
-      description: 'Introduction to ML concepts, algorithms, and applications',
-      thumbnailUrl: null,
-      tags: ['AI', 'Machine Learning', 'Data Science'],
-      questionCount: 75,
-      averageRating: 4.6,
-      viewCount: 1200,
-      ownerName: 'AI Academy',
-      createdAt: '2026-03-25T11:30:00Z',
-    },
-    {
-      id: '9',
-      name: 'French Conjugation',
-      description: 'Master French verb conjugations across all tenses',
-      thumbnailUrl: null,
-      tags: ['French', 'Grammar', 'Verbs'],
-      questionCount: 180,
-      averageRating: 4.5,
-      viewCount: 890,
-      ownerName: 'French Fluent',
-      createdAt: '2026-03-24T09:15:00Z',
-    },
-    {
-      id: '10',
-      name: 'Psychology 101',
-      description: 'Introduction to psychology: theories, experiments, concepts',
-      thumbnailUrl: null,
-      tags: ['Psychology', 'Social Science', 'Behavior'],
-      questionCount: 110,
-      averageRating: 4.7,
-      viewCount: 2100,
-      ownerName: 'Mind Matters',
-      createdAt: '2026-03-22T15:10:00Z',
-    },
-    {
-      id: '11',
-      name: 'AWS Cloud Practitioner',
-      description: 'Prepare for AWS Cloud Practitioner certification',
-      thumbnailUrl: null,
-      tags: ['AWS', 'Cloud', 'Certification'],
-      questionCount: 200,
-      averageRating: 4.8,
-      viewCount: 3400,
-      ownerName: 'Cloud Guru',
-      createdAt: '2026-03-26T04:00:00Z',
-    },
-  ];
+  private hotTagsData = signal<HotTag[]>([]);
+  private recommendedDecksData = signal<ExploreDeck[]>([]);
+  private trendingDecksData = signal<ExploreDeck[]>([]);
 
   ngOnInit() {
+    this.loadExploreData();
+
     this.route.queryParams
       .pipe(takeUntil(this.destroy$))
       .subscribe(params => {
@@ -346,6 +218,46 @@ export class Search implements OnInit, OnDestroy, AfterViewInit {
     });
   }
 
+  private loadExploreData() {
+    this.exploreLoading.set(true);
+
+    forkJoin({
+      hotTags: this.deckService.getExploreHotTags(15),
+      recommended: this.deckService.getExploreRecommended(8),
+      trending: this.deckService.getExploreTrending(8),
+    }).subscribe({
+      next: ({ hotTags, recommended, trending }) => {
+        this.hotTagsData.set((hotTags.data ?? []).map(name => ({ name })));
+        this.recommendedDecksData.set((recommended.data ?? []).map(deck => this.mapExploreDeck(deck)));
+        this.trendingDecksData.set((trending.data ?? []).map(deck => this.mapExploreDeck(deck)));
+        this.exploreLoading.set(false);
+      },
+      error: () => {
+        this.hotTagsData.set([]);
+        this.recommendedDecksData.set([]);
+        this.trendingDecksData.set([]);
+        this.exploreLoading.set(false);
+      },
+    });
+  }
+
+  private mapExploreDeck(deck: ExploreDeckResponse): ExploreDeck {
+    return {
+      id: deck.id,
+      name: deck.name,
+      description: deck.description,
+      thumbnailUrl: deck.thumbnailUrl ?? null,
+      tags: deck.tags ?? [],
+      questionCount: deck.questionCount ?? 0,
+      averageRating: deck.averageRating ?? 0,
+      totalRatings: deck.totalRatings ?? 0,
+      ownerName: deck.ownerName,
+      ownerEmail: deck.ownerEmail,
+      createdAt: deck.createdAt,
+      updatedAt: deck.updatedAt ?? null,
+    };
+  }
+
   get totalPages(): number {
     return this.pagination()?.totalPages || 0;
   }
@@ -371,39 +283,14 @@ export class Search implements OnInit, OnDestroy, AfterViewInit {
   }
 
   get hotTags(): HotTag[] {
-    const counts = new Map<string, number>();
-
-    for (const deck of this.exploreDecks) {
-      for (const tag of deck.tags) {
-        counts.set(tag, (counts.get(tag) || 0) + 1);
-      }
-    }
-
-    return Array.from(counts.entries())
-      .map(([name, count]) => ({ name, count }))
-      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
-      .slice(0, 20);
+    return this.hotTagsData();
   }
 
   get trendingDecks(): ExploreDeck[] {
-    return [...this.exploreDecks]
-      .sort((a, b) => b.viewCount - a.viewCount)
-      .slice(0, 4);
+    return this.trendingDecksData();
   }
 
   get recommendedDecks(): ExploreDeck[] {
-    return [...this.exploreDecks]
-      .sort((a, b) => {
-        const scoreA = a.averageRating * 100 + a.viewCount;
-        const scoreB = b.averageRating * 100 + b.viewCount;
-        return scoreB - scoreA;
-      })
-      .slice(0, 4);
-  }
-
-  get newDecks(): ExploreDeck[] {
-    return [...this.exploreDecks]
-      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
-      .slice(0, 4);
+    return this.recommendedDecksData();
   }
 }

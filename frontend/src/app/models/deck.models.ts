@@ -186,3 +186,22 @@ export interface RecentDeckResponse {
   activityType: RecentDeckActivityType;
   lastActivityAt: string;
 }
+
+// ── Explore ──
+
+export interface ExploreDeckResponse {
+  id: string;
+  name: string;
+  description: string;
+  visibility: DeckVisibility;
+  status: DeckStatus;
+  tags: string[];
+  questionCount: number;
+  thumbnailUrl: string | null;
+  createdAt: string;
+  updatedAt: string | null;
+  averageRating: number;
+  totalRatings: number;
+  ownerName: string;
+  ownerEmail: string;
+}

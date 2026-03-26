@@ -24,6 +24,9 @@ using MyQuizGenerator.Application.QuizAttempts.Commands.CreateQuizAttempt;
 using MyQuizGenerator.Application.QuizAttempts.DTOs;
 using MyQuizGenerator.Application.QuizAttempts.Queries.GetQuizAttemptsByDeckId;
 using MyQuizGenerator.Application.QuizAttempts.Queries.GetQuizAttemptById;
+using RecommendedDecks = MyQuizGenerator.Application.Decks.Queries.GetRecommendedDecks;
+using TrendingDecks = MyQuizGenerator.Application.Decks.Queries.GetTrendingDecks;
+using HotTags = MyQuizGenerator.Application.Decks.Queries.GetHotTags;
 
 namespace MyQuizGenerator.Presentation.Controllers;
 
@@ -212,6 +215,39 @@ public class DecksController : BaseApiController
         var query = new SearchDecks.SearchPublicDecksQuery(searchTerm, page, size);
         var result = await _mediator.Send(query);
         return ApiPaged(result.Items, result.Page, result.Size, result.TotalRecords);
+    }
+
+    /// <summary>
+    /// Gets personalized public deck recommendations for the current user.
+    /// Excludes decks created by the current user.
+    /// </summary>
+    [HttpGet("explore/recommended")]
+    public async Task<IActionResult> GetRecommendedDecks([FromQuery] int limit = 12)
+    {
+        var result = await _mediator.Send(new RecommendedDecks.GetRecommendedDecksQuery(limit));
+        return ApiOk(result);
+    }
+
+    /// <summary>
+    /// Gets the hottest public deck tags ordered by usage count and latest activity.
+    /// </summary>
+    [AllowAnonymous]
+    [HttpGet("explore/hot-tags")]
+    public async Task<IActionResult> GetHotTags([FromQuery] int limit = 10)
+    {
+        var result = await _mediator.Send(new HotTags.GetHotTagsQuery(limit));
+        return ApiOk(result);
+    }
+
+    /// <summary>
+    /// Gets trending public decks based on recent views, saves, attempts, ratings, and hot tags.
+    /// Excludes decks created by the current user.
+    /// </summary>
+    [HttpGet("explore/trending")]
+    public async Task<IActionResult> GetTrendingDecks([FromQuery] int limit = 12)
+    {
+        var result = await _mediator.Send(new TrendingDecks.GetTrendingDecksQuery(limit));
+        return ApiOk(result);
     }
 
     /// <summary>

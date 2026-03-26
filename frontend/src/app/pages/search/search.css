@@ -157,14 +157,18 @@
   position: sticky;
   top: 0;
   z-index: 40;
-  padding: 10px 16px;
+  max-height: 0;
+  padding: 0 16px;
   opacity: 0;
   pointer-events: none;
   transform: translateY(-100%);
-  transition: opacity 0.2s ease, transform 0.2s ease;
+  overflow: hidden;
+  transition: max-height 0.2s ease, padding 0.2s ease, opacity 0.2s ease, transform 0.2s ease;
 }
 
 .search-floating-bar-visible {
+  max-height: 96px;
+  padding: 10px 16px;
   opacity: 1;
   pointer-events: auto;
   transform: translateY(0);

@@ -250,7 +250,7 @@ export class Search implements OnInit, OnDestroy, AfterViewInit {
       return;
     }
 
-    const threshold = 88;
+    const threshold = 0;
 
     if (this.scrollContainer === window) {
       this.compactSearch.set(trigger.getBoundingClientRect().top <= threshold);

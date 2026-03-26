@@ -5,6 +5,7 @@ import { ApiResponse, PagedResponse } from '../models/api.models';
 import {
   CreateDeckRequest,
   CreateDeckRatingRequest,
+  DashboardStatsResponse,
   DeckDetailResponse,
   DeckMemberResponse,
   DeckRatingCheckResponse,
@@ -12,6 +13,7 @@ import {
   DeckSummaryResponse,
   GeneratedDeckResponse,
   QuizAttemptHistoryResponse,
+  RecentDeckResponse,
   UpdateDeckRequest
 } from '../models/deck.models';
 
@@ -144,5 +146,15 @@ export class DeckService {
   getAttemptedDecks(page = 1, size = 10): Observable<PagedResponse<QuizAttemptHistoryResponse>> {
     const params = new HttpParams().set('page', page).set('size', size);
     return this.http.get<PagedResponse<QuizAttemptHistoryResponse>>(`${this.endpoint}/attempted`, { params });
+  }
+
+  // Dashboard APIs
+  getDashboardStats(): Observable<ApiResponse<DashboardStatsResponse>> {
+    return this.http.get<ApiResponse<DashboardStatsResponse>>('/api/user/dashboard/stats');
+  }
+
+  getRecentDecks(limit = 4): Observable<ApiResponse<RecentDeckResponse[]>> {
+    const params = new HttpParams().set('limit', limit);
+    return this.http.get<ApiResponse<RecentDeckResponse[]>>('/api/user/dashboard/recent-decks', { params });
   }
 }

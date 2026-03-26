@@ -1,32 +1,97 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { AuthService } from '../../services/auth.service';
+import { DeckService } from '../../services/deck.service';
+import { DashboardStatsResponse, RecentDeckResponse } from '../../models/deck.models';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [RouterModule],
+  imports: [RouterModule, CommonModule],
   templateUrl: './dashboard.html',
   styleUrl: './dashboard.css',
 })
-export class Dashboard {
+export class Dashboard implements OnInit {
   private authService = inject(AuthService);
+  private deckService = inject(DeckService);
+
+  // Loading states
+  loadingStats = signal(true);
+  loadingRecentDecks = signal(true);
+
+  // Data
+  stats = signal<DashboardStatsResponse | null>(null);
+  recentDecks = signal<RecentDeckResponse[]>([]);
 
   userName = computed(() => {
     const user = this.authService.currentUser();
     return user?.firstName || 'there';
   });
 
-  continueStudying = [
-    { title: 'Biology 101', terms: 42, topic: 'Molecular Structure', progress: 65, color: '#3b82f6', barColor: '#3b82f6', icon: 'biotech' },
-    { title: 'Advanced Calculus', terms: 128, topic: 'Integration Rules', progress: 30, color: '#1e293b', barColor: '#4255FF', icon: 'calculate' },
-    { title: 'World History', terms: 85, topic: 'The Renaissance', progress: 85, color: '#a16207', barColor: '#f59e0b', icon: 'public' },
-    { title: 'Spanish Verbs', terms: 200, topic: 'Irregular Forms', progress: 12, color: '#b45309', barColor: '#ea580c', icon: 'translate' },
-  ];
+  greeting = computed(() => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 18) return 'Good afternoon';
+    return 'Good evening';
+  });
 
-  recommended = [
-    { title: 'Organic Chemistry II', rating: 4.9, reviews: '1.2k', terms: 84, color: '#7c3aed', icon: 'science' },
-    { title: 'Comp Sci: Algorithms', rating: 4.8, reviews: '859', terms: 110, color: '#0ea5e9', icon: 'code' },
-    { title: 'Intro to Psychology', rating: 4.7, reviews: '2.4k', terms: 92, color: '#ec4899', icon: 'psychology' },
-  ];
+  ngOnInit() {
+    this.loadStats();
+    this.loadRecentDecks();
+  }
+
+  private loadStats() {
+    this.deckService.getDashboardStats().subscribe({
+      next: (res) => {
+        this.stats.set(res.data ?? null);
+        this.loadingStats.set(false);
+      },
+      error: () => {
+        this.loadingStats.set(false);
+      },
+    });
+  }
+
+  private loadRecentDecks() {
+    this.deckService.getRecentDecks(4).subscribe({
+      next: (res) => {
+        this.recentDecks.set(res.data ?? []);
+        this.loadingRecentDecks.set(false);
+      },
+      error: () => {
+        this.loadingRecentDecks.set(false);
+      },
+    });
+  }
+
+  getActivityIcon(type: string): string {
+    switch (type) {
+      case 'Studied': return 'school';
+      case 'Saved': return 'bookmark';
+      default: return 'visibility';
+    }
+  }
+
+  getActivityLabel(type: string): string {
+    switch (type) {
+      case 'Studied': return 'Studied';
+      case 'Saved': return 'Saved';
+      default: return 'Viewed';
+    }
+  }
+
+  formatTimeAgo(dateStr: string): string {
+    const diff = Date.now() - new Date(dateStr).getTime();
+    const minutes = Math.floor(diff / 60000);
+    const hours = Math.floor(diff / 3600000);
+    const days = Math.floor(diff / 86400000);
+
+    if (minutes < 1) return 'Just now';
+    if (minutes < 60) return `${minutes}m ago`;
+    if (hours < 24) return `${hours}h ago`;
+    if (days === 1) return 'Yesterday';
+    if (days < 7) return `${days}d ago`;
+    return new Date(dateStr).toLocaleDateString();
+  }
 }

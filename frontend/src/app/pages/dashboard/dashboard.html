@@ -1,87 +1,111 @@
 <!-- Greeting Section -->
 <section class="greeting-section">
   <div>
-    <h1 class="greeting-title">Good morning, {{ userName() }}!</h1>
+    <h1 class="greeting-title">{{ greeting() }}, {{ userName() }}!</h1>
     <p class="greeting-sub">Ready to master your classes today?</p>
   </div>
-  <div class="streak-badge">
-    <span class="material-symbols-outlined streak-icon">local_fire_department</span>
-    <span>7 day streak</span>
-  </div>
+  @if (!loadingStats() && stats()?.currentStreak) {
+    <div class="streak-badge">
+      <span class="material-symbols-outlined streak-icon">local_fire_department</span>
+      <span>{{ stats()!.currentStreak }} day streak</span>
+    </div>
+  }
 </section>
 
 <!-- Stats Cards -->
 <section class="stats-section">
-  <div class="stat-card">
-    <span class="material-symbols-outlined stat-icon blue">style</span>
-    <div class="stat-label">STUDY SETS</div>
-    <div class="stat-value">24</div>
-  </div>
-  <div class="stat-card">
-    <span class="material-symbols-outlined stat-icon indigo">quiz</span>
-    <div class="stat-label">QUIZZES TAKEN</div>
-    <div class="stat-value">12</div>
-  </div>
-  <div class="stat-card">
-    <span class="material-symbols-outlined stat-icon green">trending_up</span>
-    <div class="stat-label">AVERAGE SCORE</div>
-    <div class="stat-value">92%</div>
-  </div>
-  <div class="stat-card">
-    <span class="material-symbols-outlined stat-icon orange">emoji_events</span>
-    <div class="stat-label">GLOBAL RANKING</div>
-    <div class="stat-value">Top 5%</div>
-  </div>
+  @if (loadingStats()) {
+    @for (i of [1,2,3,4]; track i) {
+      <div class="stat-card skeleton">
+        <div class="skeleton-icon shimmer"></div>
+        <div class="skeleton-label shimmer"></div>
+        <div class="skeleton-value shimmer"></div>
+      </div>
+    }
+  } @else {
+    <div class="stat-card">
+      <span class="material-symbols-outlined stat-icon blue">style</span>
+      <div class="stat-label">STUDY SETS</div>
+      <div class="stat-value">{{ stats()?.totalDecks ?? 0 }}</div>
+    </div>
+    <div class="stat-card">
+      <span class="material-symbols-outlined stat-icon indigo">quiz</span>
+      <div class="stat-label">QUIZZES TAKEN</div>
+      <div class="stat-value">{{ stats()?.totalQuizzesAttempted ?? 0 }}</div>
+    </div>
+    <div class="stat-card">
+      <span class="material-symbols-outlined stat-icon green">trending_up</span>
+      <div class="stat-label">AVERAGE SCORE</div>
+      <div class="stat-value">{{ (stats()?.averageScore ?? 0) | number:'1.0-0' }}%</div>
+    </div>
+    <div class="stat-card">
+      <span class="material-symbols-outlined stat-icon orange">local_fire_department</span>
+      <div class="stat-label">CURRENT STREAK</div>
+      <div class="stat-value">{{ stats()?.currentStreak ?? 0 }} days</div>
+    </div>
+  }
 </section>
 
-<!-- Continue Studying -->
+<!-- Recent Activity -->
 <section class="section">
   <div class="section-header">
-    <h2 class="section-title">Continue Studying</h2>
+    <h2 class="section-title">Recent Activity</h2>
     <a class="view-all" routerLink="/library">View all</a>
   </div>
-  <div class="course-grid">
-    @for (course of continueStudying; track course.title) {
-      <div class="course-card" routerLink="/deck/1" style="cursor:pointer">
-        <div class="course-img" [style.background-color]="course.color">
-          <span class="material-symbols-outlined course-icon">{{ course.icon }}</span>
-        </div>
-        <div class="course-info">
-          <h3 class="course-title">{{ course.title }}</h3>
-          <p class="course-meta">{{ course.terms }} Terms &bull; {{ course.topic }}</p>
-          <div class="progress-bar">
-            <div class="progress-fill" [style.width]="course.progress + '%'" [style.background-color]="course.barColor"></div>
-          </div>
-          <span class="progress-text">{{ course.progress }}% complete</span>
-        </div>
-      </div>
-    }
-  </div>
-</section>
 
-<!-- Recommended for You -->
-<section class="section">
-  <div class="section-header">
-    <h2 class="section-title">Recommended for You</h2>
-    <a class="view-all">View all</a>
-  </div>
-  <div class="recommended-grid">
-    @for (rec of recommended; track rec.title) {
-      <div class="rec-card">
-        <div class="rec-img" [style.background-color]="rec.color">
-          <span class="material-symbols-outlined rec-icon">{{ rec.icon }}</span>
-        </div>
-        <div class="rec-info">
-          <h3 class="rec-title">{{ rec.title }}</h3>
-          <div class="rec-rating">
-            <span class="material-symbols-outlined star-icon">star</span>
-            <span class="rating-value">{{ rec.rating }}</span>
-            <span class="rating-count">({{ rec.reviews }})</span>
+  @if (loadingRecentDecks()) {
+    <div class="course-grid">
+      @for (i of [1,2,3,4]; track i) {
+        <div class="course-card skeleton">
+          <div class="skeleton-img shimmer"></div>
+          <div class="skeleton-info">
+            <div class="skeleton-title shimmer"></div>
+            <div class="skeleton-meta shimmer"></div>
+            <div class="skeleton-tags shimmer"></div>
           </div>
-          <p class="rec-meta">{{ rec.terms }} terms</p>
         </div>
-        <button class="study-btn" routerLink="/deck/1">Study</button>
-      </div>
-    }
-  </div>
+      }
+    </div>
+  } @else if (recentDecks().length === 0) {
+    <div class="empty-state">
+      <span class="material-symbols-outlined empty-icon">explore</span>
+      <h3 class="empty-title">No recent activity</h3>
+      <p class="empty-desc">Start exploring study sets to see your recent activity here.</p>
+      <a class="empty-btn" routerLink="/explore">
+        <span class="material-symbols-outlined">search</span>
+        Explore Study Sets
+      </a>
+    </div>
+  } @else {
+    <div class="course-grid">
+      @for (deck of recentDecks(); track deck.id) {
+        <a class="course-card" [routerLink]="['/deck', deck.id]">
+          <div class="course-img">
+            @if (deck.thumbnailUrl) {
+              <img [src]="deck.thumbnailUrl" [alt]="deck.name" />
+            } @else {
+              <img src="/images/default-deck.png" alt="Deck" />
+            }
+            <span class="activity-badge" [attr.data-type]="deck.activityType">
+              <span class="material-symbols-outlined">{{ getActivityIcon(deck.activityType) }}</span>
+              {{ getActivityLabel(deck.activityType) }}
+            </span>
+          </div>
+          <div class="course-info">
+            <h3 class="course-title">{{ deck.name }}</h3>
+            <p class="course-meta">{{ deck.questionCount }} Terms</p>
+            <div class="course-tags">
+              @for (tag of deck.tags | slice:0:2; track tag) {
+                <span class="tag">{{ tag }}</span>
+              }
+              @if (deck.tags.length > 2) {
+                <span class="tag extra">+{{ deck.tags.length - 2 }}</span>
+              }
+            </div>
+            <span class="course-time">{{ formatTimeAgo(deck.lastActivityAt) }}</span>
+          </div>
+        </a>
+      }
+    </div>
+  }
 </section>

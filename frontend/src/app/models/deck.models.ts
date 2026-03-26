@@ -163,3 +163,26 @@ export interface QuizAttemptHistoryResponse {
   startedAt: string;
   endedAt: string;
 }
+
+// ── Dashboard ──
+
+export interface DashboardStatsResponse {
+  totalDecks: number;
+  totalQuizzesAttempted: number;
+  averageScore: number;
+  currentStreak: number;
+}
+
+export type RecentDeckActivityType = 'Viewed' | 'Studied' | 'Saved';
+
+export interface RecentDeckResponse {
+  id: string;
+  name: string;
+  description: string;
+  thumbnailUrl: string | null;
+  tags: string[];
+  questionCount: number;
+  ownerId: string;
+  activityType: RecentDeckActivityType;
+  lastActivityAt: string;
+}

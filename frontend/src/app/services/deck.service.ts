@@ -129,6 +129,10 @@ export class DeckService {
     });
   }
 
+  recordDeckView(deckId: string): Observable<ApiResponse<void>> {
+    return this.http.post<ApiResponse<void>>(`/api/user/dashboard/decks/${deckId}/view`, {});
+  }
+
   saveDeck(deckId: string): Observable<ApiResponse<void>> {
     return this.http.post<ApiResponse<void>>(`${this.endpoint}/${deckId}/save`, {});
   }

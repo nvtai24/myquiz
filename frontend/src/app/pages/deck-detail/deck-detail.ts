@@ -352,6 +352,11 @@ export class DeckDetail implements OnInit {
         this.displayQuestions.set(res.data?.questions ?? []);
         this.isSaved.set(res.data?.isSaved ?? false);
         this.loadingDeck.set(false);
+
+        // Record deck view for logged-in users
+        if (this.authService.isLoggedIn()) {
+          this.deckService.recordDeckView(id).subscribe();
+        }
       },
       error: (err) => {
         this.deckError.set(err?.error?.message ?? 'Không thể tải bộ thẻ này.');

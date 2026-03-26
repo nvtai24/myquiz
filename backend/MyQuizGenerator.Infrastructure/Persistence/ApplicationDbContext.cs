@@ -26,6 +26,7 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, IdentityRole, str
     public DbSet<PaymentTransaction> PaymentTransactions { get; set; }
     public DbSet<DeckRating> DeckRatings { get; set; }
     public DbSet<SavedDeck> SavedDecks { get; set; }
+    public DbSet<DeckView> DeckViews { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -239,6 +240,27 @@ public class ApplicationDbContext : IdentityDbContext<AppUser, IdentityRole, str
 
             // Ensure one save per user per deck
             entity.HasIndex(s => new { s.DeckId, s.UserId }).IsUnique();
+        });
+
+        modelBuilder.Entity<DeckView>(entity =>
+        {
+            entity.HasKey(v => v.Id);
+            entity.Property(v => v.DeckId).IsRequired();
+            entity.Property(v => v.UserId).IsRequired();
+            entity.Property(v => v.ViewedAt).IsRequired();
+
+            entity.HasOne(v => v.Deck)
+                .WithMany(d => d.DeckViews)
+                .HasForeignKey(v => v.DeckId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            entity.HasOne<AppUser>()
+                .WithMany(u => u.DeckViews)
+                .HasForeignKey(v => v.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Ensure one view record per user per deck (upsert pattern)
+            entity.HasIndex(v => new { v.DeckId, v.UserId }).IsUnique();
         });
     }
 

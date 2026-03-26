@@ -20,4 +20,5 @@ public class AppUser : IdentityUser
     public ICollection<UserSubscriptionPlan> UserSubscriptionPlans { get; set; } = new List<UserSubscriptionPlan>();
     public ICollection<DeckRating> DeckRatings { get; set; } = new List<DeckRating>();
     public ICollection<SavedDeck> SavedDecks { get; set; } = new List<SavedDeck>();
+    public ICollection<DeckView> DeckViews { get; set; } = new List<DeckView>();
 }

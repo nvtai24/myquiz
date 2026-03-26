@@ -296,6 +296,32 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                     b.ToTable("DeckRatings");
                 });
 
+            modelBuilder.Entity("MyQuizGenerator.Domain.Entities.DeckView", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<Guid>("DeckId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("ViewedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.HasIndex("DeckId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("DeckViews");
+                });
+
             modelBuilder.Entity("MyQuizGenerator.Domain.Entities.PaymentTransaction", b =>
                 {
                     b.Property<Guid>("Id")
@@ -784,6 +810,23 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                     b.Navigation("Deck");
                 });
 
+            modelBuilder.Entity("MyQuizGenerator.Domain.Entities.DeckView", b =>
+                {
+                    b.HasOne("MyQuizGenerator.Domain.Entities.Deck", "Deck")
+                        .WithMany("DeckViews")
+                        .HasForeignKey("DeckId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MyQuizGenerator.Infrastructure.Identity.AppUser", null)
+                        .WithMany("DeckViews")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Deck");
+                });
+
             modelBuilder.Entity("MyQuizGenerator.Domain.Entities.PaymentTransaction", b =>
                 {
                     b.HasOne("MyQuizGenerator.Domain.Entities.SubscriptionPlan", "SubscriptionPlan")
@@ -890,6 +933,8 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
 
                     b.Navigation("DeckRatings");
 
+                    b.Navigation("DeckViews");
+
                     b.Navigation("Questions");
 
                     b.Navigation("QuizAttempts");
@@ -917,6 +962,8 @@ namespace MyQuizGenerator.Infrastructure.Persistence.Migrations
                     b.Navigation("DeckMembers");
 
                     b.Navigation("DeckRatings");
+
+                    b.Navigation("DeckViews");
 
                     b.Navigation("Decks");
 

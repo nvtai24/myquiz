@@ -40,6 +40,26 @@
       }
     </div>
   </div>
+  <div #searchCompactTrigger class="search-compact-trigger" aria-hidden="true"></div>
+
+  <div class="search-floating-bar" [class.search-floating-bar-visible]="compactSearch()">
+    <div class="search-floating-bar-inner">
+      <div class="search-input-wrap search-input-wrap-compact">
+        <span class="material-symbols-outlined search-icon">search</span>
+        <input
+          type="text"
+          placeholder="Search by deck name, tags, topics..."
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearchInput($event)"
+        />
+        @if (searchTerm()) {
+          <button class="clear-btn" (click)="clearSearch()">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        }
+      </div>
+    </div>
+  </div>
 
   <!-- Results Area -->
   <div class="results-area">
@@ -180,7 +200,7 @@
               <span class="material-symbols-outlined">auto_awesome</span>
               Recommended for You
             </h2>
-            <span class="section-badge recommended">Picks for you</span>
+            <!-- <span class="section-badge recommended">Picks for you</span> -->
           </div>
           <div class="decks-grid">
             @for (deck of recommendedDecks; track deck.id) {

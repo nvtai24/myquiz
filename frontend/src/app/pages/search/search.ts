@@ -1,4 +1,13 @@
-import { Component, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import {
+  AfterViewInit,
+  Component,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+  inject,
+  signal,
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule, ActivatedRoute, Router } from '@angular/router';
@@ -32,11 +41,15 @@ interface HotTag {
   templateUrl: './search.html',
   styleUrl: './search.css',
 })
-export class Search implements OnInit, OnDestroy {
+export class Search implements OnInit, OnDestroy, AfterViewInit {
   private deckService = inject(DeckService);
   private route = inject(ActivatedRoute);
   private router = inject(Router);
   private destroy$ = new Subject<void>();
+  private scrollContainer: HTMLElement | Window = window;
+  private removeScrollListener?: () => void;
+
+  @ViewChild('searchCompactTrigger') private searchCompactTrigger?: ElementRef<HTMLDivElement>;
 
   searchTerm = signal('');
   results = signal<DeckSummaryResponse[]>([]);
@@ -45,6 +58,7 @@ export class Search implements OnInit, OnDestroy {
   currentPage = signal(1);
   pageSize = 12;
   hasSearched = signal(false);
+  compactSearch = signal(false);
 
   private searchSubject = new Subject<string>();
 
@@ -210,8 +224,57 @@ export class Search implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.removeScrollListener?.();
     this.destroy$.next();
     this.destroy$.complete();
+  }
+
+  ngAfterViewInit() {
+    if (!this.searchCompactTrigger?.nativeElement) {
+      return;
+    }
+
+    this.scrollContainer = this.findScrollContainer(this.searchCompactTrigger.nativeElement);
+    const onScroll = () => this.updateCompactSearch();
+
+    this.scrollContainer.addEventListener('scroll', onScroll, { passive: true });
+    this.removeScrollListener = () => this.scrollContainer.removeEventListener('scroll', onScroll);
+
+    this.updateCompactSearch();
+  }
+
+  private updateCompactSearch() {
+    const trigger = this.searchCompactTrigger?.nativeElement;
+    if (!trigger) {
+      this.compactSearch.set(false);
+      return;
+    }
+
+    const threshold = 88;
+
+    if (this.scrollContainer === window) {
+      this.compactSearch.set(trigger.getBoundingClientRect().top <= threshold);
+      return;
+    }
+
+    const containerRect = (this.scrollContainer as HTMLElement).getBoundingClientRect();
+    const triggerRect = trigger.getBoundingClientRect();
+    this.compactSearch.set(triggerRect.top - containerRect.top <= threshold);
+  }
+
+  private findScrollContainer(element: HTMLElement): HTMLElement | Window {
+    let current = element.parentElement;
+
+    while (current) {
+      const style = window.getComputedStyle(current);
+      const overflowY = style.overflowY;
+      if ((overflowY === 'auto' || overflowY === 'scroll') && current.scrollHeight > current.clientHeight) {
+        return current;
+      }
+      current = current.parentElement;
+    }
+
+    return window;
   }
 
   onSearchInput(value: string) {

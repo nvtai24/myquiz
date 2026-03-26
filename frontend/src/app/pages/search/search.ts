@@ -328,6 +328,16 @@ export class Search implements OnInit, OnDestroy {
       .slice(0, 4);
   }
 
+  get recommendedDecks(): ExploreDeck[] {
+    return [...this.exploreDecks]
+      .sort((a, b) => {
+        const scoreA = a.averageRating * 100 + a.viewCount;
+        const scoreB = b.averageRating * 100 + b.viewCount;
+        return scoreB - scoreA;
+      })
+      .slice(0, 4);
+  }
+
   get newDecks(): ExploreDeck[] {
     return [...this.exploreDecks]
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())

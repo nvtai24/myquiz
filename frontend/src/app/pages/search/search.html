@@ -173,6 +173,57 @@
     <!-- Explore Content (no search yet) -->
     @if (!loading() && !hasSearched()) {
       <div class="explore-content">
+        <!-- Recommended -->
+        <section class="explore-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="material-symbols-outlined">auto_awesome</span>
+              Recommended for You
+            </h2>
+            <span class="section-badge recommended">Picks for you</span>
+          </div>
+          <div class="decks-grid">
+            @for (deck of recommendedDecks; track deck.id) {
+              <a class="deck-card" [routerLink]="['/deck', deck.id]">
+                <div class="deck-img">
+                  @if (deck.thumbnailUrl) {
+                    <img [src]="deck.thumbnailUrl" [alt]="deck.name" />
+                  } @else {
+                    <img src="/images/thumbnail_default.png" alt="Deck" />
+                  }
+                  <span class="terms-chip">{{ deck.questionCount }} TERMS</span>
+                  <span class="rating-chip">
+                    <span class="material-symbols-outlined">star</span>
+                    {{ deck.averageRating }}
+                  </span>
+                  <span class="recommended-badge">
+                    <span class="material-symbols-outlined">auto_awesome</span>
+                  </span>
+                </div>
+                <div class="deck-body">
+                  <div class="deck-tags">
+                    @for (tag of deck.tags | slice: 0 : 2; track tag) {
+                      <span class="tag">{{ tag }}</span>
+                    }
+                  </div>
+                  <h3 class="deck-name">{{ deck.name }}</h3>
+                  <p class="deck-desc">{{ deck.description }}</p>
+                  <div class="deck-footer">
+                    <div class="deck-stats">
+                      <span class="material-symbols-outlined">recommend</span>
+                      Good match
+                    </div>
+                    <span class="study-chip">
+                      <span class="material-symbols-outlined">play_arrow</span>
+                      Study
+                    </span>
+                  </div>
+                </div>
+              </a>
+            }
+          </div>
+        </section>
+
         <!-- Trending -->
         <section class="explore-section">
           <div class="section-header">

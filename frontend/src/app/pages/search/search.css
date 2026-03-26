@@ -380,6 +380,24 @@
   }
 }
 
+.recommended-badge {
+  position: absolute;
+  bottom: 10px;
+  left: 10px;
+  background: linear-gradient(135deg, #7c3aed, #2563eb);
+  color: #fff;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.recommended-badge .material-symbols-outlined {
+  font-size: 18px;
+}
+
 .new-badge {
   position: absolute;
   bottom: 10px;
@@ -551,6 +569,11 @@
 .section-badge.new {
   background: linear-gradient(135deg, #d1fae5, #a7f3d0);
   color: #059669;
+}
+
+.section-badge.recommended {
+  background: linear-gradient(135deg, #ede9fe, #dbeafe);
+  color: #5b21b6;
 }
 
 /* ── Hot Tags ── */

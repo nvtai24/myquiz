@@ -39,19 +39,19 @@ public class GetTrendingDecksQueryHandler : IRequestHandler<GetTrendingDecksQuer
             .Where(d => d.OwnerId != userId
                         && d.Visibility == DeckVisibility.Public
                         && d.Status == DeckStatus.Published)
-            .Select(d => new
+            .Select(d => new TrendingDeckCandidateResponse
             {
-                d.Id,
-                d.Name,
-                d.Description,
-                d.Visibility,
-                d.Status,
-                d.Tags,
+                Id = d.Id,
+                Name = d.Name,
+                Description = d.Description,
+                Visibility = d.Visibility,
+                Status = d.Status,
+                Tags = d.Tags,
                 QuestionCount = d.Questions.Count,
                 ThumbnailUrl = d.ThumbnailUrl,
-                d.CreatedAt,
-                d.UpdatedAt,
-                d.OwnerId,
+                CreatedAt = d.CreatedAt,
+                UpdatedAt = d.UpdatedAt,
+                OwnerId = d.OwnerId,
                 TotalRatings = d.DeckRatings.Count,
                 AverageRating = d.DeckRatings.Count == 0 ? 0 : d.DeckRatings.Average(r => (double)r.Rating),
                 ViewCount = d.DeckViews.Count,
@@ -67,13 +67,13 @@ public class GetTrendingDecksQueryHandler : IRequestHandler<GetTrendingDecksQuer
         var hotTagSet = candidates
             .SelectMany(d => (d.Tags ?? Array.Empty<string>())
                 .Where(tag => !string.IsNullOrWhiteSpace(tag))
-                .Select(tag => new
+                .Select(tag => new HotTagMomentumResponse
                 {
                     Tag = tag.Trim(),
                     LastActiveAt = d.UpdatedAt ?? d.CreatedAt
                 }))
             .GroupBy(x => x.Tag, StringComparer.OrdinalIgnoreCase)
-            .Select(group => new
+            .Select(group => new HotTagAggregateResponse
             {
                 Tag = group.First().Tag,
                 Count = group.Count(),
@@ -113,7 +113,7 @@ public class GetTrendingDecksQueryHandler : IRequestHandler<GetTrendingDecksQuer
                     hotTagBonus +
                     freshnessScore;
 
-                return new
+                return new RankedTrendingDeckResponse
                 {
                     Deck = d,
                     Score = trendScore,

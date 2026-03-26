@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.EntityFrameworkCore;
 using MyQuizGenerator.Application.Common.Interfaces;
+using MyQuizGenerator.Application.Decks.DTOs;
 using MyQuizGenerator.Domain.Entities;
 using MyQuizGenerator.Domain.Enums;
 
@@ -25,9 +26,9 @@ public class GetHotTagsQueryHandler : IRequestHandler<GetHotTagsQuery, List<stri
         var decks = await _deckRepository.GetQueryable()
             .AsNoTracking()
             .Where(d => d.Visibility == DeckVisibility.Public && d.Status == DeckStatus.Published)
-            .Select(d => new
+            .Select(d => new HotTagDeckProjectionResponse
             {
-                d.Tags,
+                Tags = d.Tags,
                 LastActiveAt = d.UpdatedAt ?? d.CreatedAt
             })
             .ToListAsync(cancellationToken);
@@ -36,13 +37,13 @@ public class GetHotTagsQueryHandler : IRequestHandler<GetHotTagsQuery, List<stri
         var hotTags = decks
             .SelectMany(d => (d.Tags ?? Array.Empty<string>())
                 .Where(tag => !string.IsNullOrWhiteSpace(tag))
-                .Select(tag => new
+                .Select(tag => new HotTagActivityResponse
                 {
                     Tag = tag.Trim(),
-                    d.LastActiveAt
+                    LastActiveAt = d.LastActiveAt
                 }))
             .GroupBy(x => x.Tag, StringComparer.OrdinalIgnoreCase)
-            .Select(group => new
+            .Select(group => new HotTagAggregateResponse
             {
                 Tag = group.First().Tag,
                 Count = group.Count(),

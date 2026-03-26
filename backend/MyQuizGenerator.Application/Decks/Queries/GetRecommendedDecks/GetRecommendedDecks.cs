@@ -47,7 +47,12 @@ public class GetRecommendedDecksQueryHandler : IRequestHandler<GetRecommendedDec
             .Where(v => v.UserId == userId)
             .OrderByDescending(v => v.ViewedAt)
             .Take(40)
-            .Select(v => new { Tags = v.Deck.Tags, ActivityAt = v.ViewedAt, Weight = 1.0 })
+            .Select(v => new RecommendedDeckActivitySignalResponse
+            {
+                Tags = v.Deck.Tags,
+                ActivityAt = v.ViewedAt,
+                Weight = 1.0
+            })
             .ToListAsync(cancellationToken);
 
         var savedDecks = await _savedDeckRepository.GetQueryable()
@@ -55,7 +60,12 @@ public class GetRecommendedDecksQueryHandler : IRequestHandler<GetRecommendedDec
             .Where(s => s.UserId == userId)
             .OrderByDescending(s => s.SavedAt)
             .Take(40)
-            .Select(s => new { Tags = s.Deck.Tags, ActivityAt = s.SavedAt, Weight = 3.0 })
+            .Select(s => new RecommendedDeckActivitySignalResponse
+            {
+                Tags = s.Deck.Tags,
+                ActivityAt = s.SavedAt,
+                Weight = 3.0
+            })
             .ToListAsync(cancellationToken);
 
         var studiedDecks = await _quizAttemptRepository.GetQueryable()
@@ -63,7 +73,12 @@ public class GetRecommendedDecksQueryHandler : IRequestHandler<GetRecommendedDec
             .Where(a => a.UserId == userId)
             .OrderByDescending(a => a.StartedAt)
             .Take(40)
-            .Select(a => new { Tags = a.Deck.Tags, ActivityAt = a.StartedAt, Weight = 4.0 })
+            .Select(a => new RecommendedDeckActivitySignalResponse
+            {
+                Tags = a.Deck.Tags,
+                ActivityAt = a.StartedAt,
+                Weight = 4.0
+            })
             .ToListAsync(cancellationToken);
 
         var tagWeights = new Dictionary<string, double>(StringComparer.OrdinalIgnoreCase);
@@ -96,19 +111,19 @@ public class GetRecommendedDecksQueryHandler : IRequestHandler<GetRecommendedDec
             .Where(d => d.OwnerId != userId
                         && d.Visibility == DeckVisibility.Public
                         && d.Status == DeckStatus.Published)
-            .Select(d => new
+            .Select(d => new RecommendedDeckCandidateResponse
             {
-                d.Id,
-                d.Name,
-                d.Description,
-                d.Visibility,
-                d.Status,
-                d.Tags,
+                Id = d.Id,
+                Name = d.Name,
+                Description = d.Description,
+                Visibility = d.Visibility,
+                Status = d.Status,
+                Tags = d.Tags,
                 QuestionCount = d.Questions.Count,
                 ThumbnailUrl = d.ThumbnailUrl,
-                d.CreatedAt,
-                d.UpdatedAt,
-                d.OwnerId,
+                CreatedAt = d.CreatedAt,
+                UpdatedAt = d.UpdatedAt,
+                OwnerId = d.OwnerId,
                 TotalRatings = d.DeckRatings.Count,
                 AverageRating = d.DeckRatings.Count == 0 ? 0 : d.DeckRatings.Average(r => (double)r.Rating),
                 SaveCount = d.SavedByUsers.Count,
@@ -145,7 +160,7 @@ public class GetRecommendedDecksQueryHandler : IRequestHandler<GetRecommendedDec
 
                 var finalScore = (tagWeights.Count == 0 ? 0 : tagMatchScore * 3.0) + popularityScore + freshnessScore;
 
-                return new
+                return new RankedRecommendedDeckResponse
                 {
                     Deck = d,
                     Score = finalScore,

@@ -455,7 +455,7 @@
 }
 
 .deck-body {
-  padding: 14px;
+  padding: 18px 18px 16px;
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -463,29 +463,77 @@
 
 .deck-tags {
   display: flex;
-  gap: 6px;
+  gap: 7px;
   flex-wrap: wrap;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+}
+
+.deck-meta-bottom {
+  margin-top: auto;
 }
 
 .tag {
-  background: #f0f1ff;
-  color: #4255ff;
-  font-size: 0.68rem;
-  font-weight: 700;
-  padding: 3px 8px;
-  border-radius: 6px;
+  background: #f8faff;
+  color: #5b6b92;
+  border: 1px solid #e6ebff;
+  font-size: 0.67rem;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 9999px;
   letter-spacing: 0.02em;
 }
 
+.tag-subtle {
+  background: #f6f8fc;
+  color: #667085;
+  border-color: #e8edf5;
+  font-weight: 500;
+}
+
+.tag-badge {
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 0.65rem;
+  font-weight: 700;
+  padding: 4px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+}
+
+.tag-badge.extra {
+  background: #e2e8f0;
+  color: #334155;
+}
+
+.quiz-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 12px;
+  min-height: 24px;
+}
+
+.deck-tags-results {
+  margin-bottom: 14px;
+}
+
+.no-tags {
+  font-size: 0.75rem;
+  color: #9ca3af;
+  font-style: italic;
+}
+
 .deck-name {
-  font-size: 0.95rem;
+  font-size: 1.02rem;
   font-weight: 700;
   color: #1e1e2f;
-  margin: 0 0 6px;
-  white-space: nowrap;
+  margin: 0 0 12px;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 .deck-desc {
@@ -501,18 +549,44 @@
   padding-bottom: 10px;
 }
 
+.deck-owner-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  min-width: 0;
+}
+
+.deck-owner-icon {
+  flex-shrink: 0;
+  font-size: 17px;
+  color: #98a2b3;
+}
+
+.deck-owner-inline {
+  margin: 0;
+  min-width: 0;
+  font-size: 0.78rem;
+  line-height: 1.4;
+  color: #667085;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .deck-footer {
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-top: auto;
-  padding-top: 10px;
-  border-top: 1px solid #f3f4f6;
+  padding-top: 12px;
+  border-top: 1px solid #f1f4f9;
 }
 
 .deck-date {
-  font-size: 0.72rem;
-  color: #9ca3af;
+  font-size: 0.74rem;
+  color: #98a2b3;
   font-weight: 500;
 }
 
@@ -547,11 +621,11 @@
   display: inline-flex;
   align-items: center;
   gap: 3px;
-  background: #eef0ff;
+  background: #f4f6ff;
   color: #4255ff;
-  font-size: 0.75rem;
+  font-size: 0.74rem;
   font-weight: 700;
-  padding: 5px 12px;
+  padding: 6px 12px;
   border-radius: 9999px;
   transition: all 0.15s;
 }

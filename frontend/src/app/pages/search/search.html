@@ -121,13 +121,25 @@
               }
             </div>
             <div class="deck-body">
-              <div class="deck-tags">
-                @for (tag of deck.tags | slice: 0 : 3; track tag) {
-                  <span class="tag">{{ tag }}</span>
-                }
-              </div>
               <h3 class="deck-name">{{ deck.name }}</h3>
-              <p class="deck-desc">{{ deck.description }}</p>
+              <div class="deck-meta-bottom">
+                <div class="quiz-tags deck-tags-results">
+                  @for (tag of deck.tags | slice: 0 : 3; track tag) {
+                    <span class="tag-badge">{{ tag }}</span>
+                  }
+                  @if (deck.tags.length > 3) {
+                    <span class="tag-badge extra">+{{ deck.tags.length - 3 }}</span>
+                  }
+                  @if (deck.tags.length === 0) {
+                    <span class="no-tags">No tags</span>
+                  }
+                </div>
+              </div>
+
+              <div class="deck-owner-row">
+                <span class="material-symbols-outlined deck-owner-icon">person</span>
+                <p class="deck-owner-inline">{{ deck.ownerName }} ({{ deck.ownerEmail }})</p>
+              </div>
               <div class="deck-footer">
                 <span class="deck-date">{{ deck.createdAt | date: 'dd MMM yyyy' }}</span>
                 <span class="study-chip">

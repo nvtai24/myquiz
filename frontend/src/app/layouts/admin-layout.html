@@ -1,9 +1,11 @@
 <div class="flex h-screen bg-[#F0F2FF] font-[Inter]">
   <!-- Sidebar -->
   <aside
-    [class]="sidebarCollapsed()
-      ? 'w-16 min-w-[64px] bg-[#0f0a1e] flex flex-col shadow-2xl transition-all duration-300 overflow-hidden'
-      : 'w-60 min-w-[240px] bg-[#0f0a1e] flex flex-col shadow-2xl transition-all duration-300'"
+    [class]="
+      sidebarCollapsed()
+        ? 'w-16 min-w-[64px] bg-[#0f0a1e] flex flex-col shadow-2xl transition-all duration-300 overflow-hidden'
+        : 'w-60 min-w-[240px] bg-[#0f0a1e] flex flex-col shadow-2xl transition-all duration-300'
+    "
   >
     <!-- Logo & Toggle -->
     <div class="flex items-center px-3 py-4 border-b border-white/5">
@@ -18,8 +20,11 @@
         [style.width]="sidebarCollapsed() ? '0px' : '160px'"
         [style.opacity]="sidebarCollapsed() ? '0' : '1'"
       >
-        <img src="images/logo.png" alt="MyQuiz" class="h-10 w-auto drop-shadow-lg shrink-0">
-        <span class="px-2 py-0.5 rounded-md bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-[10px] font-black tracking-widest uppercase shadow-sm whitespace-nowrap">Admin</span>
+        <img src="images/logo.png" alt="MyQuiz" class="h-10 w-auto drop-shadow-lg shrink-0" />
+        <span
+          class="px-2 py-0.5 rounded-md bg-indigo-500/20 border border-indigo-500/30 text-indigo-300 text-[10px] font-black tracking-widest uppercase shadow-sm whitespace-nowrap"
+          >Admin</span
+        >
       </div>
     </div>
 
@@ -29,13 +34,21 @@
         <a
           [routerLink]="item.path"
           routerLinkActive="!bg-indigo-600 !text-white"
-          [class]="sidebarCollapsed()
-            ? 'flex items-center justify-center px-0 py-2.5 rounded-xl text-slate-300 font-semibold text-[13.5px] no-underline transition-all hover:bg-white/10 hover:text-white'
-            : 'flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-300 font-semibold text-[13.5px] no-underline transition-all hover:bg-white/10 hover:text-white'"
+          [class]="
+            sidebarCollapsed()
+              ? 'flex items-center justify-center px-0 py-2.5 rounded-xl text-slate-300 font-semibold text-[13.5px] no-underline transition-all hover:bg-white/10 hover:text-white'
+              : 'flex items-center gap-3 px-3 py-2.5 rounded-xl text-slate-300 font-semibold text-[13.5px] no-underline transition-all hover:bg-white/10 hover:text-white'
+          "
           [title]="sidebarCollapsed() ? item.label : ''"
         >
           <span class="material-symbols-outlined shrink-0">{{ item.icon }}</span>
-          <span [class]="sidebarCollapsed() ? 'opacity-0 w-0 overflow-hidden whitespace-nowrap transition-all duration-200' : 'transition-all duration-200'">
+          <span
+            [class]="
+              sidebarCollapsed()
+                ? 'opacity-0 w-0 overflow-hidden whitespace-nowrap transition-all duration-200'
+                : 'transition-all duration-200'
+            "
+          >
             {{ item.label }}
           </span>
         </a>
@@ -64,13 +77,21 @@
       <!-- <div class="h-px bg-[#1e1636] mx-2 my-3"></div>/ -->
       <button
         (click)="logout()"
-        [class]="sidebarCollapsed()
-          ? 'w-full flex items-center justify-center px-0 py-2.5 rounded-xl text-red-400 font-semibold text-[13.5px] transition-all hover:bg-red-500/10 bg-transparent border-none cursor-pointer'
-          : 'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-400 font-semibold text-[13.5px] transition-all hover:bg-red-500/10 bg-transparent border-none cursor-pointer'"
+        [class]="
+          sidebarCollapsed()
+            ? 'w-full flex items-center justify-center px-0 py-2.5 rounded-xl text-red-400 font-semibold text-[13.5px] transition-all hover:bg-red-500/10 bg-transparent border-none cursor-pointer'
+            : 'w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-red-400 font-semibold text-[13.5px] transition-all hover:bg-red-500/10 bg-transparent border-none cursor-pointer'
+        "
         [title]="sidebarCollapsed() ? 'Log out' : ''"
       >
         <span class="material-symbols-outlined shrink-0">logout</span>
-        <span [class]="sidebarCollapsed() ? 'opacity-0 w-0 overflow-hidden whitespace-nowrap transition-all duration-200' : 'transition-all duration-200'">
+        <span
+          [class]="
+            sidebarCollapsed()
+              ? 'opacity-0 w-0 overflow-hidden whitespace-nowrap transition-all duration-200'
+              : 'transition-all duration-200'
+          "
+        >
           Log out
         </span>
       </button>
@@ -80,9 +101,9 @@
   <!-- Content -->
   <div class="flex-1 flex flex-col overflow-hidden">
     <!-- Top bar -->
-    <header class="bg-white border-b border-gray-200 px-8 py-3.5 flex items-center justify-between shrink-0">
-
-
+    <header
+      class="bg-white border-b border-gray-200 px-8 py-3.5 flex items-center justify-between shrink-0"
+    >
       <div class="flex items-center">
         <!-- Back to App button moved to Top Bar -->
         <button
@@ -97,12 +118,16 @@
       <div>
         <!-- Enlarged System Status -->
         @if (isSystemOnline()) {
-          <span class="inline-flex items-center gap-2 px-4 py-1.5 bg-green-50 border border-green-200 text-green-700 text-[12px] font-bold rounded-full shadow-sm">
+          <span
+            class="inline-flex items-center gap-2 px-4 py-1.5 bg-green-50 border border-green-200 text-green-700 text-[12px] font-bold rounded-full shadow-sm"
+          >
             <span class="w-2.5 h-2.5 rounded-full bg-green-600 animate-pulse"></span>
             System Online
           </span>
         } @else {
-          <span class="inline-flex items-center gap-2 px-4 py-1.5 bg-red-50 border border-red-200 text-red-700 text-[12px] font-bold rounded-full shadow-sm">
+          <span
+            class="inline-flex items-center gap-2 px-4 py-1.5 bg-red-50 border border-red-200 text-red-700 text-[12px] font-bold rounded-full shadow-sm"
+          >
             <span class="w-2.5 h-2.5 rounded-full bg-red-600 animate-pulse"></span>
             System Offline
           </span>

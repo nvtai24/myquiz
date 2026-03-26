@@ -7,23 +7,22 @@ import { DeckService } from '../../services/deck.service';
 import { DeckSummaryResponse } from '../../models/deck.models';
 import { PaginationMeta } from '../../models/api.models';
 
-interface Category {
-  name: string;
-  icon: string;
-  color: string;
-  count: number;
-}
-
-interface FeaturedDeck {
+interface ExploreDeck {
   id: string;
   name: string;
   description: string;
   thumbnailUrl: string | null;
   tags: string[];
   questionCount: number;
-  rating: number;
-  studyCount: number;
+  averageRating: number;
+  viewCount: number;
   ownerName: string;
+  createdAt: string;
+}
+
+interface HotTag {
+  name: string;
+  count: number;
 }
 
 @Component({
@@ -49,19 +48,7 @@ export class Search implements OnInit, OnDestroy {
 
   private searchSubject = new Subject<string>();
 
-  // Mock data for explore page
-  categories: Category[] = [
-    { name: 'Mathematics', icon: 'calculate', color: '#4255FF', count: 1250 },
-    { name: 'Science', icon: 'science', color: '#10b981', count: 980 },
-    { name: 'Languages', icon: 'translate', color: '#f59e0b', count: 2100 },
-    { name: 'History', icon: 'history_edu', color: '#8b5cf6', count: 750 },
-    { name: 'Computer Science', icon: 'code', color: '#06b6d4', count: 1500 },
-    { name: 'Medicine', icon: 'medical_services', color: '#ef4444', count: 890 },
-    { name: 'Business', icon: 'business_center', color: '#6366f1', count: 620 },
-    { name: 'Arts', icon: 'palette', color: '#ec4899', count: 430 },
-  ];
-
-  trendingDecks: FeaturedDeck[] = [
+  exploreDecks: ExploreDeck[] = [
     {
       id: '1',
       name: 'Biology 101: Cell Structure',
@@ -69,9 +56,10 @@ export class Search implements OnInit, OnDestroy {
       thumbnailUrl: null,
       tags: ['Biology', 'Science', 'Cells'],
       questionCount: 85,
-      rating: 4.9,
-      studyCount: 12500,
+      averageRating: 4.9,
+      viewCount: 12500,
       ownerName: 'Dr. Sarah Chen',
+      createdAt: '2026-03-10T08:30:00Z',
     },
     {
       id: '2',
@@ -80,9 +68,10 @@ export class Search implements OnInit, OnDestroy {
       thumbnailUrl: null,
       tags: ['Programming', 'JavaScript', 'Web Dev'],
       questionCount: 120,
-      rating: 4.8,
-      studyCount: 9800,
+      averageRating: 4.8,
+      viewCount: 9800,
       ownerName: 'Code Academy',
+      createdAt: '2026-03-08T10:15:00Z',
     },
     {
       id: '3',
@@ -91,9 +80,10 @@ export class Search implements OnInit, OnDestroy {
       thumbnailUrl: null,
       tags: ['Spanish', 'Language', 'Beginner'],
       questionCount: 200,
-      rating: 4.7,
-      studyCount: 8500,
+      averageRating: 4.7,
+      viewCount: 8500,
       ownerName: 'Maria Garcia',
+      createdAt: '2026-03-18T09:00:00Z',
     },
     {
       id: '4',
@@ -102,13 +92,11 @@ export class Search implements OnInit, OnDestroy {
       thumbnailUrl: null,
       tags: ['History', 'WWII', 'World History'],
       questionCount: 95,
-      rating: 4.8,
-      studyCount: 7200,
+      averageRating: 4.8,
+      viewCount: 7200,
       ownerName: 'History Hub',
+      createdAt: '2026-03-05T06:20:00Z',
     },
-  ];
-
-  featuredDecks: FeaturedDeck[] = [
     {
       id: '5',
       name: 'Organic Chemistry Reactions',
@@ -116,9 +104,10 @@ export class Search implements OnInit, OnDestroy {
       thumbnailUrl: null,
       tags: ['Chemistry', 'Organic', 'Reactions'],
       questionCount: 150,
-      rating: 4.9,
-      studyCount: 5600,
+      averageRating: 4.9,
+      viewCount: 5600,
       ownerName: 'Prof. Johnson',
+      createdAt: '2026-03-23T13:00:00Z',
     },
     {
       id: '6',
@@ -127,9 +116,10 @@ export class Search implements OnInit, OnDestroy {
       thumbnailUrl: null,
       tags: ['SAT', 'Vocabulary', 'Test Prep'],
       questionCount: 500,
-      rating: 4.8,
-      studyCount: 15000,
+      averageRating: 4.8,
+      viewCount: 15000,
       ownerName: 'Test Prep Pro',
+      createdAt: '2026-03-12T12:45:00Z',
     },
     {
       id: '7',
@@ -138,13 +128,11 @@ export class Search implements OnInit, OnDestroy {
       thumbnailUrl: null,
       tags: ['Anatomy', 'Medicine', 'Biology'],
       questionCount: 280,
-      rating: 4.9,
-      studyCount: 11200,
+      averageRating: 4.9,
+      viewCount: 11200,
       ownerName: 'Med School Help',
+      createdAt: '2026-03-19T07:40:00Z',
     },
-  ];
-
-  newDecks: FeaturedDeck[] = [
     {
       id: '8',
       name: 'Machine Learning Basics',
@@ -152,9 +140,10 @@ export class Search implements OnInit, OnDestroy {
       thumbnailUrl: null,
       tags: ['AI', 'Machine Learning', 'Data Science'],
       questionCount: 75,
-      rating: 4.6,
-      studyCount: 1200,
+      averageRating: 4.6,
+      viewCount: 1200,
       ownerName: 'AI Academy',
+      createdAt: '2026-03-25T11:30:00Z',
     },
     {
       id: '9',
@@ -163,9 +152,10 @@ export class Search implements OnInit, OnDestroy {
       thumbnailUrl: null,
       tags: ['French', 'Grammar', 'Verbs'],
       questionCount: 180,
-      rating: 4.5,
-      studyCount: 890,
+      averageRating: 4.5,
+      viewCount: 890,
       ownerName: 'French Fluent',
+      createdAt: '2026-03-24T09:15:00Z',
     },
     {
       id: '10',
@@ -174,9 +164,10 @@ export class Search implements OnInit, OnDestroy {
       thumbnailUrl: null,
       tags: ['Psychology', 'Social Science', 'Behavior'],
       questionCount: 110,
-      rating: 4.7,
-      studyCount: 2100,
+      averageRating: 4.7,
+      viewCount: 2100,
       ownerName: 'Mind Matters',
+      createdAt: '2026-03-22T15:10:00Z',
     },
     {
       id: '11',
@@ -185,9 +176,10 @@ export class Search implements OnInit, OnDestroy {
       thumbnailUrl: null,
       tags: ['AWS', 'Cloud', 'Certification'],
       questionCount: 200,
-      rating: 4.8,
-      studyCount: 3400,
+      averageRating: 4.8,
+      viewCount: 3400,
       ownerName: 'Cloud Guru',
+      createdAt: '2026-03-26T04:00:00Z',
     },
   ];
 
@@ -235,9 +227,9 @@ export class Search implements OnInit, OnDestroy {
     this.updateUrl('', 1);
   }
 
-  searchByCategory(categoryName: string) {
-    this.searchTerm.set(categoryName);
-    this.searchSubject.next(categoryName);
+  searchByTag(tagName: string) {
+    this.searchTerm.set(tagName);
+    this.searchSubject.next(tagName);
   }
 
   changePage(page: number) {
@@ -313,5 +305,32 @@ export class Search implements OnInit, OnDestroy {
     }
 
     return pages;
+  }
+
+  get hotTags(): HotTag[] {
+    const counts = new Map<string, number>();
+
+    for (const deck of this.exploreDecks) {
+      for (const tag of deck.tags) {
+        counts.set(tag, (counts.get(tag) || 0) + 1);
+      }
+    }
+
+    return Array.from(counts.entries())
+      .map(([name, count]) => ({ name, count }))
+      .sort((a, b) => b.count - a.count || a.name.localeCompare(b.name))
+      .slice(0, 20);
+  }
+
+  get trendingDecks(): ExploreDeck[] {
+    return [...this.exploreDecks]
+      .sort((a, b) => b.viewCount - a.viewCount)
+      .slice(0, 4);
+  }
+
+  get newDecks(): ExploreDeck[] {
+    return [...this.exploreDecks]
+      .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+      .slice(0, 4);
   }
 }

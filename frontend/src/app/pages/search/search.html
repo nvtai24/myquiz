@@ -10,14 +10,34 @@
 
       <div class="search-input-wrap">
         <span class="material-symbols-outlined search-icon">search</span>
-        <input type="text" placeholder="Search by deck name, tags, topics..." [ngModel]="searchTerm()"
-          (ngModelChange)="onSearchInput($event)" autofocus />
+        <input
+          type="text"
+          placeholder="Search by deck name, tags, topics..."
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearchInput($event)"
+          autofocus
+        />
         @if (searchTerm()) {
-        <button class="clear-btn" (click)="clearSearch()">
-          <span class="material-symbols-outlined">close</span>
-        </button>
+          <button class="clear-btn" (click)="clearSearch()">
+            <span class="material-symbols-outlined">close</span>
+          </button>
         }
       </div>
+
+      @if (!hasSearched()) {
+        <div class="search-header-tags">
+          <div class="tags-grid">
+            @for (tag of hotTags; track tag.name) {
+              <button
+                class="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:border-white/40 hover:bg-white/16"
+                (click)="searchByTag(tag.name)"
+              >
+                #{{ tag.name }}
+              </button>
+            }
+          </div>
+        </div>
+      }
     </div>
   </div>
 
@@ -25,188 +45,71 @@
   <div class="results-area">
     <!-- Search term indicator -->
     @if (hasSearched() && searchTerm()) {
-    <div class="results-info">
-      <span class="material-symbols-outlined info-icon">filter_list</span>
-      <span class="info-text">
-        @if (pagination()) {
-        {{ pagination()!.totalRecords }} results for
-        } @else {
-        Results for
-        }
-        "<strong>{{ searchTerm() }}</strong>"
-      </span>
-      <button class="clear-search-btn" (click)="clearSearch()">
-        <span class="material-symbols-outlined">close</span>
-        Clear
-      </button>
-    </div>
+      <div class="results-info">
+        <span class="material-symbols-outlined info-icon">filter_list</span>
+        <span class="info-text">
+          @if (pagination()) {
+            {{ pagination()!.totalRecords }} results for
+          } @else {
+            Results for
+          }
+          "<strong>{{ searchTerm() }}</strong
+          >"
+        </span>
+        <button class="clear-search-btn" (click)="clearSearch()">
+          <span class="material-symbols-outlined">close</span>
+          Clear
+        </button>
+      </div>
     }
 
     <!-- Loading State -->
     @if (loading()) {
-    <div class="loading-state">
-      <div class="loading-grid">
-        @for (i of [1,2,3,4,5,6]; track i) {
-        <div class="skeleton-card">
-          <div class="skeleton-img shimmer"></div>
-          <div class="skeleton-body">
-            <div class="skeleton-line short shimmer"></div>
-            <div class="skeleton-line shimmer"></div>
-            <div class="skeleton-line long shimmer"></div>
-          </div>
+      <div class="loading-state">
+        <div class="loading-grid">
+          @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+            <div class="skeleton-card">
+              <div class="skeleton-img shimmer"></div>
+              <div class="skeleton-body">
+                <div class="skeleton-line short shimmer"></div>
+                <div class="skeleton-line shimmer"></div>
+                <div class="skeleton-line long shimmer"></div>
+              </div>
+            </div>
+          }
         </div>
-        }
       </div>
-    </div>
     }
 
     <!-- Results Grid -->
     @if (!loading() && results().length > 0) {
-    <div class="results-grid">
-      @for (deck of results(); track deck.id) {
-      <a class="deck-card" [routerLink]="['/deck', deck.id]">
-        <div class="deck-img">
-          @if (deck.thumbnailUrl) {
-          <img [src]="deck.thumbnailUrl" [alt]="deck.name" />
-          } @else {
-          <img src="/images/thumbnail_default.png" alt="Deck" />
-          }
-          <span class="terms-chip">{{ deck.questionCount }} TERMS</span>
-          @if (deck.averageRating) {
-          <span class="rating-chip">
-            <span class="material-symbols-outlined">star</span>
-            {{ deck.averageRating.toFixed(1) }}
-          </span>
-          }
-        </div>
-        <div class="deck-body">
-          <div class="deck-tags">
-            @for (tag of deck.tags | slice:0:3; track tag) {
-            <span class="tag">{{ tag }}</span>
-            }
-          </div>
-          <h3 class="deck-name">{{ deck.name }}</h3>
-          <p class="deck-desc">{{ deck.description }}</p>
-          <div class="deck-footer">
-            <span class="deck-date">{{ deck.createdAt | date:'dd MMM yyyy' }}</span>
-            <span class="study-chip">
-              <span class="material-symbols-outlined">play_arrow</span>
-              Study
-            </span>
-          </div>
-        </div>
-      </a>
-      }
-    </div>
-
-    <!-- Pagination -->
-    @if (totalPages > 1) {
-    <div class="pagination">
-      <button class="page-btn nav-btn" [disabled]="currentPage() === 1" (click)="changePage(currentPage() - 1)">
-        <span class="material-symbols-outlined">chevron_left</span>
-      </button>
-
-      @for (p of pageNumbers; track $index) {
-      @if (p === -1) {
-      <span class="page-ellipsis">…</span>
-      } @else {
-      <button class="page-btn" [class.active]="p === currentPage()" (click)="changePage(p)">
-        {{ p }}
-      </button>
-      }
-      }
-
-      <button class="page-btn nav-btn" [disabled]="currentPage() === totalPages"
-        (click)="changePage(currentPage() + 1)">
-        <span class="material-symbols-outlined">chevron_right</span>
-      </button>
-    </div>
-    }
-    }
-
-    <!-- Empty State (after search) -->
-    @if (!loading() && hasSearched() && results().length === 0) {
-    <div class="empty-state">
-      <div class="empty-illustration">
-        <span class="material-symbols-outlined empty-icon">search_off</span>
-      </div>
-      <h3 class="empty-title">No results found</h3>
-      <p class="empty-desc">We couldn't find any study sets matching "<strong>{{ searchTerm() }}</strong>". Try
-        adjusting your search terms.</p>
-      <button class="empty-btn" (click)="clearSearch()">
-        <span class="material-symbols-outlined">refresh</span>
-        Clear & try again
-      </button>
-    </div>
-    }
-
-    <!-- Explore Content (no search yet) -->
-    @if (!loading() && !hasSearched()) {
-    <div class="explore-content">
-      <!-- Categories -->
-      <section class="explore-section">
-        <div class="section-header">
-          <h2 class="section-title">
-            <span class="material-symbols-outlined">category</span>
-            Browse by Category
-          </h2>
-        </div>
-        <div class="categories-grid">
-          @for (cat of categories; track cat.name) {
-          <button class="category-card" (click)="searchByCategory(cat.name)">
-            <div class="category-icon" [style.background]="cat.color + '15'" [style.color]="cat.color">
-              <span class="material-symbols-outlined">{{ cat.icon }}</span>
-            </div>
-            <div class="category-info">
-              <h3 class="category-name">{{ cat.name }}</h3>
-              <span class="category-count">{{ cat.count | number }} sets</span>
-            </div>
-            <span class="material-symbols-outlined category-arrow">chevron_right</span>
-          </button>
-          }
-        </div>
-      </section>
-
-      <!-- Trending -->
-      <section class="explore-section">
-        <div class="section-header">
-          <h2 class="section-title">
-            <span class="material-symbols-outlined">trending_up</span>
-            Trending Now
-          </h2>
-          <span class="section-badge">Most studied this week</span>
-        </div>
-        <div class="decks-grid">
-          @for (deck of trendingDecks; track deck.id) {
+      <div class="results-grid">
+        @for (deck of results(); track deck.id) {
           <a class="deck-card" [routerLink]="['/deck', deck.id]">
             <div class="deck-img">
               @if (deck.thumbnailUrl) {
-              <img [src]="deck.thumbnailUrl" [alt]="deck.name" />
+                <img [src]="deck.thumbnailUrl" [alt]="deck.name" />
               } @else {
-              <img src="/images/thumbnail_default.png" alt="Deck" />
+                <img src="/images/thumbnail_default.png" alt="Deck" />
               }
               <span class="terms-chip">{{ deck.questionCount }} TERMS</span>
-              <span class="rating-chip">
-                <span class="material-symbols-outlined">star</span>
-                {{ deck.rating }}
-              </span>
-              <span class="trending-badge">
-                <span class="material-symbols-outlined">local_fire_department</span>
-              </span>
+              @if (deck.averageRating) {
+                <span class="rating-chip">
+                  <span class="material-symbols-outlined">star</span>
+                  {{ deck.averageRating.toFixed(1) }}
+                </span>
+              }
             </div>
             <div class="deck-body">
               <div class="deck-tags">
-                @for (tag of deck.tags | slice:0:2; track tag) {
-                <span class="tag">{{ tag }}</span>
+                @for (tag of deck.tags | slice: 0 : 3; track tag) {
+                  <span class="tag">{{ tag }}</span>
                 }
               </div>
               <h3 class="deck-name">{{ deck.name }}</h3>
               <p class="deck-desc">{{ deck.description }}</p>
               <div class="deck-footer">
-                <div class="deck-stats">
-                  <span class="material-symbols-outlined">school</span>
-                  {{ formatStudyCount(deck.studyCount) }} studied
-                </div>
+                <span class="deck-date">{{ deck.createdAt | date: 'dd MMM yyyy' }}</span>
                 <span class="study-chip">
                   <span class="material-symbols-outlined">play_arrow</span>
                   Study
@@ -214,108 +117,155 @@
               </div>
             </div>
           </a>
-          }
-        </div>
-      </section>
+        }
+      </div>
 
-      <!-- Featured -->
-      <section class="explore-section featured-section">
-        <div class="section-header">
-          <h2 class="section-title">
-            <span class="material-symbols-outlined">workspace_premium</span>
-            Featured Study Sets
-          </h2>
-          <span class="section-badge featured">Editor's Pick</span>
+      <!-- Pagination -->
+      @if (totalPages > 1) {
+        <div class="pagination">
+          <button
+            class="page-btn nav-btn"
+            [disabled]="currentPage() === 1"
+            (click)="changePage(currentPage() - 1)"
+          >
+            <span class="material-symbols-outlined">chevron_left</span>
+          </button>
+
+          @for (p of pageNumbers; track $index) {
+            @if (p === -1) {
+              <span class="page-ellipsis">…</span>
+            } @else {
+              <button class="page-btn" [class.active]="p === currentPage()" (click)="changePage(p)">
+                {{ p }}
+              </button>
+            }
+          }
+
+          <button
+            class="page-btn nav-btn"
+            [disabled]="currentPage() === totalPages"
+            (click)="changePage(currentPage() + 1)"
+          >
+            <span class="material-symbols-outlined">chevron_right</span>
+          </button>
         </div>
-        <div class="featured-grid">
-          @for (deck of featuredDecks; track deck.id) {
-          <a class="featured-card" [routerLink]="['/deck', deck.id]">
-            <div class="featured-img">
-              @if (deck.thumbnailUrl) {
-              <img [src]="deck.thumbnailUrl" [alt]="deck.name" />
-              } @else {
-              <img src="/images/thumbnail_default.png" alt="Deck" />
-              }
-              <div class="featured-overlay">
-                <span class="featured-badge">
-                  <span class="material-symbols-outlined">verified</span>
-                  Featured
-                </span>
-              </div>
-            </div>
-            <div class="featured-body">
-              <div class="featured-tags">
-                @for (tag of deck.tags | slice:0:2; track tag) {
-                <span class="tag">{{ tag }}</span>
-                }
-              </div>
-              <h3 class="featured-name">{{ deck.name }}</h3>
-              <p class="featured-desc">{{ deck.description }}</p>
-              <div class="featured-meta">
-                <div class="featured-author">
-                  <span class="material-symbols-outlined">person</span>
-                  {{ deck.ownerName }}
-                </div>
-                <div class="featured-stats">
-                  <span class="stat">
+      }
+    }
+
+    <!-- Empty State (after search) -->
+    @if (!loading() && hasSearched() && results().length === 0) {
+      <div class="empty-state">
+        <div class="empty-illustration">
+          <span class="material-symbols-outlined empty-icon">search_off</span>
+        </div>
+        <h3 class="empty-title">No results found</h3>
+        <p class="empty-desc">
+          We couldn't find any study sets matching "<strong>{{ searchTerm() }}</strong
+          >". Try adjusting your search terms.
+        </p>
+        <button class="empty-btn" (click)="clearSearch()">
+          <span class="material-symbols-outlined">refresh</span>
+          Clear & try again
+        </button>
+      </div>
+    }
+
+    <!-- Explore Content (no search yet) -->
+    @if (!loading() && !hasSearched()) {
+      <div class="explore-content">
+        <!-- Trending -->
+        <section class="explore-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="material-symbols-outlined">visibility</span>
+              Trending Now
+            </h2>
+            <span class="section-badge">Most viewed decks</span>
+          </div>
+          <div class="decks-grid">
+            @for (deck of trendingDecks; track deck.id) {
+              <a class="deck-card" [routerLink]="['/deck', deck.id]">
+                <div class="deck-img">
+                  @if (deck.thumbnailUrl) {
+                    <img [src]="deck.thumbnailUrl" [alt]="deck.name" />
+                  } @else {
+                    <img src="/images/thumbnail_default.png" alt="Deck" />
+                  }
+                  <span class="terms-chip">{{ deck.questionCount }} TERMS</span>
+                  <span class="rating-chip">
                     <span class="material-symbols-outlined">star</span>
-                    {{ deck.rating }}
+                    {{ deck.averageRating }}
                   </span>
-                  <span class="stat">
-                    <span class="material-symbols-outlined">style</span>
-                    {{ deck.questionCount }}
+                  <span class="trending-badge">
+                    <span class="material-symbols-outlined">visibility</span>
                   </span>
                 </div>
-              </div>
-            </div>
-          </a>
-          }
-        </div>
-      </section>
+                <div class="deck-body">
+                  <div class="deck-tags">
+                    @for (tag of deck.tags | slice: 0 : 2; track tag) {
+                      <span class="tag">{{ tag }}</span>
+                    }
+                  </div>
+                  <h3 class="deck-name">{{ deck.name }}</h3>
+                  <p class="deck-desc">{{ deck.description }}</p>
+                  <div class="deck-footer">
+                    <div class="deck-stats">
+                      <span class="material-symbols-outlined">visibility</span>
+                      {{ formatStudyCount(deck.viewCount) }} views
+                    </div>
+                    <span class="study-chip">
+                      <span class="material-symbols-outlined">play_arrow</span>
+                      Study
+                    </span>
+                  </div>
+                </div>
+              </a>
+            }
+          </div>
+        </section>
 
-      <!-- New Arrivals -->
-      <section class="explore-section">
-        <div class="section-header">
-          <h2 class="section-title">
-            <span class="material-symbols-outlined">new_releases</span>
-            New Arrivals
-          </h2>
-          <span class="section-badge new">Just added</span>
-        </div>
-        <div class="decks-grid four-cols">
-          @for (deck of newDecks; track deck.id) {
-          <a class="deck-card compact" [routerLink]="['/deck', deck.id]">
-            <div class="deck-img">
-              @if (deck.thumbnailUrl) {
-              <img [src]="deck.thumbnailUrl" [alt]="deck.name" />
-              } @else {
-              <img src="/images/thumbnail_default.png" alt="Deck" />
-              }
-              <span class="terms-chip">{{ deck.questionCount }} TERMS</span>
-              <span class="new-badge">NEW</span>
-            </div>
-            <div class="deck-body">
-              <div class="deck-tags">
-                @for (tag of deck.tags | slice:0:2; track tag) {
-                <span class="tag">{{ tag }}</span>
-                }
-              </div>
-              <h3 class="deck-name">{{ deck.name }}</h3>
-              <div class="deck-footer">
-                <div class="deck-rating">
-                  <span class="material-symbols-outlined">star</span>
-                  {{ deck.rating }}
+        <!-- New Arrivals -->
+        <section class="explore-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="material-symbols-outlined">new_releases</span>
+              New Arrivals
+            </h2>
+            <span class="section-badge new">Just added</span>
+          </div>
+          <div class="decks-grid four-cols">
+            @for (deck of newDecks; track deck.id) {
+              <a class="deck-card compact" [routerLink]="['/deck', deck.id]">
+                <div class="deck-img">
+                  @if (deck.thumbnailUrl) {
+                    <img [src]="deck.thumbnailUrl" [alt]="deck.name" />
+                  } @else {
+                    <img src="/images/thumbnail_default.png" alt="Deck" />
+                  }
+                  <span class="terms-chip">{{ deck.questionCount }} TERMS</span>
+                  <span class="new-badge">NEW</span>
                 </div>
-                <span class="study-chip">
-                  <span class="material-symbols-outlined">play_arrow</span>
-                </span>
-              </div>
-            </div>
-          </a>
-          }
-        </div>
-      </section>
-    </div>
+                <div class="deck-body">
+                  <div class="deck-tags">
+                    @for (tag of deck.tags | slice: 0 : 2; track tag) {
+                      <span class="tag">{{ tag }}</span>
+                    }
+                  </div>
+                  <h3 class="deck-name">{{ deck.name }}</h3>
+                  <p class="deck-desc">{{ deck.description }}</p>
+                  <div class="deck-footer">
+                    <span class="deck-date">{{ deck.createdAt | date: 'dd MMM yyyy' }}</span>
+                    <span class="study-chip">
+                      <span class="material-symbols-outlined">play_arrow</span>
+                      Study
+                    </span>
+                  </div>
+                </div>
+              </a>
+            }
+          </div>
+        </section>
+      </div>
     }
   </div>
 </div>

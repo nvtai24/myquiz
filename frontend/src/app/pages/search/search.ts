@@ -7,6 +7,25 @@ import { DeckService } from '../../services/deck.service';
 import { DeckSummaryResponse } from '../../models/deck.models';
 import { PaginationMeta } from '../../models/api.models';
 
+interface Category {
+  name: string;
+  icon: string;
+  color: string;
+  count: number;
+}
+
+interface FeaturedDeck {
+  id: string;
+  name: string;
+  description: string;
+  thumbnailUrl: string | null;
+  tags: string[];
+  questionCount: number;
+  rating: number;
+  studyCount: number;
+  ownerName: string;
+}
+
 @Component({
   selector: 'app-search',
   standalone: true,
@@ -30,8 +49,149 @@ export class Search implements OnInit, OnDestroy {
 
   private searchSubject = new Subject<string>();
 
+  // Mock data for explore page
+  categories: Category[] = [
+    { name: 'Mathematics', icon: 'calculate', color: '#4255FF', count: 1250 },
+    { name: 'Science', icon: 'science', color: '#10b981', count: 980 },
+    { name: 'Languages', icon: 'translate', color: '#f59e0b', count: 2100 },
+    { name: 'History', icon: 'history_edu', color: '#8b5cf6', count: 750 },
+    { name: 'Computer Science', icon: 'code', color: '#06b6d4', count: 1500 },
+    { name: 'Medicine', icon: 'medical_services', color: '#ef4444', count: 890 },
+    { name: 'Business', icon: 'business_center', color: '#6366f1', count: 620 },
+    { name: 'Arts', icon: 'palette', color: '#ec4899', count: 430 },
+  ];
+
+  trendingDecks: FeaturedDeck[] = [
+    {
+      id: '1',
+      name: 'Biology 101: Cell Structure',
+      description: 'Complete guide to cell biology, organelles, and cellular processes',
+      thumbnailUrl: null,
+      tags: ['Biology', 'Science', 'Cells'],
+      questionCount: 85,
+      rating: 4.9,
+      studyCount: 12500,
+      ownerName: 'Dr. Sarah Chen',
+    },
+    {
+      id: '2',
+      name: 'JavaScript Fundamentals',
+      description: 'Master JavaScript basics: variables, functions, arrays, and objects',
+      thumbnailUrl: null,
+      tags: ['Programming', 'JavaScript', 'Web Dev'],
+      questionCount: 120,
+      rating: 4.8,
+      studyCount: 9800,
+      ownerName: 'Code Academy',
+    },
+    {
+      id: '3',
+      name: 'Spanish Vocabulary - Beginner',
+      description: 'Essential Spanish words and phrases for beginners',
+      thumbnailUrl: null,
+      tags: ['Spanish', 'Language', 'Beginner'],
+      questionCount: 200,
+      rating: 4.7,
+      studyCount: 8500,
+      ownerName: 'Maria Garcia',
+    },
+    {
+      id: '4',
+      name: 'World War II Timeline',
+      description: 'Key events, battles, and figures of World War II',
+      thumbnailUrl: null,
+      tags: ['History', 'WWII', 'World History'],
+      questionCount: 95,
+      rating: 4.8,
+      studyCount: 7200,
+      ownerName: 'History Hub',
+    },
+  ];
+
+  featuredDecks: FeaturedDeck[] = [
+    {
+      id: '5',
+      name: 'Organic Chemistry Reactions',
+      description: 'All major organic chemistry reactions with mechanisms',
+      thumbnailUrl: null,
+      tags: ['Chemistry', 'Organic', 'Reactions'],
+      questionCount: 150,
+      rating: 4.9,
+      studyCount: 5600,
+      ownerName: 'Prof. Johnson',
+    },
+    {
+      id: '6',
+      name: 'SAT Vocabulary Master',
+      description: 'Top 500 SAT vocabulary words with examples',
+      thumbnailUrl: null,
+      tags: ['SAT', 'Vocabulary', 'Test Prep'],
+      questionCount: 500,
+      rating: 4.8,
+      studyCount: 15000,
+      ownerName: 'Test Prep Pro',
+    },
+    {
+      id: '7',
+      name: 'Human Anatomy',
+      description: 'Complete human anatomy: bones, muscles, organs',
+      thumbnailUrl: null,
+      tags: ['Anatomy', 'Medicine', 'Biology'],
+      questionCount: 280,
+      rating: 4.9,
+      studyCount: 11200,
+      ownerName: 'Med School Help',
+    },
+  ];
+
+  newDecks: FeaturedDeck[] = [
+    {
+      id: '8',
+      name: 'Machine Learning Basics',
+      description: 'Introduction to ML concepts, algorithms, and applications',
+      thumbnailUrl: null,
+      tags: ['AI', 'Machine Learning', 'Data Science'],
+      questionCount: 75,
+      rating: 4.6,
+      studyCount: 1200,
+      ownerName: 'AI Academy',
+    },
+    {
+      id: '9',
+      name: 'French Conjugation',
+      description: 'Master French verb conjugations across all tenses',
+      thumbnailUrl: null,
+      tags: ['French', 'Grammar', 'Verbs'],
+      questionCount: 180,
+      rating: 4.5,
+      studyCount: 890,
+      ownerName: 'French Fluent',
+    },
+    {
+      id: '10',
+      name: 'Psychology 101',
+      description: 'Introduction to psychology: theories, experiments, concepts',
+      thumbnailUrl: null,
+      tags: ['Psychology', 'Social Science', 'Behavior'],
+      questionCount: 110,
+      rating: 4.7,
+      studyCount: 2100,
+      ownerName: 'Mind Matters',
+    },
+    {
+      id: '11',
+      name: 'AWS Cloud Practitioner',
+      description: 'Prepare for AWS Cloud Practitioner certification',
+      thumbnailUrl: null,
+      tags: ['AWS', 'Cloud', 'Certification'],
+      questionCount: 200,
+      rating: 4.8,
+      studyCount: 3400,
+      ownerName: 'Cloud Guru',
+    },
+  ];
+
   ngOnInit() {
-    // Read query param on init
     this.route.queryParams
       .pipe(takeUntil(this.destroy$))
       .subscribe(params => {
@@ -44,7 +204,6 @@ export class Search implements OnInit, OnDestroy {
         }
       });
 
-    // Debounced search
     this.searchSubject
       .pipe(
         debounceTime(400),
@@ -76,12 +235,23 @@ export class Search implements OnInit, OnDestroy {
     this.updateUrl('', 1);
   }
 
+  searchByCategory(categoryName: string) {
+    this.searchTerm.set(categoryName);
+    this.searchSubject.next(categoryName);
+  }
+
   changePage(page: number) {
     this.currentPage.set(page);
     this.updateUrl(this.searchTerm(), page);
     this.performSearch(this.searchTerm(), page);
-    // Scroll to top
     window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  formatStudyCount(count: number): string {
+    if (count >= 1000) {
+      return (count / 1000).toFixed(1) + 'k';
+    }
+    return count.toString();
   }
 
   private updateUrl(term: string, page: number) {
@@ -134,11 +304,11 @@ export class Search implements OnInit, OnDestroy {
       for (let i = 1; i <= total; i++) pages.push(i);
     } else {
       pages.push(1);
-      if (current > 3) pages.push(-1); // ellipsis
+      if (current > 3) pages.push(-1);
       for (let i = Math.max(2, current - 1); i <= Math.min(total - 1, current + 1); i++) {
         pages.push(i);
       }
-      if (current < total - 2) pages.push(-1); // ellipsis
+      if (current < total - 2) pages.push(-1);
       pages.push(total);
     }
 

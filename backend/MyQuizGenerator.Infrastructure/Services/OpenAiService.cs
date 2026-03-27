@@ -52,6 +52,8 @@ public class OpenAiService : IAiService
 
     public async Task<GeneratedDeckResponse> GenerateDeckFromPdfAsync(Stream fileStream, string fileName, int maxQuestions, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Starting PDF deck generation for file: {FileName}, maxQuestions: {MaxQuestions}", fileName, maxQuestions);
+
         using var uploadBuffer = new MemoryStream();
         fileStream.Position = 0;
         await fileStream.CopyToAsync(uploadBuffer, cancellationToken);
@@ -62,12 +64,15 @@ public class OpenAiService : IAiService
         var pageWindowSize = DeterminePdfWindowSize(totalPages);
         var pageRanges = BuildPageRanges(totalPages, pageWindowSize);
 
+        _logger.LogInformation("PDF has {TotalPages} pages, targeting {TargetQuestions} questions with {RangeCount} passes", totalPages, targetQuestions, pageRanges.Count);
+
         if (pageRanges.Count == 0)
         {
             pageRanges.Add((1, pageWindowSize));
         }
 
         var fileId = await UploadFileToOpenAiAsync(fileBytes, fileName, cancellationToken);
+        _logger.LogInformation("PDF uploaded to OpenAI with fileId: {FileId}", fileId);
 
         try
         {
@@ -153,6 +158,8 @@ public class OpenAiService : IAiService
                 Questions = allQuestions.Take(targetQuestions).ToList()
             };
 
+            _logger.LogInformation("PDF deck generation completed. Deck: {DeckName}, Questions: {QuestionCount}", result.Name, result.Questions.Count);
+
             return result;
         }
         finally
@@ -163,6 +170,8 @@ public class OpenAiService : IAiService
 
     public async Task<GeneratedDeckResponse> GenerateDeckAsync(string text, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Starting text deck generation, text length: {TextLength} characters", text.Length);
+
         var systemPrompt = """
             You are a helpful assistant that generates a study deck from the provided text.
             The output must be a valid JSON object with the following structure:
@@ -215,11 +224,13 @@ public class OpenAiService : IAiService
                 {
                     PropertyNameCaseInsensitive = true
                 });
-                return deck ?? new GeneratedDeckResponse();
+                var result = deck ?? new GeneratedDeckResponse();
+                _logger.LogInformation("Text deck generation completed. Deck: {DeckName}, Questions: {QuestionCount}", result.Name, result.Questions.Count);
+                return result;
             }
-            catch (JsonException)
+            catch (JsonException ex)
             {
-                // Handle parsing error - for now return empty
+                _logger.LogWarning(ex, "Failed to parse deck JSON response");
                 return new GeneratedDeckResponse();
             }
         }, cancellationToken);
@@ -227,6 +238,7 @@ public class OpenAiService : IAiService
 
     public async Task<List<GeneratedQuestionResponse>> GenerateQuestionsFromChunkAsync(string chunkText, int chunkIndex, CancellationToken cancellationToken)
     {
+        _logger.LogInformation("Starting chunk question generation, chunk {ChunkIndex}, length: {TextLength} characters", chunkIndex + 1, chunkText.Length);
         var systemPrompt = """
             You are a helpful assistant that generates study questions from the provided text.
             The output must be a valid JSON array with the following structure:
@@ -279,10 +291,13 @@ public class OpenAiService : IAiService
                 {
                     PropertyNameCaseInsensitive = true
                 });
-                return questions ?? new List<GeneratedQuestionResponse>();
+                var result = questions ?? new List<GeneratedQuestionResponse>();
+                _logger.LogInformation("Chunk question generation completed. Questions: {QuestionCount}", result.Count);
+                return result;
             }
-            catch (JsonException)
+            catch (JsonException ex)
             {
+                _logger.LogWarning(ex, "Failed to parse questions JSON response");
                 return new List<GeneratedQuestionResponse>();
             }
         }, cancellationToken);

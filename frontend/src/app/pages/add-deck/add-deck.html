@@ -255,8 +255,8 @@
         <div class="flex gap-6 px-6 py-5 mb-12 relative w-full">
           <div class="flex-1 min-w-[30%]">
             <label class="text-[11px] font-bold text-[#4255FF] uppercase tracking-wider">Question</label>
-            <input type="text" class="w-full border-none border-b-2 border-gray-100 py-2 text-[15px] outline-none focus:border-[#4255FF]"
-              placeholder="Enter question" [ngModel]="card.term" (ngModelChange)="updateTerm(i, $event)" />
+            <textarea class="w-full border-none border-b-2 border-gray-100 py-2 text-[15px] outline-none focus:border-[#4255FF] resize-none overflow-hidden bg-transparent"
+              placeholder="Enter question" rows="1" style="field-sizing: content" [ngModel]="card.term" (ngModelChange)="updateTerm(i, $event)"></textarea>
           </div>
           <div class="flex-1">
             <label class="text-[11px] font-bold text-[#4255FF] uppercase tracking-wider">Answer</label>
@@ -267,7 +267,7 @@
                     <button class="text-gray-300" [class.text-green-500]="card.correctAnswers?.includes(optIdx)" (click)="toggleCorrectAnswer(i, optIdx)">
                       <span class="material-symbols-outlined">{{ card.correctAnswers?.includes(optIdx) ? 'check_circle' : 'radio_button_unchecked' }}</span>
                     </button>
-                    <input type="text" class="w-full bg-transparent outline-none text-[14px]" [ngModel]="opt" (ngModelChange)="updateOption(i, optIdx, $event)" />
+                    <textarea class="w-full bg-transparent outline-none text-[14px] resize-none overflow-hidden" rows="1" style="field-sizing: content" [ngModel]="opt" (ngModelChange)="updateOption(i, optIdx, $event)"></textarea>
                   </div>
                 }
               </div>
@@ -277,8 +277,8 @@
                 <button class="flex-1 py-3 border-2 rounded-xl font-bold" [class]="!card.isTrue ? 'border-red-500 bg-red-50 text-red-700' : 'border-gray-200 text-gray-400'" (click)="updateIsTrue(i, false)">False</button>
               </div>
             } @else {
-              <input type="text" class="w-full border-none border-b-2 border-gray-100 py-2 text-[15px] outline-none focus:border-[#4255FF]"
-                placeholder="Correct answer" [ngModel]="card.blankAnswer" (ngModelChange)="updateBlankAnswer(i, $event)" />
+              <textarea class="w-full border-none border-b-2 border-gray-100 py-2 text-[15px] outline-none focus:border-[#4255FF] resize-none overflow-hidden bg-transparent"
+                placeholder="Correct answer" rows="1" style="field-sizing: content" [ngModel]="card.blankAnswer" (ngModelChange)="updateBlankAnswer(i, $event)"></textarea>
             }
           </div>
         </div>
@@ -287,8 +287,8 @@
           <button class="text-[12px] font-bold text-gray-400 hover:text-gray-600" (click)="toggleExtra(i)">{{ card.showExtra ? 'Hide' : 'Add' }} Hint & Explanation</button>
           @if (card.showExtra) {
             <div class="grid grid-cols-2 gap-4 mt-3 pb-4">
-              <input type="text" class="border border-gray-100 rounded-lg p-2 text-[13px]" placeholder="Hint" [ngModel]="card.hint" (ngModelChange)="updateHint(i, $event)" />
-              <input type="text" class="border border-gray-100 rounded-lg p-2 text-[13px]" placeholder="Explanation" [ngModel]="card.explanation" (ngModelChange)="updateExplanation(i, $event)" />
+              <textarea class="border border-gray-100 rounded-lg p-2 text-[13px] resize-none overflow-hidden w-full bg-transparent outline-none" placeholder="Hint" rows="1" style="field-sizing: content" [ngModel]="card.hint" (ngModelChange)="updateHint(i, $event)"></textarea>
+              <textarea class="border border-gray-100 rounded-lg p-2 text-[13px] resize-none overflow-hidden w-full bg-transparent outline-none" placeholder="Explanation" rows="1" style="field-sizing: content" [ngModel]="card.explanation" (ngModelChange)="updateExplanation(i, $event)"></textarea>
             </div>
           }
         </div>

@@ -50,6 +50,9 @@ export class AuthService {
   private setSession(authData: AuthTokenResponse): void {
     if (!isPlatformBrowser(this.platformId)) return;
     localStorage.setItem('user', JSON.stringify(authData.user));
+    if (authData.refreshToken) {
+      localStorage.setItem('refreshToken', authData.refreshToken);
+    }
     this.currentUser.set(authData.user);
   }
 
@@ -68,6 +71,7 @@ export class AuthService {
 
   private clearSession(): void {
     localStorage.removeItem('user');
+    localStorage.removeItem('refreshToken');
     this.currentUser.set(null);
     this.router.navigate(['/login']);
   }
@@ -77,7 +81,11 @@ export class AuthService {
     if (!isPlatformBrowser(this.platformId)) {
       return throwError(() => new Error('Not a browser environment'));
     }
-    return this.http.post<ApiResponse<RefreshTokenResponse>>(`${this.endpoint}/refresh-token`, {});
+    const refreshToken = localStorage.getItem('refreshToken');
+    if (!refreshToken) {
+      return throwError(() => new Error('No refresh token available'));
+    }
+    return this.http.post<ApiResponse<RefreshTokenResponse>>(`${this.endpoint}/refresh-token`, { refreshToken });
   }
 
   /** Called by the interceptor when refresh also fails — clear everything and go to login. */

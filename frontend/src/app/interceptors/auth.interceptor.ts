@@ -6,11 +6,12 @@ import { AuthService } from "../services/auth.service";
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
     const authReq = req.clone({ withCredentials: true });
 
-    // Skip refresh logic for auth endpoints to avoid loops
-    const isAuthCall = req.url.includes('/auth/refresh-token')
-        || req.url.includes('/auth/login')
-        || req.url.includes('/auth/logout')
-        || req.url.includes('/auth/register');
+    // Skip refresh logic for auth endpoints to avoid loops (case-insensitive)
+    const urlLower = req.url.toLowerCase();
+    const isAuthCall = urlLower.includes('/auth/refresh-token')
+        || urlLower.includes('/auth/login')
+        || urlLower.includes('/auth/logout')
+        || urlLower.includes('/auth/register');
 
     if (isAuthCall) {
         return next(authReq);

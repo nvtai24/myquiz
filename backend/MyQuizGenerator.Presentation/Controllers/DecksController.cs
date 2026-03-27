@@ -62,7 +62,7 @@ public class DecksController : BaseApiController
     /// <param name="file">The file to process (PDF, DOCX, PPTX, TXT).</param>
     /// <returns>A generated deck with questions.</returns>
     [HttpPost("generate")]
-    public async Task<IActionResult> Generate(IFormFile file)
+    public async Task<IActionResult> Generate(IFormFile file, CancellationToken cancellationToken)
     {
         if (file == null || file.Length == 0)
         {
@@ -71,7 +71,7 @@ public class DecksController : BaseApiController
 
         using var stream = file.OpenReadStream();
         var command = new MyQuizGenerator.Application.Decks.Commands.GenerateDeckFromFiles.GenerateDeckFromFilesCommand(stream, file.FileName, file.ContentType);
-        var result = await _mediator.Send(command);
+        var result = await _mediator.Send(command, cancellationToken);
         return ApiOk(result);
     }
 

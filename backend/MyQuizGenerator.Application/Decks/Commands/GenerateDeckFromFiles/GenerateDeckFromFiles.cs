@@ -32,6 +32,7 @@ public class GenerateDeckFromFilesCommandHandler : IRequestHandler<GenerateDeckF
     }
 
     private const int ChunkSize = 15000; // Characters per chunk
+    private const int MaxParallelChunks = 5; // Process up to 5 chunks concurrently
 
     public async Task<GeneratedDeckResponse> Handle(GenerateDeckFromFilesCommand request, CancellationToken cancellationToken)
     {
@@ -86,22 +87,49 @@ public class GenerateDeckFromFilesCommandHandler : IRequestHandler<GenerateDeckF
         var chunks = ChunkText(text, ChunkSize);
         var maxQuestions = activePlan?.MaxQuestionsPerGenerate ?? -1; // -1 = unlimited
 
+        // Check cancellation before starting AI calls
+        cancellationToken.ThrowIfCancellationRequested();
+
         GeneratedDeckResponse generatedDeck = await _aiService.GenerateDeckAsync(chunks[0], cancellationToken);
 
-        // 4. Process additional chunks with early stop when limit reached
-        for (int i = 1; i < chunks.Count; i++)
+        // 4. Process additional chunks in parallel batches with early stop
+        var remainingChunks = chunks.Skip(1).ToList();
+        var allQuestions = new List<GeneratedQuestionResponse>(generatedDeck.Questions);
+
+        for (int batchStart = 0; batchStart < remainingChunks.Count; batchStart += MaxParallelChunks)
         {
-            // Early stop: skip remaining chunks if already have enough questions
-            if (maxQuestions >= 0 && generatedDeck.Questions.Count >= maxQuestions)
+            // Check cancellation before each batch
+            cancellationToken.ThrowIfCancellationRequested();
+
+            // Early stop: skip remaining if already have enough questions
+            if (maxQuestions >= 0 && allQuestions.Count >= maxQuestions)
             {
                 break;
             }
 
-            var additionalQuestions = await _aiService.GenerateQuestionsFromChunkAsync(chunks[i], i, cancellationToken);
-            generatedDeck.Questions.AddRange(additionalQuestions);
+            // Get current batch of chunks
+            var batch = remainingChunks
+                .Skip(batchStart)
+                .Take(MaxParallelChunks)
+                .Select((chunk, idx) => (Chunk: chunk, Index: batchStart + idx + 1))
+                .ToList();
+
+            // Process batch in parallel
+            var tasks = batch.Select(item =>
+                _aiService.GenerateQuestionsFromChunkAsync(item.Chunk, item.Index, cancellationToken));
+
+            var batchResults = await Task.WhenAll(tasks);
+
+            // Add results
+            foreach (var questions in batchResults)
+            {
+                allQuestions.AddRange(questions);
+            }
         }
 
-        // 5. Final trim if exceeded limit (last chunk may have pushed over)
+        generatedDeck.Questions = allQuestions;
+
+        // 5. Final trim if exceeded limit (last batch may have pushed over)
         if (maxQuestions >= 0 && generatedDeck.Questions.Count > maxQuestions)
         {
             generatedDeck.Questions = generatedDeck.Questions.Take(maxQuestions).ToList();

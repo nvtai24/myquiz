@@ -50,9 +50,6 @@ export class AuthService {
   private setSession(authData: AuthTokenResponse): void {
     if (!isPlatformBrowser(this.platformId)) return;
     localStorage.setItem('user', JSON.stringify(authData.user));
-    if (authData.refreshToken) {
-      localStorage.setItem('refreshToken', authData.refreshToken);
-    }
     this.currentUser.set(authData.user);
   }
 
@@ -71,21 +68,18 @@ export class AuthService {
 
   private clearSession(): void {
     localStorage.removeItem('user');
-    localStorage.removeItem('refreshToken');
     this.currentUser.set(null);
     this.router.navigate(['/login']);
   }
 
-  /** Called by the interceptor when a 401 occurs — silently renews the access token. */
+  /** Called by the interceptor when a 401 occurs — silently renews the access token.
+   *  Backend reads refresh token from HttpOnly cookie, withCredentials: true sends it automatically.
+   */
   refreshTokenSilent(): Observable<ApiResponse<RefreshTokenResponse>> {
     if (!isPlatformBrowser(this.platformId)) {
       return throwError(() => new Error('Not a browser environment'));
     }
-    const refreshToken = localStorage.getItem('refreshToken');
-    if (!refreshToken) {
-      return throwError(() => new Error('No refresh token available'));
-    }
-    return this.http.post<ApiResponse<RefreshTokenResponse>>(`${this.endpoint}/refresh-token`, { refreshToken });
+    return this.http.post<ApiResponse<RefreshTokenResponse>>(`${this.endpoint}/refresh-token`, {});
   }
 
   /** Called by the interceptor when refresh also fails — clear everything and go to login. */

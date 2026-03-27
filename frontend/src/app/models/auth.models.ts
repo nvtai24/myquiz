@@ -43,15 +43,10 @@ export interface User {
 }
 
 export interface AuthTokenResponse {
-  accessToken: string;
-  refreshToken: string;
-  expiresAt: string;
   user: User;
 }
 
-export interface RefreshTokenResponse {
-  expiresAt: string;
-}
+export interface RefreshTokenResponse {}
 
 export interface RegisterResponse {
   user: User;

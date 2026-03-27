@@ -18,7 +18,7 @@ export class AdminPlans implements OnInit {
   loading = signal(true);
   error = signal<string | null>(null);
   saving = signal(false);
-  successMsg = signal<string | null>(null);
+  formError = signal<string | null>(null);
 
   // Edit modal
   editingPlan = signal<AdminSubscriptionPlanResponse | null>(null);
@@ -56,12 +56,13 @@ export class AdminPlans implements OnInit {
       isActive: plan.isActive,
       order: plan.order
     });
-    this.successMsg.set(null);
+    this.formError.set(null);
   }
 
   closeModal() {
     this.editingPlan.set(null);
     this.showCreateModal.set(false);
+    this.formError.set(null);
   }
 
   getDurationText(days: number) {
@@ -73,7 +74,7 @@ export class AdminPlans implements OnInit {
 
   toggleActive(plan: AdminSubscriptionPlanResponse) {
     const newStatus = !plan.isActive;
-    
+
     Swal.fire({
       title: 'Update Status',
       text: `Are you sure you want to ${newStatus ? 'activate' : 'deactivate'} plan ${plan.name}?`,
@@ -91,7 +92,7 @@ export class AdminPlans implements OnInit {
             Swal.fire('Success', `Plan ${plan.name} has been ${newStatus ? 'activated' : 'deactivated'}.`, 'success');
             this.loadPlans();
           },
-          error: (err: any) => Swal.fire('Error', 'An error occurred: ' + err.message, 'error')
+          error: (err: any) => Swal.fire('Error', this.extractErrorMessage(err), 'error')
         });
       }
     });
@@ -114,7 +115,7 @@ export class AdminPlans implements OnInit {
             this.plans.update(plans => plans.filter(p => p.id !== plan.id));
             Swal.fire('Success', `Plan ${plan.name} deleted successfully!`, 'success');
           },
-          error: (err: any) => Swal.fire('Error', 'An error occurred during deletion: ' + err.message, 'error')
+          error: (err: any) => Swal.fire('Error', this.extractErrorMessage(err), 'error')
         });
       }
     });
@@ -123,32 +124,36 @@ export class AdminPlans implements OnInit {
   savePlan() {
     const plan = this.editingPlan();
     if (!plan) return;
+
     this.saving.set(true);
+    this.formError.set(null);
     this.adminService.updateSubscriptionPlan(plan.id, this.editForm()).subscribe({
       next: () => {
         this.saving.set(false);
-        this.successMsg.set('Updated successfully!');
+        Swal.fire('Success', `Plan ${plan.name} updated successfully!`, 'success');
         this.closeModal();
         this.loadPlans();
       },
       error: (err) => {
         this.saving.set(false);
-        this.error.set(err?.error?.message ?? 'Error updating plan');
+        this.formError.set(this.extractErrorMessage(err));
       }
     });
   }
 
   createPlan() {
     this.saving.set(true);
+    this.formError.set(null);
     this.adminService.createSubscriptionPlan(this.editForm()).subscribe({
       next: () => {
         this.saving.set(false);
+        Swal.fire('Success', 'Plan created successfully!', 'success');
         this.closeModal();
         this.loadPlans();
       },
       error: (err) => {
         this.saving.set(false);
-        this.error.set(err?.error?.message ?? 'Error creating plan');
+        this.formError.set(this.extractErrorMessage(err));
       }
     });
   }
@@ -156,6 +161,11 @@ export class AdminPlans implements OnInit {
   openCreate() {
     this.editingPlan.set(null);
     this.editForm.set({ name: '', description: '', dailyGenerateLimit: 0, maxQuestionsPerGenerate: 20, hasExportToPdf: false, price: 0, duration: 30, isActive: true, order: 1 });
+    this.formError.set(null);
     this.showCreateModal.set(true);
+  }
+
+  private extractErrorMessage(err: any): string {
+    return err?.error?.message ?? err?.message ?? 'An error occurred. Please try again.';
   }
 }

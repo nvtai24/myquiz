@@ -194,7 +194,8 @@ public class OpenAiService : IAiService
 
         var options = new ChatCompletionOptions
         {
-            MaxOutputTokenCount = _settings.MaxTokens
+            MaxOutputTokenCount = _settings.MaxTokens,
+            Temperature = _settings.Temperature
         };
 
         return await _resiliencePipeline.ExecuteAsync(async ct =>
@@ -253,7 +254,8 @@ public class OpenAiService : IAiService
 
         var options = new ChatCompletionOptions
         {
-            MaxOutputTokenCount = _settings.MaxTokens
+            MaxOutputTokenCount = _settings.MaxTokens,
+            Temperature = _settings.Temperature
         };
 
         return await _resiliencePipeline.ExecuteAsync(async ct =>
@@ -322,6 +324,7 @@ public class OpenAiService : IAiService
         {
             model = _settings.Model,
             max_output_tokens = _settings.MaxTokens,
+            temperature = _settings.Temperature,
             input = new object[]
             {
                 new

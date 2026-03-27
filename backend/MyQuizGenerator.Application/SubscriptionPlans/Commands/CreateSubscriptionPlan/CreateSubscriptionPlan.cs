@@ -1,4 +1,6 @@
 using MediatR;
+using Microsoft.EntityFrameworkCore;
+using MyQuizGenerator.Application.Common.Exceptions;
 using MyQuizGenerator.Application.Common.Interfaces;
 using MyQuizGenerator.Application.SubscriptionPlans.DTOs;
 using MyQuizGenerator.Domain.Entities;
@@ -22,6 +24,14 @@ public class CreateSubscriptionPlanCommandHandler : IRequestHandler<CreateSubscr
 
     public async Task<SubscriptionPlanResponse> Handle(CreateSubscriptionPlanCommand command, CancellationToken cancellationToken)
     {
+        var orderExists = await _repository.GetQueryable()
+            .AnyAsync(p => p.Order == command.Request.Order, cancellationToken);
+
+        if (orderExists)
+        {
+            throw new ConflictException($"Subscription plan order {command.Request.Order} already exists.");
+        }
+
         var plan = new SubscriptionPlan
         {
             Name = command.Request.Name,

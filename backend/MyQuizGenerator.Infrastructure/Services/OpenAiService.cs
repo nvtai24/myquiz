@@ -1,9 +1,11 @@
 using System.Text.Json;
 using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.Extensions.Options;
 using MyQuizGenerator.Application.Common.Interfaces;
 using MyQuizGenerator.Application.Decks.DTOs;
 using MyQuizGenerator.Infrastructure.Settings;
+using MyQuizGenerator.Application.Common.Exceptions;
 using OpenAI.Chat;
 using Polly;
 using Polly.Retry;
@@ -71,12 +73,27 @@ public class OpenAiService : IAiService
         {
             var questionsPerPass = DetermineQuestionsPerPass(targetQuestions, pageRanges.Count);
             var firstRange = pageRanges[0];
-            var initialDeck = await GenerateDeckFromPdfRangeAsync(
-                fileId,
-                firstRange.StartPage,
-                firstRange.EndPage,
-                Math.Min(targetQuestions, questionsPerPass),
-                cancellationToken);
+            GeneratedDeckResponse initialDeck;
+            try
+            {
+                initialDeck = await GenerateDeckFromPdfRangeAsync(
+                    fileId,
+                    firstRange.StartPage,
+                    firstRange.EndPage,
+                    Math.Min(targetQuestions, questionsPerPass),
+                    cancellationToken);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Initial PDF pass failed. Falling back to empty metadata and continuing with later passes.");
+                initialDeck = new GeneratedDeckResponse
+                {
+                    Name = Path.GetFileNameWithoutExtension(fileName),
+                    Description = string.Empty,
+                    Tags = new List<string>(),
+                    Questions = new List<GeneratedQuestionResponse>()
+                };
+            }
 
             var allQuestions = new List<GeneratedQuestionResponse>();
             AddUniqueQuestions(allQuestions, initialDeck.Questions);
@@ -87,31 +104,45 @@ public class OpenAiService : IAiService
                 var remaining = targetQuestions - allQuestions.Count;
                 var budget = Math.Min(remaining, questionsPerPass);
 
-                var moreQuestions = await GenerateQuestionsFromPdfRangeAsync(
-                    fileId,
-                    range.StartPage,
-                    range.EndPage,
-                    budget,
-                    i + 1,
-                    cancellationToken);
+                try
+                {
+                    var moreQuestions = await GenerateQuestionsFromPdfRangeAsync(
+                        fileId,
+                        range.StartPage,
+                        range.EndPage,
+                        budget,
+                        i + 1,
+                        cancellationToken);
 
-                AddUniqueQuestions(allQuestions, moreQuestions);
+                    AddUniqueQuestions(allQuestions, moreQuestions);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "PDF pass {PassIndex} failed for pages {StartPage}-{EndPage}. Skipping this pass.", i + 1, range.StartPage, range.EndPage);
+                }
             }
 
             // If the page-window passes still miss target due to overlap/dedup, request one global fill pass.
             if (allQuestions.Count < targetQuestions)
             {
                 var remaining = targetQuestions - allQuestions.Count;
-                var fillQuestions = await GenerateQuestionsFromPdfRangeAsync(
-                    fileId,
-                    1,
-                    totalPages > 0 ? totalPages : pageRanges.Last().EndPage,
-                    Math.Min(remaining, Math.Max(4, questionsPerPass + 2)),
-                    0,
-                    cancellationToken,
-                    isGlobalFill: true);
+                try
+                {
+                    var fillQuestions = await GenerateQuestionsFromPdfRangeAsync(
+                        fileId,
+                        1,
+                        totalPages > 0 ? totalPages : pageRanges.Last().EndPage,
+                        Math.Min(remaining, Math.Max(4, questionsPerPass + 2)),
+                        0,
+                        cancellationToken,
+                        isGlobalFill: true);
 
-                AddUniqueQuestions(allQuestions, fillQuestions);
+                    AddUniqueQuestions(allQuestions, fillQuestions);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Global fill pass failed. Returning currently generated questions.");
+                }
             }
 
             var result = new GeneratedDeckResponse
@@ -163,7 +194,6 @@ public class OpenAiService : IAiService
 
         var options = new ChatCompletionOptions
         {
-            Temperature = _settings.Temperature,
             MaxOutputTokenCount = _settings.MaxTokens
         };
 
@@ -223,7 +253,6 @@ public class OpenAiService : IAiService
 
         var options = new ChatCompletionOptions
         {
-            Temperature = _settings.Temperature,
             MaxOutputTokenCount = _settings.MaxTokens
         };
 
@@ -292,7 +321,6 @@ public class OpenAiService : IAiService
         var payload = new
         {
             model = _settings.Model,
-            temperature = _settings.Temperature,
             max_output_tokens = _settings.MaxTokens,
             input = new object[]
             {
@@ -317,20 +345,43 @@ public class OpenAiService : IAiService
         };
 
         var payloadJson = JsonSerializer.Serialize(payload);
-        using var response = await httpClient.PostAsync(
-            "responses",
-            new StringContent(payloadJson, Encoding.UTF8, "application/json"),
-            cancellationToken);
+        const int maxAttempts = 5;
 
-        var body = await response.Content.ReadAsStringAsync(cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
+        for (var attempt = 1; attempt <= maxAttempts; attempt++)
         {
-            _logger.LogError("OpenAI responses.create failed: {StatusCode} - {Body}", response.StatusCode, body);
-            throw new Exception("Failed to generate deck from PDF via OpenAI.");
+            try
+            {
+                using var response = await httpClient.PostAsync(
+                    "responses",
+                    new StringContent(payloadJson, Encoding.UTF8, "application/json"),
+                    cancellationToken);
+
+                var body = await response.Content.ReadAsStringAsync(cancellationToken);
+
+                if (!response.IsSuccessStatusCode)
+                {
+                    if ((int)response.StatusCode == 429 && attempt < maxAttempts)
+                    {
+                        var retryDelay = ResolveRateLimitDelay(response, body, attempt);
+                        _logger.LogWarning("OpenAI responses rate-limited on attempt {Attempt}. Retrying after {DelaySeconds}s.", attempt, retryDelay.TotalSeconds);
+                        await Task.Delay(retryDelay, cancellationToken);
+                        continue;
+                    }
+
+                    _logger.LogError("OpenAI responses.create failed: {StatusCode} - {Body}", response.StatusCode, body);
+                    throw new BadRequestException($"OpenAI responses.create failed ({(int)response.StatusCode}): {TruncateForError(body)}");
+                }
+
+                return ExtractOutputText(body);
+            }
+            catch (TaskCanceledException ex) when (!cancellationToken.IsCancellationRequested && attempt < maxAttempts)
+            {
+                _logger.LogWarning(ex, "OpenAI responses timeout on attempt {Attempt}, retrying...", attempt);
+                await Task.Delay(TimeSpan.FromSeconds(2 * attempt), cancellationToken);
+            }
         }
 
-        return ExtractOutputText(body);
+        throw new BadRequestException("OpenAI responses request timed out after retries.");
     }
 
     private static string ExtractOutputText(string responseBody)
@@ -535,29 +586,30 @@ public class OpenAiService : IAiService
 
     private static int DeterminePdfWindowSize(int totalPages)
     {
-        // Prefer small windows for better question focus and less semantic dilution.
-        if (totalPages <= 0 || totalPages <= 20)
+        // Keep each pass focused but not too sparse.
+        if (totalPages <= 0 || totalPages <= 15)
         {
             return 2;
         }
 
-        if (totalPages <= 60)
+        if (totalPages <= 50)
         {
             return 3;
         }
 
-        return 4;
+        return 4; // Very long PDFs need slightly bigger windows to avoid too many calls.
     }
 
     private static int DetermineQuestionsPerPass(int targetQuestions, int totalRanges)
     {
         if (totalRanges <= 0)
         {
-            return 10;
+            return 6;
         }
 
+        // Balanced density: enough coverage per pass without making questions too generic.
         var average = (int)Math.Ceiling((double)targetQuestions / totalRanges);
-        return Math.Clamp(average, 8, 10);
+        return Math.Clamp(average, 5, 7);
     }
 
     private static void AddUniqueQuestions(List<GeneratedQuestionResponse> target, IEnumerable<GeneratedQuestionResponse> source)
@@ -586,6 +638,37 @@ public class OpenAiService : IAiService
         return content.Trim().ToLowerInvariant();
     }
 
+    private static TimeSpan ResolveRateLimitDelay(HttpResponseMessage response, string body, int attempt)
+    {
+        if (response.Headers.TryGetValues("Retry-After", out var values))
+        {
+            var raw = values.FirstOrDefault();
+            if (int.TryParse(raw, out var seconds) && seconds > 0)
+            {
+                return TimeSpan.FromSeconds(seconds + 1);
+            }
+        }
+
+        // Example body fragment: "Please try again in 10.557s."
+        var match = Regex.Match(body, @"try again in\s+([0-9]+(?:\.[0-9]+)?)s", RegexOptions.IgnoreCase);
+        if (match.Success && double.TryParse(match.Groups[1].Value, out var secondsFromBody) && secondsFromBody > 0)
+        {
+            return TimeSpan.FromSeconds(Math.Ceiling(secondsFromBody) + 1);
+        }
+
+        return TimeSpan.FromSeconds(Math.Min(30, 3 * attempt));
+    }
+
+    private static string TruncateForError(string content, int maxLength = 1200)
+    {
+        if (string.IsNullOrWhiteSpace(content))
+        {
+            return "(empty response body)";
+        }
+
+        return content.Length <= maxLength ? content : content[..maxLength] + "...(truncated)";
+    }
+
     private async Task TryDeleteOpenAiFileAsync(string fileId, CancellationToken cancellationToken)
     {
         try
@@ -603,7 +686,9 @@ public class OpenAiService : IAiService
     {
         var client = _httpClientFactory.CreateClient();
         client.BaseAddress = new Uri("https://api.openai.com/v1/");
+        client.Timeout = TimeSpan.FromMinutes(10);
         client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", _settings.ApiKey);
         return client;
     }
 }
+

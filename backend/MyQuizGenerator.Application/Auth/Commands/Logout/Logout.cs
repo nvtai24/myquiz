@@ -18,7 +18,10 @@ public class LogoutCommandHandler : IRequestHandler<LogoutCommand>
     public async Task Handle(LogoutCommand command, CancellationToken cancellationToken)
     {
         // Revoke refresh token from Redis — instantly invalidates the session
-        await _tokenService.RevokeRefreshTokenAsync(command.Request.RefreshToken, cancellationToken);
+        if (!string.IsNullOrEmpty(command.Request.RefreshToken))
+        {
+            await _tokenService.RevokeRefreshTokenAsync(command.Request.RefreshToken, cancellationToken);
+        }
 
         // Blacklist access token
         if (!string.IsNullOrEmpty(command.Request.AccessToken))

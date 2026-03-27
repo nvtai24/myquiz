@@ -54,21 +54,47 @@ public class AuthController : BaseApiController
     }
 
     [HttpPost("refresh-token")]
-    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
+    public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest? request)
     {
-        var command = new RefreshTokenCommand(request);
+        // Priority: read from cookie (HttpOnly), fallback to body for backward compatibility
+        var refreshToken = Request.Cookies["refresh_token"];
+
+        if (string.IsNullOrEmpty(refreshToken))
+        {
+            refreshToken = request?.RefreshToken;
+        }
+
+        if (string.IsNullOrEmpty(refreshToken))
+        {
+            return ApiBadRequest("Refresh token is required");
+        }
+
+        var command = new RefreshTokenCommand(new RefreshTokenRequest { RefreshToken = refreshToken });
         var response = await Mediator.Send(command);
         SetCookies(response.AccessToken, response.RefreshToken, response.ExpiresAt);
         return ApiOk(response, "Token refreshed successfully");
     }
 
     [HttpPost("logout")]
-    public async Task<IActionResult> Logout([FromBody] LogoutRequest request)
+    public async Task<IActionResult> Logout([FromBody] LogoutRequest? request)
     {
-        var command = new LogoutCommand(request);
+        // Read tokens from cookies (primary) or body (backward compatibility)
+        var refreshToken = Request.Cookies["refresh_token"] ?? request?.RefreshToken;
+        var accessToken = Request.Cookies["access_token"] ?? request?.AccessToken;
+
+        var logoutRequest = new LogoutRequest
+        {
+            RefreshToken = refreshToken,
+            AccessToken = accessToken
+        };
+
+        var command = new LogoutCommand(logoutRequest);
         await Mediator.Send(command);
-        Response.Cookies.Delete("access_token");
-        Response.Cookies.Delete("refresh_token");
+
+        // Clear cookies (must match the Path used when setting)
+        Response.Cookies.Delete("access_token", new CookieOptions { Path = "/" });
+        Response.Cookies.Delete("refresh_token", new CookieOptions { Path = "/api/auth" });
+
         return ApiOk("Logout successful");
     }
 
@@ -160,7 +186,7 @@ public class AuthController : BaseApiController
             Secure = true,
             SameSite = SameSiteMode.None,
             Expires = expiresAt.AddDays(7),
-            Path = "/api/auth/refresh-token" // only send to refresh-token endpoint
+            Path = "/api/auth" // only send to Auth endpoints (refresh-token, logout)
         });
     }
 }

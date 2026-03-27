@@ -1,12 +1,10 @@
-using System.ComponentModel.DataAnnotations;
-
 namespace MyQuizGenerator.Application.Auth.DTOs;
 
+/// <summary>
+/// Logout request - tokens are read from HttpOnly cookies, body is optional for backward compatibility
+/// </summary>
 public class LogoutRequest
 {
-    [Required]
-    public string RefreshToken { get; set; } = string.Empty;
-
-    [Required]
-    public string AccessToken { get; set; } = string.Empty;
+    public string? RefreshToken { get; set; }
+    public string? AccessToken { get; set; }
 }

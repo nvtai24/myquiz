@@ -582,6 +582,11 @@ export class AddDeck implements OnInit, CanComponentDeactivate {
   private applyGeneratedDeckResponse(deck: GeneratedDeckResponse) {
     if (!this.title().trim() && deck.name) this.title.set(deck.name);
     if (!this.description().trim() && deck.description) this.description.set(deck.description);
+    if (deck.tags?.length) {
+      const existing = this.tags();
+      const newTags = deck.tags.filter(t => !existing.includes(t));
+      if (newTags.length) this.tags.update(t => [...t, ...newTags]);
+    }
 
     const mapped: Card[] = deck.questions.map((q: GeneratedQuestionResponse) => {
       const cardType = this.mapQuestionTypeToCardType(q.type);

@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal, computed, PLATFORM_ID } from '@angular/core';
-import { isPlatformBrowser } from '@angular/common';
+import { isPlatformBrowser, Location } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -36,6 +36,7 @@ export class DeckDetail implements OnInit {
   private authService = inject(AuthService);
   private paymentService = inject(PaymentService);
   private platformId = inject(PLATFORM_ID);
+  private location = inject(Location);
 
   // State
   deck = signal<DeckDetailResponse | null>(null);
@@ -424,6 +425,10 @@ export class DeckDetail implements OnInit {
 
   get deckId(): string {
     return this.deck()?.id ?? '';
+  }
+
+  goBack() {
+    this.location.back();
   }
 
   get visibleTerms(): QuestionResponse[] {

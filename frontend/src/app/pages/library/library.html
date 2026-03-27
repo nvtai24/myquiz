@@ -171,20 +171,16 @@
             } @else {
             <img src="/images/thumbnail_default.png" alt="Flashcards" class="absolute inset-0 w-full h-full object-cover" />
             }
-            <span class="status-badge z-10" [class.published]="deck.status === 'Published'" [class.draft]="deck.status === 'Draft'">
-              <span class="material-symbols-outlined">{{ deck.status === 'Published' ? 'public' : 'edit_note' }}</span>
-              {{ deck.status }}
+            <span class="status-badge z-10"
+              [class.public]="deck.visibility === 'Public'"
+              [class.private]="deck.visibility === 'Private'"
+              [class.shared]="deck.visibility === 'Shared'">
+              <span class="material-symbols-outlined">{{ deck.visibility === 'Private' ? 'lock' : deck.visibility === 'Shared' ? 'group' : 'public' }}</span>
+              {{ deck.visibility }}
             </span>
             <span class="terms-badge z-10">{{ deck.questionCount }} TERMS</span>
           </div>
           <div class="quiz-info">
-            <div class="quiz-header">
-              <span class="visibility-badge" [class.private]="deck.visibility === 'Private'" [class.shared]="deck.visibility === 'Shared'">
-                <span class="material-symbols-outlined">{{ deck.visibility === 'Private' ? 'lock' : deck.visibility === 'Shared' ? 'group' : 'public' }}</span>
-                {{ deck.visibility }}
-              </span>
-            </div>
-
             <h3 class="quiz-title">{{ deck.name }}</h3>
 
             <div class="quiz-tags">

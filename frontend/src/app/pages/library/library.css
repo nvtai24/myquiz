@@ -521,12 +521,16 @@
 .status-badge .material-symbols-outlined {
   font-size: 14px;
 }
-.status-badge.draft {
-  background: rgba(217, 119, 6, 0.9);
+.status-badge.public {
+  background: rgba(66, 85, 255, 0.9);
   color: #fff;
 }
-.status-badge.published {
-  background: rgba(66, 85, 255, 0.9);
+.status-badge.private {
+  background: rgba(75, 85, 99, 0.9);
+  color: #fff;
+}
+.status-badge.shared {
+  background: rgba(217, 119, 6, 0.9);
   color: #fff;
 }
 

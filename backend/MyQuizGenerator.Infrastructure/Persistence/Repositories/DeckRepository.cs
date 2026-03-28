@@ -157,7 +157,7 @@ public class DeckRepository : Repository<Guid, Deck>, IDeckRepository
     {
         var query = _context.Decks
             .AsNoTracking()
-            .Where(d => d.Visibility == Domain.Enums.DeckVisibility.Public);
+            .Where(d => d.Visibility == Domain.Enums.DeckVisibility.Public && d.Status == Domain.Enums.DeckStatus.Published);
 
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {

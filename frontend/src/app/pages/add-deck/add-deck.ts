@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit, HostListener } from '@angular/core';
+import { Component, inject, signal, OnInit, OnDestroy, HostListener } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { DeckService } from '../../services/deck.service';
@@ -12,7 +12,7 @@ import {
   GeneratedQuestionResponse,
   QuestionType,
 } from '../../models/deck.models';
-import { forkJoin, of, switchMap, map, finalize, Subject } from 'rxjs';
+import { forkJoin, of, switchMap, map, finalize, Subject, Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { CanComponentDeactivate } from '../../guards/unsaved-changes.guard';
 
@@ -36,7 +36,7 @@ interface Card {
   imports: [FormsModule, CommonModule],
   templateUrl: './add-deck.html',
 })
-export class AddDeck implements OnInit, CanComponentDeactivate {
+export class AddDeck implements OnInit, OnDestroy, CanComponentDeactivate {
   title = signal('');
   description = signal('');
   visibility = signal<'public' | 'private' | 'shared'>('public');
@@ -74,8 +74,11 @@ export class AddDeck implements OnInit, CanComponentDeactivate {
   pendingAiCards = signal<Card[]>([]);
 
   aiUsageCount = signal<number>(0);
-  aiUsageMax = signal<number>(0); 
+  aiUsageMax = signal<number>(0);
   aiLimitLoading = signal<boolean>(false);
+  aiStreamProgress = signal<{ current: number; total: number; questions: number } | null>(null);
+
+  private currentStreamSub: Subscription | null = null;
 
   private nextId = 3;
   cards = signal<Card[]>([
@@ -99,6 +102,12 @@ export class AddDeck implements OnInit, CanComponentDeactivate {
 
   ngOnInit() {
     this.loadSubscriptionLimits();
+  }
+
+  ngOnDestroy() {
+    // Unsubscribe → triggers AbortController.abort() inside generateDeckStream()
+    // → fetch cancelled → BE receives CancellationToken → OpenAI call stops
+    this.currentStreamSub?.unsubscribe();
   }
 
   @HostListener('window:beforeunload', ['$event'])
@@ -540,6 +549,7 @@ export class AddDeck implements OnInit, CanComponentDeactivate {
 
   generateWithAi() {
     if (this.aiGenerating()) return;
+
     let fileToSend: File | null = null;
     if (this.aiSource() === 'upload') {
       if (!this.aiFile()) {
@@ -556,25 +566,58 @@ export class AddDeck implements OnInit, CanComponentDeactivate {
       const blob = new Blob([text], { type: 'text/plain' });
       fileToSend = new File([blob], 'pasted-content.txt', { type: 'text/plain' });
     }
+
     this.aiGenerating.set(true);
+    this.aiStreamProgress.set(null);
     this.errorMessage.set(null);
     this.lastUsedAiFile.set(fileToSend);
 
-    this.deckService.generateDeck(fileToSend!).subscribe({
-      next: (res) => {
-        this.aiGenerating.set(false);
-        if (!res.success || !res.data) {
-          this.showError(res.message || 'AI generation failed');
-          return;
+    let deckMeta: { name: string; description: string; tags: string[] } | null = null;
+    let allQuestions: GeneratedQuestionResponse[] = [];
+
+    this.currentStreamSub = this.deckService.generateDeckStream(fileToSend!).subscribe({
+      next: (event) => {
+        switch (event.type) {
+          case 'start':
+            this.aiStreamProgress.set({ current: 0, total: event.totalChunks, questions: 0 });
+            break;
+          case 'metadata':
+            deckMeta = { name: event.name, description: event.description, tags: event.tags };
+            break;
+          case 'questions':
+            allQuestions = [...allQuestions, ...event.questions];
+            this.aiStreamProgress.set({
+              current: event.chunk,
+              total: event.totalChunks,
+              questions: event.totalQuestions,
+            });
+            break;
+          case 'error':
+            this.aiGenerating.set(false);
+            this.aiStreamProgress.set(null);
+            this.showError(event.message);
+            break;
         }
-        if (this.aiUsageMax() !== -1) {
-          this.aiUsageCount.update((c) => c + 1);
-        }
-        this.applyGeneratedDeckResponse(res.data);
       },
-      error: (err) => {
+      complete: () => {
         this.aiGenerating.set(false);
-        this.showError(this.extractErrorMessage(err));
+        this.aiStreamProgress.set(null);
+        if (allQuestions.length > 0 && deckMeta) {
+          if (this.aiUsageMax() !== -1) {
+            this.aiUsageCount.update((c) => c + 1);
+          }
+          this.applyGeneratedDeckResponse({
+            name: deckMeta.name,
+            description: deckMeta.description,
+            tags: deckMeta.tags,
+            questions: allQuestions,
+          });
+        }
+      },
+      error: () => {
+        this.aiGenerating.set(false);
+        this.aiStreamProgress.set(null);
+        this.showError('Connection lost. Please try again.');
       },
     });
   }

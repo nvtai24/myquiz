@@ -13,10 +13,13 @@ import {
   DeckSummaryResponse,
   ExploreDeckResponse,
   GeneratedDeckResponse,
+  QuestionType,
   QuizAttemptHistoryResponse,
   RecentDeckResponse,
+  SseStreamEvent,
   UpdateDeckRequest
 } from '../models/deck.models';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root',
@@ -101,6 +104,104 @@ export class DeckService {
     const formData = new FormData();
     formData.append('file', file, file.name);
     return this.http.post<ApiResponse<GeneratedDeckResponse>>(`${this.endpoint}/generate`, formData);
+  }
+
+  generateDeckStream(file: File): Observable<SseStreamEvent> {
+    return new Observable<SseStreamEvent>(observer => {
+      const abortController = new AbortController();
+      const formData = new FormData();
+      formData.append('file', file, file.name);
+
+      const apiUrl: string = (environment as any).apiUrl || '';
+
+      fetch(`${apiUrl}/api/Decks/generate/stream`, {
+        method: 'POST',
+        body: formData,
+        credentials: 'include',
+        signal: abortController.signal,
+      })
+        .then(async response => {
+          if (!response.ok) {
+            observer.error(new Error(`HTTP error ${response.status}`));
+            return;
+          }
+
+          const reader = response.body!.getReader();
+          const decoder = new TextDecoder();
+          let buffer = '';
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            buffer += decoder.decode(value, { stream: true });
+
+            // SSE events separated by double newline (handle \r\n and \n)
+            const parts = buffer.split(/\r?\n\r?\n/);
+            buffer = parts.pop() ?? '';
+
+            for (const part of parts) {
+              const lines = part.split(/\r?\n/);
+              let eventName = '';
+              let dataStr = '';
+
+              for (const line of lines) {
+                if (line.startsWith('event: ')) {
+                  eventName = line.slice(7).trim();
+                } else if (line.startsWith('data: ')) {
+                  dataStr = line.slice(6);
+                }
+              }
+
+              if (!eventName || !dataStr) continue;
+
+              try {
+                const raw = JSON.parse(dataStr);
+                // BE sends numeric enum (0,1,2) for question type — normalize to string
+                if (Array.isArray(raw.questions)) {
+                  raw.questions = raw.questions.map((q: any) => ({
+                    ...q,
+                    type: this.normalizeQuestionType(q.type),
+                  }));
+                }
+                const event = { ...raw, type: eventName } as SseStreamEvent;
+                observer.next(event);
+
+                if (eventName === 'complete' || eventName === 'error') {
+                  observer.complete();
+                  return;
+                }
+              } catch {
+                // ignore malformed SSE event
+              }
+            }
+          }
+
+          observer.complete();
+        })
+        .catch(err => {
+          if (err.name === 'AbortError') {
+            observer.complete();
+          } else {
+            observer.error(err);
+          }
+        });
+
+      // Unsubscribe → abort fetch → BE gets cancellation via CancellationToken
+      return () => abortController.abort();
+    });
+  }
+
+  private normalizeQuestionType(type: QuestionType | number): QuestionType {
+    if (typeof type === 'number') {
+      const map: Record<number, QuestionType> = {
+        0: 'MultipleChoice',
+        1: 'TrueFalse',
+        2: 'FillInTheBlank',
+      };
+      return map[type] ?? 'MultipleChoice';
+    }
+    return type;
   }
 
   deleteDeck(id: string): Observable<ApiResponse<void>> {

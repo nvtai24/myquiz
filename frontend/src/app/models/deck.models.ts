@@ -187,6 +187,49 @@ export interface RecentDeckResponse {
   lastActivityAt: string;
 }
 
+// ── SSE Streaming Events ──
+
+export interface SseStartEvent {
+  type: 'start';
+  totalChunks: number;
+  maxQuestions: number;
+}
+
+export interface SseMetadataEvent {
+  type: 'metadata';
+  name: string;
+  description: string;
+  tags: string[];
+}
+
+export interface SseQuestionsEvent {
+  type: 'questions';
+  chunk: number;
+  totalChunks: number;
+  questions: GeneratedQuestionResponse[];
+  totalQuestions: number;
+}
+
+export interface SseCompleteEvent {
+  type: 'complete';
+  name: string;
+  description: string;
+  tags: string[];
+  totalQuestions: number;
+}
+
+export interface SseErrorEvent {
+  type: 'error';
+  message: string;
+}
+
+export type SseStreamEvent =
+  | SseStartEvent
+  | SseMetadataEvent
+  | SseQuestionsEvent
+  | SseCompleteEvent
+  | SseErrorEvent;
+
 // ── Explore ──
 
 export interface ExploreDeckResponse {

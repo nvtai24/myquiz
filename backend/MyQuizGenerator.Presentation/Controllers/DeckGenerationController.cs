@@ -112,60 +112,103 @@ public class DeckGenerationController : BaseApiController
                 tags = generatedDeck.Tags
             }, jsonOptions, cancellationToken);
 
-            // Send first batch of questions
-            await SendSseEventAsync("questions", new
-            {
-                chunk = 1,
-                totalChunks,
-                questions = generatedDeck.Questions,
-                totalQuestions = generatedDeck.Questions.Count
-            }, jsonOptions, cancellationToken);
-
             var allQuestions = new List<GeneratedQuestionResponse>(generatedDeck.Questions);
-            var remainingChunks = chunks.Skip(1).ToList();
 
-            // Process remaining chunks in parallel batches
-            for (int batchStart = 0; batchStart < remainingChunks.Count; batchStart += MaxParallelChunks)
+            // Check if first chunk already has enough questions
+            if (maxQuestions >= 0 && allQuestions.Count >= maxQuestions)
             {
-                cancellationToken.ThrowIfCancellationRequested();
-
-                // Early stop
-                if (maxQuestions >= 0 && allQuestions.Count >= maxQuestions)
-                {
-                    break;
-                }
-
-                var batch = remainingChunks
-                    .Skip(batchStart)
-                    .Take(MaxParallelChunks)
-                    .Select((chunk, idx) => (Chunk: chunk, Index: batchStart + idx + 1))
-                    .ToList();
-
-                var tasks = batch.Select(item =>
-                    _aiService.GenerateQuestionsFromChunkAsync(item.Chunk, item.Index, cancellationToken));
-
-                var batchResults = await Task.WhenAll(tasks);
-
-                // Send each batch result
-                foreach (var (questions, idx) in batchResults.Select((q, i) => (q, i)))
-                {
-                    allQuestions.AddRange(questions);
-                    var chunkNumber = batchStart + idx + 2; // +2 because chunk 1 is already processed
-
-                    await SendSseEventAsync("questions", new
-                    {
-                        chunk = chunkNumber,
-                        totalChunks,
-                        questions,
-                        totalQuestions = allQuestions.Count
-                    }, jsonOptions, cancellationToken);
-                }
-            }
-
-            // Trim if needed
-            if (maxQuestions >= 0 && allQuestions.Count > maxQuestions)
-            {
+                // Trim to limit and skip remaining chunks
                 allQuestions = allQuestions.Take(maxQuestions).ToList();
+
+                await SendSseEventAsync("questions", new
+                {
+                    chunk = 1,
+                    totalChunks,
+                    questions = allQuestions,
+                    totalQuestions = allQuestions.Count
+                }, jsonOptions, cancellationToken);
+            }
+            else
+            {
+                // Send first batch of questions
+                await SendSseEventAsync("questions", new
+                {
+                    chunk = 1,
+                    totalChunks,
+                    questions = generatedDeck.Questions,
+                    totalQuestions = generatedDeck.Questions.Count
+                }, jsonOptions, cancellationToken);
+
+                var remainingChunks = chunks.Skip(1).ToList();
+
+                // Process remaining chunks in parallel batches
+                for (int batchStart = 0; batchStart < remainingChunks.Count; batchStart += MaxParallelChunks)
+                {
+                    cancellationToken.ThrowIfCancellationRequested();
+
+                    // Early stop - check before starting new batch
+                    if (maxQuestions >= 0 && allQuestions.Count >= maxQuestions)
+                    {
+                        break;
+                    }
+
+                    // Calculate how many more questions we need
+                    var questionsNeeded = maxQuestions >= 0 ? maxQuestions - allQuestions.Count : int.MaxValue;
+
+                    // Limit batch size based on questions needed (estimate ~5 questions per chunk)
+                    var estimatedChunksNeeded = maxQuestions >= 0 ? Math.Max(1, (int)Math.Ceiling(questionsNeeded / 5.0)) : MaxParallelChunks;
+                    var chunksToProcess = Math.Min(MaxParallelChunks, estimatedChunksNeeded);
+
+                    var batch = remainingChunks
+                        .Skip(batchStart)
+                        .Take(chunksToProcess)
+                        .Select((chunk, idx) => (Chunk: chunk, Index: batchStart + idx + 1))
+                        .ToList();
+
+                    var tasks = batch.Select(item =>
+                        _aiService.GenerateQuestionsFromChunkAsync(item.Chunk, item.Index, cancellationToken));
+
+                    var batchResults = await Task.WhenAll(tasks);
+
+                    // Send each batch result
+                    foreach (var (questions, idx) in batchResults.Select((q, i) => (q, i)))
+                    {
+                        // Check if we've reached limit before adding more
+                        if (maxQuestions >= 0 && allQuestions.Count >= maxQuestions)
+                        {
+                            break;
+                        }
+
+                        var questionsToAdd = questions;
+
+                        // Trim this batch if it would exceed limit
+                        if (maxQuestions >= 0)
+                        {
+                            var remaining = maxQuestions - allQuestions.Count;
+                            if (questions.Count > remaining)
+                            {
+                                questionsToAdd = questions.Take(remaining).ToList();
+                            }
+                        }
+
+                        allQuestions.AddRange(questionsToAdd);
+                        var chunkNumber = batchStart + idx + 2; // +2 because chunk 1 is already processed
+
+                        await SendSseEventAsync("questions", new
+                        {
+                            chunk = chunkNumber,
+                            totalChunks,
+                            questions = questionsToAdd,
+                            totalQuestions = allQuestions.Count
+                        }, jsonOptions, cancellationToken);
+
+                        // Check again after adding - if limit reached, break out
+                        if (maxQuestions >= 0 && allQuestions.Count >= maxQuestions)
+                        {
+                            break;
+                        }
+                    }
+                }
             }
 
             // Increment rate limit

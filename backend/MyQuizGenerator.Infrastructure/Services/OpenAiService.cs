@@ -179,17 +179,47 @@ public class OpenAiService : IAiService
               "name": "A suitable concise title for the deck",
               "description": "A brief description of what this deck covers",
               "tags": ["tag1", "tag2", "tag3"],
-              "questions": [
-                {
-                  "content": "Question text",
-                  "type": 0, // 0 for Multiple Choice, 1 for True/False, 2 for Fill in the Blank
-                  "options": ["Option 1", "Option 2", "Option 3", "Option 4"], // Only for Multiple Choice, include the correct answer
-                  "correctAnswers": ["Option 1"], // List of correct answers
-                  "explanation": "Explanation for the answer",
-                  "hint": "Hint for the question"
-                }
-              ]
+              "questions": [ ... ]
             }
+
+            Each question object must follow these STRICT rules based on its type:
+
+            Type 0 – Multiple Choice:
+            {
+              "content": "Question text?",
+              "type": 0,
+              "options": ["A", "B", "C", "D"],   // EXACTLY 4 distinct options. NEVER use "True"/"False" as options for type 0.
+              "correctAnswers": ["A"],             // Must contain exactly 1 value that is in the options array.
+              "explanation": "Why A is correct",
+              "hint": "Hint"
+            }
+
+            Type 1 – True / False:
+            {
+              "content": "Statement to evaluate.",
+              "type": 1,
+              "options": ["True", "False"],         // ALWAYS exactly these two values, in this order.
+              "correctAnswers": ["True"],            // Must be exactly ["True"] or ["False"].
+              "explanation": "Why it is true/false",
+              "hint": "Hint"
+            }
+
+            Type 2 – Fill in the Blank:
+            {
+              "content": "The capital of France is ___.",
+              "type": 2,
+              "options": [],                         // ALWAYS an empty array for fill-in-the-blank.
+              "correctAnswers": ["Paris"],           // One or more acceptable answers.
+              "explanation": "Explanation",
+              "hint": "Hint"
+            }
+
+            CRITICAL RULES:
+            - For type 0 (Multiple Choice): options MUST have exactly 4 items. Do NOT use "True" and "False" as options. correctAnswers must be a subset of options.
+            - For type 1 (True/False): options MUST be ["True", "False"]. correctAnswers MUST be ["True"] or ["False"].
+            - For type 2 (Fill in the Blank): options MUST be an empty array [].
+            - Every correctAnswer value MUST exactly match one of the options (for type 0 and type 1).
+            - Generate a mix of all three question types.
             Only return the JSON object. Do not include any markdown formatting or extra text.
             """;
 
@@ -225,6 +255,7 @@ public class OpenAiService : IAiService
                     PropertyNameCaseInsensitive = true
                 });
                 var result = deck ?? new GeneratedDeckResponse();
+                result.Questions = SanitizeQuestions(result.Questions);
                 _logger.LogInformation("Text deck generation completed. Deck: {DeckName}, Questions: {QuestionCount}", result.Name, result.Questions.Count);
                 return result;
             }
@@ -241,19 +272,26 @@ public class OpenAiService : IAiService
         _logger.LogInformation("Starting chunk question generation, chunk {ChunkIndex}, length: {TextLength} characters", chunkIndex + 1, chunkText.Length);
         var systemPrompt = """
             You are a helpful assistant that generates study questions from the provided text.
-            The output must be a valid JSON array with the following structure:
-            [
-              {
-                "content": "Question text",
-                "type": 0, // 0 for Multiple Choice, 1 for True/False, 2 for Fill in the Blank
-                "options": ["Option 1", "Option 2", "Option 3", "Option 4"], // Only for Multiple Choice, include the correct answer
-                "correctAnswers": ["Option 1"], // List of correct answers
-                "explanation": "Explanation for the answer",
-                "hint": "Hint for the question"
-              }
-            ]
-            Only return the JSON array. Do not include any markdown formatting or extra text.
-            Generate diverse question types based on the content.
+            The output must be a valid JSON array of question objects.
+
+            Each question object must follow these STRICT rules based on its type:
+
+            Type 0 – Multiple Choice:
+            { "content": "Question?", "type": 0, "options": ["A","B","C","D"], "correctAnswers": ["A"], "explanation": "...", "hint": "..." }
+            - options: EXACTLY 4 distinct items. NEVER use "True"/"False" as the only options for type 0.
+            - correctAnswers: exactly 1 value that appears in options.
+
+            Type 1 – True / False:
+            { "content": "Statement.", "type": 1, "options": ["True","False"], "correctAnswers": ["True"], "explanation": "...", "hint": "..." }
+            - options: ALWAYS ["True","False"].
+            - correctAnswers: MUST be ["True"] or ["False"].
+
+            Type 2 – Fill in the Blank:
+            { "content": "The ___ is ...", "type": 2, "options": [], "correctAnswers": ["answer"], "explanation": "...", "hint": "..." }
+            - options: ALWAYS empty array [].
+
+            CRITICAL: correctAnswers must match options exactly (for type 0 and 1). Generate a mix of types.
+            Only return the JSON array. No markdown.
             """;
 
         var userPrompt = $"Generate 5-10 study questions from the following text (chunk {chunkIndex + 1}):\n\n{chunkText}";
@@ -291,7 +329,7 @@ public class OpenAiService : IAiService
                 {
                     PropertyNameCaseInsensitive = true
                 });
-                var result = questions ?? new List<GeneratedQuestionResponse>();
+                var result = SanitizeQuestions(questions ?? new List<GeneratedQuestionResponse>());
                 _logger.LogInformation("Chunk question generation completed. Questions: {QuestionCount}", result.Count);
                 return result;
             }
@@ -453,10 +491,12 @@ public class OpenAiService : IAiService
 
         try
         {
-            return JsonSerializer.Deserialize<GeneratedDeckResponse>(jsonResponse, new JsonSerializerOptions
+            var deck = JsonSerializer.Deserialize<GeneratedDeckResponse>(jsonResponse, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             }) ?? new GeneratedDeckResponse();
+            deck.Questions = SanitizeQuestions(deck.Questions);
+            return deck;
         }
         catch (JsonException)
         {
@@ -479,10 +519,11 @@ public class OpenAiService : IAiService
 
         try
         {
-            return JsonSerializer.Deserialize<List<GeneratedQuestionResponse>>(jsonResponse, new JsonSerializerOptions
+            var questions = JsonSerializer.Deserialize<List<GeneratedQuestionResponse>>(jsonResponse, new JsonSerializerOptions
             {
                 PropertyNameCaseInsensitive = true
             }) ?? new List<GeneratedQuestionResponse>();
+            return SanitizeQuestions(questions);
         }
         catch (JsonException)
         {
@@ -504,17 +545,25 @@ public class OpenAiService : IAiService
               "name": "A suitable concise title",
               "description": "A brief description",
               "tags": ["tag1", "tag2", "tag3"],
-              "questions": [
-                {
-                  "content": "Question text",
-                  "type": 0,
-                  "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
-                  "correctAnswers": ["Option 1"],
-                  "explanation": "Explanation",
-                  "hint": "Hint"
-                }
-              ]
+              "questions": [ ... ]
             }
+
+            Each question MUST follow these STRICT rules by type:
+
+            Type 0 – Multiple Choice:
+            { "content": "?", "type": 0, "options": ["A","B","C","D"], "correctAnswers": ["A"], "explanation": "...", "hint": "..." }
+            - EXACTLY 4 distinct options. NEVER use only "True"/"False" for type 0.
+            - correctAnswers: exactly 1 value that is in options.
+
+            Type 1 – True / False:
+            { "content": "Statement.", "type": 1, "options": ["True","False"], "correctAnswers": ["True"], "explanation": "...", "hint": "..." }
+            - options ALWAYS ["True","False"]. correctAnswers MUST be ["True"] or ["False"].
+
+            Type 2 – Fill in the Blank:
+            { "content": "The ___ is ...", "type": 2, "options": [], "correctAnswers": ["answer"], "explanation": "...", "hint": "..." }
+            - options ALWAYS empty [].
+
+            CRITICAL: For type 0 and 1, every correctAnswer must exactly match an option. Generate a mix of types.
             Return JSON only. No markdown.
             """;
 
@@ -541,17 +590,24 @@ public class OpenAiService : IAiService
     {
         var systemPrompt = """
             You generate study questions from a PDF.
-            Return exactly one valid JSON array:
-            [
-              {
-                "content": "Question text",
-                "type": 0,
-                "options": ["Option 1", "Option 2", "Option 3", "Option 4"],
-                "correctAnswers": ["Option 1"],
-                "explanation": "Explanation",
-                "hint": "Hint"
-              }
-            ]
+            Return exactly one valid JSON array of question objects.
+
+            Each question MUST follow these STRICT rules by type:
+
+            Type 0 – Multiple Choice:
+            { "content": "?", "type": 0, "options": ["A","B","C","D"], "correctAnswers": ["A"], "explanation": "...", "hint": "..." }
+            - EXACTLY 4 distinct options. NEVER use only "True"/"False" for type 0.
+            - correctAnswers: exactly 1 value that is in options.
+
+            Type 1 – True / False:
+            { "content": "Statement.", "type": 1, "options": ["True","False"], "correctAnswers": ["True"], "explanation": "...", "hint": "..." }
+            - options ALWAYS ["True","False"]. correctAnswers MUST be ["True"] or ["False"].
+
+            Type 2 – Fill in the Blank:
+            { "content": "The ___ is ...", "type": 2, "options": [], "correctAnswers": ["answer"], "explanation": "...", "hint": "..." }
+            - options ALWAYS empty [].
+
+            CRITICAL: For type 0 and 1, every correctAnswer must exactly match an option. Generate a mix of types.
             Return JSON only. No markdown.
             """;
 
@@ -654,6 +710,93 @@ public class OpenAiService : IAiService
     private static string NormalizeQuestionKey(string content)
     {
         return content.Trim().ToLowerInvariant();
+    }
+
+    /// <summary>
+    /// Post-process AI-generated questions to fix common inconsistencies:
+    /// - MC question with only True/False options → convert to TrueFalse type
+    /// - TrueFalse question with more than 2 options → convert to MC type
+    /// - Ensure correctAnswers actually appear in options
+    /// - Ensure TrueFalse always has ["True","False"] options
+    /// - Ensure FillInTheBlank has empty options
+    /// </summary>
+    private static List<GeneratedQuestionResponse> SanitizeQuestions(List<GeneratedQuestionResponse> questions)
+    {
+        foreach (var q in questions)
+        {
+            var optionsList = q.Options?.ToList() ?? new List<string>();
+            var correctList = q.CorrectAnswers?.ToList() ?? new List<string>();
+
+            // Detect mismatch: type says MC but options look like True/False
+            if (q.Type == Domain.Enums.QuestionType.MultipleChoice)
+            {
+                var isTrueFalseOptions = optionsList.Count == 2
+                    && optionsList.Any(o => o.Equals("True", StringComparison.OrdinalIgnoreCase))
+                    && optionsList.Any(o => o.Equals("False", StringComparison.OrdinalIgnoreCase));
+
+                if (isTrueFalseOptions)
+                {
+                    // Re-classify as True/False
+                    q.Type = Domain.Enums.QuestionType.TrueFalse;
+                }
+            }
+
+            // Detect mismatch: type says TrueFalse but options have more than 2 items (looks like MC)
+            if (q.Type == Domain.Enums.QuestionType.TrueFalse && optionsList.Count > 2)
+            {
+                q.Type = Domain.Enums.QuestionType.MultipleChoice;
+            }
+
+            // Now enforce per-type rules
+            switch (q.Type)
+            {
+                case Domain.Enums.QuestionType.TrueFalse:
+                    q.Options = new[] { "True", "False" };
+                    // Normalize correct answers to exact "True" or "False"
+                    q.CorrectAnswers = correctList
+                        .Select(a => a.Trim().Equals("True", StringComparison.OrdinalIgnoreCase) ? "True" : "False")
+                        .Distinct()
+                        .Take(1)
+                        .ToArray();
+                    if (q.CorrectAnswers.Length == 0)
+                    {
+                        q.CorrectAnswers = new[] { "True" };
+                    }
+                    break;
+
+                case Domain.Enums.QuestionType.FillInTheBlank:
+                    q.Options = Array.Empty<string>();
+                    // correctAnswers stay as-is (free text)
+                    break;
+
+                case Domain.Enums.QuestionType.MultipleChoice:
+                default:
+                    // Ensure correctAnswers are subset of options (case-insensitive match, use exact option casing)
+                    if (optionsList.Count > 0)
+                    {
+                        var fixedCorrect = new List<string>();
+                        foreach (var answer in correctList)
+                        {
+                            var match = optionsList.FirstOrDefault(o => o.Equals(answer, StringComparison.OrdinalIgnoreCase));
+                            if (match != null)
+                            {
+                                fixedCorrect.Add(match);
+                            }
+                        }
+
+                        // If none matched (AI hallucinated an answer not in options), keep the first option as answer
+                        if (fixedCorrect.Count == 0 && optionsList.Count > 0)
+                        {
+                            fixedCorrect.Add(optionsList[0]);
+                        }
+
+                        q.CorrectAnswers = fixedCorrect.Distinct().ToArray();
+                    }
+                    break;
+            }
+        }
+
+        return questions;
     }
 
     private static TimeSpan ResolveRateLimitDelay(HttpResponseMessage response, string body, int attempt)

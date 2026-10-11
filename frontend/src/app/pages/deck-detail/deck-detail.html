@@ -1,0 +1,1220 @@
+@if (loadingDeck()) {
+  <div class="max-w-4xl mx-auto py-20 px-6 flex justify-center">
+    <div class="flex flex-col items-center gap-4 text-gray-400">
+      <span class="material-symbols-outlined text-[48px] animate-spin">progress_activity</span>
+      <p class="font-medium">Loading...</p>
+    </div>
+  </div>
+} @else if (deckError()) {
+  <div class="max-w-4xl mx-auto py-20 px-6 flex justify-center">
+    <div class="flex flex-col items-center gap-4 text-red-500">
+      <span class="material-symbols-outlined text-[48px]">error</span>
+      <p class="font-medium">{{ deckError() }}</p>
+      <button
+        (click)="goBack()"
+        class="px-6 py-2 bg-[#4255FF] text-white rounded-xl font-bold cursor-pointer border-none"
+        >Go Back</button
+      >
+    </div>
+  </div>
+} @else if (deck()) {
+  <div class="max-w-6xl mx-auto py-8 px-4 sm:px-6 pb-20">
+    <!-- Top Bar -->
+    <div class="flex items-center justify-between mb-6">
+      <button
+        (click)="goBack()"
+        class="inline-flex items-center gap-1.5 text-gray-400 font-semibold bg-transparent border-none cursor-pointer hover:text-[#4255FF] transition-colors text-[14px]"
+      >
+        <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+        Back
+      </button>
+      <div class="flex items-center gap-2">
+        @if (isOwner()) {
+          <button
+            [routerLink]="['/edit-deck', deck()!.id]"
+            class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-600 text-[13px] font-bold cursor-pointer hover:bg-amber-100 transition-colors"
+          >
+            <span class="material-symbols-outlined text-[18px]">edit</span>
+            Edit
+          </button>
+        }
+        @if (isOwner()) {
+          <button
+            (click)="openInviteModal()"
+            class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-indigo-50 border border-indigo-200 text-[#4255FF] text-[13px] font-bold cursor-pointer hover:bg-indigo-100 transition-colors"
+          >
+            <span class="material-symbols-outlined text-[18px]">person_add</span>
+            Invite
+          </button>
+        }
+        @if (isLoggedIn() && !isOwner()) {
+          <button
+            (click)="toggleSave()"
+            [disabled]="savingDeck()"
+            class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-[13px] font-bold cursor-pointer transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            [class]="isSaved() ? 'bg-emerald-50 border border-emerald-200 text-emerald-600 hover:bg-emerald-100' : 'bg-gray-50 border border-gray-200 text-gray-600 hover:bg-gray-100'"
+          >
+            @if (savingDeck()) {
+              <span class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+            } @else {
+              <span
+                class="material-symbols-outlined text-[18px]"
+                [style.font-variation-settings]="isSaved() ? '\'FILL\' 1' : ''"
+              >bookmark</span>
+            }
+            {{ isSaved() ? 'Saved' : 'Save' }}
+          </button>
+        }
+        @if (hasExportToPdf()) {
+          <button
+            (click)="exportPdf()"
+            [disabled]="exportingPdf()"
+            class="flex items-center gap-1.5 px-3 py-2 rounded-xl bg-rose-50 border border-rose-200 text-rose-600 text-[13px] font-bold cursor-pointer hover:bg-rose-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            @if (exportingPdf()) {
+              <span class="material-symbols-outlined text-[18px] animate-spin">progress_activity</span>
+              Exporting...
+            } @else {
+              <span class="material-symbols-outlined text-[18px]">picture_as_pdf</span>
+              Export PDF
+            }
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- ── Hero Card ── -->
+    <div class="bg-white border border-gray-200 rounded-2xl shadow-sm mb-6 overflow-hidden">
+      <div class="p-6 flex flex-col sm:flex-row gap-5 items-start">
+        <!-- Thumbnail -->
+        <div
+          class="w-28 h-28 sm:w-36 sm:h-36 rounded-2xl overflow-hidden border border-gray-100 shrink-0"
+        >
+          @if (deck()!.thumbnailUrl) {
+            <img [src]="deck()!.thumbnailUrl" alt="Thumbnail" class="w-full h-full object-cover" />
+          } @else {
+            <img
+              src="/images/thumbnail_default.png"
+              alt="Default Thumbnail"
+              class="w-full h-full object-cover"
+            />
+          }
+        </div>
+
+        <!-- Info -->
+        <div class="flex-1 min-w-0">
+          <!-- Badges -->
+          <div class="flex flex-wrap items-center gap-2 mb-2">
+            <span
+              class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold border"
+              [class]="
+                deck()!.visibility === 'Public'
+                  ? 'bg-green-50 text-green-600 border-green-200'
+                  : deck()!.visibility === 'Private'
+                    ? 'bg-gray-100 text-gray-500 border-gray-200'
+                    : 'bg-blue-50 text-blue-600 border-blue-200'
+              "
+            >
+              <span class="material-symbols-outlined text-[13px] leading-none">
+                {{
+                  deck()!.visibility === 'Public'
+                    ? 'public'
+                    : deck()!.visibility === 'Private'
+                      ? 'lock'
+                      : 'group'
+                }}
+              </span>
+              {{ deck()!.visibility }}
+            </span>
+            <!-- @if (deck()!.status === 'Published') {
+              <span
+                class="inline-flex items-center gap-1 px-2.5 py-0.5 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-full text-[11px] font-bold"
+              >
+                <span class="material-symbols-outlined text-[13px] leading-none">check_circle</span>
+                Published
+              </span>
+            } -->
+          </div>
+
+          <!-- Name -->
+          <h1 class="text-2xl font-black text-gray-900 m-0 mb-2 leading-tight">
+            {{ deck()!.name }}
+          </h1>
+
+          <!-- Description -->
+          @if (deck()!.description) {
+            <p class="text-[14px] text-gray-500 leading-relaxed m-0 mb-3">
+              {{ deck()!.description }}
+            </p>
+          }
+
+          <!-- Creator -->
+          <div class="flex items-center gap-2 mb-4">
+            <div
+              class="inline-flex items-center gap-1.5 px-2.5 py-1.5 bg-gray-50 border border-gray-100 rounded-xl text-[12px] text-gray-500"
+            >
+              <span class="material-symbols-outlined text-[18px] text-[#4255FF]">person</span>
+              <span class="font-bold text-gray-700">Created by</span>
+              <span class="font-black text-gray-900">{{ deck()!.ownerName }}</span>
+              <span class="opacity-60">({{ deck()!.ownerEmail }})</span>
+            </div>
+          </div>
+
+          <!-- Tags -->
+          @if (deck()!.tags.length) {
+            <div class="flex flex-wrap gap-1.5 mb-3">
+              @for (tag of deck()!.tags; track tag) {
+                <span
+                  class="inline-flex items-center gap-1 px-2.5 py-0.5 bg-indigo-50 text-[#4255FF] rounded-full text-[11px] font-bold"
+                >
+                  <span class="material-symbols-outlined text-[12px]">label</span>{{ tag }}
+                </span>
+              }
+            </div>
+          }
+
+          <!-- Rating -->
+          <!-- <div class="flex items-center gap-2">
+          <div class="flex gap-0.5">
+            @for (s of getStarArray(deck()!.averageRating ?? 0); track $index) {
+            <span class="material-symbols-outlined text-[16px]"
+              [class]="s === 'empty' ? 'text-gray-200' : 'text-amber-400'">star</span>
+            }
+          </div>
+          <span class="text-[13px] font-bold text-gray-700">{{ (deck()!.averageRating ?? 0).toFixed(1) }}</span>
+          <span class="text-[12px] text-gray-400">({{ deck()!.totalRatings ?? 0 }} reviews)</span>
+        </div> -->
+        </div>
+      </div>
+
+      <!-- Stats Bar -->
+      <div class="grid grid-cols-3 border-t border-gray-100 divide-x divide-gray-100 bg-gray-50/60">
+        <div class="flex items-center gap-3 px-6 py-4">
+          <span class="material-symbols-outlined text-[22px] text-blue-500">style</span>
+          <div>
+            <div class="text-lg font-black text-gray-900 leading-none">
+              {{ deck()!.questionCount }}
+            </div>
+            <div class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide mt-0.5">
+              Questions
+            </div>
+          </div>
+        </div>
+        <button
+          (click)="isLoggedIn() && openRatingModal()"
+          class="flex items-center gap-3 px-6 py-4 border-none bg-transparent text-left w-full transition-colors"
+          [class]="isLoggedIn() ? 'cursor-pointer hover:bg-amber-50/60 group' : 'cursor-default'"
+        >
+          <span class="material-symbols-outlined text-[22px] text-amber-400">star</span>
+          <div>
+            <div class="text-lg font-black text-gray-900 leading-none">
+              {{ (deck()!.averageRating ?? 0).toFixed(1)
+              }}<small class="text-[12px] font-semibold text-gray-400">/5</small>
+            </div>
+            <div class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide mt-0.5">
+              Avg Rating
+              @if (isLoggedIn()) {
+                <span
+                  class="text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity ml-1"
+                  >· Rate</span
+                >
+              }
+            </div>
+          </div>
+        </button>
+        <div class="flex items-center gap-3 px-6 py-4">
+          <span class="material-symbols-outlined text-[22px] text-gray-400">calendar_today</span>
+          <div>
+            <div class="text-[14px] font-black text-gray-900 leading-none">
+              {{ deck()!.createdAt | date: 'dd/MM/yyyy' }}
+            </div>
+            <div class="text-[11px] font-semibold text-gray-400 uppercase tracking-wide mt-0.5">
+              Created
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Study Modes ── -->
+    <div class="mb-6">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        <!-- Flashcard -->
+        <button
+          (click)="goToLearn()"
+          class="flex flex-col items-center gap-2.5 p-4 rounded-2xl border-2 border-gray-100 bg-white hover:border-[#4255FF] hover:bg-indigo-50/60 cursor-pointer transition-all text-center relative"
+        >
+          <div
+            class="w-12 h-12 rounded-xl flex items-center justify-center text-white"
+            style="background: linear-gradient(135deg, #f093fb, #f5576c)"
+          >
+            <span class="material-symbols-outlined text-[26px]">cards_stack</span>
+          </div>
+          <div class="text-[13px] font-black text-gray-900">Flashcard</div>
+        </button>
+
+        <!-- Quiz -->
+        <button
+          (click)="openQuizConfig()"
+          class="flex flex-col items-center gap-2.5 p-4 rounded-2xl border-2 border-gray-100 bg-white hover:border-[#4255FF] hover:bg-indigo-50/60 cursor-pointer transition-all text-center"
+        >
+          <div
+            class="w-12 h-12 rounded-xl flex items-center justify-center text-white"
+            style="background: linear-gradient(135deg, #4255ff, #6366f1)"
+          >
+            <span class="material-symbols-outlined text-[26px]">quiz</span>
+          </div>
+          <div class="text-[13px] font-black text-gray-900">Quiz</div>
+        </button>
+
+        <!-- Blast -->
+        <button
+          disabled
+          class="flex flex-col items-center gap-2.5 p-4 rounded-2xl border-2 border-gray-100 bg-white text-center opacity-60 cursor-not-allowed relative"
+        >
+          <div
+            class="w-12 h-12 rounded-xl flex items-center justify-center text-white"
+            style="background: linear-gradient(135deg, #43e97b, #38f9d7)"
+          >
+            <span class="material-symbols-outlined text-[26px]">rocket_launch</span>
+          </div>
+          <div>
+            <div class="text-[13px] font-black text-gray-900">Blast</div>
+          </div>
+          <span
+            class="absolute top-2 right-2 text-[9px] font-black bg-amber-100 text-amber-600 px-1.5 py-0.5 rounded-full uppercase tracking-wide"
+            >Soon</span
+          >
+        </button>
+
+        <!-- Match -->
+        <button
+          disabled
+          class="flex flex-col items-center gap-2.5 p-4 rounded-2xl border-2 border-gray-100 bg-white text-center opacity-60 cursor-not-allowed relative"
+        >
+          <div
+            class="w-12 h-12 rounded-xl flex items-center justify-center text-white"
+            style="background: linear-gradient(135deg, #fa709a, #fee140)"
+          >
+            <span class="material-symbols-outlined text-[26px]">grid_view</span>
+          </div>
+          <div>
+            <div class="text-[13px] font-black text-gray-900">Match</div>
+          </div>
+          <span
+            class="absolute top-2 right-2 text-[9px] font-black bg-amber-100 text-amber-600 px-1.5 py-0.5 rounded-full uppercase tracking-wide"
+            >Soon</span
+          >
+        </button>
+      </div>
+    </div>
+
+    <!-- ── Flashcard Viewer ── -->
+    @if (displayQuestions().length && currentQuestion()) {
+      @let q = currentQuestion()!;
+      <div class="mb-6">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="text-[17px] font-black text-gray-900 m-0 flex items-center gap-2">
+            <span class="material-symbols-outlined text-[22px] text-[#4255FF]">flip</span>
+            Flashcards
+          </h2>
+        </div>
+
+        <!-- Card (full-width) -->
+        <div class="card-flip-scene">
+          <div class="card-flip-inner" [class.flipped]="isFlipped()" (click)="flipCard()">
+            <!-- Front: Question -->
+            <div
+              class="card-flip-face bg-white border-2 border-gray-200 cursor-pointer shadow-[0_4px_20px_rgba(0,0,0,0.06)] hover:border-gray-300 transition-colors"
+            >
+              <div class="flex-1 p-8 flex flex-col justify-center overflow-y-auto">
+                <p
+                  class="text-[10px] font-black text-gray-300 uppercase tracking-[0.15em] mb-4 m-0"
+                >
+                  Question / Term
+                </p>
+                <p class="text-[18px] sm:text-[20px] font-bold text-gray-900 leading-snug m-0 mb-4">
+                  {{ q.content }}
+                </p>
+                @if (q.options.length) {
+                  <div class="flex flex-col gap-2 mt-1">
+                    @for (opt of q.options; track opt; let i = $index) {
+                      <div
+                        class="flex items-center gap-3 px-4 py-2.5 bg-gray-50 border border-gray-100 rounded-xl text-[13px] font-medium text-gray-700"
+                      >
+                        <span
+                          class="w-6 h-6 rounded-full bg-white border border-gray-200 text-gray-500 text-[11px] font-black flex items-center justify-center shrink-0"
+                          >{{ 'ABCD'[i] }}</span
+                        >
+                        {{ opt }}
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+              <!-- Bottom strip: hint -->
+              <div
+                class="border-t border-gray-100 px-6 pt-3 shrink-0 bg-gray-50/50"
+                [class.pb-3]="!showHint()"
+                [class.pb-4]="showHint()"
+              >
+                <div class="flex items-center justify-between">
+                  <span
+                    class="flex items-center gap-1.5 text-[12px] text-gray-300 font-semibold select-none"
+                  >
+                    <span class="material-symbols-outlined text-[15px]">touch_app</span>
+                    Tap to flip
+                  </span>
+                  @if (q.hint) {
+                    <button
+                      (click)="showHint.update(v => !v); $event.stopPropagation()"
+                      class="flex items-center gap-2 px-3 py-2 rounded-xl text-[12px] border cursor-pointer transition-all w-full text-left max-w-[300px]"
+                      [class]="
+                        showHint()
+                          ? 'bg-amber-50 border-amber-300 text-amber-900'
+                          : 'bg-white border-gray-200 text-gray-400 hover:border-amber-300 hover:text-amber-500'
+                      "
+                    >
+                      @if (showHint()) {
+                        <span
+                          class="material-symbols-outlined text-[16px] shrink-0 text-amber-500"
+                          style="font-variation-settings: 'FILL' 1"
+                          >lightbulb</span
+                        >
+                        <span class="font-medium leading-relaxed text-[13px] italic">{{
+                          q.hint
+                        }}</span>
+                      } @else {
+                        <span class="material-symbols-outlined text-[16px] shrink-0"
+                          >lightbulb</span
+                        >
+                        <span class="font-black uppercase tracking-wider text-[10px]">Hint</span>
+                      }
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <!-- Back: Answer -->
+            <div
+              class="card-flip-face card-flip-back bg-[#f5f7ff] border-2 border-[#4255FF]/25 cursor-pointer shadow-[0_4px_20px_rgba(66,85,255,0.08)]"
+            >
+              <div class="flex-1 p-8 flex flex-col justify-center overflow-y-auto">
+                <p
+                  class="text-[10px] font-black text-[#4255FF] uppercase tracking-[0.15em] mb-4 m-0"
+                >
+                  Correct Answer
+                </p>
+                <div class="flex flex-col gap-2.5">
+                  @for (ans of q.correctAnswers; track ans) {
+                    <div
+                      class="flex items-center gap-3 px-5 py-3.5 bg-white border border-[#4255FF]/20 rounded-xl text-[16px] font-bold text-gray-900 shadow-sm"
+                    >
+                      <span
+                        class="material-symbols-outlined text-[20px] text-[#4255FF]"
+                        style="font-variation-settings: 'FILL' 1"
+                        >check_circle</span
+                      >
+                      {{ ans }}
+                    </div>
+                  }
+                </div>
+              </div>
+              <!-- Bottom strip: explanation -->
+              <div
+                class="border-t border-[#4255FF]/10 px-6 pt-3 shrink-0 bg-[#4255FF]/5"
+                [class.pb-3]="!showExplanation()"
+                [class.pb-4]="showExplanation()"
+              >
+                <div class="flex items-center justify-between">
+                  <span
+                    class="flex items-center gap-1.5 text-[12px] text-[#4255FF]/40 font-semibold select-none"
+                  >
+                    <span class="material-symbols-outlined text-[15px]">touch_app</span>
+                    Tap to flip back
+                  </span>
+                  @if (q.explanation) {
+                    <button
+                      (click)="showExplanation.update(v => !v); $event.stopPropagation()"
+                      class="flex items-center gap-2 px-3 py-2 rounded-xl text-[12px] border cursor-pointer transition-all w-full text-left max-w-[400px]"
+                      [class]="
+                        showExplanation()
+                          ? 'bg-blue-50 border-blue-300 text-blue-900'
+                          : 'bg-white border-[#4255FF]/20 text-[#4255FF]/60 hover:border-blue-300 hover:text-blue-500'
+                      "
+                    >
+                      @if (showExplanation()) {
+                        <span
+                          class="material-symbols-outlined text-[16px] shrink-0 text-blue-500"
+                          style="font-variation-settings: 'FILL' 1"
+                          >school</span
+                        >
+                        <span class="font-medium leading-relaxed text-[13px] italic">{{
+                          q.explanation
+                        }}</span>
+                      } @else {
+                        <span class="material-symbols-outlined text-[16px] shrink-0">school</span>
+                        <span class="font-black uppercase tracking-wider text-[10px]"
+                          >Explanation</span
+                        >
+                      }
+                    </button>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Bottom control bar ── -->
+        <div class="mt-3 flex items-center justify-between px-1">
+          <!-- Left: empty spacer to balance -->
+          <div class="w-9"></div>
+
+          <!-- Center: prev · counter · next -->
+          <div class="flex items-center gap-2">
+            <button
+              (click)="prevCard()"
+              [disabled]="currentCardIndex() === 0"
+              class="w-10 h-10 rounded-2xl border-2 border-gray-200 bg-white text-gray-400 flex items-center justify-center cursor-pointer hover:border-[#4255FF] hover:text-[#4255FF] hover:bg-[#eef0ff] disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
+            >
+              <span class="material-symbols-outlined text-[20px]">arrow_back_ios</span>
+            </button>
+            <span class="text-[13px] font-bold text-gray-500 tabular-nums min-w-[52px] text-center">
+              {{ currentCardIndex() + 1 }} / {{ displayQuestions().length }}
+            </span>
+            <button
+              (click)="nextCard()"
+              [disabled]="currentCardIndex() === displayQuestions().length - 1"
+              class="w-10 h-10 rounded-2xl border-2 border-gray-200 bg-white text-gray-400 flex items-center justify-center cursor-pointer hover:border-[#4255FF] hover:text-[#4255FF] hover:bg-[#eef0ff] disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-sm"
+            >
+              <span class="material-symbols-outlined text-[20px]">arrow_forward_ios</span>
+            </button>
+          </div>
+
+          <!-- Right: shuffle · restart · fullscreen -->
+          <div class="flex items-center gap-1.5">
+            <button
+              (click)="shuffleCards()"
+              title="Shuffle"
+              class="w-9 h-9 rounded-xl border flex items-center justify-center cursor-pointer transition-all"
+              [class]="
+                isShuffled()
+                  ? 'bg-[#eef0ff] border-[#4255FF] text-[#4255FF]'
+                  : 'bg-white border-gray-200 text-gray-400 hover:border-[#4255FF] hover:text-[#4255FF]'
+              "
+            >
+              <span class="material-symbols-outlined text-[18px]">shuffle</span>
+            </button>
+            <button
+              (click)="restartCards()"
+              title="Restart"
+              class="w-9 h-9 rounded-xl border bg-white border-gray-200 text-gray-400 flex items-center justify-center cursor-pointer transition-all hover:border-gray-400 hover:text-gray-700"
+            >
+              <span class="material-symbols-outlined text-[18px]">restart_alt</span>
+            </button>
+            <button
+              (click)="goToLearn()"
+              title="Fullscreen"
+              class="w-9 h-9 rounded-xl border bg-white border-gray-200 text-gray-400 flex items-center justify-center cursor-pointer transition-all hover:border-[#4255FF] hover:text-[#4255FF] hover:bg-[#eef0ff]"
+            >
+              <span class="material-symbols-outlined text-[18px]">open_in_full</span>
+            </button>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- ── Bottom: Questions + Ratings ── -->
+    <div class="flex flex-col lg:flex-row gap-6 items-start">
+      <!-- Questions List -->
+      <section class="flex-1 min-w-0">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-[17px] font-black text-gray-900 m-0 flex items-center gap-2">
+            <span class="material-symbols-outlined text-[22px] text-[#4255FF]">list_alt</span>
+            Questions
+            <span class="text-gray-400 font-semibold text-[14px]"
+              >({{ deck()!.questionCount }})</span
+            >
+          </h2>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          @for (q of visibleTerms; track q.id; let i = $index) {
+            <div
+              class="bg-white border border-gray-100 rounded-2xl p-4 hover:border-indigo-200 hover:shadow-sm transition-all"
+            >
+              <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                <div class="min-w-0 rounded-2xl border border-gray-100 bg-gray-50/60 p-4">
+                  <div class="flex items-center gap-2 mb-3">
+                    <span class="material-symbols-outlined text-[18px] text-[#4255FF]">help</span>
+                    <span class="text-[11px] font-black uppercase tracking-[0.14em] text-gray-400">
+                      Question
+                    </span>
+                  </div>
+
+                  <p class="text-[14px] font-bold text-gray-900 m-0 mb-3 leading-snug">
+                    {{ q.content }}
+                  </p>
+
+                  @if (q.options.length) {
+                    <div class="flex flex-col gap-2">
+                      @for (opt of q.options; track opt; let optionIndex = $index) {
+                        <div
+                          class="flex items-center gap-3 rounded-xl border border-gray-200 bg-white px-3 py-2 text-[12px] font-semibold text-gray-700"
+                        >
+                          <span
+                            class="flex h-6 w-6 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-[10px] font-black text-gray-500"
+                          >
+                            {{ 'ABCD'[optionIndex] }}
+                          </span>
+                          <span class="min-w-0">{{ opt }}</span>
+                        </div>
+                      }
+                    </div>
+                  }
+
+                  @if (q.hint) {
+                    <div class="mt-3">
+                      <button
+                        (click)="toggleListHint(q.id)"
+                        class="flex w-full items-start gap-2 rounded-xl border px-3 py-2 text-left text-[11px] cursor-pointer transition-all"
+                        [class]="
+                          expandedHints().has(q.id)
+                            ? 'bg-amber-50 border-amber-300 text-amber-900'
+                            : 'bg-white border-gray-200 text-gray-400 hover:border-amber-300 hover:text-amber-500'
+                        "
+                      >
+                        <span
+                          class="material-symbols-outlined text-[14px] shrink-0"
+                          [class.text-amber-500]="expandedHints().has(q.id)"
+                          [style.font-variation-settings]="
+                            expandedHints().has(q.id) ? '\'FILL\' 1' : ''
+                          "
+                          >lightbulb</span
+                        >
+                        <span class="flex-1 min-w-0">
+                          @if (expandedHints().has(q.id)) {
+                            <span
+                              class="block font-medium leading-relaxed text-[12px] italic animate-in fade-in duration-200"
+                            >
+                              {{ q.hint }}
+                            </span>
+                          } @else {
+                            <span class="font-black uppercase tracking-wider text-[9px]">Hint</span>
+                          }
+                        </span>
+                      </button>
+                    </div>
+                  }
+                </div>
+
+                <div class="min-w-0 rounded-2xl border border-blue-100 bg-blue-50/50 p-4">
+                  <div class="flex items-center gap-2 mb-3">
+                    <span class="material-symbols-outlined text-[18px] text-[#4255FF]"
+                      >task_alt</span
+                    >
+                    <span
+                      class="text-[11px] font-black uppercase tracking-[0.14em] text-[#4255FF]/60"
+                    >
+                      Correct Answer
+                    </span>
+                  </div>
+
+                  <div class="flex flex-col gap-2">
+                    @for (ans of q.correctAnswers; track ans) {
+                      <div
+                        class="flex items-center gap-3 rounded-xl border border-green-200 bg-white px-3 py-2 text-[12px] font-bold text-gray-800"
+                      >
+                        <span
+                          class="material-symbols-outlined text-[18px] text-green-600"
+                          style="font-variation-settings: 'FILL' 1"
+                          >check_circle</span
+                        >
+                        <span>{{ ans }}</span>
+                      </div>
+                    }
+                  </div>
+
+                  @if (q.explanation) {
+                    <div class="mt-3">
+                      <button
+                        (click)="toggleListExplanation(q.id)"
+                        class="flex w-full items-start gap-2 rounded-xl border px-3 py-2 text-left text-[11px] cursor-pointer transition-all"
+                        [class]="
+                          expandedExplanations().has(q.id)
+                            ? 'bg-blue-50 border-blue-300 text-blue-900'
+                            : 'bg-white border-blue-100 text-[#4255FF]/60 hover:border-blue-300 hover:text-blue-500'
+                        "
+                      >
+                        <span
+                          class="material-symbols-outlined text-[14px] shrink-0"
+                          [class.text-blue-500]="expandedExplanations().has(q.id)"
+                          [style.font-variation-settings]="
+                            expandedExplanations().has(q.id) ? '\'FILL\' 1' : ''
+                          "
+                          >school</span
+                        >
+                        <span class="flex-1 min-w-0">
+                          @if (expandedExplanations().has(q.id)) {
+                            <span
+                              class="block font-medium leading-relaxed text-[12px] italic animate-in fade-in duration-200"
+                            >
+                              {{ q.explanation }}
+                            </span>
+                          } @else {
+                            <span class="font-black uppercase tracking-wider text-[9px]"
+                              >Explanation</span
+                            >
+                          }
+                        </span>
+                      </button>
+                    </div>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        @if (totalFilteredTerms > 4) {
+          <button
+            (click)="toggleTerms()"
+            class="w-full flex items-center justify-center gap-2 py-3.5 mt-3 bg-gray-50 border-2 border-dashed border-gray-200 rounded-xl text-gray-500 font-bold text-[13px] cursor-pointer hover:bg-indigo-50 hover:border-[#4255FF] hover:text-[#4255FF] transition-all"
+          >
+            <span class="material-symbols-outlined text-[20px]">{{
+              showAllTerms() ? 'expand_less' : 'expand_more'
+            }}</span>
+            {{ showAllTerms() ? 'Collapse' : 'Show all ' + totalFilteredTerms + ' questions' }}
+          </button>
+        }
+      </section>
+
+      <!-- Ratings Sidebar -->
+      <aside class="hidden">
+        <!-- Summary -->
+        <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+          <h3 class="text-[13px] font-black text-gray-500 uppercase tracking-wider m-0 mb-4">
+            Ratings & Reviews
+          </h3>
+          @if (loadingRatings()) {
+            <div class="flex justify-center py-4 text-gray-300">
+              <span class="material-symbols-outlined text-[30px] animate-spin"
+                >progress_activity</span
+              >
+            </div>
+          } @else {
+            <div class="flex items-center gap-4 mb-4">
+              <span class="text-[3rem] font-black text-[#4255FF] leading-none">{{
+                (ratingSummary()?.averageRating ?? 0).toFixed(1)
+              }}</span>
+              <div>
+                <div class="flex gap-0.5 mb-1">
+                  @for (s of getStarArray(ratingSummary()?.averageRating ?? 0); track $index) {
+                    <span
+                      class="material-symbols-outlined text-[16px]"
+                      [class]="s === 'empty' ? 'text-gray-200' : 'text-amber-400'"
+                      >star</span
+                    >
+                  }
+                </div>
+                <span class="text-[11px] font-bold text-gray-400"
+                  >{{ ratingSummary()?.totalRatings ?? 0 }} reviews</span
+                >
+              </div>
+            </div>
+            <div class="flex flex-col gap-2">
+              @for (r of ratingBreakdown; track r.stars) {
+                <div class="flex items-center gap-2">
+                  <span class="text-[11px] font-bold text-gray-400 w-2.5">{{ r.stars }}</span>
+                  <span class="material-symbols-outlined text-[11px] text-gray-300">star</span>
+                  <div class="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div
+                      class="h-full bg-[#4255FF] rounded-full transition-[width] duration-700"
+                      [style.width]="getBarWidth(r.count)"
+                    ></div>
+                  </div>
+                  <span class="text-[11px] font-bold text-gray-300 w-4 text-right">{{
+                    r.count
+                  }}</span>
+                </div>
+              }
+            </div>
+          }
+        </div>
+
+        <!-- Recent Reviews -->
+        @if ((ratingSummary()?.ratings?.length ?? 0) > 0) {
+          <div class="bg-white border border-gray-200 rounded-2xl p-5 shadow-sm">
+            <h3 class="text-[13px] font-black text-gray-500 uppercase tracking-wider m-0 mb-4">
+              Recent Reviews
+            </h3>
+            <div class="flex flex-col gap-4">
+              @for (rev of ratingSummary()!.ratings | slice: 0 : 5; track rev.id) {
+                <div
+                  class="flex flex-col gap-1.5 pb-4 border-b border-gray-50 last:pb-0 last:border-0"
+                >
+                  <div class="flex items-center gap-2.5">
+                    <div
+                      class="w-8 h-8 rounded-full bg-indigo-50 text-[#4255FF] flex items-center justify-center font-black text-[12px] shrink-0"
+                    >
+                      {{ getInitial(rev.userName) }}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                      <div class="text-[13px] font-bold text-gray-900 truncate">
+                        {{ rev.userName }}
+                      </div>
+                      <div class="text-[11px] text-gray-400">
+                        {{ formatTimeAgo(rev.createdAt) }}
+                      </div>
+                    </div>
+                    <div class="flex gap-px shrink-0">
+                      @for (s of getStarArray(rev.rating); track $index) {
+                        <span
+                          class="material-symbols-outlined text-[11px]"
+                          [class]="s === 'empty' ? 'text-gray-200' : 'text-amber-400'"
+                          >star</span
+                        >
+                      }
+                    </div>
+                  </div>
+                  @if (rev.comment) {
+                    <p class="text-[12px] italic text-gray-400 leading-relaxed m-0">
+                      "{{ rev.comment }}"
+                    </p>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </aside>
+    </div>
+  </div>
+}
+
+<!-- ── Rating Modal ── -->
+@if (isRatingModalOpen()) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+    (click)="closeRatingModal()"
+  >
+    <div
+      class="bg-white rounded-2xl w-full max-w-sm p-6 shadow-2xl relative"
+      (click)="$event.stopPropagation()"
+    >
+      <button
+        class="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-50 border-none text-gray-400 flex items-center justify-center cursor-pointer hover:bg-gray-100 hover:text-gray-700"
+        (click)="closeRatingModal()"
+      >
+        <span class="material-symbols-outlined text-[18px]">close</span>
+      </button>
+
+      @if (!hasRated()) {
+        <div class="flex items-center gap-3 mb-4">
+          <div>
+            <h3 class="text-[17px] font-black text-gray-900 m-0">How helpful was this deck?</h3>
+          </div>
+        </div>
+      }
+
+      @if (ratingSuccess()) {
+        <div class="flex flex-col items-center gap-3 py-6 text-center">
+          <span class="material-symbols-outlined text-[48px] text-green-500">check_circle</span>
+          <p class="text-[15px] font-black text-gray-900 m-0">Thanks for your rating!</p>
+          <p class="text-[13px] text-gray-400 m-0">Your review has been submitted.</p>
+        </div>
+      } @else if (hasRated()) {
+        <!-- Already rated state -->
+        <div class="flex flex-col items-center gap-3 py-4 text-center">
+          <div>
+            <p class="text-[15px] font-black text-gray-900 m-0 mb-1">
+              You've already rated this deck
+            </p>
+          </div>
+          <div class="flex gap-1 my-1">
+            @for (star of [1, 2, 3, 4, 5]; track star) {
+              <span
+                class="material-symbols-outlined text-[28px]"
+                [class]="star <= (existingRatingValue() ?? 0) ? 'text-amber-400' : 'text-gray-200'"
+                style="font-variation-settings: 'FILL' 1"
+                >star</span
+              >
+            }
+          </div>
+          @if (existingRatingComment()) {
+            <p
+              class="text-[12px] italic text-gray-500 bg-gray-50 rounded-xl px-4 py-2.5 m-0 text-left w-full"
+            >
+              "{{ existingRatingComment() }}"
+            </p>
+          }
+        </div>
+        <button
+          (click)="closeRatingModal()"
+          class="w-full mt-2 py-2.5 rounded-xl bg-gray-100 text-gray-600 font-bold text-[13px] border-none cursor-pointer hover:bg-gray-200 transition-colors"
+        >
+          Close
+        </button>
+      } @else {
+        <!-- Stars -->
+        <div class="flex justify-center gap-2 mb-5">
+          @for (star of [1, 2, 3, 4, 5]; track star) {
+            <button
+              class="bg-transparent border-none p-0 cursor-pointer transition-all hover:scale-110"
+              (mouseenter)="setHoverRating(star)"
+              (mouseleave)="clearHover()"
+              (click)="setMyRating(star)"
+            >
+              <span
+                class="material-symbols-outlined text-[40px] transition-colors"
+                [class]="getStarState(star) === 'filled' ? 'text-amber-400' : 'text-gray-200'"
+                >star</span
+              >
+            </button>
+          }
+        </div>
+
+        @if (myRating() > 0) {
+          <p class="text-center text-[13px] font-bold text-gray-500 mb-4 -mt-2">
+            {{ ['', 'Poor', 'Fair', 'Good', 'Very good', 'Excellent'][myRating()] }}
+          </p>
+        }
+
+        <textarea
+          class="w-full bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 text-[13px] text-gray-900 resize-none outline-none transition-all placeholder-gray-400 focus:bg-white focus:border-[#4255FF] mb-4"
+          rows="3"
+          placeholder="Leave a comment (optional)..."
+          [ngModel]="myComment()"
+          (ngModelChange)="myComment.set($event)"
+        ></textarea>
+
+        @if (ratingError()) {
+          <div
+            class="flex items-center gap-2 bg-red-50 text-red-600 px-3 py-2.5 rounded-xl text-[12px] font-bold mb-4"
+          >
+            <span class="material-symbols-outlined text-[16px]">error</span> {{ ratingError() }}
+          </div>
+        }
+
+        <div class="flex gap-2">
+          <button
+            (click)="closeRatingModal()"
+            class="flex-1 py-2.5 rounded-xl bg-gray-100 text-gray-600 font-bold text-[13px] border-none cursor-pointer hover:bg-gray-200 transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            class="flex-1 flex items-center justify-center gap-1.5 py-2.5 bg-[#4255FF] border-none rounded-xl text-white font-black text-[13px] cursor-pointer hover:bg-[#3345e0] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            [disabled]="!myRating() || submittingRating()"
+            (click)="submitRating()"
+          >
+            @if (submittingRating()) {
+              <span class="material-symbols-outlined text-[16px] animate-spin"
+                >progress_activity</span
+              >
+              Sending...
+            } @else {
+              Submit
+            }
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+<!-- ── Invite Modal ── -->
+@if (isInviteModalOpen()) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4"
+    (click)="closeInviteModal()"
+  >
+    <div
+      class="bg-white rounded-2xl w-full max-w-md p-6 shadow-2xl relative"
+      (click)="$event.stopPropagation()"
+    >
+      <button
+        class="absolute top-4 right-4 w-8 h-8 rounded-full bg-gray-50 border-none text-gray-400 flex items-center justify-center cursor-pointer hover:bg-gray-100 hover:text-gray-700"
+        (click)="closeInviteModal()"
+      >
+        <span class="material-symbols-outlined text-[18px]">close</span>
+      </button>
+
+      <div class="flex items-center gap-3 mb-1">
+        <div
+          class="w-10 h-10 rounded-xl bg-indigo-50 text-[#4255FF] flex items-center justify-center"
+        >
+          <span class="material-symbols-outlined text-[22px]">person_add</span>
+        </div>
+        <div>
+          <h3 class="text-[17px] font-black text-gray-900 m-0">Share this deck</h3>
+          <p class="text-[12px] text-gray-400 m-0">Invite someone by email</p>
+        </div>
+      </div>
+
+      <div class="h-px bg-gray-100 my-4"></div>
+
+      @if (inviteSuccess()) {
+        <div
+          class="flex items-center gap-2 p-3 bg-green-50 text-green-700 text-[13px] font-bold rounded-xl mb-4"
+        >
+          <span class="material-symbols-outlined text-[18px]">check_circle</span
+          >{{ inviteSuccess() }}
+        </div>
+      }
+      @if (inviteError()) {
+        <div
+          class="flex items-center gap-2 p-3 bg-red-50 text-red-600 text-[13px] font-bold rounded-xl mb-4"
+        >
+          <span class="material-symbols-outlined text-[18px]">error</span>{{ inviteError() }}
+        </div>
+      }
+
+      <div class="flex gap-2 mb-5">
+        <div class="relative flex-1">
+          <span
+            class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-[18px]"
+            >mail</span
+          >
+          <input
+            type="email"
+            class="w-full pl-10 pr-3 py-2.5 bg-gray-50 border border-gray-200 rounded-xl text-[14px] text-gray-900 outline-none focus:border-[#4255FF] focus:ring-2 focus:ring-[#4255FF]/20 transition-all placeholder-gray-400"
+            placeholder="email@example.com"
+            [ngModel]="inviteEmail()"
+            (ngModelChange)="inviteEmail.set($event)"
+            (keydown.enter)="sendInvite()"
+          />
+        </div>
+        <button
+          class="px-4 py-2.5 rounded-xl bg-[#4255FF] text-white font-bold text-[13px] border-none cursor-pointer flex items-center gap-1.5 hover:bg-[#3345e0] disabled:opacity-50 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
+          [disabled]="!inviteEmail().trim() || isInviting()"
+          (click)="sendInvite()"
+        >
+          @if (isInviting()) {
+            <span class="material-symbols-outlined text-[16px] animate-spin"
+              >progress_activity</span
+            >
+          } @else {
+            <span class="material-symbols-outlined text-[16px]">send</span>
+            Send
+          }
+        </button>
+      </div>
+
+      <p class="text-[11px] text-gray-400 m-0 leading-relaxed mb-4">
+        The invited user will receive access to view this deck. Only the deck owner can invite
+        others.
+      </p>
+
+      <!-- Members list -->
+      @if (loadingMembers()) {
+        <div class="flex items-center justify-center py-4 text-gray-300">
+          <span class="material-symbols-outlined text-[22px] animate-spin">progress_activity</span>
+        </div>
+      } @else if (deckMembers().length > 0) {
+        <div>
+          <p class="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2 m-0">
+            Members ({{ deckMembers().length }})
+          </p>
+          <div class="flex flex-col gap-1 max-h-[200px] overflow-y-auto">
+            @for (member of deckMembers(); track member.id) {
+              <div class="flex items-center gap-2 px-3 py-2 rounded-xl bg-gray-50">
+                <span class="material-symbols-outlined text-[16px] text-gray-400">person</span>
+                <span class="text-[13px] text-gray-700 truncate">{{ member.email }}</span>
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+}
+
+<!-- ── Quiz Config Modal ── -->
+@if (isQuizConfigOpen()) {
+  <div
+    class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4"
+    (click)="closeQuizConfig()"
+  >
+    <div class="bg-white w-full max-w-lg rounded-2xl shadow-2xl" (click)="$event.stopPropagation()">
+      <!-- Header -->
+      <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-gray-100">
+        <div>
+          <h3 class="text-[16px] font-black text-gray-900 m-0">Quiz Settings</h3>
+          <p class="text-[12px] text-gray-400 m-0 mt-0.5">Customize before you start</p>
+        </div>
+        <button
+          class="w-8 h-8 rounded-full bg-gray-100 border-none text-gray-400 flex items-center justify-center cursor-pointer hover:bg-gray-200 transition-colors"
+          (click)="closeQuizConfig()"
+        >
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
+      <div class="px-6 py-5 flex flex-col gap-5">
+        <!-- Question Count -->
+        <div class="bg-gray-50 rounded-xl p-4">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-[13px] font-black text-gray-700">Number of Questions</span>
+            <div
+              class="flex items-center gap-2 bg-white border border-gray-200 rounded-lg px-2 py-1"
+            >
+              <button
+                class="w-6 h-6 rounded flex items-center justify-center font-black text-[15px] text-gray-500 border-none bg-transparent cursor-pointer hover:text-gray-900 disabled:opacity-30 leading-none"
+                [disabled]="quizConfig().questionCount <= 1"
+                (click)="setQuizConfigQuestionCount(quizConfig().questionCount - 1)"
+              >
+                −
+              </button>
+              <span class="w-8 text-center text-[14px] font-black text-gray-900 tabular-nums">{{
+                quizConfig().questionCount
+              }}</span>
+              <button
+                class="w-6 h-6 rounded flex items-center justify-center font-black text-[15px] text-gray-500 border-none bg-transparent cursor-pointer hover:text-gray-900 disabled:opacity-30 leading-none"
+                [disabled]="quizConfig().questionCount >= (deck()?.questionCount ?? 10)"
+                (click)="setQuizConfigQuestionCount(quizConfig().questionCount + 1)"
+              >
+                +
+              </button>
+            </div>
+          </div>
+          <input
+            type="range"
+            min="1"
+            [max]="deck()?.questionCount ?? 10"
+            [value]="quizConfig().questionCount"
+            (input)="setQuizConfigQuestionCount(+$any($event.target).value)"
+            class="w-full accent-[#4255FF] h-1.5 cursor-pointer"
+          />
+          <div class="flex justify-between text-[11px] text-gray-400 font-semibold mt-1.5">
+            <span>1</span>
+            <span>{{ deck()?.questionCount ?? 10 }} total</span>
+          </div>
+        </div>
+
+        <!-- Question Types -->
+        <div>
+          <p class="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2.5 m-0">
+            Question Types
+          </p>
+          <div class="grid grid-cols-3 gap-2">
+            @for (
+              type of [
+                { key: 'MultipleChoice', label: 'Multiple Choice', icon: 'checklist' },
+                { key: 'TrueFalse', label: 'True / False', icon: 'check_circle' },
+                { key: 'FillInTheBlank', label: 'Fill in Blank', icon: 'edit_note' },
+              ];
+              track type.key
+            ) {
+              <button
+                class="flex flex-col items-center gap-1.5 py-3.5 px-2 rounded-xl border-2 transition-all select-none text-center"
+                [class]="
+                  !isTypeAvailable(type.key)
+                    ? 'border-gray-100 bg-gray-50 text-gray-300 cursor-not-allowed opacity-60'
+                    : isTypeEnabled(type.key)
+                      ? 'border-[#4255FF] bg-indigo-50/50 text-[#4255FF] cursor-pointer'
+                      : 'border-gray-100 bg-white text-gray-400 hover:border-gray-200 cursor-pointer'
+                "
+                [disabled]="!isTypeAvailable(type.key)"
+                (click)="toggleQuizConfigType($any(type.key))"
+              >
+                <span
+                  class="material-symbols-outlined text-[22px]"
+                  [style.font-variation-settings]="isTypeEnabled(type.key) ? '\'FILL\' 1' : ''"
+                  >{{ type.icon }}</span
+                >
+                <span class="text-[11px] font-bold leading-tight">{{ type.label }}</span>
+                @if (isTypeAvailable(type.key)) {
+                  <span class="text-[10px] font-semibold opacity-60"
+                    >{{ getTypeCount(type.key) }} qs</span
+                  >
+                } @else {
+                  <span class="text-[10px] font-semibold">None</span>
+                }
+              </button>
+            }
+          </div>
+        </div>
+
+        <!-- Options -->
+        <div>
+          <p class="text-[11px] font-black text-gray-400 uppercase tracking-widest mb-2.5 m-0">
+            Options
+          </p>
+          <div
+            class="flex flex-col divide-y divide-gray-50 border border-gray-100 rounded-xl overflow-hidden"
+          >
+            @for (
+              opt of [
+                {
+                  key: 'shuffle',
+                  label: 'Shuffle Questions',
+                  desc: 'Randomize order',
+                  icon: 'shuffle',
+                },
+                { key: 'showTimer', label: 'Show Timer', desc: 'Track duration', icon: 'timer' },
+                {
+                  key: 'enableHints',
+                  label: 'Enable Hints',
+                  desc: 'Allow hints during quiz',
+                  icon: 'lightbulb',
+                },
+              ];
+              track opt.key
+            ) {
+              <div
+                class="flex items-center gap-3 px-4 py-3 cursor-pointer select-none hover:bg-gray-50 transition-colors"
+                (click)="toggleQuizConfigOption($any(opt.key))"
+              >
+                <span
+                  class="material-symbols-outlined text-[20px] shrink-0"
+                  [class]="isOptionEnabled($any(opt.key)) ? 'text-[#4255FF]' : 'text-gray-300'"
+                  >{{ opt.icon }}</span
+                >
+                <div class="flex-1 min-w-0">
+                  <div class="text-[13px] font-bold text-gray-800">{{ opt.label }}</div>
+                  <div class="text-[11px] text-gray-400">{{ opt.desc }}</div>
+                </div>
+                <div
+                  class="w-9 h-5 rounded-full transition-all shrink-0 relative"
+                  [class]="isOptionEnabled($any(opt.key)) ? 'bg-[#4255FF]' : 'bg-gray-200'"
+                >
+                  <div
+                    class="absolute top-0.5 w-4 h-4 bg-white rounded-full shadow transition-all duration-200"
+                    [class]="isOptionEnabled($any(opt.key)) ? 'left-4' : 'left-0.5'"
+                  ></div>
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="px-6 py-4 border-t border-gray-100 flex gap-2.5">
+        <button
+          class="px-5 py-2.5 rounded-xl bg-gray-100 border-none text-gray-600 font-bold text-[13px] cursor-pointer hover:bg-gray-200 transition-colors"
+          (click)="closeQuizConfig()"
+        >
+          Cancel
+        </button>
+        <button
+          class="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl border-none text-white font-black text-[14px] cursor-pointer transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          [class]="
+            quizConfigValid
+              ? 'bg-[#4255FF] hover:bg-[#3345e0] shadow-[0_4px_14px_rgba(66,85,255,0.25)]'
+              : 'bg-gray-300'
+          "
+          [disabled]="!quizConfigValid"
+          (click)="closeQuizConfig(); startStudy()"
+        >
+          <span class="material-symbols-outlined text-[20px]">play_arrow</span>
+          Start Quiz
+        </button>
+      </div>
+    </div>
+  </div>
+}

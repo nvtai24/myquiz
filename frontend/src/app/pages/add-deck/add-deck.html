@@ -1,0 +1,414 @@
+<div class="max-w-[1400px] mx-auto pb-20 pt-6 px-6" style="font-family: 'Inter', sans-serif;">
+  <!-- Hero Top Bar -->
+  <div class="sticky top-0 z-10 flex items-center justify-between pb-5 mb-5 bg-transparent pt-2">
+    <div class="flex items-center gap-3.5">
+      <button
+        class="w-10 h-10 rounded-xl border border-gray-200 bg-white text-gray-500 flex items-center justify-center cursor-pointer transition-all hover:bg-gray-100 hover:text-gray-900 hover:border-gray-300"
+        (click)="cancel()">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </button>
+      <div class="flex flex-col">
+        <h1 class="text-xl font-extrabold text-[#141118] m-0 leading-tight tracking-[-0.01em]">
+          Create study set
+        </h1>
+        <p class="text-[13px] text-[#726388] mt-1 mb-0 font-medium">
+          Build your own study set quickly
+        </p>
+      </div>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="relative flex items-center">
+        <span class="material-symbols-outlined text-[16px] absolute left-3 pointer-events-none text-gray-500">
+          {{ visibility() === 'private' ? 'lock' : visibility() === 'shared' ? 'group' : 'public' }}
+        </span>
+        <select
+          class="appearance-none pl-8 pr-8 py-2 rounded-xl text-[13px] font-semibold border cursor-pointer outline-none transition-all bg-white text-gray-700 border-gray-200 hover:bg-gray-50 hover:border-gray-300"
+          [ngModel]="visibility()" (ngModelChange)="visibility.set($event)">
+          <option value="public">Public</option>
+          <option value="private">Private</option>
+          <option value="shared">Shared</option>
+        </select>
+        <span
+          class="material-symbols-outlined text-[14px] absolute right-2 pointer-events-none text-gray-400">expand_more</span>
+      </div>
+
+      <button
+        class="flex items-center gap-1.5 bg-white border border-gray-200 text-[13px] font-semibold cursor-pointer px-5 py-2.5 rounded-xl transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+        [class]="canSaveDraft ? 'text-[#141118] hover:bg-gray-50 hover:border-gray-300' : 'text-gray-400'"
+        (click)="saveDraft()" [disabled]="savingDraft()">
+        @if (savingDraft()) {
+        <span class="material-symbols-outlined text-[17px] animate-spin">progress_activity</span>
+        Saving...
+        } @else {
+        <span class="material-symbols-outlined text-[17px]">save</span>
+        Save draft
+        }
+      </button>
+
+      <button (click)="publish()" [disabled]="creating() || checkLimitDeck()"
+        [class.bg-gradient-to-r]="!checkLimitDeck()" [class.from-[#7C3AED]]="!checkLimitDeck()"
+        [class.to-[#4255FF]]="!checkLimitDeck()" [class.bg-white]="checkLimitDeck()"
+        [class.text-gray-400]="checkLimitDeck()" [class.border]="checkLimitDeck()"
+        [class.border-gray-300]="checkLimitDeck()"
+        class="flex items-center gap-1.5 text-[13px] text-white font-bold px-6 py-2.5 rounded-xl transition-all hover:shadow-[0_4px_16px_rgba(66,85,255,0.35)] hover:-translate-y-[1px] disabled:opacity-60 disabled:cursor-not-allowed">
+        @if (creating()) {
+        <span class="material-symbols-outlined text-[17px] animate-spin">progress_activity</span>
+        Publishing...
+        } @else {
+        <span class="material-symbols-outlined text-[17px]">publish</span>
+        Publish
+        }
+      </button>
+    </div>
+  </div>
+
+  @if (checkLimit()) {
+  <div class="w-full mb-6 py-3 px-4 rounded-xl bg-red-50 border border-red-200 text-red-700 flex items-center gap-3">
+    <span class="material-symbols-outlined text-[24px]">block</span>
+    <div class="flex flex-col">
+      <span class="text-[14px] font-bold">Limit Reached</span>
+      <span class="text-[12px] font-medium mt-0.5">You have reached your creation limit. Upgrade your plan to create more decks.</span>
+    </div>
+    <a (click)="updateSubscription()"
+      class="ml-auto px-4 py-2 bg-red-600 text-white text-[12px] font-bold rounded-lg cursor-pointer no-underline hover:bg-red-700">Upgrade</a>
+  </div>
+  }
+
+  <!-- Meta Section -->
+  <div class="flex gap-6 bg-white border border-gray-200 rounded-2xl p-7 mb-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+    <div class="flex-1 flex flex-col gap-6">
+      <div class="flex flex-col gap-2">
+        <label class="text-[11px] font-bold text-[#4255FF] tracking-widest flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[16px]">title</span>
+          TITLE
+        </label>
+        <input type="text"
+          class="border-none border-b-2 border-gray-200 py-3 text-[15px] text-[#141118] font-medium outline-none transition-colors bg-transparent placeholder-[#b0a3bf] focus:border-[#4255FF]"
+          placeholder="Enter a title" [ngModel]="title()" (ngModelChange)="title.set($event)" />
+      </div>
+      <div class="flex flex-col gap-2">
+        <label class="text-[11px] font-bold text-[#4255FF] tracking-widest flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[16px]">notes</span>
+          DESCRIPTION
+        </label>
+        <textarea
+          class="border-none border-b-2 border-gray-200 py-3 text-[15px] text-[#141118] outline-none resize-y transition-colors bg-transparent min-h-[70px] placeholder-[#b0a3bf] focus:border-[#4255FF]"
+          placeholder="Add a description..." rows="2" [ngModel]="description()"
+          (ngModelChange)="description.set($event)"></textarea>
+      </div>
+      <div class="flex flex-col gap-2">
+        <label class="text-[11px] font-bold text-[#4255FF] tracking-widest flex items-center gap-1.5">
+          <span class="material-symbols-outlined text-[16px]">label</span>
+          TAGS
+        </label>
+        <div
+          class="flex flex-wrap items-center gap-2 border-b-2 border-gray-200 py-2 min-h-[44px] transition-colors focus-within:border-[#4255FF]">
+          @for (tag of tags(); track tag; let i = $index) {
+          <span
+            class="flex items-center gap-1 px-2.5 py-1 bg-[#eef0ff] text-[#4255FF] text-[12px] font-semibold rounded-lg">
+            {{ tag }}
+            <button
+              class="w-4 h-4 flex items-center justify-center bg-transparent border-none cursor-pointer text-[#4255FF] opacity-60 hover:opacity-100 p-0"
+              (click)="removeTag(i)" type="button">
+              <span class="material-symbols-outlined text-[13px]">close</span>
+            </button>
+          </span>
+          }
+          <input type="text"
+            class="border-none outline-none text-[14px] font-medium text-[#141118] bg-transparent placeholder-[#b0a3bf] flex-1 min-w-[120px] py-1"
+            placeholder="Add tags..."
+            [ngModel]="tagInput()" (ngModelChange)="tagInput.set($event)" (keydown)="onTagKeydown($event)"
+            (blur)="addTag()" />
+        </div>
+      </div>
+    </div>
+    <div
+      class="w-[200px] min-w-[200px] min-h-[160px] border-2 border-dashed border-gray-300 rounded-2xl flex flex-col items-center justify-center cursor-pointer transition-all relative overflow-hidden bg-gray-50 hover:border-[#4255FF] hover:bg-[#f5f6ff]"
+      (click)="coverInput.click()">
+      @if (coverImage()) {
+      <img [src]="coverImage()" alt="Cover image" class="w-full h-full object-cover" />
+      <button
+        class="absolute top-2 right-2 w-8 h-8 rounded-full bg-black/60 border border-white/20 text-white flex items-center justify-center cursor-pointer transition-colors backdrop-blur-[2px] hover:bg-black/80"
+        (click)="removeCoverImage(); $event.stopPropagation()">
+        <span class="material-symbols-outlined text-[16px]">close</span>
+      </button>
+      } @else {
+      <div class="flex flex-col items-center gap-2 cursor-pointer p-4 text-center">
+        <span class="material-symbols-outlined text-[36px] text-gray-400">add_photo_alternate</span>
+        <span class="text-[14px] text-[#141118] font-bold m-0 leading-tight">Cover Image</span>
+        <span class="text-[11px] text-[#726388] font-medium">Click to upload</span>
+      </div>
+      }
+      <input #coverInput type="file" accept="image/*" hidden (change)="onCoverImageSelect($event)" />
+    </div>
+  </div>
+
+  <!-- AI Generator (Optional) -->
+  <div class="bg-white border border-gray-200 rounded-2xl mb-6 shadow-[0_1px_3px_rgba(0,0,0,0.06)] relative overflow-hidden">
+    <div class="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-[#4255FF] via-purple-400 to-amber-500"></div>
+    <button class="w-full flex items-center gap-4 p-5 cursor-pointer text-left" (click)="showAiPanel.set(!showAiPanel())">
+      <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-[#7C3AED] to-[#4255FF] text-white flex items-center justify-center shadow-sm">
+        <span class="material-symbols-outlined text-[22px]">auto_awesome</span>
+      </div>
+      <div class="flex-1">
+        <h3 class="text-[15px] font-bold text-[#141118] m-0">AI Card Generator</h3>
+        <p class="text-[12px] text-[#726388] mt-0.5 mb-0 font-medium">Optional: Generate cards from your materials</p>
+      </div>
+      <div class="flex items-center gap-3">
+        @if (aiLimitLoading()) {
+          <span class="text-[12px] text-gray-400 animate-pulse">Loading...</span>
+        } @else if (aiUsageMax() !== -1 && aiUsageMax() > 0) {
+          <div class="bg-purple-50 px-2.5 py-1 rounded-lg border border-purple-100 flex items-center gap-1.5">
+            <span class="text-[11px] font-bold text-purple-600">{{ aiUsageCount() }}/{{ aiUsageMax() }}</span>
+          </div>
+        }
+        <span class="material-symbols-outlined text-[20px] text-gray-400 transition-transform" [class.rotate-180]="showAiPanel()">expand_more</span>
+      </div>
+    </button>
+
+    @if (showAiPanel()) {
+    <div class="px-5 pb-5 border-t border-gray-100">
+      <div class="flex gap-2 mt-4 mb-4">
+        <button class="flex items-center gap-2 py-2 px-4 rounded-lg text-[13px] font-bold transition-all"
+          [class]="aiSource() === 'upload' ? 'text-[#4255FF] bg-[#eef0ff]' : 'text-gray-500 hover:bg-gray-100'"
+          (click)="aiSource.set('upload')">
+          <span class="material-symbols-outlined text-[16px]">upload_file</span> Upload
+        </button>
+        <button class="flex items-center gap-2 py-2 px-4 rounded-lg text-[13px] font-bold transition-all"
+          [class]="aiSource() === 'paste' ? 'text-[#4255FF] bg-[#eef0ff]' : 'text-gray-500 hover:bg-gray-100'"
+          (click)="aiSource.set('paste')">
+          <span class="material-symbols-outlined text-[16px]">content_paste</span> Paste
+        </button>
+      </div>
+
+      @if (aiSource() === 'upload') {
+        <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 flex flex-col items-center justify-center gap-2 cursor-pointer bg-gray-50 hover:border-[#4255FF] hover:bg-[#f8f9ff]"
+          (dragover)="$event.preventDefault()" (drop)="onAiFileDrop($event)" (click)="aiFileInput.click()">
+          @if (aiFileName()) {
+            <span class="font-bold text-[#4255FF]">{{ aiFileName() }}</span>
+          } @else {
+            <span class="material-symbols-outlined text-[32px] text-gray-300">cloud_upload</span>
+            <p class="font-bold text-[#141118] text-[14px]">Click or drag file to upload</p>
+          }
+          <input #aiFileInput type="file" hidden (change)="onAiFileSelect($event)" />
+        </div>
+      } @else {
+        <textarea class="w-full min-h-[160px] p-4 border-2 border-gray-200 rounded-xl outline-none focus:border-[#4255FF] text-[14px]"
+          placeholder="Paste your content here..." [ngModel]="aiPasteText()" (ngModelChange)="aiPasteText.set($event)"></textarea>
+      }
+
+      <button class="w-full mt-4 py-3 rounded-xl bg-gradient-to-r from-[#7C3AED] to-[#4255FF] text-white font-bold transition-all flex items-center justify-center gap-2 disabled:opacity-50 hover:shadow-lg"
+        [disabled]="aiGenerating() || (aiUsageMax() !== -1 && aiUsageCount() >= aiUsageMax())" (click)="generateWithAi()">
+        <span class="material-symbols-outlined text-[18px]" [class.animate-spin]="aiGenerating()">{{ aiGenerating() ? 'progress_activity' : 'auto_awesome' }}</span>
+        {{ aiGenerating() ? 'Generating...' : 'Generate' }}
+      </button>
+
+      @if (aiGenerating() && aiStreamProgress(); as progress) {
+        <div class="mt-3 px-1">
+          <div class="flex justify-between text-[11px] font-bold text-purple-700 mb-1">
+            <span>Chunk {{ progress.current }}/{{ progress.total }}</span>
+            <span>{{ progress.questions }} questions</span>
+          </div>
+          <div class="w-full bg-purple-100 rounded-full h-2">
+            <div class="bg-gradient-to-r from-[#7C3AED] to-[#4255FF] h-2 rounded-full transition-all duration-300"
+              [style.width.%]="progress.total > 0 ? (progress.current / progress.total) * 100 : 0">
+            </div>
+          </div>
+        </div>
+      } @else if (aiGenerating()) {
+        <p class="text-center text-purple-600 text-[12px] font-bold mt-2 animate-pulse">Connecting to AI...</p>
+      }
+
+      @if (aiUsageMax() !== -1 && aiUsageCount() >= aiUsageMax()) {
+        <p class="text-center text-red-500 text-[12px] font-bold mt-2">Daily limit reached. Upgrade to continue.</p>
+      }
+    </div>
+    }
+  </div>
+
+  <!-- Cards List -->
+  <div class="flex flex-col gap-4">
+    <div class="flex items-center justify-between mb-2">
+      <h3 class="flex items-center gap-2 text-lg font-bold text-[#141118] m-0">
+        <span class="material-symbols-outlined text-[22px] text-[#4255FF]">style</span>
+        Your Cards
+      </h3>
+      <span class="text-[13px] font-bold text-[#726388]">{{ cards().length }} cards</span>
+    </div>
+
+    @if (aiGenerated()) {
+    <div class="flex items-center gap-3 px-5 py-3.5 bg-amber-50 border border-amber-200 rounded-xl mb-1">
+      <span class="material-symbols-outlined text-[22px] text-amber-500">auto_awesome</span>
+      <p class="text-[13px] font-bold text-amber-800 flex-1">Cards generated by AI! Review them before publishing.</p>
+      <button class="text-amber-400 p-0" (click)="aiGenerated.set(false)"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    }
+
+    @for (card of cards(); track card.id; let i = $index) {
+    <div class="bg-white border border-gray-200 rounded-2xl flex transition-all relative group shadow-sm overflow-hidden"
+      [class.opacity-50]="dragIndex() === i" [class.border-[#4255FF]]="dragIndex() === i"
+      [attr.draggable]="grabIndex() === i ? 'true' : 'false'" (dragstart)="onDragStart(i)"
+      (dragover)="onDragOver($event, i)" (dragend)="onDragEnd(); onGrabEnd()">
+      <div class="w-12 shrink-0 bg-gray-50 border-r border-gray-100 flex flex-col items-center justify-center gap-2 py-4">
+        <span class="text-[14px] font-extrabold text-[#4255FF]">{{ i + 1 }}</span>
+        <span class="material-symbols-outlined text-[20px] text-gray-300 cursor-grab hover:text-gray-500"
+          (mousedown)="onGrabStart(i)" (mouseup)="onGrabEnd()" (mouseleave)="onGrabEnd()">drag_indicator</span>
+      </div>
+
+      <div class="flex-1 flex flex-col bg-white">
+        <div class="flex border-b border-gray-100 bg-gray-50/50 px-2 pt-1">
+          <button class="flex items-center gap-1.5 py-2.5 px-4 font-bold text-[12.5px] border-b-[3px] transition-all"
+            [class]="card.type === 'multiple-choice' ? 'text-[#4255FF] border-[#4255FF]' : 'text-gray-500 border-transparent'"
+            (click)="updateCardType(i, 'multiple-choice')">Multiple Choice</button>
+          <button class="flex items-center gap-1.5 py-2.5 px-4 font-bold text-[12.5px] border-b-[3px] transition-all"
+            [class]="card.type === 'true-false' ? 'text-[#4255FF] border-[#4255FF]' : 'text-gray-500 border-transparent'"
+            (click)="updateCardType(i, 'true-false')">True / False</button>
+          <button class="flex items-center gap-1.5 py-2.5 px-4 font-bold text-[12.5px] border-b-[3px] transition-all"
+            [class]="card.type === 'fill-blank' ? 'text-[#4255FF] border-[#4255FF]' : 'text-gray-500 border-transparent'"
+            (click)="updateCardType(i, 'fill-blank')">Fill Blank</button>
+        </div>
+
+        <div class="flex gap-6 px-6 py-5 mb-12 relative w-full">
+          <div class="flex-1 min-w-[30%]">
+            <label class="text-[11px] font-bold text-[#4255FF] uppercase tracking-wider">Question</label>
+            <textarea class="w-full border-none border-b-2 border-gray-100 py-2 text-[15px] outline-none focus:border-[#4255FF] resize-none overflow-hidden bg-transparent"
+              placeholder="Enter question" rows="1" style="field-sizing: content" [ngModel]="card.term" (ngModelChange)="updateTerm(i, $event)"></textarea>
+          </div>
+          <div class="flex-1">
+            <label class="text-[11px] font-bold text-[#4255FF] uppercase tracking-wider">Answer</label>
+            @if (card.type === 'multiple-choice') {
+              <div class="grid grid-cols-2 gap-2 mt-2">
+                @for (opt of card.options; track $index; let optIdx = $index) {
+                  <div class="flex items-center gap-2 p-2 rounded-xl border-2" [class]="card.correctAnswers?.includes(optIdx) ? 'border-green-400 bg-green-50' : 'border-gray-200'">
+                    <button class="text-gray-300" [class.text-green-500]="card.correctAnswers?.includes(optIdx)" (click)="toggleCorrectAnswer(i, optIdx)">
+                      <span class="material-symbols-outlined">{{ card.correctAnswers?.includes(optIdx) ? 'check_circle' : 'radio_button_unchecked' }}</span>
+                    </button>
+                    <textarea class="w-full bg-transparent outline-none text-[14px] resize-none overflow-hidden" rows="1" style="field-sizing: content" [ngModel]="opt" (ngModelChange)="updateOption(i, optIdx, $event)"></textarea>
+                  </div>
+                }
+              </div>
+            } @else if (card.type === 'true-false') {
+              <div class="flex gap-4 mt-2">
+                <button class="flex-1 py-3 border-2 rounded-xl font-bold" [class]="card.isTrue ? 'border-green-500 bg-green-50 text-green-700' : 'border-gray-200 text-gray-400'" (click)="updateIsTrue(i, true)">True</button>
+                <button class="flex-1 py-3 border-2 rounded-xl font-bold" [class]="!card.isTrue ? 'border-red-500 bg-red-50 text-red-700' : 'border-gray-200 text-gray-400'" (click)="updateIsTrue(i, false)">False</button>
+              </div>
+            } @else {
+              <textarea class="w-full border-none border-b-2 border-gray-100 py-2 text-[15px] outline-none focus:border-[#4255FF] resize-none overflow-hidden bg-transparent"
+                placeholder="Correct answer" rows="1" style="field-sizing: content" [ngModel]="card.blankAnswer" (ngModelChange)="updateBlankAnswer(i, $event)"></textarea>
+            }
+          </div>
+        </div>
+
+        <div class="px-6 pb-4">
+          <button class="text-[12px] font-bold text-gray-400 hover:text-gray-600" (click)="toggleExtra(i)">{{ card.showExtra ? 'Hide' : 'Add' }} Hint & Explanation</button>
+          @if (card.showExtra) {
+            <div class="grid grid-cols-2 gap-4 mt-3 pb-4">
+              <textarea class="border border-gray-100 rounded-lg p-2 text-[13px] resize-none overflow-hidden w-full bg-transparent outline-none" placeholder="Hint" rows="1" style="field-sizing: content" [ngModel]="card.hint" (ngModelChange)="updateHint(i, $event)"></textarea>
+              <textarea class="border border-gray-100 rounded-lg p-2 text-[13px] resize-none overflow-hidden w-full bg-transparent outline-none" placeholder="Explanation" rows="1" style="field-sizing: content" [ngModel]="card.explanation" (ngModelChange)="updateExplanation(i, $event)"></textarea>
+            </div>
+          }
+        </div>
+
+        <div class="absolute bottom-3 right-4 flex gap-1 group-hover:opacity-100 opacity-0 transition-opacity">
+          <button class="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-[#4255FF]" (click)="duplicateCard(i)"><span class="material-symbols-outlined">content_copy</span></button>
+          <button class="w-9 h-9 flex items-center justify-center text-gray-400 hover:text-red-500 disabled:opacity-30" [disabled]="cards().length <= 2" (click)="deleteCard(i)"><span class="material-symbols-outlined">delete</span></button>
+        </div>
+      </div>
+    </div>
+    }
+
+    <button class="w-full p-6 mt-3 border-2 border-dashed border-gray-200 rounded-2xl font-bold text-gray-400 hover:border-[#4255FF] hover:text-[#4255FF] transition-all flex flex-col items-center gap-2" (click)="addCard()">
+      <span class="material-symbols-outlined text-[32px]">add_circle</span>
+      <span>ADD NEW CARD</span>
+    </button>
+  </div>
+</div>
+
+<!-- Floating Banners -->
+@if (errorMessage()) {
+<div class="auth-error-banner">
+  <div class="auth-error-inner">
+    <span class="material-symbols-outlined text-red-500">error</span>
+    <p class="auth-error-msg flex-1">{{ errorMessage() }}</p>
+    <button (click)="errorMessage.set(null)"><span class="material-symbols-outlined">close</span></button>
+  </div>
+</div>
+}
+
+@if (successMessage()) {
+<div class="auth-success-banner">
+  <div class="auth-success-inner">
+    <span class="material-symbols-outlined text-green-500">check_circle</span>
+    <p class="auth-error-msg flex-1">{{ successMessage() }}</p>
+    <button (click)="successMessage.set(null)"><span class="material-symbols-outlined">close</span></button>
+  </div>
+</div>
+}
+
+<!-- AI Confirm Dialog -->
+@if (showAiConfirm()) {
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full overflow-hidden">
+    <div class="p-6">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-[#7C3AED] to-[#4255FF] text-white flex items-center justify-center">
+          <span class="material-symbols-outlined text-[24px]">auto_awesome</span>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-[#141118] m-0">{{ pendingAiCards().length }} cards generated!</h3>
+          <p class="text-[13px] text-[#726388] mt-0.5 mb-0">You have {{ cards().length }} existing cards</p>
+        </div>
+      </div>
+      <p class="text-[14px] text-gray-600 mb-6">How would you like to handle the new cards?</p>
+
+      <div class="flex flex-col gap-3">
+        <button (click)="confirmAiAppend()"
+          class="w-full py-3.5 px-4 rounded-xl bg-[#4255FF] text-white font-bold text-[14px] flex items-center justify-center gap-2 hover:bg-[#3344dd] transition-colors">
+          <span class="material-symbols-outlined text-[20px]">playlist_add</span>
+          Add to existing cards
+        </button>
+        <button (click)="confirmAiReplace()"
+          class="w-full py-3.5 px-4 rounded-xl bg-white border-2 border-gray-200 text-gray-700 font-bold text-[14px] flex items-center justify-center gap-2 hover:bg-gray-50 hover:border-gray-300 transition-colors">
+          <span class="material-symbols-outlined text-[20px]">sync</span>
+          Replace all cards
+        </button>
+        <button (click)="cancelAiConfirm()"
+          class="w-full py-2.5 text-gray-500 font-medium text-[13px] hover:text-gray-700 transition-colors">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+}
+
+<!-- Leave Confirmation Dialog -->
+@if (showLeaveConfirm()) {
+<div class="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+  <div class="bg-white rounded-2xl shadow-2xl max-w-sm w-full overflow-hidden">
+    <div class="p-6">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="w-12 h-12 rounded-xl bg-amber-100 text-amber-600 flex items-center justify-center">
+          <span class="material-symbols-outlined text-[24px]">warning</span>
+        </div>
+        <div>
+          <h3 class="text-lg font-bold text-[#141118] m-0">Unsaved changes</h3>
+          <p class="text-[13px] text-[#726388] mt-0.5 mb-0">Your progress will be lost</p>
+        </div>
+      </div>
+      <p class="text-[14px] text-gray-600 mb-6">Are you sure you want to leave? All unsaved changes will be discarded.</p>
+
+      <div class="flex gap-3">
+        <button (click)="cancelLeave()"
+          class="flex-1 py-3 px-4 rounded-xl bg-white border-2 border-gray-200 text-gray-700 font-bold text-[14px] hover:bg-gray-50 hover:border-gray-300 transition-colors">
+          Stay
+        </button>
+        <button (click)="confirmLeave()"
+          class="flex-1 py-3 px-4 rounded-xl bg-red-500 text-white font-bold text-[14px] hover:bg-red-600 transition-colors">
+          Leave
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+}

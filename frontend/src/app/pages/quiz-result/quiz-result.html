@@ -1,0 +1,205 @@
+@if (!attempt()) {
+  <div class="flex items-center justify-center min-h-[65vh]">
+    <div class="flex flex-col items-center gap-4 text-gray-400">
+      <span class="material-symbols-outlined text-[48px]">quiz</span>
+      <p class="font-semibold text-[15px]">No result data available.</p>
+      <button (click)="goBack()" class="px-6 py-2.5 bg-brand-blue text-white rounded-xl font-bold border-none cursor-pointer">Go Back</button>
+    </div>
+  </div>
+} @else {
+<div class="max-w-3xl mx-auto px-4 sm:px-6 py-8 pb-20">
+
+  <!-- ── Top Actions ── -->
+  <div class="flex gap-3 mb-6">
+    <button
+      (click)="goBack()"
+      class="flex-1 flex items-center justify-center gap-2 py-3 rounded-xl bg-white border border-gray-200 text-gray-700 font-bold text-[14px] cursor-pointer hover:bg-gray-50 transition-colors"
+    >
+      <span class="material-symbols-outlined text-[20px]">arrow_back</span>
+      Back to Deck
+    </button>
+    <button
+      (click)="retryQuiz()"
+      class="flex-2 flex items-center justify-center gap-2 py-3 rounded-xl bg-brand-blue border-none text-white font-black text-[14px] cursor-pointer shadow-[0_4px_14px_rgba(66,85,255,0.3)] hover:bg-[#3345e0] transition-all"
+    >
+      <span class="material-symbols-outlined text-[20px]">replay</span>
+      Try Again
+    </button>
+  </div>
+
+  <!-- ── Hero Score Card ── -->
+  <div class="bg-white border border-gray-200 rounded-2xl shadow-sm p-6 mb-6 flex flex-col sm:flex-row items-center gap-6">
+    <!-- Ring -->
+    <div class="relative shrink-0 w-32 h-32">
+      <svg viewBox="0 0 120 120" class="w-full h-full -rotate-90">
+        <circle cx="60" cy="60" r="52" fill="none" stroke="#f3f4f6" stroke-width="10" />
+        <circle cx="60" cy="60" r="52" fill="none" stroke-width="10"
+          stroke-linecap="round"
+          [attr.stroke]="scoreColor"
+          [attr.stroke-dasharray]="326.7"
+          [attr.stroke-dashoffset]="ringOffset"
+          class="transition-all duration-1000"
+        />
+      </svg>
+      <div class="absolute inset-0 flex flex-col items-center justify-center">
+        <span class="text-[26px] font-black leading-none" [style.color]="scoreColor">{{ score() | number:'1.0-0' }}%</span>
+        <span class="text-[10px] font-black uppercase tracking-widest text-gray-400 mt-0.5">Score</span>
+      </div>
+    </div>
+
+    <!-- Info -->
+    <div class="flex-1 text-center sm:text-left">
+      <div class="flex items-center justify-center sm:justify-start gap-1.5 mb-1">
+        @for (s of [1,2,3,4,5]; track s) {
+          <span class="material-symbols-outlined text-[22px]"
+            [style.font-variation-settings]="s <= starsCount ? '\'FILL\' 1' : ''"
+            [class]="s <= starsCount ? 'text-amber-400' : 'text-gray-200'"
+          >star</span>
+        }
+      </div>
+      <h1 class="text-[22px] font-black text-gray-900 m-0 mb-1">{{ greeting }}</h1>
+      <p class="text-[14px] text-gray-400 font-medium m-0 mb-4">{{ deckTitle() || 'Quiz' }}</p>
+      <div class="flex items-center justify-center sm:justify-start gap-4 flex-wrap">
+        <div class="flex items-center gap-1.5 text-green-600 font-bold text-[13px]">
+          <span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 1">check_circle</span>
+          {{ totalCorrect() }} correct
+        </div>
+        <div class="flex items-center gap-1.5 text-red-500 font-bold text-[13px]">
+          <span class="material-symbols-outlined text-[18px]" style="font-variation-settings:'FILL' 1">cancel</span>
+          {{ totalIncorrect() }} wrong
+        </div>
+        <div class="flex items-center gap-1.5 text-gray-400 font-bold text-[13px]">
+          <span class="material-symbols-outlined text-[18px]">timer</span>
+          {{ formattedTime }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Stats Bar ── -->
+  <div class="grid grid-cols-3 gap-3 mb-6">
+    <div class="bg-white border border-gray-200 rounded-2xl p-4 flex flex-col items-center gap-1 shadow-sm">
+      <span class="material-symbols-outlined text-[24px] text-green-500" style="font-variation-settings:'FILL' 1">check_circle</span>
+      <span class="text-[22px] font-black text-gray-900">{{ totalCorrect() }}</span>
+      <span class="text-[10px] font-black uppercase tracking-wider text-gray-400">Correct</span>
+    </div>
+    <div class="bg-white border border-gray-200 rounded-2xl p-4 flex flex-col items-center gap-1 shadow-sm">
+      <span class="material-symbols-outlined text-[24px] text-red-400" style="font-variation-settings:'FILL' 1">cancel</span>
+      <span class="text-[22px] font-black text-gray-900">{{ totalIncorrect() }}</span>
+      <span class="text-[10px] font-black uppercase tracking-wider text-gray-400">Wrong</span>
+    </div>
+    <div class="bg-white border border-gray-200 rounded-2xl p-4 flex flex-col items-center gap-1 shadow-sm">
+      <span class="material-symbols-outlined text-[24px] text-brand-blue">timer</span>
+      <span class="text-[18px] font-black text-gray-900 tabular-nums">{{ formattedTime }}</span>
+      <span class="text-[10px] font-black uppercase tracking-wider text-gray-400">Time</span>
+    </div>
+  </div>
+
+  <!-- ── Question Review ── -->
+  <div class="bg-white border border-gray-200 rounded-2xl shadow-sm overflow-hidden mb-6">
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <h2 class="text-[15px] font-black text-gray-900 m-0 flex items-center gap-2">
+        <span class="material-symbols-outlined text-[20px] text-brand-blue">rate_review</span>
+        Review Answers ({{ totalQuestions() }})
+      </h2>
+      <button
+        class="text-[12px] font-bold text-brand-blue bg-indigo-50 px-3 py-1.5 rounded-lg border border-indigo-100 cursor-pointer hover:bg-indigo-100 transition-colors"
+        (click)="expandAll()"
+      >{{ expandedIndex() === -1 ? 'Collapse All' : 'Expand All' }}</button>
+    </div>
+
+    <div class="divide-y divide-gray-50">
+      @for (ans of attempt()!.userAnswers; track ans.id; let i = $index) {
+        <div>
+          <!-- Row header -->
+          <div
+            class="flex items-start gap-4 px-6 py-4 cursor-pointer hover:bg-gray-50/60 transition-colors"
+            (click)="toggleQuestion(i)"
+          >
+            <div class="shrink-0 mt-0.5">
+              @if (ans.isCorrect) {
+                <span class="material-symbols-outlined text-[22px] text-green-500" style="font-variation-settings:'FILL' 1">check_circle</span>
+              } @else {
+                <span class="material-symbols-outlined text-[22px] text-red-400" style="font-variation-settings:'FILL' 1">cancel</span>
+              }
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-[14px] font-bold text-gray-900 m-0 leading-snug">
+                <span class="text-gray-400 font-black mr-1">{{ i + 1 }}.</span>{{ ans.question }}
+              </p>
+              @if (!isExpanded(i)) {
+                <div class="flex items-center gap-2 mt-1 text-[12px] font-medium flex-wrap">
+                  <span class="text-gray-400">Your answer:</span>
+                  <span [class]="ans.isCorrect ? 'text-green-600 font-bold' : 'text-red-500 font-bold'">
+                    {{ ans.answer.length ? ans.answer.join(', ') : '--' }}
+                  </span>
+                  @if (!ans.isCorrect) {
+                    <span class="text-gray-300">·</span>
+                    <span class="text-gray-400">Correct:</span>
+                    <span class="text-green-600 font-bold">{{ ans.correctAnswers.join(', ') }}</span>
+                  }
+                </div>
+              }
+            </div>
+            <span class="material-symbols-outlined text-[20px] text-gray-300 shrink-0 mt-0.5 transition-transform"
+              [class.rotate-180]="isExpanded(i)">expand_more</span>
+          </div>
+
+          <!-- Expanded detail -->
+          @if (isExpanded(i)) {
+            <div class="px-6 pb-5 pt-1">
+              @if (hasOptions(ans)) {
+                <div class="flex flex-col gap-2">
+                  @for (opt of ans.options; track opt; let j = $index) {
+                    <div
+                      class="flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-colors"
+                      [class]="getOptionClass(ans, opt)"
+                    >
+                      <span class="w-7 h-7 rounded-lg flex items-center justify-center text-[12px] font-black border shrink-0"
+                        [class]="isOptionCorrect(ans, opt) ? 'bg-green-500 border-green-500 text-white' : isOptionUserAnswer(ans, opt) ? 'bg-red-400 border-red-400 text-white' : 'bg-white border-gray-200 text-gray-400'"
+                      >{{ getOptionLabel(j) }}</span>
+                      <span class="flex-1 text-[13px] font-semibold">{{ opt }}</span>
+                      @if (isOptionCorrect(ans, opt) && isOptionUserAnswer(ans, opt)) {
+                        <span class="material-symbols-outlined text-[18px] text-green-500" style="font-variation-settings:'FILL' 1">verified</span>
+                      } @else if (isOptionCorrect(ans, opt)) {
+                        <span class="material-symbols-outlined text-[18px] text-green-500" style="font-variation-settings:'FILL' 1">check_circle</span>
+                      } @else if (isOptionUserAnswer(ans, opt)) {
+                        <span class="material-symbols-outlined text-[18px] text-red-400" style="font-variation-settings:'FILL' 1">cancel</span>
+                      }
+                    </div>
+                  }
+                </div>
+              } @else {
+                <div class="flex flex-col gap-2">
+                  <div class="flex items-start gap-3 p-3 rounded-xl border"
+                    [class]="ans.isCorrect ? 'border-green-200 bg-green-50' : 'border-red-200 bg-red-50'">
+                    <span class="material-symbols-outlined text-[16px] mt-0.5 shrink-0"
+                      [class]="ans.isCorrect ? 'text-green-500' : 'text-red-400'">person</span>
+                    <div>
+                      <span class="text-[10px] font-black uppercase tracking-wider block mb-0.5"
+                        [class]="ans.isCorrect ? 'text-green-600' : 'text-red-500'">Your answer</span>
+                      <span class="text-[13px] font-bold" [class]="ans.isCorrect ? 'text-green-800' : 'text-red-700'">
+                        {{ ans.answer.length ? ans.answer.join(', ') : '--' }}
+                      </span>
+                    </div>
+                  </div>
+                  @if (!ans.isCorrect) {
+                    <div class="flex items-start gap-3 p-3 rounded-xl border border-green-200 bg-green-50">
+                      <span class="material-symbols-outlined text-[16px] mt-0.5 text-green-500 shrink-0" style="font-variation-settings:'FILL' 1">check_circle</span>
+                      <div>
+                        <span class="text-[10px] font-black uppercase tracking-wider text-green-600 block mb-0.5">Correct answer</span>
+                        <span class="text-[13px] font-bold text-green-800">{{ ans.correctAnswers.join(', ') }}</span>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+</div>
+}

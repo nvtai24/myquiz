@@ -1,0 +1,230 @@
+<div class="profile-page">
+  <!-- Toast Notifications -->
+  @if (saveSuccess()) {
+    <div class="toast success">
+      <span class="material-symbols-outlined">check_circle</span>
+      {{ saveSuccess() }}
+    </div>
+  }
+  @if (saveError()) {
+    <div class="toast error">
+      <span class="material-symbols-outlined">error</span>
+      {{ saveError() }}
+    </div>
+  }
+
+  <!-- Profile Hero -->
+  <div class="hero-card">
+    <div class="hero-left">
+      <div class="hero-avatar">
+        @if (avatarUrl()) {
+          <img [src]="avatarUrl()" alt="Avatar" class="avatar-img" />
+        } @else {
+          <span class="material-symbols-outlined avatar-icon">account_circle</span>
+        }
+        @if (editMode()) {
+          <button class="avatar-edit-btn" (click)="avatarInput.click()">
+            <span class="material-symbols-outlined">edit</span>
+          </button>
+        }
+      </div>
+      <div class="hero-info">
+        <div class="name-row">
+          <h1 class="user-name">{{ displayName }}</h1>
+          <span class="role-badge" [class.admin]="isAdmin">{{ badgeLabel }}</span>
+        </div>
+        <p class="user-email">{{ userEmail }}</p>
+      </div>
+    </div>
+    <div class="hero-actions">
+      @if (!editMode()) {
+        <button class="btn-edit" (click)="toggleEditMode()">
+          <span class="material-symbols-outlined">edit</span>
+          Edit
+        </button>
+      }
+    </div>
+    <input #avatarInput type="file" accept="image/*" hidden (change)="onAvatarSelect($event)" />
+  </div>
+
+  <!-- Personal Information Section -->
+  <div class="section-card">
+    <div class="section-header">
+      <h3 class="section-heading">Personal Information</h3>
+    </div>
+
+    @if (editMode()) {
+      <!-- Edit Mode -->
+      <div class="form-row">
+        <div class="form-group">
+          <label class="form-label">First Name</label>
+          <input type="text" class="form-input" [ngModel]="firstName()" (ngModelChange)="firstName.set($event)" placeholder="Enter first name..." />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Last Name</label>
+          <input type="text" class="form-input" [ngModel]="lastName()" (ngModelChange)="lastName.set($event)" placeholder="Enter last name..." />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Email</label>
+        <div class="email-row">
+          <input type="email" class="form-input" [ngModel]="email()" (ngModelChange)="email.set($event)" disabled />
+          <span class="verified-badge">
+            <span class="material-symbols-outlined">check_circle</span>
+            VERIFIED
+          </span>
+        </div>
+      </div>
+      <div class="form-actions">
+        <button class="btn-cancel" (click)="toggleEditMode()">Cancel</button>
+        <button class="btn-save" (click)="saveChanges()" [disabled]="saving()">
+          @if (saving()) {
+            <span class="material-symbols-outlined spin">progress_activity</span>
+            Saving...
+          } @else {
+            Save Changes
+          }
+        </button>
+      </div>
+    } @else {
+      <!-- View Mode -->
+      @if (loadingProfile()) {
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Full Name</span>
+            <div class="skeleton-line" style="width: 150px;"></div>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Email</span>
+            <div class="skeleton-line" style="width: 200px;"></div>
+          </div>
+        </div>
+      } @else {
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Full Name</span>
+            <span class="info-value">{{ displayName || '–' }}</span>
+          </div>
+          <div class="info-item">
+            <span class="info-label">Email</span>
+            <span class="info-value">{{ userEmail || '–' }}</span>
+          </div>
+        </div>
+      }
+    }
+  </div>
+
+  <!-- Security Section -->
+  <div class="section-card">
+    <div class="section-header">
+      <h3 class="section-heading">Security</h3>
+    </div>
+
+    <div class="security-actions">
+      <button class="btn-security" (click)="togglePasswordSection()">
+        <span class="material-symbols-outlined">lock_reset</span>
+        <div class="btn-security-text">
+          <span class="btn-security-title">Change Password</span>
+          <span class="btn-security-desc">Update your password</span>
+        </div>
+      </button>
+
+      <button class="btn-security" (click)="forgotPassword()" [disabled]="sendingForgotPassword()">
+        @if (sendingForgotPassword()) {
+          <span class="material-symbols-outlined spin">progress_activity</span>
+        } @else {
+          <span class="material-symbols-outlined">help</span>
+        }
+        <div class="btn-security-text">
+          <span class="btn-security-title">Forgot Password</span>
+          <span class="btn-security-desc">Reset password via email</span>
+        </div>
+      </button>
+    </div>
+
+    <!-- Forgot Password Messages -->
+    @if (forgotPasswordSuccess()) {
+      <div class="toast success inline-toast" style="margin-top: 16px;">
+        <span class="material-symbols-outlined">check_circle</span>
+        {{ forgotPasswordSuccess() }}
+      </div>
+    }
+    @if (forgotPasswordError()) {
+      <div class="toast error inline-toast" style="margin-top: 16px;">
+        <span class="material-symbols-outlined">error</span>
+        {{ forgotPasswordError() }}
+      </div>
+    }
+
+    <!-- Change Password Form -->
+    @if (showPasswordSection()) {
+      <div class="password-form">
+        @if (passwordSuccess()) {
+          <div class="toast success inline-toast">
+            <span class="material-symbols-outlined">check_circle</span>
+            {{ passwordSuccess() }}
+          </div>
+        }
+        @if (passwordError()) {
+          <div class="toast error inline-toast">
+            <span class="material-symbols-outlined">error</span>
+            {{ passwordError() }}
+          </div>
+        }
+
+        <div class="form-group">
+          <label class="form-label">Current Password</label>
+          <div class="password-input-wrap">
+            <input [type]="showCurrentPassword() ? 'text' : 'password'" class="form-input" placeholder="••••••••"
+              [ngModel]="currentPassword()" (ngModelChange)="currentPassword.set($event)" />
+            <button class="toggle-pw-btn" (click)="showCurrentPassword.update(v => !v)" type="button">
+              <span class="material-symbols-outlined">{{ showCurrentPassword() ? 'visibility_off' : 'visibility' }}</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label class="form-label">New Password</label>
+            <div class="password-input-wrap">
+              <input [type]="showNewPassword() ? 'text' : 'password'" class="form-input" placeholder="New password"
+                [ngModel]="newPassword()" (ngModelChange)="newPassword.set($event)" />
+              <button class="toggle-pw-btn" (click)="showNewPassword.update(v => !v)" type="button">
+                <span class="material-symbols-outlined">{{ showNewPassword() ? 'visibility_off' : 'visibility' }}</span>
+              </button>
+            </div>
+            @if (newPassword()) {
+              <div class="strength-bar-wrap">
+                <div class="strength-bar" [style.width]="(passwordStrength() / 4 * 100) + '%'" [style.background]="strengthColor"></div>
+              </div>
+              <p class="strength-label" [style.color]="strengthColor">{{ strengthLabel }}</p>
+            }
+          </div>
+          <div class="form-group">
+            <label class="form-label">Confirm New Password</label>
+            <div class="password-input-wrap">
+              <input [type]="showConfirmPassword() ? 'text' : 'password'" class="form-input" placeholder="Confirm"
+                [ngModel]="confirmPassword()" (ngModelChange)="confirmPassword.set($event)" />
+              <button class="toggle-pw-btn" (click)="showConfirmPassword.update(v => !v)" type="button">
+                <span class="material-symbols-outlined">{{ showConfirmPassword() ? 'visibility_off' : 'visibility' }}</span>
+              </button>
+            </div>
+            @if (confirmPassword() && newPassword() !== confirmPassword()) {
+              <p class="mismatch-hint">Passwords do not match</p>
+            }
+          </div>
+        </div>
+
+        <button class="btn-change-pw" (click)="changePassword()" [disabled]="changingPassword()">
+          @if (changingPassword()) {
+            <span class="material-symbols-outlined spin">progress_activity</span>
+            Processing...
+          } @else {
+            <span class="material-symbols-outlined">lock_reset</span>
+            Change Password
+          }
+        </button>
+      </div>
+    }
+  </div>
+</div>

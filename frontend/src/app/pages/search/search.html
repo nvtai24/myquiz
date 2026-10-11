@@ -1,0 +1,318 @@
+<div class="search-page">
+  <!-- Search Header -->
+  <div class="search-header">
+    <div class="search-header-inner">
+      <h1 class="search-title">
+        <span class="material-symbols-outlined title-icon">explore</span>
+        Explore Study Sets
+      </h1>
+      <p class="search-subtitle">Discover flashcards and study materials from the community</p>
+
+      <div class="search-input-wrap">
+        <span class="material-symbols-outlined search-icon">search</span>
+        <input
+          type="text"
+          placeholder="Search by deck name, tags, topics..."
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearchInput($event)"
+          autofocus
+        />
+        @if (searchTerm()) {
+          <button class="clear-btn" (click)="clearSearch()">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        }
+      </div>
+
+      @if (!hasSearched()) {
+        <div class="search-header-tags">
+          <div class="tags-grid">
+            @for (tag of hotTags; track tag.name) {
+              <button
+                class="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-semibold text-white transition-all hover:-translate-y-0.5 hover:border-white/40 hover:bg-white/16"
+                (click)="searchByTag(tag.name)"
+              >
+                #{{ tag.name }}
+              </button>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+  <div #searchCompactTrigger class="search-compact-trigger" aria-hidden="true"></div>
+
+  <div class="search-floating-bar" [class.search-floating-bar-visible]="compactSearch()">
+    <div class="search-floating-bar-inner">
+      <div class="search-input-wrap search-input-wrap-compact">
+        <span class="material-symbols-outlined search-icon">search</span>
+        <input
+          type="text"
+          placeholder="Search by deck name, tags, topics..."
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearchInput($event)"
+        />
+        @if (searchTerm()) {
+          <button class="clear-btn" (click)="clearSearch()">
+            <span class="material-symbols-outlined">close</span>
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Results Area -->
+  <div class="results-area">
+    <!-- Search term indicator -->
+    @if (hasSearched() && searchTerm()) {
+      <div class="results-info">
+        <span class="material-symbols-outlined info-icon">filter_list</span>
+        <span class="info-text">
+          @if (pagination()) {
+            {{ pagination()!.totalRecords }} results for
+          } @else {
+            Results for
+          }
+          "<strong>{{ searchTerm() }}</strong
+          >"
+        </span>
+        <button class="clear-search-btn" (click)="clearSearch()">
+          <span class="material-symbols-outlined">close</span>
+          Clear
+        </button>
+      </div>
+    }
+
+    <!-- Loading State -->
+    @if (loading()) {
+      <div class="loading-state">
+        <div class="loading-grid">
+          @for (i of [1, 2, 3, 4, 5, 6]; track i) {
+            <div class="skeleton-card">
+              <div class="skeleton-img shimmer"></div>
+              <div class="skeleton-body">
+                <div class="skeleton-line short shimmer"></div>
+                <div class="skeleton-line shimmer"></div>
+                <div class="skeleton-line long shimmer"></div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Results Grid -->
+    @if (!loading() && results().length > 0) {
+      <div class="results-grid">
+        @for (deck of results(); track deck.id) {
+          <a class="deck-card" [routerLink]="['/deck', deck.id]">
+            <div class="deck-img">
+              @if (deck.thumbnailUrl) {
+                <img [src]="deck.thumbnailUrl" [alt]="deck.name" />
+              } @else {
+                <img src="/images/thumbnail_default.png" alt="Deck" />
+              }
+              <span class="terms-chip">{{ deck.questionCount }} TERMS</span>
+              @if (deck.averageRating) {
+                <span class="rating-chip">
+                  <span class="material-symbols-outlined">star</span>
+                  {{ deck.averageRating.toFixed(1) }}
+                </span>
+              }
+            </div>
+            <div class="deck-body">
+              <h3 class="deck-name">{{ deck.name }}</h3>
+              <div class="deck-meta-bottom">
+                <div class="quiz-tags deck-tags-results">
+                  @for (tag of deck.tags | slice: 0 : 3; track tag) {
+                    <span class="tag-badge">{{ tag }}</span>
+                  }
+                  @if (deck.tags.length > 3) {
+                    <span class="tag-badge extra">+{{ deck.tags.length - 3 }}</span>
+                  }
+                  @if (deck.tags.length === 0) {
+                    <span class="no-tags">No tags</span>
+                  }
+                </div>
+              </div>
+
+              <div class="deck-owner-row">
+                <span class="material-symbols-outlined deck-owner-icon">person</span>
+                <p class="deck-owner-inline">{{ deck.ownerName }} ({{ deck.ownerEmail }})</p>
+              </div>
+              <div class="deck-footer">
+                <span class="deck-date">{{ deck.createdAt | date: 'dd MMM yyyy' }}</span>
+                <span class="study-chip">
+                  <span class="material-symbols-outlined">play_arrow</span>
+                  Study
+                </span>
+              </div>
+            </div>
+          </a>
+        }
+      </div>
+
+      <!-- Pagination -->
+      @if (totalPages > 1) {
+        <div class="pagination">
+          <button
+            class="page-btn nav-btn"
+            [disabled]="currentPage() === 1"
+            (click)="changePage(currentPage() - 1)"
+          >
+            <span class="material-symbols-outlined">chevron_left</span>
+          </button>
+
+          @for (p of pageNumbers; track $index) {
+            @if (p === -1) {
+              <span class="page-ellipsis">…</span>
+            } @else {
+              <button class="page-btn" [class.active]="p === currentPage()" (click)="changePage(p)">
+                {{ p }}
+              </button>
+            }
+          }
+
+          <button
+            class="page-btn nav-btn"
+            [disabled]="currentPage() === totalPages"
+            (click)="changePage(currentPage() + 1)"
+          >
+            <span class="material-symbols-outlined">chevron_right</span>
+          </button>
+        </div>
+      }
+    }
+
+    <!-- Empty State (after search) -->
+    @if (!loading() && hasSearched() && results().length === 0) {
+      <div class="empty-state">
+        <div class="empty-illustration">
+          <span class="material-symbols-outlined empty-icon">search_off</span>
+        </div>
+        <h3 class="empty-title">No results found</h3>
+        <p class="empty-desc">
+          We couldn't find any study sets matching "<strong>{{ searchTerm() }}</strong
+          >". Try adjusting your search terms.
+        </p>
+        <button class="empty-btn" (click)="clearSearch()">
+          <span class="material-symbols-outlined">refresh</span>
+          Clear & try again
+        </button>
+      </div>
+    }
+
+    <!-- Explore Content (no search yet) -->
+    @if (!loading() && !hasSearched()) {
+      <div class="explore-content">
+        <section class="explore-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="material-symbols-outlined">auto_awesome</span>
+              Recommended for You
+            </h2>
+          </div>
+          <div class="decks-grid">
+            @for (deck of recommendedDecks; track deck.id) {
+              <a class="deck-card" [routerLink]="['/deck', deck.id]">
+                <div class="deck-img">
+                  @if (deck.thumbnailUrl) {
+                    <img [src]="deck.thumbnailUrl" [alt]="deck.name" />
+                  } @else {
+                    <img src="/images/thumbnail_default.png" alt="Deck" />
+                  }
+                  <span class="terms-chip">{{ deck.questionCount }} TERMS</span>
+                  <span class="rating-chip">
+                    <span class="material-symbols-outlined">star</span>
+                    {{ deck.averageRating.toFixed(1) }}
+                  </span>
+                </div>
+                <div class="deck-body">
+                  <h3 class="deck-name">{{ deck.name }}</h3>
+                  <div class="deck-meta-bottom">
+                    <div class="quiz-tags deck-tags-results">
+                      @for (tag of deck.tags | slice: 0 : 3; track tag) {
+                        <span class="tag-badge">{{ tag }}</span>
+                      }
+                      @if (deck.tags.length > 3) {
+                        <span class="tag-badge extra">+{{ deck.tags.length - 3 }}</span>
+                      }
+                      @if (deck.tags.length === 0) {
+                        <span class="no-tags">No tags</span>
+                      }
+                    </div>
+                  </div>
+                  <div class="deck-owner-row">
+                    <span class="material-symbols-outlined deck-owner-icon">person</span>
+                    <p class="deck-owner-inline">{{ deck.ownerName }} ({{ deck.ownerEmail }})</p>
+                  </div>
+                  <div class="deck-footer">
+                    <span class="deck-date">{{ deck.createdAt | date: 'dd MMM yyyy' }}</span>
+                    <span class="study-chip">
+                      <span class="material-symbols-outlined">play_arrow</span>
+                      Study
+                    </span>
+                  </div>
+                </div>
+              </a>
+            }
+          </div>
+        </section>
+
+        <section class="explore-section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <span class="material-symbols-outlined">trending_up</span>
+              Trending Now
+            </h2>
+          </div>
+          <div class="decks-grid">
+            @for (deck of trendingDecks; track deck.id) {
+              <a class="deck-card" [routerLink]="['/deck', deck.id]">
+                <div class="deck-img">
+                  @if (deck.thumbnailUrl) {
+                    <img [src]="deck.thumbnailUrl" [alt]="deck.name" />
+                  } @else {
+                    <img src="/images/thumbnail_default.png" alt="Deck" />
+                  }
+                  <span class="terms-chip">{{ deck.questionCount }} TERMS</span>
+                  <span class="rating-chip">
+                    <span class="material-symbols-outlined">star</span>
+                    {{ deck.averageRating.toFixed(1) }}
+                  </span>
+                </div>
+                <div class="deck-body">
+                  <h3 class="deck-name">{{ deck.name }}</h3>
+                  <div class="deck-meta-bottom">
+                    <div class="quiz-tags deck-tags-results">
+                      @for (tag of deck.tags | slice: 0 : 3; track tag) {
+                        <span class="tag-badge">{{ tag }}</span>
+                      }
+                      @if (deck.tags.length > 3) {
+                        <span class="tag-badge extra">+{{ deck.tags.length - 3 }}</span>
+                      }
+                      @if (deck.tags.length === 0) {
+                        <span class="no-tags">No tags</span>
+                      }
+                    </div>
+                  </div>
+                  <div class="deck-owner-row">
+                    <span class="material-symbols-outlined deck-owner-icon">person</span>
+                    <p class="deck-owner-inline">{{ deck.ownerName }} ({{ deck.ownerEmail }})</p>
+                  </div>
+                  <div class="deck-footer">
+                    <span class="deck-date">{{ deck.createdAt | date: 'dd MMM yyyy' }}</span>
+                    <span class="study-chip">
+                      <span class="material-symbols-outlined">play_arrow</span>
+                      Study
+                    </span>
+                  </div>
+                </div>
+              </a>
+            }
+          </div>
+        </section>
+      </div>
+    }
+  </div>
+</div>
